@@ -1,0 +1,22 @@
+Explanation of Folders:
+1. Client-side (/client)
+    /public: Static assets  erved by the server (HTML, icons, etc.).
+    /src: The core React application code.
+    /components: Reusable UI components.
+    /pages: Components tied to specific routes (e.g., Home, Login).
+    /hooks: Custom hooks to manage state or side effects.
+    /context: Context providers for global state management.
+    /services: API-related functions (Axios/Fetch calls).
+    /utils: Utility functions used across the app (e.g., formatters, validators).
+        App.js: Main entry point for the React app.
+    
+
+2. Server-side (/server)
+    /config: Database connection settings, environment variables, etc.
+        db.js: Database connection setup using PostgreSQL (Knex, Sequelize, or raw pg module).
+    /controllers: Functions that handle API requests and responses, interacting with models and services.
+    /models: Defines PostgreSQL schemas and models (could use Sequelize, TypeORM, etc.).
+    /routes: Define API endpoints and map them to controllers.
+    /middlewares: Custom middlewares like authentication, logging, etc.
+    /services: Contains business logic and external service interactions.
+        server.js: Entry point to start the Express server.
