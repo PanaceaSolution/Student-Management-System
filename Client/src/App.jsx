@@ -1,8 +1,13 @@
 import React from 'react'
+import LoginPage from './pages/loginPage';
+
 
 const App = () => {
   return (
-    <div className='text-6xl text-red-600 flex h-screen w-full justify-center items-center'>Student Management System</div>
+    <div>
+     <LoginPage/>
+    </div>
+    
   )
 }
 
