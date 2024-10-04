@@ -1,9 +1,14 @@
-import React from 'react'
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 const App = () => {
   return (
-    <div className='text-6xl text-red-600 flex h-screen w-full justify-center items-center'>Student Management System</div>
-  )
-}
+    <Router>
+      <Routes>
+        <Route path="/login"/>
+      </Routes> 
+    </Router>
+  );
+};
 
-export default App
+export default App;
