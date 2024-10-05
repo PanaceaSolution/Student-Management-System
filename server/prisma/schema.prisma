@@ -8,113 +8,133 @@ datasource db {
 }
 
 model Login {
-  id        Int    @id @default(autoincrement())
-  username  String
-  password  String
-  role      String
-  admin     Admin?     // Relation to Admin
-  student   Student?   // Relation to Student
-  parent    Parent?    // Relation to Parent
-  staff     Staff?     // Relation to Staff
+  id       Int      @id @default(autoincrement())
+  username String
+  password String
+  role     String
+  admin    Admin? // Relation to Admin
+  student  Student? // Relation to Student
+  parent   Parent? // Relation to Parent
+  staff    Staff? // Relation to Staff
 }
 
 model Admin {
-  id          Int    @id @default(autoincrement())
-  username    String
-  access      String // Description of admin access level
-  loginId     Int    @unique   // Ensure loginId is unique
-  login       Login  @relation(fields: [loginId], references: [id])
+  id       Int    @id @default(autoincrement())
+  username String
+  access   String // Description of admin access level
+  loginId  Int    @unique // Ensure loginId is unique
+  login    Login  @relation(fields: [loginId], references: [id])
 }
 
 model Student {
-  id        Int    @id @default(autoincrement())
-  username  String
-  fname     String
-  lname     String
-  address   String
-  sex       String
-  bloodtype String
-  parentId  Int
-  classId   Int
-  dob       DateTime
-  email     String
-  parent    Parent @relation(fields: [parentId], references: [id])
-  loginId   Int    @unique   // Ensure loginId is unique
-  login     Login  @relation(fields: [loginId], references: [id])
-  class     Class  @relation(fields: [classId], references: [id])  // Relation to Class
-  submissions Submission[]  // Add the reverse relation for submissions
+  id          Int          @id @default(autoincrement())
+  username    String       @unique
+  fname       String
+  lname       String
+  address     String
+  sex         String
+  bloodtype   String
+  parentId    Int
+  classId     Int
+  dob         DateTime
+  email       String       @unique
+  parent      Parent       @relation(fields: [parentId], references: [id])
+  loginId     Int          @unique // Ensure loginId is unique
+  login       Login        @relation(fields: [loginId], references: [id])
+  class       Class        @relation(fields: [classId], references: [id]) // Relation to Class
+  submissions Submission[] // Add the reverse relation for submissions
 }
 
 model Parent {
-  id          Int    @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   fname       String
   lname       String
   phoneNumber String
   address     String
   email       String
   students    Student[]
-  loginId     Int    @unique   // Ensure loginId is unique
-  login       Login @relation(fields: [loginId], references: [id])
+  loginId     Int       @unique // Ensure loginId is unique
+  login       Login     @relation(fields: [loginId], references: [id])
 }
 
 model Staff {
-  id            Int    @id @default(autoincrement())
-  username      String
-  fname         String
-  lname         String
-  dob           DateTime
+  id             Int      @id @default(autoincrement())
+  username       String
+  fname          String
+  lname          String
+  dob            DateTime
   profilePicture String?
-  address       String
-  phoneNumber   String
-  sex           String
-  bloodType     String
-  email         String
-  role          String // For example: Teacher, Librarian, etc.
-  salary        Float
-  loginId       Int    @unique   // Ensure loginId is unique
-  login         Login  @relation(fields: [loginId], references: [id])
-  teacher       Teacher?     // Optional relation for teachers
+  address        String
+  phoneNumber    String
+  sex            String
+  bloodType      String
+  email          String
+  role           String // For example: Teacher, Librarian, etc.
+  salary         Float
+  loginId        Int      @unique // Ensure loginId is unique
+  login          Login    @relation(fields: [loginId], references: [id])
+  teacher        Teacher? // Optional relation for teachers
 }
 
 model Teacher {
-  id         Int         @id @default(autoincrement())
-  staffId    Int    @unique  // Ensure staffId is unique
-  staff      Staff       @relation(fields: [staffId], references: [id])
-  subjects   String[]
-  classId    Int
-  class      Class       @relation(fields: [classId], references: [id])
-  profile    String?
-  assignments Assignment[]  // New relation for teacher's assignments
+  id          Int          @id @default(autoincrement())
+  staffId     Int          @unique // Ensure staffId is unique
+  staff       Staff        @relation(fields: [staffId], references: [id])
+  subjects    String[]
+  classId     Int
+  class       Class        @relation(fields: [classId], references: [id])
+  profile     String?
+  assignments Assignment[] // New relation for teacher's assignments
 }
 
 model Class {
-  id          Int    @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   className   String
   students    Student[]
   teacher     Teacher[]
-  assignments Assignment[]  // Relation for assignments linked to the class
+  assignments Assignment[] // Relation for assignments linked to the class
 }
 
 model Assignment {
-  id          Int      @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   title       String
   description String
   dueDate     DateTime
-  createdAt   DateTime @default(now())
-  classId     Int      // Which class the assignment is for
-  class       Class    @relation(fields: [classId], references: [id])
-  teacherId   Int      // The teacher who created the assignment
-  teacher     Teacher  @relation(fields: [teacherId], references: [id])
-  submissions Submission[]  // Relation to track submissions
+  createdAt   DateTime     @default(now())
+  classId     Int // Which class the assignment is for
+  class       Class        @relation(fields: [classId], references: [id])
+  teacherId   Int // The teacher who created the assignment
+  teacher     Teacher      @relation(fields: [teacherId], references: [id])
+  submissions Submission[] // Relation to track submissions
 }
 
 model Submission {
-  id           Int      @id @default(autoincrement())
-  assignmentId Int      // Link to the assignment
+  id           Int        @id @default(autoincrement())
+  assignmentId Int // Link to the assignment
   assignment   Assignment @relation(fields: [assignmentId], references: [id])
-  studentId    Int      // Link to the student
-  student      Student  @relation(fields: [studentId], references: [id])
-  submittedAt  DateTime @default(now())
+  studentId    Int // Link to the student
+  student      Student    @relation(fields: [studentId], references: [id])
+  submittedAt  DateTime   @default(now())
   grade        Float?
   feedback     String?
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model testStudent {
+  id        Int      @id @default(autoincrement())
+  username  String? @unique
+  fname     String
+  lname     String
+  email     String   @unique
+  address   String
+  sex       Gender
+  bloodtype String
+  parentId  Int
+  classId   Int
+  dob       DateTime
 }
