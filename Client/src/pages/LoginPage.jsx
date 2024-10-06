@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button"; // Import Button component
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"; // Import card components
@@ -25,9 +24,9 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-sky-200"> {/* Center the card vertically and horizontally */}
+    <div className="flex items-center justify-center min-h-screen bg-background"> {/* Center the card vertically and horizontally */}
       <Card className="w-full max-w-2xl mx-auto flex">
-        <div className="flex flex-col items-center justify-center p-6 bg-sky-300"> {/* Left section for avatar and text */}
+        <div className="flex flex-col items-center justify-center p-6 bg-primary"> {/* Left section for avatar and text */}
           <Avatar className="w-24 h-24 mb-6"> {/* Increase size of avatar */}
             <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
             <AvatarFallback>CN</AvatarFallback>
@@ -92,16 +91,14 @@ const LoginPage = () => {
                   },
                 })}
                 type="password"
+                placeholder="Enter your password"
                 required
               />
               {errors.password && <span className="text-red-500">{errors.password.message}</span>}
             </div>
 
-            <Button type="submit" className="w-full bg-sky-300">
+            <Button type="submit" className="  hover:bg-primary" >
               Login
-            </Button>
-            <Button variant="outline" className="w-full mt-2">
-              Login with Google
             </Button>
           </form>
 
