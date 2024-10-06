@@ -18,6 +18,7 @@ const links = [
    {
       name: 'Students',
       href: '/students',
+      role: "Admin",
       icon: <FaUserGraduate className="h-6 w-6" />,
    },
    {
@@ -53,9 +54,11 @@ const links = [
    {
       name: 'Finance',
       href: '/finance',
+      role: "admin",
       icon: <ChartColumn className="h-6 w-6" />,
    },
 ];
+
 
 const Sidebar = () => {
    const location = useLocation();

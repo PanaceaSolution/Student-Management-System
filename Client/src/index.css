@@ -88,3 +88,8 @@
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-purple-400;
 }
+/* @media print {
+  .no-print {
+    display: none;
+  }
+} */

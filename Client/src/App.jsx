@@ -1,6 +1,6 @@
-import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Layout from './components/Layout'
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
 
 import { Classes, Dashboard, Finance, Library, Logistics, Staffs, Students, Subjects, Teachers } from './pages/admin'
 import LoginPage from './pages/LoginPage'
@@ -22,9 +22,12 @@ const App = () => {
           <Route path="/logistics" element={<Logistics />} />
           <Route path="/finance" element={<Finance />} />
         </Route>
+        {/* Students */}
+
+        {/* Teachers */}
       </Routes>
     </Router>
-  )
-}
+  );
+};
 
 export default App;
