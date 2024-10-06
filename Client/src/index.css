@@ -64,3 +64,27 @@
     @apply bg-background text-foreground;
   }
 }
+
+* {
+  scroll-behavior: smooth;
+}
+
+*::selection {
+  @apply bg-gradient-to-b from-blue-100 to-red-100 dark:bg-purple-400/70;
+}
+
+::-webkit-scrollbar {
+  /* height: 10px; */
+  /* border-radius: 1px solid #d5d5d5; */
+  @apply h-0 w-0 rounded-sm border-gray-100/20;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  @apply bg-purple-400/50 rounded-[4px];
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-purple-400;
+}

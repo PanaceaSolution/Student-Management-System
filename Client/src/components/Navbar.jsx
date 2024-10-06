@@ -7,6 +7,7 @@ import { LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { FaHamburger } from "react-icons/fa";
 import { useState, useEffect } from "react";
+import logo from '../assets/logo.png'
 
 const Navbar = () => {
    const [currentTime, setCurrentTime] = useState(new Date());
@@ -28,12 +29,12 @@ const Navbar = () => {
    };
 
    return (
-      <header className="flex items-center justify-between gap-4 lg:gap-20 px-4 py-4 lg:py-10 lg:px-6 border-b-2 border-black md:border-0 max-w-screen-2xl">
+      <header className="flex items-center justify-between gap-4 lg:gap-20 px-4 py-4 md:py-10 lg:px-6 border-b-2 border-black md:border-0 max-w-screen-2xl">
          {/* Drawer */}
          <Sheet>
             <SheetTrigger asChild>
                <Button
-                  variant="outline"
+                  variant="ghost"
                   size="icon"
                   className="shrink-0 md:hidden"
                >
@@ -41,26 +42,8 @@ const Navbar = () => {
                   <span className="sr-only">Toggle navigation menu</span>
                </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-80 flex flex-col bg-primary">
-               <div className="relative flex h-full min-h-screen flex-col gap-2">
-                  <div className="flex h-28 items-center justify-center px-4 lg:px-6">
-                     {/* Logo */}
-                     <Link to="/" className="flex items-center gap-2 font-semibold">
-                        <span className="text-3xl font-bold text-white">SMS</span>
-                     </Link>
-                  </div>
-                  {/* Sidebar */}
-                  <div className="flex-1">
-                     <Sidebar />
-                  </div>
-                  <Link
-                     to="/logout"
-                     className="absolute bottom-10 left-4 right-4 flex items-center gap-3 rounded-lg bg-red-500 px-4 py-4 text-white transition-all hover:bg-red-600"
-                  >
-                     <LogOut className="h-6 w-6" />
-                     <span className="md:hidden lg:block font-semibold text-base">Logout</span>
-                  </Link>
-               </div>
+            <SheetContent side="left" className="md:hidden bg-primary">
+               <Sidebar />
             </SheetContent>
          </Sheet>
 
@@ -79,7 +62,7 @@ const Navbar = () => {
             <Input
                type="search"
                placeholder="Search...."
-               className="w-full border border-black pl-8 shadow-none md:w-2/3 lg:w-1/3"
+               className="w-full border border-black pl-8 shadow-none md:w-2/3 xl:w-1/3"
                aria-label="Search"
             />
          </form>
