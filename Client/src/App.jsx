@@ -1,14 +1,25 @@
-import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Layout from './components/Layout'
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
 
-import { Classes, Dashboard, Finance, Library, Logistics, Staffs, Students, Subjects, Teachers } from './pages/admin'
+import {
+  Classes,
+  Dashboard,
+  Finance,
+  Library,
+  Logistics,
+  Staffs,
+  Students,
+  Subjects,
+  Teachers,
+} from "./pages/admin";
 
 const App = () => {
   return (
     <Router>
       <Routes>
-        <Route element={<Layout />} >
+        {/* Admin */}
+        <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/teachers" element={<Teachers />} />
           <Route path="/students" element={<Students />} />
@@ -19,9 +30,12 @@ const App = () => {
           <Route path="/logistics" element={<Logistics />} />
           <Route path="/finance" element={<Finance />} />
         </Route>
+        {/* Students */}
+
+        {/* Teachers */}
       </Routes>
     </Router>
-  )
-}
+  );
+};
 
-export default App
+export default App;
