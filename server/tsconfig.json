@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["node", "class-validator", "class-transformer"],
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,

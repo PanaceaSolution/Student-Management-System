@@ -1,6 +1,6 @@
 import { Controller, Post,Get, Body, Param, Put, Delete } from '@nestjs/common';
 import { StudentService } from './student.service';
-import { Gender } from '@prisma/client';
+import { CreateStudentDto, UpdateStudentDto } from './dto/student.dto';
 
 @Controller("student")
 export class StudentController {
@@ -8,26 +8,10 @@ export class StudentController {
 
   @Post('/create')
   async createStudent(
-    @Body('fname') fname: string,
-    @Body('lname') lname: string,
-    @Body('email') email: string,
-    @Body('address') address: string,
-    @Body('sex') sex: Gender,
-    @Body('bloodtype') bloodtype: string,
-    @Body('parentId') parentId: number,
-    @Body('classId') classId: number,
-    @Body('dob') dob: Date,
+    @Body() createStudentDto: CreateStudentDto
   ): Promise<{ status: number; message: string; student?: any }> {
     return this.studentService.createStudent(
-      fname,
-      lname,
-      email,
-      address,
-      sex,
-      bloodtype,
-      parentId,
-      classId,
-      dob
+      createStudentDto
     );
   }
 
@@ -43,27 +27,11 @@ export class StudentController {
   @Put('/update/:studentId')
   async updateStudent(
     @Param('studentId') studentId: number,
-    @Body('fname') fname?: string,
-    @Body('lname') lname?: string,
-    @Body('email') email?: string,
-    @Body('address') address?: string,
-    @Body('sex') sex?: Gender,
-    @Body('bloodtype') bloodtype?: string,
-    @Body('parentId') parentId?: number,
-    @Body('classId') classId?: number,
-    @Body('dob') dob?: Date,
+    @Body() updateStudentDto: UpdateStudentDto
   ): Promise<{ status: number; message?: string; student?: any }> {
     return this.studentService.updateStudent(
       studentId,
-      fname,
-      lname,
-      email,
-      address,
-      sex,
-      bloodtype,
-      parentId,
-      classId,
-      dob
+      updateStudentDto
     );
   }
 

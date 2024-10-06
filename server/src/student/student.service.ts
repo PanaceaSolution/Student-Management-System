@@ -1,26 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/DB/prisma.service';
-import { Gender } from '@prisma/client';
+import {CreateStudentDto, UpdateStudentDto} from './dto/student.dto'
 
 @Injectable()
 export class StudentService {
   constructor(
-    private configService: ConfigService,
     private prisma: PrismaService,
   ) {}
 
-  async createStudent(
-    fname: string,
-    lname: string,
-    email: string,
-    address: string,
-    sex: Gender,
-    bloodtype: string,
-    parentId: number,
-    classId: number,
-    dob: Date,
-  ): Promise<{ status: number; message: string; student?: any }> {
+  async createStudent(createStudentDto: CreateStudentDto): Promise<{ status: number; message: string; student?: any }> {
+    const { fname, lname, email, address, sex, bloodtype, parentId, classId, dob } = createStudentDto;
     const studentExist = await this.prisma.testStudent.findFirst({
       where: {
         email,
@@ -89,30 +78,23 @@ export class StudentService {
 
   async updateStudent(
     studentId: number,
-    fname?: string,
-    lname?: string,
-    email?: string,
-    address?: string,
-    sex?: Gender,
-    bloodtype?: string,
-    parentId?: number,
-    classId?: number,
-    dob?: Date,
+    updateStudentDto: UpdateStudentDto
   ): Promise<{ status: number; message?: string; student?: any }> {
+    const { fname, lname, email, address, sex, bloodtype, parentId, classId, dob } = updateStudentDto;
     const updatedStudent = await this.prisma.testStudent.update({
       where: {
         id: Number(studentId),
       },
       data: {
-        ...(fname && { fname }),
-        ...(lname && { lname }),
-        ...(email && { email }),
-        ...(address && { address }),
-        ...(sex && { sex }),
-        ...(bloodtype && { bloodtype }),
-        ...(parentId && { parentId }),
-        ...(classId && { classId }),
-        ...(dob && { dob }),
+        ...(fname !== undefined && { fname }),
+        ...(lname !== undefined && { lname }),
+        ...(email !== undefined && { email }),
+        ...(address !== undefined && { address }),
+        ...(sex !== undefined && { sex }),
+        ...(bloodtype !== undefined && { bloodtype }),
+        ...(parentId !== undefined && { parentId }),
+        ...(classId !== undefined && { classId }),
+        ...(dob !== undefined && { dob }),
       },
     });
     return {
