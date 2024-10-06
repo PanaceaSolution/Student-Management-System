@@ -3,12 +3,13 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 
 import { Classes, Dashboard, Finance, Library, Logistics, Staffs, Students, Subjects, Teachers } from './pages/admin'
+import LoginPage from './pages/LoginPage'
 
 const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path='/' element={<Layout />} />
+        <Route path='/' element={<LoginPage />} />
         {/* Admin */}
         <Route element={<Layout />} >
           <Route path="/dashboard" element={<Dashboard />} />
@@ -26,4 +27,4 @@ const App = () => {
   )
 }
 
-export default App
+export default App;
