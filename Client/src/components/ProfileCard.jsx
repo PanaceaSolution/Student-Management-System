@@ -10,7 +10,7 @@ const ProfileCard = ({ onEdit, onDelete, studentInfo }) => {
       const keyArray = Object.keys(studentInfo);
       setKeys(keyArray);
     } else {
-      setKeys([]); 
+      setKeys([]);
     }
   }, [studentInfo]);
 

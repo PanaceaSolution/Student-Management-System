@@ -175,9 +175,8 @@ const Students = () => {
                 <div key={tab}>
                   <a
                     href="#"
-                    className={`font-semibold cursor-pointer ${
-                      activeTab === tab ? "border-b-2 border-blue-600" : ""
-                    }`}
+                    className={`font-semibold cursor-pointer ${activeTab === tab ? "border-b-2 border-blue-600" : ""
+                      }`}
                     onClick={() => handleTabClick(tab)}
                   >
                     {tab.toUpperCase()}{" "}
