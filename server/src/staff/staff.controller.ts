@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, NotFoundException, BadRequestException } from '@nestjs/common';
 import { StaffService } from './staff.service';
-import { Prisma } from '@prisma/client';
 import { CreateStaffDto } from './dto/staff.dto'; // Ensure the path is correct
 import { UpdateStaffDto } from './dto/update-staff.dto'; // Create this DTO for updates
 

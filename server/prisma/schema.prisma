@@ -9,7 +9,7 @@ datasource db {
 
 model Login {
   id       Int      @id @default(autoincrement())
-  username String
+  username String   @unique
   password String
   role     String
   admin    Admin? // Relation to Admin
@@ -125,16 +125,3 @@ enum Gender {
   OTHER
 }
 
-model testStudent {
-  id        Int      @id @default(autoincrement())
-  username  String? @unique
-  fname     String
-  lname     String
-  email     String   @unique
-  address   String
-  sex       Gender
-  bloodtype String
-  parentId  Int
-  classId   Int
-  dob       DateTime
-}

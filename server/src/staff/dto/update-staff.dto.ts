@@ -1,6 +1,4 @@
-// src/staff/dto/update-staff.dto.ts
-
-import { IsString, IsOptional, IsEmail, IsNumber } from 'class-validator';
+import { IsString,IsNotEmpty, IsOptional, IsEmail, IsNumber, IsDateString } from 'class-validator';
 
 export class UpdateStaffDto {
   @IsOptional()
@@ -15,8 +13,9 @@ export class UpdateStaffDto {
   @IsString()
   lname?: string;
 
-  @IsOptional()
-  dob?: string; // Ensure this is validated as needed
+  @IsString()
+  @IsNotEmpty()
+  dob: string; // Use IsDateString to ensure it's a valid date format
 
   @IsOptional()
   @IsString()
@@ -50,7 +49,8 @@ export class UpdateStaffDto {
   @IsNumber()
   salary?: number;
 
+  // If you're allowing updates to the associated login record, use the appropriate validation
   @IsOptional()
   @IsNumber()
-  loginId?: number; // Adjust this based on your Login model
+  loginId?: number; // Assuming this is the foreign key ID for the login relationship
 }
