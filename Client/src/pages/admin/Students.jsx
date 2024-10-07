@@ -1,9 +1,14 @@
-import React from 'react'
+import DetailSidebar from "@/components/DetailSidebar";
+import React from "react";
 
 const Students = () => {
-   return (
-      <div>Students</div>
-   )
-}
+  return (
+    <>
+      <h1>students</h1>
+      {/* detail sidebar of student */}
+      <DetailSidebar />
+    </>
+  );
+};
 
-export default Students
+export default Students;
