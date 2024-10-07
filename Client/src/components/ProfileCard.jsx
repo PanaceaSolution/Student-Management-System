@@ -19,7 +19,7 @@ const ProfileCard = ({
   return (
     <div className="border rounded-sm p-6 shadow-md justify-start gap-3 bg-white flex flex-col">
       <div className="border-b-2">
-        <h2 className="font-bold text-xl text-[#233255CC] text-center">Students Details</h2>
+        <h2 className="font-bold text-xl text-[#233255CC] text-center">Teacher Details</h2>
       </div>
       <div>
         <p className="font-thin">REF ID</p>
@@ -58,7 +58,7 @@ const ProfileCard = ({
         <p className="font-semibold text-[#233255CC]">{dateCreated}</p>
       </div>
       <div>
-        <p className="font-thin">STUDENT STATUS</p>
+        <p className="font-thin">TEACHER STATUS</p>
         <p className="font-semibold text-[#233255CC]">{staffStatus}</p>
       </div>
 

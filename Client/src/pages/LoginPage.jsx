@@ -25,8 +25,8 @@ const LoginPage = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background"> {/* Center the card vertically and horizontally */}
-      <Card className="w-full max-w-2xl mx-auto flex">
-        <div className="flex flex-col items-center justify-center p-6 bg-primary"> {/* Left section for avatar and text */}
+      <Card className=" max-w-3xl h-[600px] md:h-[400px] w-full mx-auto flex-col flex md:flex-row m-2">
+        <div className="flex flex-col items-center justify-center p-6 bg-primary "> {/* Left section for avatar and text */}
           <Avatar className="w-24 h-24 mb-6"> {/* Increase size of avatar */}
             <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
             <AvatarFallback>CN</AvatarFallback>

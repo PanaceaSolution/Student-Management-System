@@ -1,13 +1,12 @@
 import React from 'react'
-import { Table } from '../ui/table'
 
-const table = () => {
+const studentTable = () => {
   return (
     <div>
-      Table for Managing Stduents in Admins section
-
+      
+      
     </div>
   )
 }
 
-export default table
+export default studentTable
