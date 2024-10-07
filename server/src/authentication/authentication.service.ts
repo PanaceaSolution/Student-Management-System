@@ -6,7 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { PrismaService } from 'src/DB/prisma.service';
+import { PrismaService } from './../DB/prisma.service';
 
 @Injectable()
 export class AuthenticationService {

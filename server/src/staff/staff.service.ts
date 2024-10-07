@@ -77,15 +77,13 @@ async createStaff(data: CreateStaffDto) {
     if (data.lname !== undefined) updateData.lname = data.lname;
 
     if (data.dob !== undefined) {
-      const dob = moment(data.dob, 'YYYY-MM-DD');
-      console.log('Input dob:', data.dob); // Log the input date
-      console.log('Parsed dob:', dob.format()); // Log parsed date
-
-      if (!dob.isValid()) {
-          throw new BadRequestException('Invalid date format for dob');
-      }
-      updateData.dob = dob.toISOString(); // Convert to ISO string if valid
-  }
+        const dob = moment(data.dob, 'YYYY-MM-DD');
+        if (!dob.isValid()) {
+            throw new BadRequestException('Invalid date format for dob');
+        }
+        const dobIsoString = dob.toISOString(); // Convert to ISO string if valid
+        updateData.dob = dobIsoString;
+    }
 
     if (data.profilePicture !== undefined) updateData.profilePicture = data.profilePicture;
     if (data.address !== undefined) updateData.address = data.address;
@@ -102,11 +100,23 @@ async createStaff(data: CreateStaffDto) {
         };
     }
 
-    return this.prisma.staff.update({
-        where: { id },
-        data: updateData,
-    });
+    try {
+        const updatedStaff = await this.prisma.staff.update({
+            where: { id },
+            data: updateData,
+        });
+
+        // Return an object with a success message and updated staff data
+        return {
+            message: 'Staff member updated successfully',
+            staff: updatedStaff,
+        };
+    } catch (error) {
+        throw new BadRequestException('Failed to update staff member');
+    }
 }
+
+
 
 
   // Delete a staff member
