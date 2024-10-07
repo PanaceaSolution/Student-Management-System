@@ -1,35 +1,26 @@
-import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { Input } from "./ui/input";
 import Sidebar from "./Sidebar";
-import { LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { FaHamburger } from "react-icons/fa";
 import { useState, useEffect } from "react";
-import logo from '../assets/logo.png'
+import dayjs from 'dayjs';
+import { useAuth } from "@/context/AuthProvider";
 
 const Navbar = () => {
-   const [currentTime, setCurrentTime] = useState(new Date());
+   const { user } = useAuth()
+   const [currentTime, setCurrentTime] = useState(dayjs());
 
-   // Update time every second
    useEffect(() => {
       const timer = setInterval(() =>
-         setCurrentTime(new Date()), 1000
+         setCurrentTime(dayjs()), 1000
       );
       return () => clearInterval(timer);
    }, []);
 
-   const formatTime = (date) => {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-   };
-
-   const formatDate = (date) => {
-      return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
-   };
-
    return (
-      <header className="flex items-center justify-between gap-4 lg:gap-20 px-4 py-4 md:py-10 lg:px-6 border-b-2 border-black md:border-0 max-w-screen-2xl">
+      <header className="flex items-center justify-between gap-4 lg:gap-20 px-4 py-4 lg:px-6 border-b-2 border-black md:border-0 max-w-screen-2xl">
          {/* Drawer */}
          <Sheet>
             <SheetTrigger asChild>
@@ -38,7 +29,7 @@ const Navbar = () => {
                   size="icon"
                   className="shrink-0 md:hidden"
                >
-                  <FaHamburger className="w-8 h-8" />
+                  <FaHamburger className="w-8 h-8 text-primary" />
                   <span className="sr-only">Toggle navigation menu</span>
                </Button>
             </SheetTrigger>
@@ -48,12 +39,12 @@ const Navbar = () => {
          </Sheet>
 
          {/* User Information */}
-         <div className="flex flex-col items-center px-4">
-            <h1 className="text-xl md:text-2xl font-bold">
-               Welcome, Admin
+         <div className=" hidden md:flex flex-col items-start md:items-center">
+            <h1 className=" text-lg md:text-2xl font-bold">
+               Welcome, {user?.userName}
             </h1>
-            <p className="text-sm font-medium">
-               {`${formatTime(currentTime)} - ${formatDate(currentTime)}`}
+            <p className="text-sm font-medium lg:text-right lg:mt-0 mt-1">
+               {`${currentTime.format('HH:mm A')} - ${currentTime.format('D MMM, YYYY')}`}
             </p>
          </div>
 
