@@ -133,19 +133,17 @@ const Sidebar = () => {
    });
 
    return (
-      <aside className="sticky top-0 md:border-r bg-primary text-white lg:rounded-tr-lg lg:rounded-br-lg h-screen overflow-scroll py-3">
-         <div className="relative flex min-h-screen md:h-full flex-col">
+      <aside className="sticky top-0 md:border-r bg-primary text-white lg:rounded-tr-lg lg:rounded-br-lg h-screen overflow-y-auto scrollbar-none">
+         <div className="flex flex-col min-h-screen py-3">
             {/* Logo Section */}
-            <div className="flex h-32 items-center justify-center px-1 lg:px-4">
-               <Link to="/" className="flex items-center gap-2 font-bold text-white">
-                  <img src={logo} alt="Logo" className="w-40 h-40 md:w-16 md:h-16 lg:w-40 lg:h-40" />
-               </Link>
-            </div>
+            <Link to="/" className="flex items-center justify-center">
+               <img src={logo} alt="Logo" className="w-40 h-40 md:w-16 md:h-16 lg:w-40 lg:h-40" />
+            </Link>
 
             {/* Sidebar Content */}
             <nav className="flex-1 px-2">
                <TooltipProvider>
-                  <nav className="grid items-start gap-4 text-sm font-medium lg:px-4" role="navigation">
+                  <nav className="grid items-start gap-2 text-sm font-medium lg:px-4" role="navigation">
                      {filteredLinks.map((link, index) => (
                         <Link
                            key={index}
@@ -173,7 +171,7 @@ const Sidebar = () => {
             {/* Logout Button */}
             <Link
                to="/logout"
-               className=" flex items-center justify-center gap-3 rounded-lg bg-red-500 p-4 m-4 text-white transition-all hover:bg-red-600"
+               className=" flex items-center justify-center gap-3 rounded-lg bg-red-500 p-4 m-4 mb-6 text-white transition-all hover:bg-red-600"
             >
                <span >
                   <LuLogOut className="h-6 w-6" />
