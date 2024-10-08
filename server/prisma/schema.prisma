@@ -72,7 +72,7 @@ model Staff {
   role           String // For example: Teacher, Librarian, etc.
   salary         Float
   loginId        Int      @unique // Ensure loginId is unique
-  login          Login    @relation(fields: [loginId], references: [id])
+  login          Login    @relation(fields: [loginId], references: [id], onDelete: Cascade)
   teacher        Teacher? // Optional relation for teachers
 }
 

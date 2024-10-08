@@ -120,9 +120,26 @@ async createStaff(data: CreateStaffDto) {
 
 
   // Delete a staff member
-  async deleteStaff(id: number) {
-    return this.prisma.staff.delete({
-      where: { id },
+async deleteStaff(id: number) {
+  const staff = await this.prisma.staff.findUnique({
+    where: { id },
+    include: { login: true }, // Ensure we get the associated login entry
+  });
+
+  if (!staff) {
+    throw new BadRequestException('Staff member not found');
+  }
+
+  // Delete the associated login if it exists
+  if (staff.login) {
+    await this.prisma.login.delete({
+      where: { id: staff.login.id },
     });
   }
+
+  // Finally delete the staff member
+  return this.prisma.staff.delete({
+    where: { id },
+  });
+}
 }
