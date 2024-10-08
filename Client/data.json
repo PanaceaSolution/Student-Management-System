@@ -540,17 +540,5 @@
       "class": "CS168",
       "createdAt": "2024-03-17T12:00:00Z"
     }
-  ],
-  "brands": [
-    {
-      "id": "STU45",
-      "firstName": "Anusha",
-      "lastName": "Turner",
-      "gender": "Female",
-      "Class": "BCA",
-      "email": "sofia.turner@example.com",
-      "class": "CS125",
-      "createdAt": "2024-02-19T12:00:00Z"
-    }
   ]
 }
