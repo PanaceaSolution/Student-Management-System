@@ -1,18 +1,19 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import Paginations from "@/components/Paginations"; // Pagination component
 import Table from "@/components/Tables"; // Table to display student data
-import ResultShowing from "@/components/ResultShowing"; 
-import ProfileCard from "@/components/ProfileCard"; 
-import Select from "@/components/Select"; 
-import Button from "@/components/Button"; 
-import SearchBox from "@/components/SearchBox"; 
-import Papa from "papaparse"; 
-import { jsPDF } from "jspdf"; 
-import "jspdf-autotable"; 
+import ResultShowing from "@/components/ResultShowing";
+import ProfileCard from "@/components/ProfileCard";
+import Select from "@/components/Select";
+import Button from "@/components/Button";
+import SearchBox from "@/components/SearchBox";
+import Papa from "papaparse";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 import useGetAllStudents from "@/hooks/useGetAllStudents"; // Custom hook to fetch students
 import useDeleteStudent from "@/hooks/useDeleteStudnet"; // Custom hook to delete a student
-import { DateSelect } from "@/components/DateSelect"; 
+import { DateSelect } from "@/components/DateSelect";
 import Alert from "@/components/Alert"; // Alert notification component
+import StudentForm from "@/components/StudentForm";
 
 // Custom hook for debouncing input value
 const useDebounce = (value, delay) => {
@@ -138,7 +139,7 @@ const Students = () => {
               prevStudents.filter((student) => student.id !== id)
             );
           })
-          
+
       }
     },
     [deleteStudent]
@@ -218,7 +219,7 @@ const Students = () => {
 
     doc.save("students.pdf"); // Save PDF
   }, [students]);
-  
+
   return (
     <section>
       <div className="max-w-full mx-auto">
@@ -235,7 +236,7 @@ const Students = () => {
                   onChange={handleExpertChange}
                   className="w-32 bg-white"
                 />
-                <Button type="create">ADD</Button>
+                <StudentForm />
               </div>
             </div>
             <div className="border-b-2 p-2">
@@ -272,9 +273,8 @@ const Students = () => {
                 <div key={tab}>
                   <a
                     href="#"
-                    className={`font-semibold cursor-pointer ${
-                      activeTab === tab ? "border-b-2 border-blue-600" : ""
-                    }`}
+                    className={`font-semibold cursor-pointer ${activeTab === tab ? "border-b-2 border-blue-600" : ""
+                      }`}
                     onClick={() => handleTabClick(tab)}
                   >
                     {tab.toUpperCase()}{" "}

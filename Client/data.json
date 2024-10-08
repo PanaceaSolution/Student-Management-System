@@ -61,16 +61,6 @@
       "createdAt": "2024-01-29T12:00:00Z"
     },
     {
-      "id": "STU53",
-      "firstName": "Jackson",
-      "lastName": "Lewis",
-      "gender": "Male",
-      "Class": "CSIT",
-      "email": "jackson.lewis@example.com",
-      "class": "CS121",
-      "createdAt": "2024-01-30T12:00:00Z"
-    },
-    {
       "id": "STU54",
       "firstName": "Samantha",
       "lastName": "Lee",
@@ -119,16 +109,6 @@
       "email": "scarlett.young@example.com",
       "class": "CS126",
       "createdAt": "2024-02-04T12:00:00Z"
-    },
-    {
-      "id": "STU59",
-      "firstName": "Isaac",
-      "lastName": "Hernandez",
-      "gender": "Male",
-      "Class": "CSIT",
-      "email": "isaac.hernandez@example.com",
-      "class": "CS127",
-      "createdAt": "2024-02-05T12:00:00Z"
     },
     {
       "id": "STU60",

@@ -13,8 +13,8 @@ const ProfileCard = ({ onEdit, onDelete, studentInfo }) => {
     }
   }, [studentInfo]);
 
- 
-  const studentId = studentInfo?.id; 
+
+  const studentId = studentInfo?.id;
 
 
   const handleEdit = () => {

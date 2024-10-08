@@ -7,11 +7,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useState } from "react";
 
 export function DateSelect({ className, onChange }) {
-   const [date, setDate] = useState(null); 
+   const [date, setDate] = useState(null);
 
    const handleSelect = (selectedDate) => {
       setDate(selectedDate);
-      onChange(selectedDate);  
+      onChange(selectedDate);
    };
 
    return (
@@ -22,13 +22,13 @@ export function DateSelect({ className, onChange }) {
                   id="date"
                   variant={"outline"}
                   className={cn(
-                     "w-auto bg-[#FFFFFF]  justify-start text-left font-normal",
+                     " justify-start text-left font-normal",
                      !date && "text-muted-foreground"
                   )}
                   aria-label="Select a date range"
                >
-                  <CalendarIcon className="mr-1 h-4 w-3" />
-                  {date ? (
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date?.from ? (
                      date.to ? (
                         <>
                            {format(date.from, "LLL dd, y")} -{" "}
@@ -38,7 +38,7 @@ export function DateSelect({ className, onChange }) {
                         format(date.from, "LLL dd, y")
                      )
                   ) : (
-                     <span className="text-gray-900 text-sm">Pick a date</span> 
+                     <span className="text-gray-900 text-sm">Pick a date</span>
                   )}
                </Button>
             </PopoverTrigger>
@@ -46,9 +46,9 @@ export function DateSelect({ className, onChange }) {
                <Calendar
                   initialFocus
                   mode="range"
-                  defaultMonth={new Date()}  
+                  defaultMonth={new Date()}
                   selected={date}
-                  onSelect={handleSelect}
+                  onSelect={setDate}
                   numberOfMonths={1}
                />
             </PopoverContent>

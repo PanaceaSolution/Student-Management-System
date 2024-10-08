@@ -1,4 +1,7 @@
-[
+
+
+
+  [
     { "id": "STU0", "firstName": "John", "lastName": "Smith", "gender": "Male", "department": "CSIT", "email": "john.smith@example.com", "class": "CS101", "createdAt": "2024-01-01T12:00:00Z" },
     { "id": "STU1", "firstName": "Jane", "lastName": "Doe", "gender": "Female", "department": "CSIT", "email": "jane.doe@example.com", "class": "CS101", "createdAt": "2024-01-02T12:00:00Z" },
     { "id": "STU2", "firstName": "Alex", "lastName": "Johnson", "gender": "Male", "department": "CSIT", "email": "alex.johnson@example.com", "class": "CS102", "createdAt": "2024-01-03T12:00:00Z" },
@@ -49,4 +52,4 @@
     { "id": "STU47", "firstName": "Lily", "lastName": "Perez", "gender": "Female", "department": "CSIT", "email": "lily.perez@example.com", "class": "CS124", "createdAt": "2024-02-17T12:00:00Z" },
     { "id": "STU48", "firstName": "Anthony", "lastName": "Roberts", "gender": "Male", "department": "CSIT", "email": "anthony.roberts@example.com", "class": "CS125", "createdAt": "2024-02-18T12:00:00Z" },
     { "id": "STU49", "firstName": "Sofia", "lastName": "Turner", "gender": "Female", "department": "CSIT", "email": "sofia.turner@example.com", "class": "CS125", "createdAt": "2024-02-19T12:00:00Z" }
-  ]
+]
