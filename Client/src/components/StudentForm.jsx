@@ -1,6 +1,6 @@
 import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { Button } from "@/components/ui/button";
+
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from './DatePicker';
+import Button from './Button';
 
 const StudentForm = () => {
   const { control, handleSubmit, formState: { errors } } = useForm();
@@ -24,7 +25,7 @@ const StudentForm = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Add New Student</Button>
+        <Button type="create">Add New Student</Button>
       </DialogTrigger>
       <DialogContent className="p-2 max-w-[400px]  sm:max-w-[500px]">
         <DialogHeader>
@@ -148,7 +149,7 @@ const StudentForm = () => {
 
           <div className="grid grid-cols-2 gap-4">
             {/* DOB */}
-            {/* <div className="grid items-center gap-2">
+            <div className="grid items-center gap-2">
               <Label htmlFor="dob">DOB</Label>
               <Controller
                 name="dob"
@@ -164,7 +165,7 @@ const StudentForm = () => {
                 )}
               />
               {errors.dob && <span className="text-red-500">{errors.dob.message}</span>}
-            </div> */}
+            </div>
 
             {/* Admission Date
             <div className="grid items-center gap-2">
@@ -219,7 +220,7 @@ const StudentForm = () => {
           </div>
 
           <DialogFooter>
-            <Button type="submit">Save changes</Button>
+            <Button type="create">Save changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>

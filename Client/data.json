@@ -1,56 +1,6 @@
 {
   "student": [
     {
-      "id": "STU45",
-      "firstName": "Elijah",
-      "lastName": "Moore",
-      "gender": "Male",
-      "Class": "BCA",
-      "email": "elijah.moore@example.com",
-      "class": "CS113",
-      "createdAt": "2024-01-22T12:00:00Z"
-    },
-    {
-      "id": "STU46",
-      "firstName": "Amelia",
-      "lastName": "Jackson",
-      "gender": "Female",
-      "Class": "BIM",
-      "email": "amelia.jackson@example.com",
-      "class": "CS114",
-      "createdAt": "2024-01-23T12:00:00Z"
-    },
-    {
-      "id": "STU47",
-      "firstName": "Aiden",
-      "lastName": "Martin",
-      "gender": "Male",
-      "Class": "CSIT",
-      "email": "aiden.martin@example.com",
-      "class": "CS115",
-      "createdAt": "2024-01-24T12:00:00Z"
-    },
-    {
-      "id": "STU48",
-      "firstName": "Harper",
-      "lastName": "Lee",
-      "gender": "Female",
-      "Class": "BCA",
-      "email": "harper.lee@example.com",
-      "class": "CS116",
-      "createdAt": "2024-01-25T12:00:00Z"
-    },
-    {
-      "id": "STU50",
-      "firstName": "Sukraj",
-      "lastName": "Robinson",
-      "gender": "Female",
-      "Class": "CSIT",
-      "email": "ella.robinson@example.com",
-      "class": "CS118",
-      "createdAt": "2024-01-27T12:00:00Z"
-    },
-    {
       "id": "STU51",
       "firstName": "Daniel",
       "lastName": "Clark",

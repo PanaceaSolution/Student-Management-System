@@ -1,9 +1,8 @@
 import { Pencil, Trash2 } from "lucide-react";
 import React, { useState, useEffect, useCallback } from "react";
-const Tables = React.memo(({ items, setInfo }) => {
-  const [selectedId, setSelectedId] = useState(
-    items?.length > 0 ? items[0]?.id : null
-  );
+
+const Tables = React.memo(({ items, setStudentInfo }) => {
+  const [selectedId, setSelectedId] = useState(null);
   const [headerValue, setHeaderValue] = useState([]);
 
   const handleCheckboxChange = useCallback(
@@ -16,13 +15,14 @@ const Tables = React.memo(({ items, setInfo }) => {
 
   useEffect(() => {
     const studentDetails = items?.find((item) => item?.id === selectedId);
-    setInfo(studentDetails || {});
-  }, [selectedId, items, setInfo]);
+    setStudentInfo(studentDetails || {});
+  }, [selectedId, items, setStudentInfo]);
 
   useEffect(() => {
     if (items?.length > 0) {
       const header = Object.keys(items[0]);
       setHeaderValue(header);
+      setSelectedId(items[0]?.id);
     }
   }, [items]);
 
@@ -42,12 +42,10 @@ const Tables = React.memo(({ items, setInfo }) => {
               </label>
             </div>
           </th>
-          {headerValue?.map((items, _) => (
-            <>
-              <th key={items?.id} scope="col" className="px-6 py-3">
-                {...items}
-              </th>
-            </>
+          {headerValue?.map((key) => (
+            <th key={key} scope="col" className="px-6 py-3">
+              {key}
+            </th>
           ))}
           <th scope="col" className="px-6 py-3">
             Action
