@@ -22,13 +22,13 @@ export function DateSelect({ className, onChange }) {
                   id="date"
                   variant={"outline"}
                   className={cn(
-                     "w-auto bg-[#FFFFFF]  justify-start text-left font-normal",
+                     "w-[300px] justify-start text-left font-normal",
                      !date && "text-muted-foreground"
                   )}
                   aria-label="Select a date range"
                >
-                  <CalendarIcon className="mr-1 h-4 w-3" />
-                  {date ? (
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date?.from ? (
                      date.to ? (
                         <>
                            {format(date.from, "LLL dd, y")} -{" "}
@@ -48,7 +48,7 @@ export function DateSelect({ className, onChange }) {
                   mode="range"
                   defaultMonth={new Date()}
                   selected={date}
-                  onSelect={handleSelect}
+                  onSelect={setDate}
                   numberOfMonths={1}
                />
             </PopoverContent>

@@ -236,8 +236,7 @@ const Students = () => {
                   onChange={handleExpertChange}
                   className="w-32 bg-white"
                 />
-
-                {<StudentForm />}
+                <StudentForm />
               </div>
             </div>
             <div className="border-b-2 p-2">
