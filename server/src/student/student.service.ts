@@ -25,7 +25,10 @@ export class StudentService {
       mother_name,
       admission_date,
     } = createStudentDto;
-    console.log('Incoming request to create student:', JSON.stringify(createStudentDto, null, 2));
+    console.log(
+      'Incoming request to create student:',
+      JSON.stringify(createStudentDto, null, 2),
+    );
     if (!father_name) {
       return { status: 400, message: 'father name not found' };
     }
@@ -62,7 +65,7 @@ export class StudentService {
 
     const studentId = findStudent.id;
     const paddedId = studentId.toString().padStart(4, '0');
-    let studentUsername = `${fname.charAt(0)}${lname.charAt(0)}-${paddedId}`;
+    let studentUsername = `ST-${fname.charAt(0)}${lname.charAt(0)}${paddedId}`;
     studentUsername = studentUsername.toUpperCase();
     const studentPassword = this.generateRandomPassword();
 
@@ -83,6 +86,20 @@ export class StudentService {
       message: 'Student created successfully',
       student: newStudent,
       login: login,
+    };
+  }
+
+  async GetAllStudents(): Promise<{
+    status: number;
+    message: string;
+    student?: any;
+  }> {
+    const students = await this.prisma.student.findMany();
+
+    return {
+      status: 201,
+      message: 'All students fetched',
+      student: students,
     };
   }
 
@@ -181,13 +198,13 @@ export class StudentService {
   async deleteStudent(
     studentId: number,
   ): Promise<{ status: number; message?: string }> {
-    const findStudent = await this.prisma.student.findUnique({
+    const findStudent = await this.prisma.student.findFirst({
       where: { id: Number(studentId) },
     });
     if (!findStudent) {
       return { status: 400, message: 'Student not found' };
     }
-    await this.prisma.student.delete({ where: { id: studentId } });
+    await this.prisma.student.delete({ where: { id: Number(studentId) } });
     await this.prisma.login.delete({ where: { id: findStudent.loginId } });
     return { status: 200, message: 'Student deleted successfully' };
   }
