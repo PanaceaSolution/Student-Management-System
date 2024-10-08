@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/DB/prisma.service';
+import { PrismaService } from '../DB/prisma.service';
 import {
   CreateStudentDto,
   UpdateStudentDto,
@@ -53,7 +53,7 @@ export class StudentService {
       data: {
         username: studentUsername,
         password: studentPassword,
-        role: 'student',
+        role: 'STUDENT',
       },
     });
     const newStudent = await this.prisma.student.update({

@@ -3,7 +3,7 @@ import { CreateLoginDto, ConnectLoginDto } from '../../authentication/dto/create
 
 export class CreateStaffDto {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   username: string; // Unique username for the staff member
 
   @IsString()
@@ -51,12 +51,6 @@ export class CreateStaffDto {
   @IsNotEmpty()
   dob: string; // Date of birth in YYYY-MM-DD format
 
-  // Optional login details for creating or connecting to a login entity
-  @IsOptional()
-  login?: {
-    create?: CreateLoginDto; // For creating a new login entry
-    connect?: ConnectLoginDto; // For connecting to an existing login entry
-  };
 }
 
 // Custom decorator or helper function for date validation (example)

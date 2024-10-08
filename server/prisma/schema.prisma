@@ -10,7 +10,6 @@ datasource db {
 model Login {
   id       Int      @id @default(autoincrement())
   username String   @unique
-  username String   @unique
   password String
   role     String
   admin    Admin? // Relation to Admin
@@ -60,7 +59,7 @@ model Parent {
 
 model Staff {
   id             Int      @id @default(autoincrement())
-  username       String   @unique
+  username       String?   @unique
   fname          String
   lname          String
   dob            DateTime
@@ -69,11 +68,11 @@ model Staff {
   phoneNumber    String
   sex            String
   bloodType      String
-  email          String
+  email          String    @unique
   role           String // For example: Teacher, Librarian, etc.
   salary         Float
-  loginId        Int      @unique // Ensure loginId is unique
-  login          Login    @relation(fields: [loginId], references: [id], onDelete: Cascade)
+  loginId        Int?      @unique // Ensure loginId is unique
+  login          Login?    @relation(fields: [loginId], references: [id], onDelete: Cascade)
   teacher        Teacher? // Optional relation for teachers
 }
 
