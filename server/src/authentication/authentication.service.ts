@@ -10,14 +10,10 @@ import { PrismaService } from '../DB/prisma.service';
 
 @Injectable()
 export class AuthenticationService {
-  constructor(
-    private prisma: PrismaService,
-    private jwtService: JwtService,
-  ) {}
+  constructor(private prisma: PrismaService, private jwtService: JwtService) {}
 
   async register(RegisterDto: RegisterDto) {
     const { username, password, role } = RegisterDto;
-    // console.log(username, password, role); correct
 
     const ExistingUser = await this.prisma.login.findUnique({
       where: { username }, // This should work if username is unique
@@ -38,6 +34,10 @@ export class AuthenticationService {
     });
     return {
       message: `User ${NewUser.username} has been created`,
+      user: {
+        username: NewUser.username,
+        role: NewUser.role,
+      },
     };
   }
 

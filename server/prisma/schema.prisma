@@ -27,22 +27,25 @@ model Admin {
 }
 
 model Student {
-  id          Int          @id @default(autoincrement())
-  username    String?       @unique
-  fname       String
-  lname       String
-  address     String
-  sex         String
-  bloodtype   String
-  parentId    Int?
-  classId     Int?
-  dob         DateTime
-  email       String       @unique
-  parent      Parent?       @relation(fields: [parentId], references: [id])
-  loginId     Int?          @unique // Ensure loginId is unique
-  login       Login?        @relation(fields: [loginId], references: [id])
-  class       Class?        @relation(fields: [classId], references: [id]) // Relation to Class
-  submissions Submission[] // Add the reverse relation for submissions
+  id             Int          @id @default(autoincrement())
+  username       String?      @unique
+  fname          String
+  lname          String
+  address        String
+  sex            String
+  bloodtype      String
+  father_name    String?
+  mother_name    String?
+  parentId       Int?
+  classId        Int?
+  dob            DateTime
+  admission_date DateTime     @default(now())
+  email          String       @unique
+  parent         Parent?      @relation(fields: [parentId], references: [id])
+  loginId        Int?         @unique // Ensure loginId is unique
+  login          Login?       @relation(fields: [loginId], references: [id])
+  class          Class?       @relation(fields: [classId], references: [id]) // Relation to Class
+  submissions    Submission[] // Add the reverse relation for submissions
 }
 
 model Parent {
@@ -59,7 +62,7 @@ model Parent {
 
 model Staff {
   id             Int      @id @default(autoincrement())
-  username       String?   @unique
+  username       String?  @unique
   fname          String
   lname          String
   dob            DateTime
@@ -68,11 +71,11 @@ model Staff {
   phoneNumber    String
   sex            String
   bloodType      String
-  email          String    @unique
+  email          String   @unique
   role           String // For example: Teacher, Librarian, etc.
   salary         Float
-  loginId        Int?      @unique // Ensure loginId is unique
-  login          Login?    @relation(fields: [loginId], references: [id], onDelete: Cascade)
+  loginId        Int?     @unique // Ensure loginId is unique
+  login          Login?   @relation(fields: [loginId], references: [id], onDelete: Cascade)
   teacher        Teacher? // Optional relation for teachers
 }
 
@@ -124,4 +127,3 @@ enum Gender {
   FEMALE
   OTHER
 }
-
