@@ -11,16 +11,6 @@
       "createdAt": "2024-01-22T12:00:00Z"
     },
     {
-      "id": "STU46",
-      "firstName": "Amelia",
-      "lastName": "Jackson",
-      "gender": "Female",
-      "Class": "BIM",
-      "email": "amelia.jackson@example.com",
-      "class": "CS114",
-      "createdAt": "2024-01-23T12:00:00Z"
-    },
-    {
       "id": "STU47",
       "firstName": "Aiden",
       "lastName": "Martin",
@@ -199,16 +189,6 @@
       "email": "gabriel.white@example.com",
       "class": "CS133",
       "createdAt": "2024-02-11T12:00:00Z"
-    },
-    {
-      "id": "STU66",
-      "firstName": "Aria",
-      "lastName": "Lopez",
-      "gender": "Female",
-      "Class": "BCA",
-      "email": "aria.lopez@example.com",
-      "class": "CS134",
-      "createdAt": "2024-02-12T12:00:00Z"
     },
     {
       "id": "STU67",
