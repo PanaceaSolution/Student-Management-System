@@ -10,6 +10,8 @@ import data from "@/data.json";
 import Papa from "papaparse";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
+import StudentForm from "@/components/StudentForm";
+
 
 const Experts = [
   { value: "", label: "EXPERT" },
@@ -38,6 +40,8 @@ const Students = () => {
   const [studentInfo, setStudentInfo] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+
 
   const handleExpertChange = (event) => {
     const value = event.target.value;
@@ -140,7 +144,13 @@ const Students = () => {
                   onChange={handleExpertChange}
                   className="w-32 bg-white"
                 />
-                <Button type="create">ADD</Button>
+
+                <div>
+                  {/* // here I have added Add Student Button */}
+                  {<StudentForm />}
+
+                </div>
+
               </div>
             </div>
 
@@ -194,7 +204,7 @@ const Students = () => {
             />
             <div className="relative w-full overflow-x-auto shadow-md scrollbar-none">
               <Table
-                setStudentInfo={setStudentInfo}
+                setInfo={setStudentInfo}
                 items={currentItems}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
@@ -209,7 +219,7 @@ const Students = () => {
           </div>
           <div>
             <ProfileCard
-              studentInfo={studentInfo}
+              info={studentInfo}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />

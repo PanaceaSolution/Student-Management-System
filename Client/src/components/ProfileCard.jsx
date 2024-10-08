@@ -1,18 +1,17 @@
-// src/ProfileCard.js
 import React, { useEffect, useState } from "react";
 import Button from "@/components/Button";
 
-const ProfileCard = ({ onEdit, onDelete, studentInfo }) => {
+const ProfileCard = ({ onEdit, onDelete, info }) => {
   const [keys, setKeys] = useState([]);
 
   useEffect(() => {
-    if (studentInfo) {
-      const keyArray = Object.keys(studentInfo);
+    if (info) {
+      const keyArray = Object.keys(info);
       setKeys(keyArray);
     } else {
       setKeys([]);
     }
-  }, [studentInfo]);
+  }, [info]);
 
   return (
     <div className="border rounded-sm p-6 shadow-md justify-start gap-3 bg-white flex flex-col">
@@ -29,8 +28,8 @@ const ProfileCard = ({ onEdit, onDelete, studentInfo }) => {
             <div key={key}>
               <p className="font-thin capitalize">{key}</p>
               <p className="font-semibold text-[#233255CC]">
-                {studentInfo[key] !== undefined
-                  ? studentInfo[key].toString()
+                {info[key] !== undefined
+                  ? info[key].toString()
                   : "N/A"}
               </p>
             </div>

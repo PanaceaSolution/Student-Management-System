@@ -1,6 +1,6 @@
 import { Pencil, Trash2 } from "lucide-react";
 import React, { useState, useEffect, useCallback } from "react";
-const Tables = React.memo(({ items, setStudentInfo }) => {
+const Tables = React.memo(({ items, setInfo }) => {
   const [selectedId, setSelectedId] = useState(
     items?.length > 0 ? items[0]?.id : null
   );
@@ -16,8 +16,8 @@ const Tables = React.memo(({ items, setStudentInfo }) => {
 
   useEffect(() => {
     const studentDetails = items?.find((item) => item?.id === selectedId);
-    setStudentInfo(studentDetails || {});
-  }, [selectedId, items, setStudentInfo]);
+    setInfo(studentDetails || {});
+  }, [selectedId, items, setInfo]);
 
   useEffect(() => {
     if (items?.length > 0) {
