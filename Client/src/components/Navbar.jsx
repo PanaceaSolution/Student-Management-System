@@ -20,7 +20,7 @@ const Navbar = () => {
    }, []);
 
    return (
-      <header className="flex items-center justify-between gap-4 lg:gap-20 px-4 py-4 lg:px-6 border-b-2 border-black md:border-0 max-w-screen-2xl">
+      <header className="flex items-center justify-between gap-4 lg:gap-20 px-4 py-4 lg:px-6 max-w-screen-2xl">
          {/* Drawer */}
          <Sheet>
             <SheetTrigger asChild>
@@ -60,7 +60,7 @@ const Navbar = () => {
 
          {/* User Avatar */}
          <Avatar className="w-12 h-12">
-            <AvatarImage src="https://github.com/shadcn.png" alt="Admin Avatar" />
+            <AvatarImage src="https://images.unsplash.com/photo-1726809448984-2e7f60cc6e97?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Admin Avatar" className="object-cover" />
             <AvatarFallback>AD</AvatarFallback>
          </Avatar>
       </header>

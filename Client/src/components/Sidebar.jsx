@@ -134,49 +134,54 @@ const Sidebar = () => {
 
    return (
       <aside className="sticky top-0 md:border-r bg-primary text-white lg:rounded-tr-lg lg:rounded-br-lg h-screen overflow-y-auto scrollbar-none">
-         <div className="flex flex-col min-h-screen py-3">
+         <div className="flex flex-col min-h-screen">
+
             {/* Logo Section */}
-            <Link to="/" className="flex items-center justify-center">
-               <img src={logo} alt="Logo" className="w-40 h-40 md:w-16 md:h-16 lg:w-40 lg:h-40" />
-            </Link>
+            <div className="flex items-center justify-center">
+               <img src={logo} alt="Logo" className="h-[120px]  md:h-[80px] lg:h-[150px]" />
+            </div>
 
             {/* Sidebar Content */}
-            <nav className="flex-1 px-2">
-               <TooltipProvider>
-                  <nav className="grid items-start gap-2 text-sm font-medium lg:px-4" role="navigation">
-                     {filteredLinks.map((link, index) => (
-                        <Link
-                           key={index}
-                           to={link.href}
-                           aria-current={isActive(link.href) ? 'page' : undefined}
-                           aria-label={link.name}
-                           className={`flex items-center gap-8 rounded-lg p-4 md:p-3 lg:p-4 transition-all hover:bg-background hover:text-primary ${isActive(link.href) ? 'bg-background text-primary border-l-4 border-primary' : 'text-white'}`}
-                        >
-                           <Tooltip>
-                              <TooltipTrigger className="md:block">
-                                 <span className="flex items-center">{link.icon}</span>
-                              </TooltipTrigger>
-                              <TooltipContent className="hidden md:block lg:hidden">
-                                 <p>{link.name}</p>
-                              </TooltipContent>
-                           </Tooltip>
+            <TooltipProvider>
+               <nav className="flex flex-col justify-center gap-2 text-sm font-medium px-2 lg:px-4" role="navigation">
+                  {filteredLinks.map((link, index) => (
+                     <Link
+                        key={index}
+                        to={link.href}
+                        aria-current={isActive(link.href) ? 'page' : undefined}
+                        aria-label={link.name}
+                        className={`flex items-center gap-8 rounded-lg p-4 md:p-3 lg:p-4 transition-all hover:bg-background hover:text-primary 
+                              ${isActive(link.href)
+                              ? 'bg-background text-primary border-l-4 border-primary'
+                              : 'text-white'
+                           }
+                           `}
+                     >
+                        <Tooltip className="flex flex-row">
+                           <TooltipTrigger className="md:block">
+                              <span className="flex items-center">{link.icon}</span>
+                           </TooltipTrigger>
+                           <TooltipContent className="hidden md:block lg:hidden">
+                              <p>{link.name}</p>
+                           </TooltipContent>
+                        </Tooltip>
 
-                           <span className="font-semibold text-lg md:hidden lg:block">{link.name}</span>
-                        </Link>
-                     ))}
-                  </nav>
-               </TooltipProvider>
-            </nav>
+                        <span className="font-semibold text-lg md:hidden lg:block">{link.name}</span>
+                     </Link>
+                  ))}
+               </nav>
+            </TooltipProvider>
+
 
             {/* Logout Button */}
             <Link
                to="/logout"
-               className=" flex items-center justify-center gap-3 rounded-lg bg-red-500 p-4 m-4 mb-6 text-white transition-all hover:bg-red-600"
+               className=" flex items-center justify-center gap-3 rounded-lg bg-red-500 p-4 m-4 md:m-1 md:mt-4 lg:m-4 mb-6 text-white transition-all hover:bg-red-600"
             >
                <span >
                   <LuLogOut className="h-6 w-6" />
                </span>
-               <span className="hidden lg:block font-semibold text-base">Logout</span>
+               <span className="md:hidden lg:block font-semibold text-base">Logout</span>
             </Link>
          </div>
       </aside>
