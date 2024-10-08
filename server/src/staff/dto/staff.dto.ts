@@ -1,5 +1,4 @@
 import { IsString, IsNotEmpty, IsOptional, IsEmail, IsNumber } from 'class-validator';
-import { CreateLoginDto, ConnectLoginDto } from '../../authentication/dto/create-login.dto';
 
 export class CreateStaffDto {
   @IsString()
