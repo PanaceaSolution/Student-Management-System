@@ -1,6 +1,5 @@
 
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '@/context/AuthProvider';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { FaChalkboardTeacher, FaChartBar, FaNetworkWired, FaTasks, FaUserGraduate, FaUserTie, SiGoogleclassroom, SiGooglemessages, SiStorybook, IoLibrary, IoMdCalendar, GrResources, TbReportAnalytics, RiMoneyRupeeCircleLine, LuLogOut, MdDashboard } from '../components/Icons'
 
@@ -12,6 +11,8 @@ import {
 } from './ui/tooltip';
 
 import logo from '../assets/logo.png';
+import useAuthStore from '@/store/authStore';
+import { Button } from './ui/button';
 
 
 // Sidebar Links Configuration
@@ -20,117 +21,114 @@ const links = [
       name: 'Dashboard',
       href: '/dashboard',
       icon: <MdDashboard className="h-6 w-6" />,
-      roles: ["Admin", "Teacher", "Student", "Parent", "Accountant", "Librarian"],
+      roles: ["ADMIN", "TEACHER", "STUDENT", "PARENT", "ACCOUNTANT", "LIBRARIAN"],
    },
    {
       name: 'Students',
       href: '/students',
       icon: <FaUserGraduate className="h-6 w-6" />,
-      roles: ["Admin"],
+      roles: ["ADMIN"],
    },
    {
       name: 'Teachers',
       href: '/teachers',
       icon: <FaChalkboardTeacher className="h-6 w-6" />,
-      roles: ["Admin"],
+      roles: ["ADMIN"],
    },
    {
       name: 'Staff',
       href: '/staffs',
       icon: <FaUserTie className="h-6 w-6" />,
-      roles: ["Admin"],
+      roles: ["ADMIN"],
    },
    {
       name: 'Subjects',
       href: '/subjects',
       icon: <SiStorybook className="h-6 w-6" />,
-      roles: ["Admin"],
+      roles: ["ADMIN"],
    },
    {
       name: 'Classes',
       href: '/classes',
       icon: <SiGoogleclassroom className="h-6 w-6" />,
-      roles: ["Admin"],
+      roles: ["ADMIN"],
    },
    {
       name: 'Logistics',
       href: '/logistics',
       icon: <FaNetworkWired className="h-6 w-6" />,
-      roles: ["Admin"],
+      roles: ["ADMIN"],
    },
    {
       name: 'Portfolio',
       href: '/portfolio',
       icon: <FaUserGraduate className="h-6 w-6" />,
-      roles: ["Teacher", "Student", "Parent", "Accountant", "Librarian"],
+      roles: ["TEACHER", "STUDENT", "PARENT", "ACCOUNTANT", "LIBRARIAN"],
    },
    {
       name: 'Finance',
       href: '/finance',
       icon: <FaChartBar className="h-6 w-6" />,
-      roles: ["Admin", "Accountant"],
+      roles: ["ADMIN", "ACCOUNTANT"],
    },
    {
       name: 'Routine',
       href: '/routine',
       icon: <IoMdCalendar className="h-6 w-6" />,
-      roles: ["Teacher", "Student"],
+      roles: ["TEACHER", "STUDENT"],
    },
    {
       name: 'Resources',
       href: '/resources',
       icon: <GrResources className="h-6 w-6" />,
-      roles: ["Teacher", "Student"],
+      roles: ["TEACHER", "STUDENT"],
    },
    {
       name: 'Tasks',
       href: '/tasks',
       icon: <FaTasks className="h-6 w-6" />,
-      roles: ["Teacher", "Student"],
+      roles: ["TEACHER", "STUDENT"],
    },
    {
       name: 'Report',
       href: '/report',
       icon: <TbReportAnalytics className="h-6 w-6" />,
-      roles: ["Parent"],
+      roles: ["PARENT"],
    },
    {
       name: 'Fees',
       href: '/fees',
       icon: <RiMoneyRupeeCircleLine className="h-6 w-6" />,
-      roles: ["Parent"],
+      roles: ["PARENT"],
    },
    {
       name: 'Message',
       href: '/message',
       icon: <SiGooglemessages className="h-6 w-6" />,
-      roles: ["Teacher", "Parent"],
+      roles: ["TEACHER", "PARENT"],
    },
    {
       name: 'Library',
       href: '/library',
       icon: <IoLibrary className="h-6 w-6" />,
-      roles: ["Admin", "Teacher", "Student", "Librarian"],
+      roles: ["ADMIN", "TEACHER", "STUDENT", "LIBRARIAN"],
    },
 ];
 
 const Sidebar = () => {
    const location = useLocation();
-   const { user, staff } = useAuth();
-   const userRole = user?.role;
-   const staffRole = staff.role;
+   const navigate = useNavigate();
+   const { loggedInUser, logout } = useAuthStore();
+   const userRole = loggedInUser?.role;
 
    const isActive = (path) => location.pathname === path;
 
-   // Filter links based on user and staff roles
-   const filteredLinks = links.filter(link => {
-      if (userRole === 'Staff' && staffRole) {
-         return link.roles.includes(staffRole);
-      } else {
-         return link.roles.includes(userRole);
-      }
+   const filteredLinks = links.filter(link => link.roles.includes(userRole));
 
-   });
+   const logoutHandle = async () => {
+      await logout()
+      navigate('/');
+   }
 
    return (
       <aside className="sticky top-0 md:border-r bg-primary text-white lg:rounded-tr-lg lg:rounded-br-lg h-screen overflow-y-auto scrollbar-none">
@@ -174,15 +172,14 @@ const Sidebar = () => {
 
 
             {/* Logout Button */}
-            <Link
-               to="/logout"
-               className=" flex items-center justify-center gap-3 rounded-lg bg-red-500 p-4 m-4 md:m-1 md:mt-4 lg:m-4 mb-6 text-white transition-all hover:bg-red-600"
+            <Button
+               variant="destructive"
+               onClick={logoutHandle}
+               className="flex items-center justify-center gap-3 py-7 mx-4 mt-4"
             >
-               <span >
-                  <LuLogOut className="h-6 w-6" />
-               </span>
-               <span className="md:hidden lg:block font-semibold text-base">Logout</span>
-            </Link>
+               <LuLogOut className="h-6 w-6" />
+               <span className="hidden md:block font-semibold text-base ml-2">Logout</span>
+            </Button>
          </div>
       </aside>
    );

@@ -6,10 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { FaHamburger } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import dayjs from 'dayjs';
-import { useAuth } from "@/context/AuthProvider";
+import useAuthStore from "@/store/authStore";
 
 const Navbar = () => {
-   const { user } = useAuth()
+   const { loggedInUser } = useAuthStore()
    const [currentTime, setCurrentTime] = useState(dayjs());
 
    useEffect(() => {
@@ -41,7 +41,7 @@ const Navbar = () => {
          {/* User Information */}
          <div className=" hidden md:flex flex-col items-start md:items-center">
             <h1 className=" text-lg md:text-2xl font-bold">
-               Welcome, {user?.userName}
+               Welcome, {loggedInUser?.username}
             </h1>
             <p className="text-sm font-medium lg:text-right lg:mt-0 mt-1">
                {`${currentTime.format('HH:mm A')} - ${currentTime.format('D MMM, YYYY')}`}

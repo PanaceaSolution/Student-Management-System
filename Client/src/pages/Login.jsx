@@ -9,10 +9,12 @@ import { FaUser, FaLock } from 'react-icons/fa';
 import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 import useAuthStore from '@/store/authStore';
 import logo from '../assets/logo.png';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { login, loading } = useAuthStore();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -30,7 +32,10 @@ const Login = () => {
       password: sanitizeInput(data.password)
     };
 
-    await login(sanitizedData);
+    const res = await login(sanitizedData);
+    console.log(res);
+
+    navigate('/dashboard')
   };
 
   const togglePasswordVisibility = () => {

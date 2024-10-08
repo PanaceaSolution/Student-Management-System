@@ -30,82 +30,82 @@ const routeConfig = [
   {
     path: '/dashboard',
     element: <Dashboard />,
-    allowedRoles: ['Admin', 'Teacher', 'Student', 'Parent', 'Accountant', 'Librarian']
+    allowedRoles: ['ADMIN', 'TEACHER', 'STUDENT', 'PARENT', 'ACCOUNTANT', 'LIBRARIAN']
   },
   {
     path: '/portfolio',
     element: <Portfolio />,
-    allowedRoles: ['Teacher', 'Student', 'Parent', 'Accountant', 'Librarian']
+    allowedRoles: ['TEACHER', 'STUDENT', 'PARENT', 'ACCOUNTANT', 'LIBRARIAN']
   },
   {
     path: '/finance',
     element: <Finance />,
-    allowedRoles: ['Admin', 'Accountant']
+    allowedRoles: ['ADMIN', 'ACCOUNTANT']
   },
   {
     path: '/library',
     element: <Library />,
-    allowedRoles: ['Admin', 'Librarian', 'Student', 'Teacher']
+    allowedRoles: ['ADMIN', 'LIBRARIAN', 'STUDENT', 'TEACHER']
   },
   {
     path: '/message',
     element: <Message />,
-    allowedRoles: ['Teacher', 'Parent']
+    allowedRoles: ['TEACHER', 'PARENT']
   },
   {
     path: '/teachers',
     element: <Teachers />,
-    allowedRoles: ['Admin']
+    allowedRoles: ['ADMIN']
   },
   {
     path: '/students',
     element: <Students />,
-    allowedRoles: ['Admin']
+    allowedRoles: ['ADMIN']
   },
   {
     path: '/staffs',
     element: <Staffs />,
-    allowedRoles: ['Admin']
+    allowedRoles: ['ADMIN']
   },
   {
     path: '/subjects',
     element: <Subjects />,
-    allowedRoles: ['Admin']
+    allowedRoles: ['ADMIN']
   },
   {
     path: '/classes',
     element: <Classes />,
-    allowedRoles: ['Admin']
+    allowedRoles: ['ADMIN']
   },
   {
     path: '/logistics',
     element: <Logistics />,
-    allowedRoles: ['Admin']
+    allowedRoles: ['ADMIN']
   },
   {
     path: '/routine',
     element: <Routine />,
-    allowedRoles: ['Student', 'Teacher']
+    allowedRoles: ['STUDENT', 'TEACHER']
   },
   {
     path: '/resources',
     element: <Resources />,
-    allowedRoles: ['Student', 'Teacher']
+    allowedRoles: ['STUDENT', 'TEACHER']
   },
   {
     path: '/tasks',
     element: <Tasks />,
-    allowedRoles: ['Student', 'Teacher']
+    allowedRoles: ['STUDENT', 'TEACHER']
   },
   {
     path: '/report',
     element: <Report />,
-    allowedRoles: ['Parent']
+    allowedRoles: ['PARENT']
   },
   {
     path: '/fees',
     element: <Fees />,
-    allowedRoles: ['Parent']
+    allowedRoles: ['PARENT']
   }
 ];
 

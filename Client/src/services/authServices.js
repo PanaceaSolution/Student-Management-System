@@ -11,7 +11,7 @@ export const login = async (userData) => {
          body: JSON.stringify(userData),
       });
 
-      if (!response.ok) {
+      if (response.status !== 200) {
          throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
 
