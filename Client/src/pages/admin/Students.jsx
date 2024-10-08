@@ -129,17 +129,26 @@ const Students = () => {
     alert("Edit action triggered");
   }, []);
 
+
   // Handle student deletion
   const handleDelete = useCallback(
-    (id) => {
+    async (id) => {
       if (id) {
-        deleteStudent(id)
-          .then(() => {
-            setStudents((prevStudents) =>
-              prevStudents.filter((student) => student.id !== id)
-            );
-          })
-
+        try {
+          await deleteStudent(id); // Wait for the deletion to complete
+          setStudents((prevStudents) =>
+            prevStudents.filter((student) => student.id !== id)
+          );
+        } catch (err) {
+          console.error("Failed to delete student:", err);
+          <Alert
+            title="Error Occured!!!!!"
+            message={err?.message} // Show success alert after deletion
+            variant="warning"
+            position="top-right"
+            onDismiss={() => setShowAlert(false)}
+          />;
+        }
       }
     },
     [deleteStudent]
@@ -226,7 +235,7 @@ const Students = () => {
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-5">
           <div className="rounded-sm bg-[#F8F8F8] lg:col-span-3 p-3">
             <div className="flex justify-evenly sm:justify-end border-b-2 p-3">
-              <div className="flex gap-5 md:gap-4">
+              <div className="flex gap-3 md:gap-4">
                 <Button type="print" onClick={exportToPDF}>
                   PRINT
                 </Button>
@@ -273,8 +282,9 @@ const Students = () => {
                 <div key={tab}>
                   <a
                     href="#"
-                    className={`font-semibold cursor-pointer ${activeTab === tab ? "border-b-2 border-blue-600" : ""
-                      }`}
+                    className={`font-semibold cursor-pointer ${
+                      activeTab === tab ? "border-b-2 border-blue-600" : ""
+                    }`}
                     onClick={() => handleTabClick(tab)}
                   >
                     {tab.toUpperCase()}{" "}
@@ -314,6 +324,7 @@ const Students = () => {
           </div>
           <div className="w-auto">
             <ProfileCard
+              loading={deleteLoading}
               studentInfo={studentInfo} // Show selected student info
               onEdit={handleEdit} // Handle edit action
               onDelete={handleDelete} // Handle delete action
