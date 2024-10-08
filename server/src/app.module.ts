@@ -4,6 +4,7 @@ import { PrismaModule } from './DB/prisma.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { StudentModule } from './student/student.module';
+import { ParentModule } from './parent/parent.module';
 
 @Module({
   imports: [
@@ -12,7 +13,8 @@ import { StudentModule } from './student/student.module';
       envFilePath: '.env',
     }),
     PrismaModule,
-    StudentModule
+    StudentModule,
+    ParentModule
   ],
   controllers: [AppController],
   providers: [AppService],

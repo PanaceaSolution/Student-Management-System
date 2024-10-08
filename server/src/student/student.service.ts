@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/DB/prisma.service';
-import { CreateStudentDto, UpdateStudentDto } from './dto/student.dto';
+import {
+  CreateStudentDto,
+  UpdateStudentDto,
+  LinkParentDto,
+} from './dto/student.dto';
 
 @Injectable()
 export class StudentService {
@@ -9,17 +13,8 @@ export class StudentService {
   async createStudent(
     createStudentDto: CreateStudentDto,
   ): Promise<{ status: number; message: string; student?: any }> {
-    const {
-      fname,
-      lname,
-      email,
-      address,
-      sex,
-      bloodtype,
-      parentId,
-      classId,
-      dob,
-    } = createStudentDto;
+    const { fname, lname, email, address, sex, bloodtype, dob } =
+      createStudentDto;
     const studentExist = await this.prisma.student.findFirst({
       where: {
         email,
@@ -73,6 +68,29 @@ export class StudentService {
     };
   }
 
+  async linkParent(
+    linkParentDto: LinkParentDto,
+  ): Promise<{ status: number; message: string; result?: any }> {
+    const { parentId, studentId } = linkParentDto;
+    const findStudent = this.findStudent(studentId);
+    if (!findStudent) {
+      return { status: 400, message: 'student not found' };
+    }
+    const result = await this.prisma.student.update({
+      where: {
+        id: studentId,
+      },
+      data: {
+        parentId: parentId,
+      },
+    });
+    return {
+      status: 200,
+      message: 'Parent linked successfully',
+      result: result,
+    };
+  }
+
   async findStudent(
     studentId: number,
   ): Promise<{ status: number; message?: string; student?: any }> {
@@ -98,34 +116,35 @@ export class StudentService {
     studentId: number,
     updateStudentDto: UpdateStudentDto,
   ): Promise<{ status: number; message?: string; student?: any }> {
-    const {
-      fname,
-      lname,
-      email,
-      address,
-      sex,
-      bloodtype,
-      dob,
-    } = updateStudentDto;
-    const updatedStudent = await this.prisma.student.update({
-      where: {
-        id: Number(studentId),
-      },
-      data: {
-        ...(fname !== undefined && { fname }),
-        ...(lname !== undefined && { lname }),
-        ...(email !== undefined && { email }),
-        ...(address !== undefined && { address }),
-        ...(sex !== undefined && { sex }),
-        ...(bloodtype !== undefined && { bloodtype }),
-        ...(dob !== undefined && { dob }),
-      },
-    });
-    return {
-      status: 200,
-      message: 'student updated successfully',
-      student: updatedStudent,
-    };
+    const findStudent = this.findStudent(studentId);
+    if ((await findStudent).status == 200) {
+      const { fname, lname, email, address, sex, bloodtype, dob } =
+        updateStudentDto;
+      const updatedStudent = await this.prisma.student.update({
+        where: {
+          id: Number(studentId),
+        },
+        data: {
+          ...(fname !== undefined && { fname }),
+          ...(lname !== undefined && { lname }),
+          ...(email !== undefined && { email }),
+          ...(address !== undefined && { address }),
+          ...(sex !== undefined && { sex }),
+          ...(bloodtype !== undefined && { bloodtype }),
+          ...(dob !== undefined && { dob }),
+        },
+      });
+      return {
+        status: 200,
+        message: 'student updated successfully',
+        student: updatedStudent,
+      };
+    } else {
+      return {
+        status: 400,
+        message: 'student not found',
+      };
+    }
   }
 
   async deleteStudent(
@@ -138,6 +157,7 @@ export class StudentService {
       return { status: 400, message: 'Student not found' };
     }
     await this.prisma.student.delete({ where: { id: studentId } });
+    await this.prisma.login.delete({ where: { id: findStudent.loginId } });
     return { status: 200, message: 'Student deleted successfully' };
   }
 

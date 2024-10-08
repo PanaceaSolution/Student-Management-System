@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEmail, IsEnum, IsInt, IsDate } from 'class-validator';
+import { IsString, IsOptional, IsEmail, IsEnum, IsInt, IsDate, IsNotEmpty } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export enum Gender {
@@ -77,4 +77,14 @@ export class UpdateStudentDto {
   @IsDate()
   @Type(() => Date)
   dob?: Date;
+}
+
+export class LinkParentDto {
+  @IsNotEmpty()
+  @IsInt()
+  parentId?: number
+  
+  @IsNotEmpty()
+  @IsInt()
+  studentId?: number
 }

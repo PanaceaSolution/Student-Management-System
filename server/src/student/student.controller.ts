@@ -1,6 +1,6 @@
 import { Controller, Post,Get, Body, Param, Put, Delete } from '@nestjs/common';
 import { StudentService } from './student.service';
-import { CreateStudentDto, UpdateStudentDto } from './dto/student.dto';
+import { CreateStudentDto, UpdateStudentDto, LinkParentDto } from './dto/student.dto';
 
 @Controller("student")
 export class StudentController {
@@ -13,6 +13,15 @@ export class StudentController {
     return this.studentService.createStudent(
       createStudentDto
     );
+  }
+
+  @Put('/link-parent')
+  async linkParent(
+    @Body() linkParentDto: LinkParentDto
+  ): Promise<{status: number; message: string; result?: any; }>{
+    return this.studentService.linkParent(
+      linkParentDto
+    )
   }
 
   @Get('/:studentId')
