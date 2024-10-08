@@ -5,19 +5,21 @@ const useAddStudent = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const URL = import.meta.env.VITE_API_URL
 
   const addStudent = async (studentData) => {
     setLoading(true);
     setError(null);
     setSuccess(false);
+    console.log(studentData);
 
     try {
-      const response = await fetch('http://localhost:8080/student', {
+      const response = await fetch(`${URL}/student/create`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json', 
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(studentData), 
+        body: JSON.stringify(studentData),
       });
 
       if (!response.ok) {

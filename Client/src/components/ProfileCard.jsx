@@ -14,6 +14,7 @@ const ProfileCard = ({ onEdit, onDelete, studentInfo, loading }) => {
     }
   }, [studentInfo]);
 
+
   const studentId = studentInfo?.id;
 
   const handleEdit = () => {
@@ -45,7 +46,7 @@ const ProfileCard = ({ onEdit, onDelete, studentInfo, loading }) => {
               <p className="font-thin capitalize">{key}</p>
               <p className="font-semibold text-[#233255CC]">
                 {studentInfo[key] !== undefined
-                  ? studentInfo[key].toString()
+                  ? studentInfo[key]
                   : "N/A"}
               </p>
             </div>
@@ -57,7 +58,7 @@ const ProfileCard = ({ onEdit, onDelete, studentInfo, loading }) => {
         <Button type="edit" className="flex-shrink-0" onClick={handleEdit}>
           Edit
         </Button>
-        <Button  isDisable={loading} type="delete" className="flex-shrink-0" onClick={handleDelete}>
+        <Button isDisable={loading} type="delete" className="flex-shrink-0" onClick={handleDelete}>
           Delete
           {loading && <Loadding />}
         </Button>

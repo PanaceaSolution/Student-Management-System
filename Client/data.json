@@ -499,6 +499,19 @@
       "email": "avery.johnson@example.com",
       "class": "CS168",
       "createdAt": "2024-03-17T12:00:00Z"
+    },
+    {
+      "id": "41e6",
+      "firstName": "Aayush",
+      "lastName": "Ghimire",
+      "fatherName": "Aayush Ghimire",
+      "motherName": "Aayush Ghimire",
+      "gender": "Male",
+      "bloodType": "O",
+      "address": "Chitwan",
+      "class": "1",
+      "dob": "2024-10-09",
+      "email": "aayush@gmail.com"
     }
   ]
 }

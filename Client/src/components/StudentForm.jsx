@@ -18,37 +18,37 @@ import Alert from "./Alert";
 
 const formFields = [
   {
-    name: "firstName",
+    name: "fname",
     label: "First Name",
     required: true,
     placeholder: "Enter First Name",
   },
   {
-    name: "lastName",
+    name: "lname",
     label: "Last Name",
     required: true,
     placeholder: "Enter Last Name",
   },
   {
-    name: "fatherName",
+    name: "father_name",
     label: "Father Name",
     required: true,
     placeholder: "Enter Father's Name",
   },
   {
-    name: "motherName",
+    name: "mother_name",
     label: "Mother Name",
     required: true,
     placeholder: "Enter Mother's Name",
   },
   {
-    name: "gender",
+    name: "sex",
     label: "Gender",
     required: true,
     placeholder: "Enter Gender",
   },
   {
-    name: "bloodType",
+    name: "bloodtype",
     label: "Blood Type",
     required: true,
     placeholder: "Enter Blood Type",
@@ -75,9 +75,20 @@ const StudentForm = () => {
 
   const onSubmit = async (data) => {
     try {
+      if (data.dob) {
+        data.dob = new Date(data.dob).toISOString();
+      }
+      if (data.admission_date) {
+        data.admission_date = new Date(data.admission_date).toISOString();
+      }
+
+      // Call the addStudent function
       await addStudent(data);
-   
-      reset(); // Reset the form fields
+
+      console.log(data);
+
+
+      // reset();
     } catch (err) {
       console.error(err);
     }
@@ -86,7 +97,7 @@ const StudentForm = () => {
   useEffect(() => {
     if (success) {
       setShowAlert(true);
-   
+
     }
   }, [success]);
 
@@ -199,6 +210,35 @@ const StudentForm = () => {
             </div>
           </div>
 
+          <div className="grid items-center gap-2">
+            <Label htmlFor="admission_date">Admission Date</Label>
+            <Controller
+              name="admission_date"
+              control={control}
+              defaultValue=""
+              rules={{
+                required: "Admission Date is required",
+                validate: (value) => {
+                  const date = new Date(value);
+                  return !isNaN(date) || "Please enter a valid date";
+                },
+              }}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  id="dob"
+                  type="date"
+                  className="bg-gray-100 focus:border-blue-500 rounded-sm"
+                />
+              )}
+            />
+            {errors.dob && (
+              <span className="text-red-500 text-xs">
+                {errors.dob.message}
+              </span>
+            )}
+          </div>
+
           <DialogFooter className="flex justify-between">
             <Button
               type="submit"
@@ -217,7 +257,7 @@ const StudentForm = () => {
             message="Student added successfully!"
             variant="success"
             position="top-center"
-            onDismiss={() => setShowAlert(false)} 
+            onDismiss={() => setShowAlert(false)}
           />
         )}
       </DialogContent>

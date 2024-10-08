@@ -60,8 +60,8 @@ const Navbar = () => {
 
          {/* User Avatar */}
          <Avatar className="w-12 h-12">
-            <AvatarImage src="https://images.unsplash.com/photo-1726809448984-2e7f60cc6e97?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Admin Avatar" className="object-cover" />
-            <AvatarFallback>AD</AvatarFallback>
+            {/* <AvatarImage src="https://images.unsplash.com/photo-1726809448984-2e7f60cc6e97?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Admin Avatar" className="object-cover" /> */}
+            <AvatarFallback>{loggedInUser?.username?.charAt(0)}</AvatarFallback>
          </Avatar>
       </header>
    );

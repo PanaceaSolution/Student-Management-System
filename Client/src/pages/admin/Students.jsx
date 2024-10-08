@@ -93,6 +93,8 @@ const Students = () => {
     success,
   } = useDeleteStudent();
 
+
+
   // State to hold current students data
   const [students, setStudents] = useState(allStudents || []);
 
@@ -282,9 +284,8 @@ const Students = () => {
                 <div key={tab}>
                   <a
                     href="#"
-                    className={`font-semibold cursor-pointer ${
-                      activeTab === tab ? "border-b-2 border-blue-600" : ""
-                    }`}
+                    className={`font-semibold cursor-pointer ${activeTab === tab ? "border-b-2 border-blue-600" : ""
+                      }`}
                     onClick={() => handleTabClick(tab)}
                   >
                     {tab.toUpperCase()}{" "}
