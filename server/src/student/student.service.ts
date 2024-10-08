@@ -12,7 +12,7 @@ export class StudentService {
 
   async createStudent(
     createStudentDto: CreateStudentDto,
-  ): Promise<{ status: number; message: string; student?: any }> {
+  ): Promise<{ status: number; message: string; student?: any; login?: any; }> {
     const { fname, lname, email, address, sex, bloodtype, dob } =
       createStudentDto;
     const studentExist = await this.prisma.student.findFirst({
@@ -65,6 +65,7 @@ export class StudentService {
       status: 200,
       message: 'Student created successfully',
       student: newStudent,
+      login: login
     };
   }
 
