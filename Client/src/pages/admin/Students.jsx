@@ -145,12 +145,7 @@ const Students = () => {
                   className="w-32 bg-white"
                 />
 
-                <div>
-                  {/* // here I have added Add Student Button */}
-                  {<StudentForm />}
-
-                </div>
-
+                {<StudentForm />}
               </div>
             </div>
 
