@@ -149,7 +149,7 @@ const StudentForm = () => {
 
           <div className="grid grid-cols-2 gap-4">
             {/* DOB */}
-            {/* <div className="grid items-center gap-2">
+            <div className="grid items-center gap-2">
               <Label htmlFor="dob">DOB</Label>
               <Controller
                 name="dob"
@@ -165,7 +165,7 @@ const StudentForm = () => {
                 )}
               />
               {errors.dob && <span className="text-red-500">{errors.dob.message}</span>}
-            </div> */}
+            </div>
 
             {/* Admission Date
             <div className="grid items-center gap-2">
@@ -220,7 +220,7 @@ const StudentForm = () => {
           </div>
 
           <DialogFooter>
-            <Button type="submit">Save changes</Button>
+            <Button type="create">Save changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>

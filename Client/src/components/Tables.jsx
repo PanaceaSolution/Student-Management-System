@@ -22,6 +22,7 @@ const Tables = React.memo(({ items, setStudentInfo }) => {
     if (items?.length > 0) {
       const header = Object.keys(items[0]);
       setHeaderValue(header);
+      setSelectedId(items[0]?.id);
     }
   }, [items]);
 
@@ -41,12 +42,10 @@ const Tables = React.memo(({ items, setStudentInfo }) => {
               </label>
             </div>
           </th>
-          {headerValue?.map((items, _) => (
-            <>
-              <th key={items?.id} scope="col" className="px-6 py-3">
-                {...items}
-              </th>
-            </>
+          {headerValue?.map((key) => (
+            <th key={key} scope="col" className="px-6 py-3">
+              {key}
+            </th>
           ))}
           <th scope="col" className="px-6 py-3">
             Action
