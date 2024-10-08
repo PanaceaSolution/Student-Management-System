@@ -12,9 +12,23 @@ export class StudentService {
 
   async createStudent(
     createStudentDto: CreateStudentDto,
-  ): Promise<{ status: number; message: string; student?: any; login?: any; }> {
-    const { fname, lname, email, address, sex, bloodtype, dob } =
-      createStudentDto;
+  ): Promise<{ status: number; message: string; student?: any; login?: any }> {
+    const {
+      fname,
+      lname,
+      email,
+      address,
+      sex,
+      bloodtype,
+      dob,
+      father_name,
+      mother_name,
+      admission_date,
+    } = createStudentDto;
+    console.log('Incoming request to create student:', JSON.stringify(createStudentDto, null, 2));
+    if (!father_name) {
+      return { status: 400, message: 'father name not found' };
+    }
     const studentExist = await this.prisma.student.findFirst({
       where: {
         email,
@@ -34,6 +48,9 @@ export class StudentService {
         sex,
         bloodtype,
         dob,
+        father_name,
+        mother_name,
+        admission_date,
       },
     });
 
@@ -65,7 +82,7 @@ export class StudentService {
       status: 200,
       message: 'Student created successfully',
       student: newStudent,
-      login: login
+      login: login,
     };
   }
 
@@ -119,8 +136,18 @@ export class StudentService {
   ): Promise<{ status: number; message?: string; student?: any }> {
     const findStudent = this.findStudent(studentId);
     if ((await findStudent).status == 200) {
-      const { fname, lname, email, address, sex, bloodtype, dob } =
-        updateStudentDto;
+      const {
+        fname,
+        lname,
+        email,
+        address,
+        sex,
+        bloodtype,
+        dob,
+        father_name,
+        mother_name,
+        admission_date,
+      } = updateStudentDto;
       const updatedStudent = await this.prisma.student.update({
         where: {
           id: Number(studentId),
@@ -133,6 +160,9 @@ export class StudentService {
           ...(sex !== undefined && { sex }),
           ...(bloodtype !== undefined && { bloodtype }),
           ...(dob !== undefined && { dob }),
+          ...(father_name !== undefined && { father_name }),
+          ...(mother_name !== undefined && { mother_name }),
+          ...(admission_date !== undefined && { admission_date }),
         },
       });
       return {

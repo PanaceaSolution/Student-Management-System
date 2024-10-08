@@ -42,6 +42,25 @@ export class CreateStudentDto {
   @IsDate()
   @Type(() => Date)
   dob: Date;
+  
+  @IsString()
+  @IsOptional()
+  father_name: string;
+
+  @IsString()
+  @IsOptional()
+  mother_name: string;
+
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
+  admission_date?: Date;
+
+  constructor() {
+    if (!this.admission_date) {
+      this.admission_date = new Date();
+    }
+  }
 }
 
 export class UpdateStudentDto {
@@ -66,6 +85,14 @@ export class UpdateStudentDto {
   address?: string;
 
   @IsOptional()
+  @IsString()
+  father_name?: string;
+
+  @IsOptional()
+  @IsString()
+  mother_name?: string;
+
+  @IsOptional()
   @IsEnum(Gender)
   sex?: Gender;
 
@@ -77,6 +104,11 @@ export class UpdateStudentDto {
   @IsDate()
   @Type(() => Date)
   dob?: Date;
+
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
+  admission_date?: Date;
 }
 
 export class LinkParentDto {
