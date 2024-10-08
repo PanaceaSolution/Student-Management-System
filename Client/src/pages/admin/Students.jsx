@@ -107,14 +107,15 @@ const Students = () => {
       { header: "First Name", dataKey: "firstName" },
       { header: "Last Name", dataKey: "lastName" },
       { header: "Gender", dataKey: "gender" },
-      { header: "Department", dataKey: "department" },
+      { header: "Class", dataKey: "class" },
     ];
 
-    const pdfData = data.map((student) => ({
-      firstName: student.firstName,
-      lastName: student.lastName,
-      gender: student.gender,
-      department: student.department,
+    // Map students to PDF format
+    const pdfStudents = students?.map((student) => ({
+      firstName: student?.firstName,
+      lastName: student?.lastName,
+      gender: student?.gender,
+      Class: student?.Class,
     }));
 
     doc.setFontSize(18);
