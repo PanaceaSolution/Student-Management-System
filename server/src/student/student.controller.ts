@@ -6,7 +6,11 @@ import { CreateStudentDto, UpdateStudentDto, LinkParentDto } from './dto/student
 export class StudentController {
   constructor(private readonly studentService: StudentService) {}
 
-  @Post('/create')
+  @Get('all-students')
+  async getStudents(){
+    return this.studentService.GetAllStudents()
+  }
+  @Post('create')
   async createStudent(
     @Body() createStudentDto: CreateStudentDto
   ): Promise<{ status: number; message: string; student?: any }> {

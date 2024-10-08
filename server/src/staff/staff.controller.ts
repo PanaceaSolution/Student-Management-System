@@ -17,7 +17,7 @@ export class StaffController {
   constructor(private readonly staffService: StaffService) {}
 
   // Create a new staff member
-  @Post()
+  @Post('create')
   async create(@Body() data: CreateStaffDto) {
 
     return this.staffService.createStaff(data);
@@ -40,7 +40,7 @@ export class StaffController {
   }
 
   // Update a staff member
-  @Put(':id')
+  @Put('update/:id')
   async update(@Param('id') id: string, @Body() data: UpdateStaffDto) {
     const staff = await this.staffService.getStaffById(+id);
     if (!staff) {
@@ -50,7 +50,7 @@ export class StaffController {
   }
 
   // Delete a staff member
-  @Delete(':id')
+  @Delete('delete/:id')
   async remove(@Param('id') id: string) {
     const staff = await this.staffService.getStaffById(+id);
     if (!staff) {

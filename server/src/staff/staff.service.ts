@@ -66,7 +66,9 @@ export class StaffService {
     });
     const StaffId = FindStaff.id;
     const paddedId = StaffId.toString().padStart(4, '0');
-    let StaffUsername = `${fname.charAt(0)}${lname.charAt(0)}-${paddedId}`.toUpperCase();
+    let StaffUsername = `STF-${fname.charAt(0)}${lname.charAt(
+      0,
+    )}${paddedId}`.toUpperCase();
 
     const StaffPassword = this.generateRandomPassword();
     const login = await this.prisma.login.create({
