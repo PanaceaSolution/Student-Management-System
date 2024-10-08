@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Res } from '@nestjs/common';
+import { Response } from 'express';
 
 import * as bcrypt from 'bcrypt';
 
@@ -16,7 +17,7 @@ export class AuthenticationService {
     const { username, password, role } = RegisterDto;
 
     const ExistingUser = await this.prisma.login.findUnique({
-      where: { username }, // This should work if username is unique
+      where: { username },
     });
 
     if (ExistingUser) {
@@ -41,7 +42,7 @@ export class AuthenticationService {
     };
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto, @Res() res: Response) {
     const { username, password } = loginDto;
 
     const user = await this.prisma.login.findUnique({
@@ -60,8 +61,12 @@ export class AuthenticationService {
     }
     const payload = { username: user.username, role: user.role };
     const token = this.jwtService.sign(payload);
-    // console.log(token);
 
-    return token;
+    res.cookie('token', token, {
+      httpOnly: true,
+      sameSite: 'strict',
+    });
+
+    return res.status(200).json({ payload });
   }
 }
