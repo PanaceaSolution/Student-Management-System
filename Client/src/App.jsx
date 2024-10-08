@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LoginPage from './pages/LoginPage';
+import Login from './pages/Login';
 import PageNotFound from "./pages/PageNotFound";
 import Layout from "./components/Layout";
 import PrivateRoute from "./routes/PrivateRoute";
@@ -114,7 +114,7 @@ const App = () => {
     <Router>
       <Suspense fallback={<Loader />}>
         <Routes>
-          <Route path="/" element={<LoginPage />} />
+          <Route path="/" element={<Login />} />
 
           {/* Private routes */}
           <Route element={<Layout />}>
