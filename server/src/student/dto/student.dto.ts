@@ -36,6 +36,9 @@ export class CreateStudentDto {
   @IsInt()
   classId: number;
 
+  @IsInt()
+  loginId: number;
+
   @IsDate()
   @Type(() => Date)
   dob: Date;
@@ -69,14 +72,6 @@ export class UpdateStudentDto {
   @IsOptional()
   @IsString()
   bloodtype?: string;
-
-  @IsOptional()
-  @IsInt()
-  parentId?: number;
-
-  @IsOptional()
-  @IsInt()
-  classId?: number;
 
   @IsOptional()
   @IsDate()

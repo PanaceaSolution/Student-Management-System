@@ -9,7 +9,7 @@ datasource db {
 
 model Login {
   id       Int      @id @default(autoincrement())
-  username String
+  username String   @unique
   password String
   role     String
   admin    Admin? // Relation to Admin
@@ -20,7 +20,7 @@ model Login {
 
 model Admin {
   id       Int    @id @default(autoincrement())
-  username String
+  username String @unique
   access   String // Description of admin access level
   loginId  Int    @unique // Ensure loginId is unique
   login    Login  @relation(fields: [loginId], references: [id])
@@ -28,20 +28,20 @@ model Admin {
 
 model Student {
   id          Int          @id @default(autoincrement())
-  username    String       @unique
+  username    String?       @unique
   fname       String
   lname       String
   address     String
   sex         String
   bloodtype   String
-  parentId    Int
-  classId     Int
+  parentId    Int?
+  classId     Int?
   dob         DateTime
   email       String       @unique
-  parent      Parent       @relation(fields: [parentId], references: [id])
-  loginId     Int          @unique // Ensure loginId is unique
-  login       Login        @relation(fields: [loginId], references: [id])
-  class       Class        @relation(fields: [classId], references: [id]) // Relation to Class
+  parent      Parent?       @relation(fields: [parentId], references: [id])
+  loginId     Int?          @unique // Ensure loginId is unique
+  login       Login?        @relation(fields: [loginId], references: [id])
+  class       Class?        @relation(fields: [classId], references: [id]) // Relation to Class
   submissions Submission[] // Add the reverse relation for submissions
 }
 
@@ -51,15 +51,15 @@ model Parent {
   lname       String
   phoneNumber String
   address     String
-  email       String
+  email       String    @unique
   students    Student[]
-  loginId     Int       @unique // Ensure loginId is unique
-  login       Login     @relation(fields: [loginId], references: [id])
+  loginId     Int?      @unique // Ensure loginId is unique
+  login       Login?    @relation(fields: [loginId], references: [id])
 }
 
 model Staff {
   id             Int      @id @default(autoincrement())
-  username       String
+  username       String   @unique
   fname          String
   lname          String
   dob            DateTime
@@ -127,14 +127,14 @@ enum Gender {
 
 model testStudent {
   id        Int      @id @default(autoincrement())
-  username  String? @unique
+  username  String?  @unique
   fname     String
   lname     String
   email     String   @unique
   address   String
   sex       Gender
   bloodtype String
-  parentId  Int
+  parentId  Int?
   classId   Int
   dob       DateTime
 }
