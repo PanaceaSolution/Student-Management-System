@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Button from "@/components/Button";
+import Loadding from "./Loader/Loadding";
 
-const ProfileCard = ({ onEdit, onDelete, studentInfo }) => {
+const ProfileCard = ({ onEdit, onDelete, studentInfo, loading }) => {
   const [keys, setKeys] = useState([]);
 
   useEffect(() => {
@@ -13,9 +14,7 @@ const ProfileCard = ({ onEdit, onDelete, studentInfo }) => {
     }
   }, [studentInfo]);
 
-
   const studentId = studentInfo?.id;
-
 
   const handleEdit = () => {
     if (studentId) {
@@ -58,8 +57,9 @@ const ProfileCard = ({ onEdit, onDelete, studentInfo }) => {
         <Button type="edit" className="flex-shrink-0" onClick={handleEdit}>
           Edit
         </Button>
-        <Button type="delete" className="flex-shrink-0" onClick={handleDelete}>
+        <Button  isDisable={loading} type="delete" className="flex-shrink-0" onClick={handleDelete}>
           Delete
+          {loading && <Loadding />}
         </Button>
       </div>
     </div>

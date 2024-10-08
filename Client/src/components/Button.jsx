@@ -1,7 +1,7 @@
 // src/Button.js
 import React from "react";
 
-const Button = ({ type, onClick, children }) => {
+const Button = ({ type, onClick, children,isDisable }) => {
   const baseClasses =
     "inline-block rounded border border-current transition focus:outline-none ";
 
@@ -17,8 +17,9 @@ const Button = ({ type, onClick, children }) => {
   return (
     <button
       type="button"
-      className={`${baseClasses} ${typeClasses[type] || typeClasses.default}`}
+      className={`${baseClasses} ${typeClasses[type] || typeClasses.default} text-nowrap flex gap-4`}
       onClick={onClick}
+      disabled={isDisable}
     >
       {children}
     </button>

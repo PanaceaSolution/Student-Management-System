@@ -1,6 +1,5 @@
-import React from 'react';
-import { useForm, Controller } from 'react-hook-form';
-
+import React, { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import {
   Dialog,
   DialogContent,
@@ -12,139 +11,129 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DatePicker } from './DatePicker';
-import Button from './Button';
+import { Button } from "@/components/ui/button";
+import useAddStudent from "@/hooks/useAddStudent";
+import Loadding from "./Loader/Loadding";
+import Alert from "./Alert";
+
+const formFields = [
+  {
+    name: "firstName",
+    label: "First Name",
+    required: true,
+    placeholder: "Enter First Name",
+  },
+  {
+    name: "lastName",
+    label: "Last Name",
+    required: true,
+    placeholder: "Enter Last Name",
+  },
+  {
+    name: "fatherName",
+    label: "Father Name",
+    required: true,
+    placeholder: "Enter Father's Name",
+  },
+  {
+    name: "motherName",
+    label: "Mother Name",
+    required: true,
+    placeholder: "Enter Mother's Name",
+  },
+  {
+    name: "gender",
+    label: "Gender",
+    required: true,
+    placeholder: "Enter Gender",
+  },
+  {
+    name: "bloodType",
+    label: "Blood Type",
+    required: true,
+    placeholder: "Enter Blood Type",
+  },
+  {
+    name: "address",
+    label: "Address",
+    required: true,
+    placeholder: "Enter Address",
+  },
+  { name: "class", label: "Class", required: true, placeholder: "Enter Class" },
+];
 
 const StudentForm = () => {
-  const { control, handleSubmit, formState: { errors } } = useForm();
+  const { addStudent, loading, success, error } = useAddStudent();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm();
+  const [isOpen, setIsOpen] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
 
-  const onSubmit = (data) => {
-    console.log(data);
+  const onSubmit = async (data) => {
+    try {
+      await addStudent(data);
+   
+      reset(); // Reset the form fields
+    } catch (err) {
+      console.error(err);
+    }
   };
 
+  useEffect(() => {
+    if (success) {
+      setShowAlert(true);
+   
+    }
+  }, [success]);
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen} className="p-4">
       <DialogTrigger asChild>
-        <Button type="create">Add New Student</Button>
+        <Button className="bg-[#233255CC] text-[#FFFFFF] text-base px-3 py-1 sm:py-2">
+          ADD STUDENT
+        </Button>
       </DialogTrigger>
-      <DialogContent className="p-2 max-w-[400px]  sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Add Students</DialogTitle>
-          <DialogDescription>
-            Enter Student Information Here:
+      <DialogContent className="p-1 md:p-2 w-11/12">
+        <DialogHeader className="border-b-2 border-separate">
+          <DialogTitle className="font-bold">Add Students:</DialogTitle>
+          <DialogDescription className="text-lg font-bold text-primary">
+            Enter Student Information Here..
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-2 px-4">
-
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="grid gap-4 py-2 px-4"
+        >
           <div className="grid grid-cols-2 gap-4">
-            {/* First Name */}
-            <div className="grid items-center gap-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <Controller
-                name="firstName"
-                control={control}
-                defaultValue=""
-                rules={{ required: 'First Name is required' }}
-                render={({ field }) => (
-                  <Input {...field} id="firstName" type="text" />
+            {formFields.map(({ name, label, required, placeholder }) => (
+              <div key={name} className="grid items-center gap-2">
+                <Label htmlFor={name}>{label}</Label>
+                <Controller
+                  name={name}
+                  control={control}
+                  defaultValue=""
+                  rules={required ? { required: `${label} is required` } : {}}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      id={name}
+                      type="text"
+                      placeholder={placeholder}
+                      className="bg-gray-100 focus:border-blue-500 rounded-sm"
+                    />
+                  )}
+                />
+                {errors[name] && (
+                  <span className="text-red-500 text-xs">
+                    {errors[name].message}
+                  </span>
                 )}
-              />
-              {errors.firstName && <span className="text-red-500">{errors.firstName.message}</span>}
-            </div>
-
-            {/* Last Name */}
-            <div className="grid items-center gap-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Controller
-                name="lastName"
-                control={control}
-                defaultValue=""
-                rules={{ required: 'Last Name is required' }}
-                render={({ field }) => (
-                  <Input {...field} id="lastName" type="text" />
-                )}
-              />
-              {errors.lastName && <span className="text-red-500">{errors.lastName.message}</span>}
-            </div>
-          </div>
-
-          <div className='grid grid-cols-2 items-center gap-4'>
-            {/* Father Name */}
-            <div className="grid items-center gap-2">
-              <Label htmlFor="fatherName">Father Name</Label>
-              <Controller
-                name="fatherName"
-                control={control}
-                defaultValue=""
-                rules={{ required: 'Father Name is required' }}
-                render={({ field }) => (
-                  <Input {...field} id="fatherName" type="text" />
-                )}
-              />
-              {errors.fatherName && <span className="text-red-500">{errors.fatherName.message}</span>}
-            </div>
-
-            {/* Mother Name */}
-            <div className="grid items-center gap-2">
-              <Label htmlFor="motherName" >Mother Name</Label>
-              <Controller
-                name="motherName"
-                control={control}
-                defaultValue=""
-                rules={{ required: 'Mother Name is required' }}
-                render={({ field }) => (
-                  <Input {...field} id="motherName" type="text" />
-                )}
-              />
-              {errors.motherName && <span className="text-red-500">{errors.motherName.message}</span>}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            {/* Gender */}
-            <div className="grid items-center gap-2">
-              <Label htmlFor="gender">Gender</Label>
-              <Controller
-                name="gender"
-                control={control}
-                defaultValue=""
-                rules={{ required: 'Gender is required' }}
-                render={({ field }) => (
-                  <Input {...field} id="gender" type="text" />
-                )}
-              />
-              {errors.gender && <span className="text-red-500">{errors.gender.message}</span>}
-            </div>
-
-            {/* Blood Type */}
-            <div className="grid items-center gap-2">
-              <Label htmlFor="bloodType">Blood Type</Label>
-              <Controller
-                name="bloodType"
-                control={control}
-                defaultValue=""
-                rules={{ required: 'Blood Type is required' }}
-                render={({ field }) => (
-                  <Input {...field} id="bloodType" type="text" />
-                )}
-              />
-              {errors.bloodType && <span className="text-red-500">{errors.bloodType.message}</span>}
-            </div>
-          </div>
-
-          {/* Address */}
-          <div className="grid items-center gap-2">
-            <Label htmlFor="address">Address</Label>
-            <Controller
-              name="address"
-              control={control}
-              defaultValue=""
-              rules={{ required: 'Address is required' }}
-              render={({ field }) => (
-                <Input {...field} id="address" type="text" />
-              )}
-            />
-            {errors.address && <span className="text-red-500">{errors.address.message}</span>}
+              </div>
+            ))}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -154,75 +143,83 @@ const StudentForm = () => {
               <Controller
                 name="dob"
                 control={control}
-                defaultValue={null}
-                rules={{ required: 'DOB is required' }}
-                render={({ field: { onChange, value } }) => (
-                  <DatePicker
-                    value={value}
-                    onChange={onChange}
-                    placeholder="Select DOB"
-                  />
-                )}
-              />
-              {errors.dob && <span className="text-red-500">{errors.dob.message}</span>}
-            </div>
-
-            {/* Admission Date
-            <div className="grid items-center gap-2">
-              <Label htmlFor="admissionDate">Admission Date</Label>
-              <Controller
-                name="admissionDate"
-                control={control}
-                defaultValue={null}
-                rules={{ required: 'Admission Date is required' }}
-                render={({ field: { onChange, value } }) => (
-                  <DatePicker
-                    selected={value}
-                    onChange={(date) => onChange(date)}
-                    placeholder="Select Admission Date"
-                  />
-                )}
-              />
-              {errors.admissionDate && <span className="text-red-500">{errors.admissionDate.message}</span>}
-            </div> */}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            {/* Class */}
-            <div className="grid  items-center gap-2">
-              <Label htmlFor="class" >Class</Label>
-              <Controller
-                name="class"
-                control={control}
                 defaultValue=""
-                rules={{ required: 'Class is required' }}
+                rules={{
+                  required: "DOB is required",
+                  validate: (value) => {
+                    const date = new Date(value);
+                    return !isNaN(date) || "Please enter a valid date";
+                  },
+                }}
                 render={({ field }) => (
-                  <Input {...field} id="class" type="text" />
+                  <Input
+                    {...field}
+                    id="dob"
+                    type="date"
+                    className="bg-gray-100 focus:border-blue-500 rounded-sm"
+                  />
                 )}
               />
-              {errors.class && <span className="text-red-500">{errors.class.message}</span>}
+              {errors.dob && (
+                <span className="text-red-500 text-xs">
+                  {errors.dob.message}
+                </span>
+              )}
             </div>
 
             {/* Email */}
-            <div className="grid  items-center gap-2">
-              <Label htmlFor="email" >Email</Label>
+            <div className="grid items-center gap-2">
+              <Label htmlFor="email">Email</Label>
               <Controller
                 name="email"
                 control={control}
                 defaultValue=""
-                rules={{ required: 'Email is required' }}
+                rules={{
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                    message: "Email is not valid",
+                  },
+                }}
                 render={({ field }) => (
-                  <Input {...field} id="email" type="text" />
+                  <Input
+                    {...field}
+                    id="email"
+                    type="text"
+                    placeholder="Enter Email"
+                    className="bg-gray-100 focus:border-blue-500 rounded-sm"
+                  />
                 )}
               />
-              {errors.class && <span className="text-red-500">{errors.class.message}</span>}
+              {errors.email && (
+                <span className="text-red-500 text-xs">
+                  {errors.email.message}
+                </span>
+              )}
             </div>
           </div>
 
-          <DialogFooter>
-            <Button type="create">Save changes</Button>
+          <DialogFooter className="flex justify-between">
+            <Button
+              type="submit"
+              className="bg-[#233255CC] text-[#FFFFFF] text-base px-4 py-1 sm:py-2"
+              disabled={loading}
+            >
+              {loading ? <Loadding /> : "Add"}
+            </Button>
           </DialogFooter>
         </form>
+
+        {/* Alert Component */}
+        {showAlert && (
+          <Alert
+            title="Success!"
+            message="Student added successfully!"
+            variant="success"
+            position="top-center"
+            onDismiss={() => setShowAlert(false)} 
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
