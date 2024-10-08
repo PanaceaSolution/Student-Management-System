@@ -15,15 +15,6 @@ export class AuthenticationController {
 
   @Post('login')
   async login(@Body() LoginDto: LoginDto, @Res() res: Response) {
-    const token = this.authenticationService.login(LoginDto);
-
-    res.cookie('token', token, {
-      httpOnly: true,
-      sameSite: 'strict',
-    });
-
-    return res.json({
-      message: 'Login successful',
-    });
+    return this.authenticationService.login(LoginDto, res);
   }
 }
