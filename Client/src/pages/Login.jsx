@@ -32,9 +32,7 @@ const Login = () => {
       password: sanitizeInput(data.password)
     };
 
-    const res = await login(sanitizedData);
-    console.log(res);
-
+    await login(sanitizedData);
     navigate('/dashboard')
   };
 
@@ -103,7 +101,7 @@ const Login = () => {
 
             <Button
               type="submit"
-              className="mx-auto w-1/2 hover:bg-primary text-lg font-semibold"
+              className="mx-auto w-1/2 hover:bg-primary text-lg font-semibold disabled:cursor-not-allowed"
               disabled={loading}
             >
               Login
