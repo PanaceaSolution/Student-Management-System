@@ -108,12 +108,12 @@ export class StudentService {
     }
 
     if (createdAfter || createdBefore) {
-      where.createdAt = {};
+      where.admission_date = {};
       if (createdAfter) {
-        where.createdAt.gte = createdAfter;
+        where.admission_date.gte = createdAfter;
       }
       if (createdBefore) {
-        where.createdAt.lte = createdBefore;
+        where.admission_date.lte = createdBefore;
       }
     }
 
