@@ -4,7 +4,6 @@ import Table from "@/components/Tables"; // Table to display student data
 import ResultShowing from "@/components/ResultShowing";
 import ProfileCard from "@/components/ProfileCard";
 import Select from "@/components/Select";
-import Button from "@/components/Button";
 import SearchBox from "@/components/SearchBox";
 import Papa from "papaparse";
 import { jsPDF } from "jspdf";
@@ -14,6 +13,7 @@ import useDeleteStudent from "@/hooks/useDeleteStudnet"; // Custom hook to delet
 import { DateSelect } from "@/components/DateSelect";
 import Alert from "@/components/Alert"; // Alert notification component
 import StudentForm from "@/components/StudentForm";
+import { Button } from "@/components/ui/button";
 
 // Custom hook for debouncing input value
 const useDebounce = (value, delay) => {
@@ -34,7 +34,7 @@ const useDebounce = (value, delay) => {
 
 // Options for export formats
 const Experts = [
-  { value: "", label: "EXPERT" },
+  { value: "", label: "EXPORT" },
   { value: "CSV", label: "CSV" },
   { value: "PDF", label: "PDF" },
 ];
@@ -238,7 +238,7 @@ const Students = () => {
           <div className="rounded-sm bg-[#F8F8F8] lg:col-span-3 p-3">
             <div className="flex justify-evenly sm:justify-end border-b-2 p-3">
               <div className="flex gap-3 md:gap-4">
-                <Button type="print" onClick={exportToPDF}>
+                <Button variant="print" onClick={exportToPDF}>
                   PRINT
                 </Button>
                 <Select
@@ -301,7 +301,7 @@ const Students = () => {
               end={indexOfLastItem}
               total={students.length}
             />
-            <div className="relative w-full overflow-x-auto shadow-md scrollbar-none">
+            <div className="relative w-full overflow-x-auto shadow-md">
               {error ? (
                 <div className="text-red-500">Error: {error}</div> // Display error message if any
               ) : (

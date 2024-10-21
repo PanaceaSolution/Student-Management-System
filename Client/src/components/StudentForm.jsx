@@ -104,7 +104,7 @@ const StudentForm = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen} className="p-4">
       <DialogTrigger asChild>
-        <Button className="bg-[#233255CC] text-[#FFFFFF] text-base px-3 py-1 sm:py-2">
+        <Button variant="create">
           ADD STUDENT
         </Button>
       </DialogTrigger>
