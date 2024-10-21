@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const { login, loading } = useAuthStore();
+  const { login, loading, error } = useAuthStore();
   const navigate = useNavigate();
 
   const {
@@ -33,7 +33,9 @@ const Login = () => {
     };
 
     await login(sanitizedData);
-    navigate('/dashboard')
+    if (!error) {
+      navigate('/dashboard');
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -58,6 +60,7 @@ const Login = () => {
 
           {/* Form */}
           <form className="grid gap-8 justify-center items-center" onSubmit={handleSubmit(onSubmit)}>
+            {error && <p className="text-red-500">{error}</p>}
             <div className="grid gap-2">
               <Label htmlFor="username">Username</Label>
               <div className="flex items-center shadow-md rounded-md px-2 bg-background">
@@ -77,7 +80,7 @@ const Login = () => {
 
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <div className="flex items-center shadow-md  rounded-md px-2 bg-background">
+              <div className="flex items-center shadow-md rounded-md px-2 bg-background">
                 <FaLock className="text-gray-400 mr-2" />
                 <Input
                   id="password"
@@ -98,13 +101,12 @@ const Login = () => {
               </div>
               {errors.password && <span className="text-red-500">{errors.password.message}</span>}
             </div>
-
             <Button
               type="submit"
               className="mx-auto w-1/2 hover:bg-primary text-lg font-semibold disabled:cursor-not-allowed"
               disabled={loading}
             >
-              Login
+              {loading ? 'Logging in...' : 'Login'}
             </Button>
           </form>
         </CardContent>
