@@ -26,8 +26,6 @@ export class CreateParentDto {
   @IsNotEmpty()
   loginId: number;
 
-  // @IsNotEmpty()
-  // students: string
 }
 
 export class UpdateParentDto {

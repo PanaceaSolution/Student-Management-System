@@ -1,14 +1,15 @@
 import { Controller, Post,Get, Body, Param, Put, Delete } from '@nestjs/common';
 import { StudentService } from './student.service';
-import { CreateStudentDto, UpdateStudentDto, LinkParentDto } from './dto/student.dto';
+import { CreateStudentDto, UpdateStudentDto, LinkParentDto , FilterStudentDto} from './dto/student.dto';
+import { Query } from '@nestjs/common';
 
 @Controller("student")
 export class StudentController {
   constructor(private readonly studentService: StudentService) {}
 
   @Get('all-students')
-  async getStudents(){
-    return this.studentService.GetAllStudents()
+  async getStudents(@Query() filterDto: FilterStudentDto){
+    return this.studentService.GetAllStudents(filterDto)
   }
   @Post('create')
   async createStudent(

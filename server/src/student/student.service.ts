@@ -4,6 +4,7 @@ import {
   CreateStudentDto,
   UpdateStudentDto,
   LinkParentDto,
+  FilterStudentDto,
 } from './dto/student.dto';
 
 @Injectable()
@@ -17,7 +18,8 @@ export class StudentService {
       fname,
       lname,
       email,
-      address,
+      permanentAddress,
+      temporaryAddress,
       sex,
       bloodtype,
       dob,
@@ -25,29 +27,32 @@ export class StudentService {
       mother_name,
       admission_date,
     } = createStudentDto;
-    console.log(
-      'Incoming request to create student:',
-      JSON.stringify(createStudentDto, null, 2),
-    );
-    if (!father_name) {
-      return { status: 400, message: 'father name not found' };
-    }
-    const studentExist = await this.prisma.student.findFirst({
-      where: {
-        email,
-      },
+
+    const studentExist = await this.prisma.student.findUnique({
+      where: { email },
     });
 
     if (studentExist) {
       return { status: 400, message: 'Student already exists in the database' };
     }
 
-    await this.prisma.student.create({
+    const address = await this.prisma.address.create({
+      data: {
+        permanentAddress: {
+          create: permanentAddress,
+        },
+        temporaryAddress: {
+          create: temporaryAddress,
+        },
+      },
+    });
+
+    const student = await this.prisma.student.create({
       data: {
         fname,
         lname,
         email,
-        address,
+        addressId: address.id,
         sex,
         bloodtype,
         dob,
@@ -57,16 +62,10 @@ export class StudentService {
       },
     });
 
-    const findStudent = await this.prisma.student.findUnique({
-      where: {
-        email: String(email),
-      },
-    });
-
-    const studentId = findStudent.id;
-    const paddedId = studentId.toString().padStart(4, '0');
-    let studentUsername = `ST-${fname.charAt(0)}${lname.charAt(0)}${paddedId}`;
-    studentUsername = studentUsername.toUpperCase();
+    const paddedId = student.id.toString().padStart(4, '0');
+    let studentUsername = `ST-${fname.charAt(0)}${lname.charAt(
+      0,
+    )}${paddedId}`.toUpperCase();
     const studentPassword = this.generateRandomPassword();
 
     const login = await this.prisma.login.create({
@@ -76,8 +75,9 @@ export class StudentService {
         role: 'STUDENT',
       },
     });
+
     const newStudent = await this.prisma.student.update({
-      where: { id: studentId },
+      where: { id: student.id },
       data: { username: studentUsername, loginId: login.id },
     });
 
@@ -85,21 +85,46 @@ export class StudentService {
       status: 200,
       message: 'Student created successfully',
       student: newStudent,
-      login: login,
+      login,
     };
   }
 
-  async GetAllStudents(): Promise<{
+  async GetAllStudents(filterDto: FilterStudentDto): Promise<{
     status: number;
     message: string;
-    student?: any;
+    students?: any;
   }> {
-    const students = await this.prisma.student.findMany();
+    const { name, gender, createdAfter, createdBefore } = filterDto;
+    const where: any = {};
+    if (name) {
+      where.OR = [
+        { fname: { contains: name, mode: 'insensitive' } },
+        { lname: { contains: name, mode: 'insensitive' } },
+      ];
+    }
+
+    if (gender) {
+      where.sex = gender;
+    }
+
+    if (createdAfter || createdBefore) {
+      where.createdAt = {};
+      if (createdAfter) {
+        where.createdAt.gte = createdAfter;
+      }
+      if (createdBefore) {
+        where.createdAt.lte = createdBefore;
+      }
+    }
+
+    const students = await this.prisma.student.findMany({
+      where,
+    });
 
     return {
-      status: 201,
-      message: 'All students fetched',
-      student: students,
+      status: 200,
+      message: 'Students fetched successfully',
+      students,
     };
   }
 
@@ -107,22 +132,20 @@ export class StudentService {
     linkParentDto: LinkParentDto,
   ): Promise<{ status: number; message: string; result?: any }> {
     const { parentId, studentId } = linkParentDto;
-    const findStudent = this.findStudent(studentId);
-    if (!findStudent) {
-      return { status: 400, message: 'student not found' };
+    const findStudent = await this.findStudent(studentId);
+    if (!findStudent.student) {
+      return { status: 400, message: 'Student not found' };
     }
+
     const result = await this.prisma.student.update({
-      where: {
-        id: studentId,
-      },
-      data: {
-        parentId: parentId,
-      },
+      where: { id: studentId },
+      data: { parentId },
     });
+
     return {
       status: 200,
       message: 'Parent linked successfully',
-      result: result,
+      result,
     };
   }
 
@@ -130,19 +153,18 @@ export class StudentService {
     studentId: number,
   ): Promise<{ status: number; message?: string; student?: any }> {
     const findStudent = await this.prisma.student.findUnique({
-      where: {
-        id: Number(studentId),
-      },
+      where: { id: studentId },
     });
+
     if (!findStudent) {
       return {
         status: 400,
-        message: 'student does not exist',
+        message: 'Student does not exist',
       };
     }
     return {
       status: 200,
-      message: 'student found',
+      message: 'Student found',
       student: findStudent,
     };
   }
@@ -151,13 +173,14 @@ export class StudentService {
     studentId: number,
     updateStudentDto: UpdateStudentDto,
   ): Promise<{ status: number; message?: string; student?: any }> {
-    const findStudent = this.findStudent(studentId);
-    if ((await findStudent).status == 200) {
+    const findStudent = await this.findStudent(studentId);
+    if (findStudent.status === 200) {
       const {
         fname,
         lname,
         email,
-        address,
+        permanentAddress,
+        temporaryAddress,
         sex,
         bloodtype,
         dob,
@@ -165,15 +188,29 @@ export class StudentService {
         mother_name,
         admission_date,
       } = updateStudentDto;
-      const updatedStudent = await this.prisma.student.update({
-        where: {
-          id: Number(studentId),
+
+      await this.prisma.address.update({
+        where: { id: findStudent.student.addressId },
+        data: {
+          ...(permanentAddress && {
+            permanentAddress: {
+              update: permanentAddress,
+            },
+          }),
+          ...(temporaryAddress && {
+            temporaryAddress: {
+              update: temporaryAddress,
+            },
+          }),
         },
+      });
+
+      const updatedStudent = await this.prisma.student.update({
+        where: { id: studentId },
         data: {
           ...(fname !== undefined && { fname }),
           ...(lname !== undefined && { lname }),
           ...(email !== undefined && { email }),
-          ...(address !== undefined && { address }),
           ...(sex !== undefined && { sex }),
           ...(bloodtype !== undefined && { bloodtype }),
           ...(dob !== undefined && { dob }),
@@ -182,15 +219,16 @@ export class StudentService {
           ...(admission_date !== undefined && { admission_date }),
         },
       });
+
       return {
         status: 200,
-        message: 'student updated successfully',
+        message: 'Student updated successfully',
         student: updatedStudent,
       };
     } else {
       return {
         status: 400,
-        message: 'student not found',
+        message: 'Student not found',
       };
     }
   }

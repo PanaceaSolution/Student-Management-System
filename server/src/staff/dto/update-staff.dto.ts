@@ -1,4 +1,18 @@
-import { IsString,IsNotEmpty, IsOptional, IsEmail, IsNumber, IsDateString } from 'class-validator';
+import {
+  IsEnum,
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEmail,
+  IsNumber,
+  IsDateString,
+} from 'class-validator';
+
+export enum Gender {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+  OTHER = 'OTHER',
+}
 
 export class UpdateStaffDto {
   @IsOptional()
@@ -30,8 +44,8 @@ export class UpdateStaffDto {
   phoneNumber?: string;
 
   @IsOptional()
-  @IsString()
-  sex?: string;
+  @IsEnum(Gender)
+  sex: Gender;
 
   @IsOptional()
   @IsString()
