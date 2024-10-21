@@ -13,9 +13,7 @@ const Layout = () => {
          {/* Right Content */}
          <div className="flex flex-col">
             {/* Navbar */}
-            <div className="sticky top-0 bg-background z-50 shadow-md">
-               <Navbar />
-            </div>
+            <Navbar />
 
             {/* Main Content */}
             <main className="flex-1 p-2 lg:p-4">

@@ -149,7 +149,7 @@ const Sidebar = () => {
                            to={link.href}
                            aria-current={isActive(link.href) ? 'page' : undefined}
                            aria-label={link.name}
-                           className={`flex items-center gap-8 rounded-lg p-4 md:p-3 lg:p-4 transition-all hover:bg-background hover:text-primary 
+                           className={`flex items-center gap-8 rounded-lg p-[14px] transition-all hover:bg-background hover:text-primary 
                                  ${isActive(link.href)
                                  ? 'bg-background text-primary border-l-4 border-primary'
                                  : 'text-white'
@@ -165,7 +165,7 @@ const Sidebar = () => {
                               </TooltipContent>
                            </Tooltip>
 
-                           <span className="font-semibold text-lg md:hidden lg:block">{link.name}</span>
+                           <span className="font-semibold text-lg">{link.name}</span>
                         </Link>
                      ))}
                   </nav>
@@ -177,10 +177,10 @@ const Sidebar = () => {
             <Button
                variant="destructive"
                onClick={logoutHandle}
-               className="flex items-center justify-center gap-3 py-7 md:mx-1 lg:mx-4 mb-10 md:mb-4"
+               className="flex items-center justify-center gap-5 py-7 md:mx-1 lg:mx-4 mb-10 md:mb-4"
             >
                <LuLogOut className="w-6 h-6" />
-               <span className="md:hidden lg:block font-semibold text-base ml-2">Logout</span>
+               <span className="md:hidden lg:block font-semibold text-lg">Logout</span>
             </Button>
          </div>
       </aside>
