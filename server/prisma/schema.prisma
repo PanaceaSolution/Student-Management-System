@@ -13,7 +13,7 @@ model Login {
   password String
   role     String
   admin    Admin?
-  student  Student?
+  student  Student? @relation
   parent   Parent?
   staff    Staff?
 }
@@ -27,12 +27,12 @@ model Admin {
 }
 
 model Student {
-  id        Int     @id @default(autoincrement())
-  username  String? @unique
-  fname     String
-  lname     String
-  address   Address @relation(fields: [addressId], references: [id])
-  addressId Int
+  id             Int          @id @default(autoincrement())
+  username       String?      @unique
+  fname          String
+  lname          String
+  address        Address      @relation(fields: [addressId], references: [id])
+  addressId      Int
   sex            Gender
   bloodtype      String
   father_name    String?
@@ -44,7 +44,7 @@ model Student {
   email          String       @unique
   parent         Parent?      @relation(fields: [parentId], references: [id])
   loginId        Int?         @unique
-  login          Login?       @relation(fields: [loginId], references: [id])
+  login          Login?       @relation(fields: [loginId], references: [id], onDelete: Cascade)
   class          Class?       @relation(fields: [classId], references: [id])
   submissions    Submission[]
   documents      Document[]
@@ -88,8 +88,8 @@ model Teacher {
   staffId     Int          @unique
   staff       Staff        @relation(fields: [staffId], references: [id])
   subjects    String[]
-  classId     Int
-  class       Class        @relation(fields: [classId], references: [id])
+  classId     Int?
+  class       Class?        @relation(fields: [classId], references: [id])
   profile     String?
   assignments Assignment[]
   documents   Document[]
@@ -109,8 +109,8 @@ model Assignment {
   description String
   dueDate     DateTime
   createdAt   DateTime     @default(now())
-  classId     Int
-  class       Class        @relation(fields: [classId], references: [id])
+  classId     Int?
+  class       Class?       @relation(fields: [classId], references: [id])
   teacherId   Int
   teacher     Teacher      @relation(fields: [teacherId], references: [id])
   submissions Submission[]

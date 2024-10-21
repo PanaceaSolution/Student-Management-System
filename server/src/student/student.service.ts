@@ -233,19 +233,29 @@ export class StudentService {
     }
   }
 
-  async deleteStudent(
-    studentId: number,
+  async deleteStudents(
+    studentIds: number[],
   ): Promise<{ status: number; message?: string }> {
-    const findStudent = await this.prisma.student.findFirst({
-      where: { id: Number(studentId) },
-    });
-    if (!findStudent) {
-      return { status: 400, message: 'Student not found' };
+    if (!studentIds || studentIds.length === 0) {
+      return { status: 400, message: 'No student IDs provided' };
     }
-    await this.prisma.student.delete({ where: { id: Number(studentId) } });
-    await this.prisma.login.delete({ where: { id: findStudent.loginId } });
-    return { status: 200, message: 'Student deleted successfully' };
+  
+    const ids = studentIds.map(Number).filter(id => !isNaN(id));
+  
+    const findStudents = await this.prisma.student.findMany({
+      where: { id: { in: ids } },
+    });
+    if (findStudents.length === 0) {
+      return { status: 400, message: 'No students found for the provided IDs' };
+    }
+
+    await this.prisma.student.deleteMany({
+      where: { id: { in: ids } },
+    });
+    
+    return { status: 200, message: `${findStudents.length} students deleted successfully` };
   }
+  
 
   private generateRandomPassword(): string {
     return Math.random().toString(36).slice(-8);

@@ -7,6 +7,7 @@ import { StaffModule } from './staff/staff.module';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { ParentModule } from './parent/parent.module';
 import { StudentModule } from './student/student.module';
+import { ClassModule } from './class/class.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -18,6 +19,7 @@ import { StudentModule } from './student/student.module';
     AuthenticationModule,
     ParentModule,
     StudentModule,
+    ClassModule
   ],
   controllers: [AppController],
   providers: [AppService],
