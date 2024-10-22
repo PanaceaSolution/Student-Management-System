@@ -10,14 +10,27 @@ export const getAllStaffService = async () => {
          },
       });
 
-      if (!response.ok) {
-         throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
-
       const data = await response.json();
       return data;
    } catch (error) {
       console.error("Error while getting all staff:", error);
+      throw error;
+   }
+}
+
+export const getStaffByIdService = async (id) => {
+   try {
+      const response = await fetch(`${URL}/staff/${id}`, {
+         method: "GET",
+         headers: {
+            "Content-Type": "application/json",
+         },
+      });
+
+      const data = await response.json();
+      return data;
+   } catch (error) {
+      console.error("Error while getting staff by id:", error);
       throw error;
    }
 }
@@ -33,10 +46,6 @@ export const createStaffService = async (staffData) => {
          },
          body: JSON.stringify(staffData),
       });
-
-      if (!response.ok) {
-         throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
 
       const data = await response.json();
       return data;
@@ -56,10 +65,6 @@ export const updateStaffService = async (id, staffData) => {
          body: JSON.stringify(staffData),
       });
 
-      if (!response.ok) {
-         throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
-
       const data = await response.json();
       return data;
    } catch (error) {
@@ -76,10 +81,6 @@ export const deleteStaffService = async (id) => {
             "Content-Type": "application/json",
          },
       });
-
-      if (!response.ok) {
-         throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
 
       const data = await response.json();
       return data;

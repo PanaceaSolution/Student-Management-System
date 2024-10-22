@@ -1,7 +1,7 @@
-import React from 'react'
-import { useForm } from 'react-hook-form'
-import { Label } from '../ui/label'
-import { Input } from '../ui/input'
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { Label } from '../ui/label';
+import { Input } from '../ui/input';
 import {
    Dialog,
    DialogContent,
@@ -9,13 +9,28 @@ import {
    DialogHeader,
    DialogTitle,
    DialogTrigger,
-} from "@/components/ui/dialog"
-import { Button } from '../ui/button'
-import useStaffStore from '@/store/staffStore'
+} from "@/components/ui/dialog";
+import { Button } from '../ui/button';
+import useStaffStore from '@/store/staffStore';
 
-const Form = () => {
-   const { addStaff, loading, error } = useStaffStore()
-   const { register, handleSubmit, formState: { errors } } = useForm()
+const Form = ({ title, staffData, user }) => {
+   const { addStaff, updateStaff, loading, error } = useStaffStore();
+   const defaultDob = staffData?.dob ? new Date(staffData.dob).toISOString().split('T')[0] : '';
+
+   const { register, handleSubmit, formState: { errors } } = useForm({
+      defaultValues: {
+         fname: staffData?.fname || '',
+         lname: staffData?.lname || '',
+         email: staffData?.email || '',
+         phoneNumber: staffData?.phoneNumber || '',
+         sex: staffData?.sex || '',
+         role: staffData?.role || '',
+         dob: defaultDob,
+         bloodType: staffData?.bloodType || '',
+         salary: staffData?.salary || '',
+         address: staffData?.address || '',
+      }
+   })
 
    const onSubmit = async (data) => {
       const formattedData = {
@@ -23,27 +38,39 @@ const Form = () => {
          salary: Number(data.salary),
       };
 
-      await addStaff(formattedData);
+      if (title === "Create") {
+         await addStaff(formattedData);
+      } else {
+         await updateStaff(staffData.id, formattedData);
+      }
    };
-
 
    return (
       <Dialog>
          <DialogTrigger asChild>
-            <Button
-               variant="create"
-               className="uppercase"
-            >
-               Create Staff
-            </Button>
+            {title === "Create" ? (
+               <Button
+                  variant="create"
+                  className="uppercase"
+               >
+                  {title} {user}
+               </Button>
+            ) : (
+               <Button
+                  variant="edit"
+                  className="uppercase"
+               >
+                  Edit
+               </Button>
+            )}
          </DialogTrigger>
          <DialogContent>
             <DialogHeader>
                <DialogTitle>
-                  Create Staff
+                  {title} Staff
                </DialogTitle>
                <DialogDescription>
-                  Enter Staff Information Here..
+                  Enter Staff Information Here...
                </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit(onSubmit)}>
@@ -56,7 +83,7 @@ const Form = () => {
                         placeholder="Enter First Name"
                         {...register("fname", { required: "First Name is required" })}
                      />
-                     {errors.firstName && <p className="text-red-600">{errors.firstName.message}</p>}
+                     {errors.fname && <p className="text-red-600">{errors.fname.message}</p>}
                   </div>
                   <div>
                      <Label htmlFor="lname">Last Name</Label>
@@ -66,7 +93,7 @@ const Form = () => {
                         placeholder="Enter Last Name"
                         {...register("lname", { required: "Last Name is required" })}
                      />
-                     {errors.lastName && <p className="text-red-600">{errors.lastName.message}</p>}
+                     {errors.lname && <p className="text-red-600">{errors.lname.message}</p>}
                   </div>
                </div>
 
@@ -89,7 +116,7 @@ const Form = () => {
                         placeholder="Enter Phone"
                         {...register("phoneNumber", { required: "Phone is required" })}
                      />
-                     {errors.phone && <p className="text-red-600">{errors.phone.message}</p>}
+                     {errors.phoneNumber && <p className="text-red-600">{errors.phoneNumber.message}</p>}
                   </div>
                </div>
 
@@ -102,7 +129,7 @@ const Form = () => {
                         placeholder="Enter Gender"
                         {...register("sex", { required: "Gender is required" })}
                      />
-                     {errors.gender && <p className="text-red-600">{errors.gender.message}</p>}
+                     {errors.sex && <p className="text-red-600">{errors.sex.message}</p>}
                   </div>
                   <div>
                      <Label htmlFor="role">Role</Label>
@@ -165,13 +192,14 @@ const Form = () => {
                   variant="create"
                   className="uppercase mt-4"
                   type="submit"
+                  disabled={loading}
                >
-                  Create
+                  {loading ? (title === "Create" ? "Creating..." : "Updating...") : `${title}`}
                </Button>
             </form>
          </DialogContent>
       </Dialog>
-   )
-}
+   );
+};
 
-export default Form
+export default Form;
