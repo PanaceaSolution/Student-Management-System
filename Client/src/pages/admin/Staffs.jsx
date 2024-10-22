@@ -115,7 +115,7 @@ const Staffs = () => {
                   onChange={handleExportChange}
                   className="w-32 bg-white"
                 />
-                <Form />
+                <Form title="Create" user="Staff" />
               </div>
             </div>
             <div className="border-b-2 p-2">

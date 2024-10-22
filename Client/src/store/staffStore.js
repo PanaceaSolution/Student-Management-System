@@ -1,15 +1,16 @@
 
-import { createStaffService, deleteStaffService, getAllStaffService, updateStaffService } from "@/services/staffServices";
+import { createStaffService, deleteStaffService, getAllStaffService, getStaffByIdService, updateStaffService } from "@/services/staffServices";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
 const useStaffStore = create(
    devtools(
       persist(
-         (set, get) => ({
+         (set) => ({
             loading: false,
             error: null,
             staff: [],
+            staffById: [],
 
             // Get all staff
             getAllStaff: async () => {
@@ -17,6 +18,19 @@ const useStaffStore = create(
                try {
                   const data = await getAllStaffService();
                   set({ staff: data.payload || data, loading: false });
+                  return data;
+               } catch (error) {
+                  set({ error: error.message, loading: false });
+                  return error;
+               }
+            },
+
+            // Get staff by ID
+            getStaffById: async (staffId) => {
+               set({ loading: true, error: null });
+               try {
+                  const data = await getStaffByIdService(staffId);
+                  set({ staffById: data, loading: false });
                   return data;
                } catch (error) {
                   set({ error: error.message, loading: false });
