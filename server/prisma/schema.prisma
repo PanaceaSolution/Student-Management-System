@@ -8,14 +8,15 @@ datasource db {
 }
 
 model Login {
-  id       Int      @id @default(autoincrement())
-  username String   @unique
-  password String
-  role     String
-  admin    Admin?
-  student  Student? @relation
-  parent   Parent?
-  staff    Staff?
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  password     String
+  role         String
+  refreshToken String?
+  admin        Admin?
+  student      Student? @relation
+  parent       Parent?
+  staff        Staff?
 }
 
 model Admin {
@@ -89,7 +90,7 @@ model Teacher {
   staff       Staff        @relation(fields: [staffId], references: [id])
   subjects    String[]
   classId     Int?
-  class       Class?        @relation(fields: [classId], references: [id])
+  class       Class?       @relation(fields: [classId], references: [id])
   profile     String?
   assignments Assignment[]
   documents   Document[]
