@@ -26,7 +26,7 @@ export class StaffService {
     } = CreateStaffDto;
 
     const DOB = moment(dob, 'YYYY-MM-DD');
-    if(!DOB.isValid()){
+    if (!DOB.isValid()) {
       throw new BadRequestException('Invalid date format for Date of Birth');
     }
     const DobIsoString = DOB.toISOString();
@@ -51,7 +51,7 @@ export class StaffService {
         address,
         sex,
         bloodType,
-        dob:DobIsoString,
+        dob: DobIsoString,
         role,
         salary,
         phoneNumber,
