@@ -1,10 +1,12 @@
 import { Pencil, Trash2 } from "lucide-react";
 import React, { useState, useEffect, useCallback } from "react";
-
+import Modal from "./Modal";
+import useDeleteStudent from "@/hooks/useDeleteStudnet";
 const Tables = React.memo(({ items, setStudentInfo }) => {
   const [selectedId, setSelectedId] = useState(null);
   const [headerValue, setHeaderValue] = useState([]);
-
+  const [OpenModal, setOpenModal] = useState(-1);
+  const { deleteStudent } = useDeleteStudent();
   const handleCheckboxChange = useCallback(
     (id) => {
       const newSelectedId = selectedId === id ? null : id;
@@ -25,7 +27,9 @@ const Tables = React.memo(({ items, setStudentInfo }) => {
       setSelectedId(items[0]?.id);
     }
   }, [items]);
-
+  const handleDelete = async (id) => {
+    await deleteStudent(id);
+  };
   return (
     <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
       <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -84,11 +88,22 @@ const Tables = React.memo(({ items, setStudentInfo }) => {
                 {data[key]} {/* Accessing the value dynamically */}
               </td>
             ))}
+            <Modal
+              title={`Delete ${data?.firstName}`}
+              desc="Are You Sure ?"
+              actionName="Delete"
+              dangerAction={(e) => handleDelete(data?.id)}
+              showModal={OpenModal===data?.id}
+              cancelOption={()=>setOpenModal(-1)}
+            />
             <td className="flex items-center px-6 py-4">
               <button className="font-medium text-blue-600 dark:text-blue-500 hover:underline">
                 <Pencil size={20} color="#1ec859" />
               </button>
-              <button className="font-medium text-red-600 dark:text-red-500 hover:underline ms-3">
+              <button
+                onClick={() => setOpenModal(data?.id)}
+                className="font-medium text-red-600 dark:text-red-500 hover:underline ms-3"
+              >
                 <Trash2 size={20} />
               </button>
             </td>
