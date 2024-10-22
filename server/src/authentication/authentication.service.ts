@@ -101,14 +101,19 @@ export class AuthenticationService {
           message: 'User not found',
           success: false,
         });
-      } else if (user.role !== 'ADMIN') {
+      } else if (user.role !== 'ADMIN' && user.role !== 'STUDENT') {
         return res.status(401).json({
           message: 'You are not authorized',
           success: false,
         });
       }
+      let isPasswordValid = false;
+      if (user.role === 'ADMIN') {
+        isPasswordValid = await bcrypt.compare(password, user.password);
+      } else if (user.role === 'STUDENT') {
+        isPasswordValid = password === user.password;
+      }
 
-      const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
         return res.status(401).json({
           message: 'Invalid password',
