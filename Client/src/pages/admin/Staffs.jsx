@@ -101,7 +101,7 @@ const Staffs = () => {
 
   return (
     <section>
-      <div className='max-w-full mx-auto'>
+      <div className='max-w-full mx-auto max-h-screen'>
         <div className={`grid grid-cols-1 gap-4 ${selectedId ? 'lg:grid-cols-7 2xl:grid-cols-4 lg:gap-1' : 'pr-4'} transition-all duration-300`}>
           <div className='rounded-sm bg-card lg:col-span-5 2xl:col-span-3 p-3'>
             <div className="flex justify-evenly sm:justify-end border-b-2 p-3">
