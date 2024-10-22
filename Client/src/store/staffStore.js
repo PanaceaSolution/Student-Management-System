@@ -1,4 +1,3 @@
-
 import { createStaffService, deleteStaffService, getAllStaffService, getStaffByIdService, updateStaffService } from "@/services/staffServices";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
@@ -6,7 +5,7 @@ import { devtools, persist } from "zustand/middleware";
 const useStaffStore = create(
    devtools(
       persist(
-         (set) => ({
+         (set, get) => ({
             loading: false,
             error: null,
             staff: [],
@@ -40,11 +39,12 @@ const useStaffStore = create(
 
             // Add a new staff member
             addStaff: async (staffData) => {
-               set({ loading: true, error: null, });
+               set({ loading: true, error: null });
                try {
                   const data = await createStaffService(staffData);
+                  const state = get();
                   set({
-                     staff: [...state.staff, data.payload],
+                     staff: [...state.staff, data],
                      loading: false,
                   });
                   return data;
@@ -59,8 +59,9 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await updateStaffService(staffId, updatedStaffData);
+                  const state = get();
                   set({
-                     staff: state.staff.map((staff) => (staff.id === staffId ? data.payload : staff)),
+                     staff: state.staff.map((staff) => (staff.id === staffId ? data : staff)),
                      loading: false,
                   });
                   return data;
@@ -75,6 +76,7 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await deleteStaffService(staffId);
+                  const state = get();
                   set({
                      staff: state.staff.filter((staff) => staff.id !== staffId),
                      loading: false,
@@ -85,7 +87,8 @@ const useStaffStore = create(
                   return error;
                }
             },
-         })
+         }),
+         { name: "staff-storage" }
       )
    )
 );

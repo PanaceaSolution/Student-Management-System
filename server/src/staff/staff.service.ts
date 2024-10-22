@@ -8,7 +8,7 @@ import { UpdateStaffDto } from './dto/update-staff.dto';
 
 @Injectable()
 export class StaffService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
   async createStaff(
     CreateStaffDto: CreateStaffDto,
   ): Promise<{ status: number; message: string; staff?: any; login?: any }> {
@@ -146,6 +146,7 @@ export class StaffService {
       return {
         message: 'Staff member updated successfully',
         staff: updatedStaff,
+        status: true
       };
     } catch (error) {
       throw new BadRequestException('Failed to update staff member');

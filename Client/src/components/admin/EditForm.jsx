@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -12,25 +12,31 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from '../ui/button';
 import useStaffStore from '@/store/staffStore';
+import toast from 'react-hot-toast';
 
-const Form = ({ title, staffData, user }) => {
-   const { addStaff, updateStaff, loading, error } = useStaffStore();
+const EditForm = ({ user, staffData }) => {
+   const { updateStaff, loading, error } = useStaffStore();
+
+   const { register, handleSubmit, formState: { errors }, reset } = useForm();
    const defaultDob = staffData?.dob ? new Date(staffData.dob).toISOString().split('T')[0] : '';
-
-   const { register, handleSubmit, formState: { errors } } = useForm({
-      defaultValues: {
-         fname: staffData?.fname || '',
-         lname: staffData?.lname || '',
-         email: staffData?.email || '',
-         phoneNumber: staffData?.phoneNumber || '',
-         sex: staffData?.sex || '',
-         role: staffData?.role || '',
-         dob: defaultDob,
-         bloodType: staffData?.bloodType || '',
-         salary: staffData?.salary || '',
-         address: staffData?.address || '',
+   // Update form values when staffData changes
+   useEffect(() => {
+      if (staffData) {
+         reset({
+            fname: staffData.fname,
+            lname: staffData.lname,
+            username: staffData.username,
+            email: staffData.email,
+            phoneNumber: staffData.phoneNumber,
+            address: staffData.address,
+            role: staffData.role,
+            salary: staffData.salary,
+            dob: defaultDob,
+            sex: staffData.sex,
+            bloodType: staffData.bloodType,
+         });
       }
-   })
+   }, [staffData, reset]);
 
    const onSubmit = async (data) => {
       const formattedData = {
@@ -38,36 +44,27 @@ const Form = ({ title, staffData, user }) => {
          salary: Number(data.salary),
       };
 
-      if (title === "Create") {
-         await addStaff(formattedData);
-      } else {
-         await updateStaff(staffData.id, formattedData);
+      const res = await updateStaff(staffData.id, formattedData);
+      if (res.status) {
+         toast.success(`${user} updated successfully`);
       }
+
    };
 
    return (
       <Dialog>
          <DialogTrigger asChild>
-            {title === "Create" ? (
-               <Button
-                  variant="create"
-                  className="uppercase"
-               >
-                  {title} {user}
-               </Button>
-            ) : (
-               <Button
-                  variant="edit"
-                  className="uppercase"
-               >
-                  Edit
-               </Button>
-            )}
+            <Button
+               variant="create"
+               className="uppercase"
+            >
+               Edit
+            </Button>
          </DialogTrigger>
          <DialogContent>
             <DialogHeader>
                <DialogTitle>
-                  {title} Staff
+                  Update {user}
                </DialogTitle>
                <DialogDescription>
                   Enter Staff Information Here...
@@ -131,16 +128,20 @@ const Form = ({ title, staffData, user }) => {
                      />
                      {errors.sex && <p className="text-red-600">{errors.sex.message}</p>}
                   </div>
-                  <div>
-                     <Label htmlFor="role">Role</Label>
-                     <Input
-                        id="role"
-                        type="text"
-                        placeholder="Enter Role"
-                        {...register("role", { required: "Role is required" })}
-                     />
-                     {errors.role && <p className="text-red-600">{errors.role.message}</p>}
-                  </div>
+
+                  {/* Conditionally render Role input based on user type */}
+                  {user !== 'Teacher' && (
+                     <div>
+                        <Label htmlFor="role">Role</Label>
+                        <Input
+                           id="role"
+                           type="text"
+                           placeholder="Enter Role"
+                           {...register("role", { required: "Role is required" })}
+                        />
+                        {errors.role && <p className="text-red-600">{errors.role.message}</p>}
+                     </div>
+                  )}
                </div>
 
                <div>
@@ -194,7 +195,7 @@ const Form = ({ title, staffData, user }) => {
                   type="submit"
                   disabled={loading}
                >
-                  {loading ? (title === "Create" ? "Creating..." : "Updating...") : `${title}`}
+                  {loading ? "Updating..." : "Update"}
                </Button>
             </form>
          </DialogContent>
@@ -202,4 +203,4 @@ const Form = ({ title, staffData, user }) => {
    );
 };
 
-export default Form;
+export default EditForm;
