@@ -26,7 +26,7 @@ const StudentForm = () => {
       <DialogTrigger asChild>
         <Button variant="outline">Add New Student</Button>
       </DialogTrigger>
-      <DialogContent className="p-2 sm:max-w-[500px]">
+      <DialogContent className="p-2 sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Add Students</DialogTitle>
           <DialogDescription>

@@ -6,6 +6,7 @@ import Layout from "./components/Layout";
 import PrivateRoute from "./routes/PrivateRoute";
 import Loader from "./components/Loader/Loader";
 
+
 // Lazy load components
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Library = lazy(() => import("./pages/Library"));
