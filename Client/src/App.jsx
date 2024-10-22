@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LoginPage from './pages/LoginPage';
+import LoginPage from "./pages/LoginPage";
 import PageNotFound from "./pages/PageNotFound";
 import Layout from "./components/Layout";
 import PrivateRoute from "./routes/PrivateRoute";
@@ -28,85 +28,92 @@ const Fees = lazy(() => import("./pages/users/Fees"));
 // Define route configuration
 const routeConfig = [
   {
-    path: '/dashboard',
+    path: "/dashboard",
     element: <Dashboard />,
-    allowedRoles: ['Admin', 'Teacher', 'Student', 'Parent', 'Accountant', 'Librarian']
+    allowedRoles: [
+      "Admin",
+      "Teacher",
+      "Student",
+      "Parent",
+      "Accountant",
+      "Librarian",
+    ],
   },
   {
-    path: '/portfolio',
+    path: "/portfolio",
     element: <Portfolio />,
-    allowedRoles: ['Teacher', 'Student', 'Parent', 'Accountant', 'Librarian']
+    allowedRoles: ["Teacher", "Student", "Parent", "Accountant", "Librarian"],
   },
   {
-    path: '/finance',
+    path: "/finance",
     element: <Finance />,
-    allowedRoles: ['Admin', 'Accountant']
+    allowedRoles: ["Admin", "Accountant"],
   },
   {
-    path: '/library',
+    path: "/library",
     element: <Library />,
-    allowedRoles: ['Admin', 'Librarian', 'Student', 'Teacher']
+    allowedRoles: ["Admin", "Librarian", "Student", "Teacher"],
   },
   {
-    path: '/message',
+    path: "/message",
     element: <Message />,
-    allowedRoles: ['Teacher', 'Parent']
+    allowedRoles: ["Teacher", "Parent"],
   },
   {
-    path: '/teachers',
+    path: "/teachers",
     element: <Teachers />,
-    allowedRoles: ['Admin']
+    allowedRoles: ["Admin"],
   },
   {
-    path: '/students',
+    path: "/students",
     element: <Students />,
-    allowedRoles: ['Admin']
+    allowedRoles: ["Admin"],
   },
   {
-    path: '/staffs',
+    path: "/staffs",
     element: <Staffs />,
-    allowedRoles: ['Admin']
+    allowedRoles: ["Admin"],
   },
   {
-    path: '/subjects',
+    path: "/subjects",
     element: <Subjects />,
-    allowedRoles: ['Admin']
+    allowedRoles: ["Admin"],
   },
   {
-    path: '/classes',
+    path: "/classes",
     element: <Classes />,
-    allowedRoles: ['Admin']
+    allowedRoles: ["Admin"],
   },
   {
-    path: '/logistics',
+    path: "/logistics",
     element: <Logistics />,
-    allowedRoles: ['Admin']
+    allowedRoles: ["Admin"],
   },
   {
-    path: '/routine',
+    path: "/routine",
     element: <Routine />,
-    allowedRoles: ['Student', 'Teacher']
+    allowedRoles: ["Student", "Teacher"],
   },
   {
-    path: '/resources',
+    path: "/resources",
     element: <Resources />,
-    allowedRoles: ['Student', 'Teacher']
+    allowedRoles: ["Student", "Teacher"],
   },
   {
-    path: '/tasks',
+    path: "/tasks",
     element: <Tasks />,
-    allowedRoles: ['Student', 'Teacher']
+    allowedRoles: ["Student", "Teacher"],
   },
   {
-    path: '/report',
+    path: "/report",
     element: <Report />,
-    allowedRoles: ['Parent']
+    allowedRoles: ["Parent"],
   },
   {
-    path: '/fees',
+    path: "/fees",
     element: <Fees />,
-    allowedRoles: ['Parent']
-  }
+    allowedRoles: ["Parent"],
+  },
 ];
 
 const App = () => {
@@ -137,4 +144,3 @@ const App = () => {
 };
 
 export default App;
-

@@ -14,7 +14,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import useAddStudent from "@/hooks/useAddStudent";
 import Loadding from "./Loader/Loadding";
-import Alert from "./Alert";
+import Alert from "./common/Alert";
+import AddStudentForm from "../pages/admin/StudentForm/AddStudentForm";
 
 const formFields = [
   {
@@ -91,9 +92,9 @@ const StudentForm = () => {
   }, [success]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen} className="p-4">
+    <Dialog open={isOpen} onOpenChange={setIsOpen} className="p-2">
       <DialogTrigger asChild>
-        <Button className="bg-[#233255CC] text-[#FFFFFF] text-base px-3 py-1 sm:py-2">
+        <Button className="bg-[#233255CC] text-[#FFFFFF] text-base px-3 py-1 sm:py-1">
           ADD STUDENT
         </Button>
       </DialogTrigger>
@@ -137,7 +138,7 @@ const StudentForm = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* DOB */}
+            
             <div className="grid items-center gap-2">
               <Label htmlFor="dob">DOB</Label>
               <Controller
@@ -167,7 +168,7 @@ const StudentForm = () => {
               )}
             </div>
 
-            {/* Email */}
+          
             <div className="grid items-center gap-2">
               <Label htmlFor="email">Email</Label>
               <Controller
@@ -222,6 +223,7 @@ const StudentForm = () => {
         )}
       </DialogContent>
     </Dialog>
+   
   );
 };
 

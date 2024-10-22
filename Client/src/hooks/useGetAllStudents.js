@@ -1,31 +1,36 @@
-
-import React, { useState, useEffect, useCallback } from 'react';
+import Alert from "@/components/common/Alert";
+import useStudent from "@/Zustand/useStudent";
+import React, { useState, useEffect, useCallback } from "react";
+import toast from "react-hot-toast";
 
 const useGetAllStudents = (query) => {
-  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
- console.log(`http://localhost:8080/student${query}`)
+  const { students, setStudents } = useStudent();
+  console.log(`http://localhost:8080/student${query}`);
   const fetchStudents = useCallback(async () => {
-    setLoading(true); 
-    setError(null);    
+    setLoading(true);
+    setError(null);
     try {
       const response = await fetch(`http://localhost:8080/student${query}`);
       if (!response.ok) {
-        throw new Error('Failed to fetch students');
+        throw new Error("Failed to fetch students");
       }
       const data = await response.json();
-      setStudents(data); 
+      setStudents(data.sort((a,b)=>a-b));
     } catch (err) {
-      setError(err.message); 
+      setError(err.message);
+      toast.error(err?.message,{
+        position:"top-right"
+      })
     } finally {
       setLoading(false);
     }
-  }, [query]); 
+  }, [query]);
 
   useEffect(() => {
-    fetchStudents(); 
-  }, [fetchStudents]); 
+    fetchStudents();
+  }, [fetchStudents]);
 
   return { students, loading, error };
 };

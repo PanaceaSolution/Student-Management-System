@@ -20,7 +20,7 @@ const Navbar = () => {
    }, []);
 
    return (
-      <header className="flex items-center justify-between gap-4 lg:gap-20 px-4 py-4 lg:px-6 max-w-screen-2xl">
+      <header className=" flex items-center justify-between gap-4 lg:gap-20 px-4 py-4 lg:px-6 max-w-screen-2xl">
          {/* Drawer */}
          <Sheet>
             <SheetTrigger asChild>
