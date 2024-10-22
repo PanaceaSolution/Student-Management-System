@@ -13,6 +13,8 @@ const tableHead = ["", "Username", "First Name", "Last Name", "Gender", "Role"];
 const ITEMS_PER_PAGE = 10;
 
 const StaffTable = ({ user, handleUserId, title }) => {
+   console.log(user);
+
    const userContent =
       title === "Staff"
          ? user.filter((staffMember) => staffMember.role !== "Teacher")
@@ -72,10 +74,10 @@ const StaffTable = ({ user, handleUserId, title }) => {
                            checked={selectedUserId === staffMember.id}
                         />
                      </TableCell>
-                     <TableCell>{staffMember.userName}</TableCell>
-                     <TableCell className="font-medium">{staffMember.firstName}</TableCell>
-                     <TableCell className="font-medium">{staffMember.lastName}</TableCell>
-                     <TableCell>{staffMember.gender}</TableCell>
+                     <TableCell>{staffMember.username}</TableCell>
+                     <TableCell className="font-medium">{staffMember.fname}</TableCell>
+                     <TableCell className="font-medium">{staffMember.lname}</TableCell>
+                     <TableCell>{staffMember.sex}</TableCell>
                      <TableCell>{staffMember.role}</TableCell>
                   </TableRow>
                ))}

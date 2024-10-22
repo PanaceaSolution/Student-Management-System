@@ -1,5 +1,5 @@
-// const URL = import.meta.env.VITE_API_URL;
-const URL = "http://localhost:8080";
+const URL = import.meta.env.VITE_API_URL;
+// const URL = "http://localhost:8080";
 
 export const getAllStaffService = async () => {
    try {
@@ -18,6 +18,30 @@ export const getAllStaffService = async () => {
       return data;
    } catch (error) {
       console.error("Error while getting all staff:", error);
+      throw error;
+   }
+}
+
+export const createStaffService = async (staffData) => {
+   console.log(staffData);
+
+   try {
+      const response = await fetch(`${URL}/staff/create`, {
+         method: "POST",
+         headers: {
+            "Content-Type": "application/json",
+         },
+         body: JSON.stringify(staffData),
+      });
+
+      if (!response.ok) {
+         throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data;
+   } catch (error) {
+      console.error("Error while creating staff:", error);
       throw error;
    }
 }

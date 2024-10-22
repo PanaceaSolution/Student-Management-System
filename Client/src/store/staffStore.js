@@ -1,5 +1,5 @@
 
-import { getAllStaffService } from "@/services/staffServices";
+import { createStaffService, getAllStaffService } from "@/services/staffServices";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
@@ -28,10 +28,9 @@ const useStaffStore = create(
             addStaff: async (staffData) => {
                set({ loading: true, error: null, });
                try {
-                  const data = await addStaffService(staffData);
-                  const currentStaff = get().staff;
+                  const data = await createStaffService(staffData);
                   set({
-                     staff: [...currentStaff, data.payload],
+                     staff: [...state.staff, data.payload],
                      loading: false,
                   });
                   return data;
@@ -46,11 +45,8 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await updateStaffService(staffId, updatedStaffData);
-                  const currentStaff = get().staff;
                   set({
-                     staff: currentStaff.map((staff) =>
-                        staff.id === staffId ? { ...staff, ...updatedStaffData } : staff
-                     ),
+                     staff: state.staff.map((staff) => (staff.id === staffId ? data.payload : staff)),
                      loading: false,
                   });
                   return data;

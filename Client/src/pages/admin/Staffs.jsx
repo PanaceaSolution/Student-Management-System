@@ -6,7 +6,7 @@ import useStaffStore from '@/store/staffStore';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import StaffTable from '@/components/admin/staffTable';
 import DetailsCard from '@/components/admin/DetailsCard';
-import { Link } from 'react-router-dom';
+import Form from '@/components/admin/Form';
 
 const Exports = [
   { value: "", label: "EXPORT" },
@@ -101,7 +101,7 @@ const Staffs = () => {
 
   return (
     <section>
-      <div className='max-w-full mx-auto max-h-screen'>
+      <div className='max-w-full mx-auto'>
         <div className={`grid grid-cols-1 gap-4 ${selectedId ? 'lg:grid-cols-7 2xl:grid-cols-4 lg:gap-1' : 'pr-4'} transition-all duration-300`}>
           <div className='rounded-sm bg-card lg:col-span-5 2xl:col-span-3 p-3'>
             <div className="flex justify-evenly sm:justify-end border-b-2 p-3">
@@ -115,14 +115,7 @@ const Staffs = () => {
                   onChange={handleExportChange}
                   className="w-32 bg-white"
                 />
-                <Link to="/staffs/create">
-                  <Button
-                    variant="create"
-                    className="uppercase"
-                  >
-                    Create Staff
-                  </Button>
-                </Link>
+                <Form />
               </div>
             </div>
             <div className="border-b-2 p-2">
