@@ -6,12 +6,13 @@ import {
    CardTitle,
 } from "@/components/ui/card";
 import { Button } from "../ui/button";
-import Form from "./Form";
+import Form from "./AddForm";
 import { useEffect } from "react";
 import useStaffStore from "@/store/staffStore";
+import EditForm from "./EditForm";
 
 const staffContent = [
-   { label: "Username", key: "userName" },
+   { label: "Username", key: "username" },
    { label: "First Name", key: "fname" },
    { label: "Last Name", key: "lname" },
    { label: "Gender", key: "sex" },
@@ -33,7 +34,7 @@ const teacherContent = [
    { label: "Address", key: "address" },
    { label: "Email", key: "email" },
    { label: "Phone", key: "phoneNumber" },
-   
+
 ];
 
 const studentContent = [
@@ -102,7 +103,7 @@ const DetailsCard = ({ title, selectedId }) => {
                   ))}
                </CardContent>
                <CardFooter className="flex justify-end gap-2">
-                  <Form title="Update" staffData={userDetails} />
+                  <EditForm user={title} staffData={userDetails} />
                   <Button variant="destructive">Delete</Button>
                </CardFooter>
             </>

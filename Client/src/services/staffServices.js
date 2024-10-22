@@ -36,7 +36,6 @@ export const getStaffByIdService = async (id) => {
 }
 
 export const createStaffService = async (staffData) => {
-   console.log(staffData);
 
    try {
       const response = await fetch(`${URL}/staff/create`, {

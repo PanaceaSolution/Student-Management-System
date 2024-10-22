@@ -6,7 +6,7 @@ import useStaffStore from '@/store/staffStore';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import StaffTable from '@/components/admin/staffTable';
 import DetailsCard from '@/components/admin/DetailsCard';
-import Form from '@/components/admin/Form';
+import Form from '@/components/admin/AddForm';
 
 const Exports = [
   { value: "", label: "EXPORT" },
