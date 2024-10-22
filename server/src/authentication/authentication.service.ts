@@ -1,5 +1,5 @@
-import { Injectable, Res } from '@nestjs/common';
-import { Response } from 'express';
+import { Injectable, Req, Res } from '@nestjs/common';
+import { Response, Request } from 'express';
 
 import * as bcrypt from 'bcrypt';
 
@@ -30,7 +30,7 @@ export class AuthenticationService {
           role: 'ADMIN',
         },
       });
-      if (UserCount >= 1) {
+      if (UserCount >= 10) {
         return {
           message: "You can't create user more than 1",
           status: 403,
@@ -59,7 +59,7 @@ export class AuthenticationService {
 
       const HashedPassword = await bcrypt.hash(password, 10);
 
-      const NewUser = await this.prisma.login.create({
+      const newUser = await this.prisma.login.create({
         data: {
           username,
           password: HashedPassword,
@@ -67,10 +67,10 @@ export class AuthenticationService {
         },
       });
       return {
-        message: `User ${NewUser.username} has been created`,
+        message: `User ${newUser.username} has been created`,
         user: {
-          username: NewUser.username,
-          role: NewUser.role,
+          username: newUser.username,
+          role: newUser.role,
         },
         success: true,
       };
@@ -118,11 +118,25 @@ export class AuthenticationService {
 
       // Only set the cookie if all validations pass
       const payload = { username: user.username, role: user.role };
-      const token = this.jwtService.sign(payload);
+      const AccessToken = this.jwtService.sign(payload, {
+        expiresIn: '15m', // short lifespan for access token
+      });
 
-      res.cookie('token', token, {
+      const RefreshToken = this.jwtService.sign(payload, {
+        expiresIn: '7d',
+      });
+
+      res.cookie('accessToken', AccessToken, {
         httpOnly: true,
         sameSite: 'strict',
+      });
+      res.cookie('refreshToken', RefreshToken, {
+        httpOnly: true,
+        sameSite: 'strict',
+      });
+      await this.prisma.login.update({
+        where: { username: user.username },
+        data: { refreshToken: RefreshToken },
       });
 
       return res.status(200).json({ payload, success: true });
@@ -130,6 +144,44 @@ export class AuthenticationService {
       console.error('Error during login:', error);
       return res.status(500).json({
         message: 'Internal server error',
+        success: false,
+      });
+    }
+  }
+
+  async refreshToken(@Req() req: Request, @Res() res: Response) {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(403).json({
+        message: 'No refresh token is provided',
+        success: false,
+      });
+    }
+
+    try {
+      const decoded = this.jwtService.verify(refreshToken);
+
+      const payload = {
+        username: decoded.username,
+        role: decoded.role,
+      };
+
+      const newAccessToken = this.jwtService.sign(payload, {
+        expiresIn: '15m',
+      });
+      res.cookie('accessToken', newAccessToken, {
+        httpOnly: true,
+        sameSite: 'strict',
+      });
+
+      return res.status(200).json({
+        message: 'New access token generated',
+        success: true,
+      });
+    } catch (error) {
+      return res.status(401).json({
+        message: 'Invalid refresh token',
         success: false,
       });
     }
