@@ -1,10 +1,10 @@
-import { IsString, IsOptional, IsEmail, IsEnum, IsInt, IsDate, IsNotEmpty, ValidateNested, } from 'class-validator';
+import { IsString, IsOptional, IsEmail, IsEnum, IsInt, IsDate, IsNotEmpty, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export enum Gender {
   MALE = 'MALE',
   FEMALE = 'FEMALE',
-  OTHER = 'OTHER',
+  OTHER = 'OTHER'
 }
 
 export class AddressDto {
@@ -35,7 +35,6 @@ export class CreateStudentDto {
   @IsString()
   lname: string;
 
-  @IsNotEmpty()
   @IsEmail()
   email: string;
 
@@ -47,6 +46,8 @@ export class CreateStudentDto {
   @Type(() => AddressDto)
   temporaryAddress: AddressDto;
 
+  @IsInt()
+  addressId: number
 
   @IsEnum(Gender)
   sex: Gender;
@@ -60,10 +61,13 @@ export class CreateStudentDto {
   @IsInt()
   classId: number;
 
+  @IsInt()
+  loginId: number;
+
   @IsDate()
   @Type(() => Date)
   dob: Date;
-
+  
   @IsOptional()
   @IsString()
   father_name?: string;
@@ -156,11 +160,12 @@ export class FilterStudentDto {
   createdBefore?: Date; // End of createdAt range
 }
 
+
 export class LinkParentDto {
   @IsNotEmpty()
   @IsInt()
   parentId: number;
-
+  
   @IsNotEmpty()
   @IsInt()
   studentId: number;
