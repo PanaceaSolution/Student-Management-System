@@ -1,5 +1,5 @@
 
-import { createStaffService, getAllStaffService } from "@/services/staffServices";
+import { createStaffService, deleteStaffService, getAllStaffService, updateStaffService } from "@/services/staffServices";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
@@ -61,9 +61,8 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await deleteStaffService(staffId);
-                  const currentStaff = get().staff;
                   set({
-                     staff: currentStaff.filter((staff) => staff.id !== staffId),
+                     staff: state.staff.filter((staff) => staff.id !== staffId),
                      loading: false,
                   });
                   return data;

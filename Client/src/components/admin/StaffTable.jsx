@@ -13,7 +13,6 @@ const tableHead = ["", "Username", "First Name", "Last Name", "Gender", "Role"];
 const ITEMS_PER_PAGE = 10;
 
 const StaffTable = ({ user, handleUserId, title }) => {
-   console.log(user);
 
    const userContent =
       title === "Staff"
