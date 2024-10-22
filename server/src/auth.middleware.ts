@@ -15,6 +15,12 @@ export class AuthMiddleware implements NestMiddleware {
         });
       }
       const decoded = this.jwtService.verify(token);
+      if(decoded.role !== 'ADMIN'){
+        return res.status(403).json({
+          message:"Only Admin can Access",
+          success:false,
+        });
+      }
       req.user = decoded;
       next();
     } catch (error) {
