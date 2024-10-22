@@ -6,7 +6,7 @@ const PrivateRoute = ({ allowedRoles }) => {
    const { loggedInUser, success } = useAuthStore();
 
    // Check if the user is logged in
-   if (!loggedInUser && !success) {
+   if (!loggedInUser || !success) {
       return <Navigate to="/" replace />;
    }
 

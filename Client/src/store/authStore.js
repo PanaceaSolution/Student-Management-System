@@ -6,20 +6,18 @@ const useAuthStore = create(
    devtools(
       persist((set) => ({
          loading: false,
-         error: null,
          success: false,
          loggedInUser: null,
 
          // Login action
          login: async (userData) => {
-            set({ loading: true, error: null });
+            set({ loading: true });
             try {
                const data = await loginService(userData);
-               set({ success: true, loggedInUser: data.payload });
+               set({ success: data.success, loggedInUser: data.payload });
                return data;
             } catch (error) {
-               set({ error: error.message });
-               return error;
+               set({ success: false, loggedInUser: null });
             } finally {
                set({ loading: false });
             }
