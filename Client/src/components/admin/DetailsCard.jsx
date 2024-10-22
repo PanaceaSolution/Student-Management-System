@@ -21,15 +21,16 @@ const staffContent = [
 ];
 
 const teacherContent = [
-   { label: "Username", key: "userName" },
-   { label: "First Name", key: "firstName" },
-   { label: "Last Name", key: "lastName" },
-   { label: "Gender", key: "gender" },
+   { label: "Username", key: "username" },
+   { label: "First Name", key: "fname" },
+   { label: "Last Name", key: "lname" },
+   { label: "Gender", key: "sex" },
    { label: "Blood Type", key: "bloodType" },
    { label: "Date of Birth", key: "dob" },
    { label: "Address", key: "address" },
    { label: "Email", key: "email" },
-   { label: "Phone", key: "phone" },
+   { label: "Phone", key: "phoneNumber" },
+   
 ];
 
 const studentContent = [
