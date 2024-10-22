@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
-import Paginations from "@/components/Paginations"; // Pagination component
-import Table from "@/components/Tables"; // Table to display student data
-import ResultShowing from "@/components/ResultShowing";
+import Paginations from "@/components/common/Paginations"; // Pagination component
+import Table from "@/components/common/Tables"; // Table to display student data
+import ResultShowing from "@/components/common/ResultShowing";
 import ProfileCard from "@/components/ProfileCard";
 import Select from "@/components/Select";
 import SearchBox from "@/components/SearchBox";
@@ -11,10 +11,10 @@ import "jspdf-autotable";
 import useGetAllStudents from "@/hooks/useGetAllStudents"; // Custom hook to fetch students
 import useDeleteStudent from "@/hooks/useDeleteStudnet"; // Custom hook to delete a student
 import { DateSelect } from "@/components/DateSelect";
-import Alert from "@/components/Alert"; // Alert notification component
 import StudentForm from "@/components/StudentForm";
+import useStudent from "@/Zustand/useStudent";
+import AddStudentFormModal from "./StudentForm/AddStudentFormModal";
 import { Button } from "@/components/ui/button";
-
 // Custom hook for debouncing input value
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -65,12 +65,13 @@ const Students = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [date, setDate] = useState(null);
-  const [showAlert, setShowAlert] = useState(false); // State to control alert visibility
+  const [showAddStudentModal, setShowAddStudentModal] = useState(false);
 
+  const { } = useStudent();
   const itemsPerPage = 10; // Items to show per page
   const debouncedSearchTerm = useDebounce(searchTerm, 300); // Debounced search term for efficiency
 
-  // Reset current page on filter change
+  // Reset current page on filter changes
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedGender, selectedDepartment, debouncedSearchTerm]);
@@ -85,24 +86,8 @@ const Students = () => {
   }, [selectedGender, selectedDepartment, debouncedSearchTerm]);
 
   // Fetch all students using custom hook
-  const { students: allStudents, loading, error } = useGetAllStudents(query);
-  const {
-    deleteStudent,
-    loading: deleteLoading,
-    error: deleteError,
-    success,
-  } = useDeleteStudent();
-
-
-
-  // State to hold current students data
-  const [students, setStudents] = useState(allStudents || []);
-
-  // Update students when allStudents changes
-  useEffect(() => {
-    setStudents(allStudents);
-  }, [allStudents]);
-
+  const { students, loading, error } = useGetAllStudents(query);
+  const { deleteStudent, loading: deleteLoading, success } = useDeleteStudent();
   // Show alert on successful deletion
   useEffect(() => {
     if (success) {
@@ -131,27 +116,10 @@ const Students = () => {
     alert("Edit action triggered");
   }, []);
 
-
   // Handle student deletion
   const handleDelete = useCallback(
     async (id) => {
-      if (id) {
-        try {
-          await deleteStudent(id); // Wait for the deletion to complete
-          setStudents((prevStudents) =>
-            prevStudents.filter((student) => student.id !== id)
-          );
-        } catch (err) {
-          console.error("Failed to delete student:", err);
-          <Alert
-            title="Error Occured!!!!!"
-            message={err?.message} // Show success alert after deletion
-            variant="warning"
-            position="top-right"
-            onDismiss={() => setShowAlert(false)}
-          />;
-        }
-      }
+      await deleteStudent(id);
     },
     [deleteStudent]
   );
@@ -247,7 +215,13 @@ const Students = () => {
                   onChange={handleExpertChange}
                   className="w-32 bg-white"
                 />
-                <StudentForm />
+                {/* <StudentForm /> */}
+                <Button
+                  type="create"
+                  onClick={() => setShowAddStudentModal(true)}
+                >
+                  Add Student
+                </Button>
               </div>
             </div>
             <div className="border-b-2 p-2">
@@ -333,15 +307,10 @@ const Students = () => {
           </div>
         </div>
       </div>
-      {showAlert && (
-        <Alert
-          title="Deleted Successfully!!!!!"
-          message={`Student Deleted Successfully!!`} // Show success alert after deletion
-          variant="success"
-          position="top-right"
-          onDismiss={() => setShowAlert(false)} // Dismiss alert
-        />
-      )}
+      <AddStudentFormModal
+        cancelOption={() => setShowAddStudentModal(false)}
+        showModal={showAddStudentModal}
+      />
     </section>
   );
 };

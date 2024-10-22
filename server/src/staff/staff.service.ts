@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../DB/prisma.service'; // Adjust path as necessary
 import { CreateStaffDto } from './dto/staff.dto'; // Import your CreateStaffDto
 import { Prisma } from '@prisma/client';
-import moment, { months } from 'moment';
+import moment from 'moment';
 import { BadRequestException } from '@nestjs/common';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 
@@ -26,11 +26,9 @@ export class StaffService {
     } = CreateStaffDto;
 
     const DOB = moment(dob, 'YYYY-MM-DD');
-    if(!DOB.isValid()){
+    if (!DOB.isValid()) {
       throw new BadRequestException('Invalid date format for Date of Birth');
-  
     }
-
     const DobIsoString = DOB.toISOString();
 
     const ExistedStaff = await this.prisma.staff.findFirst({
@@ -53,7 +51,7 @@ export class StaffService {
         address,
         sex,
         bloodType,
-        dob:DobIsoString,
+        dob: DobIsoString,
         role,
         salary,
         phoneNumber,

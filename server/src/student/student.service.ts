@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../DB/prisma.service';
 import {
   CreateStudentDto,
   UpdateStudentDto,
   LinkParentDto,
 } from './dto/student.dto';
+import moment from 'moment';
 
 @Injectable()
 export class StudentService {
@@ -29,6 +30,11 @@ export class StudentService {
       'Incoming request to create student:',
       JSON.stringify(createStudentDto, null, 2),
     );
+    const DOB = moment(dob, 'YYYY-MM-DD');
+    if (!DOB.isValid()) {
+      throw new BadRequestException('Invalid date format for Date of Birth');
+    }
+    const DobIsoString = DOB.toISOString();
     if (!father_name) {
       return { status: 400, message: 'father name not found' };
     }
@@ -50,10 +56,10 @@ export class StudentService {
         address,
         sex,
         bloodtype,
-        dob,
+        dob: DobIsoString,
         father_name,
         mother_name,
-        admission_date,
+        admission_date:DobIsoString,
       },
     });
 

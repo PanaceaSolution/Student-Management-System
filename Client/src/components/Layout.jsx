@@ -16,7 +16,7 @@ const Layout = () => {
             <Navbar />
 
             {/* Main Content */}
-            <main className="flex-1 p-2 lg:p-4">
+            <main className="flex-1 py-2 lg:py-4">
                <Outlet />
             </main>
          </div>

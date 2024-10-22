@@ -10,10 +10,11 @@ import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 import useAuthStore from '@/store/authStore';
 import logo from '../assets/logo.png';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const { login, loading, error } = useAuthStore();
+  const { login, loading } = useAuthStore();
   const navigate = useNavigate();
 
   const {
@@ -32,8 +33,10 @@ const Login = () => {
       password: sanitizeInput(data.password)
     };
 
-    await login(sanitizedData);
-    if (!error) {
+    const res = await login(sanitizedData);
+    if (res.success === false) {
+      toast.error(res.message);
+    } else {
       navigate('/dashboard');
     }
   };
@@ -60,7 +63,6 @@ const Login = () => {
 
           {/* Form */}
           <form className="grid gap-8 justify-center items-center" onSubmit={handleSubmit(onSubmit)}>
-            {error && <p className="text-red-500">{error}</p>}
             <div className="grid gap-2">
               <Label htmlFor="username">Username</Label>
               <div className="flex items-center shadow-md rounded-md px-2 bg-background">

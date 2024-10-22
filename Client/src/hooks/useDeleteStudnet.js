@@ -1,30 +1,34 @@
 // src/hooks/useDeleteStudent.js
-import { useState } from 'react';
+import useStudent from "@/Zustand/useStudent";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 const useDeleteStudent = () => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const URL = import.meta.env.VITE_API_URL
-
+  const { students, setStudents } = useStudent();
   const deleteStudent = async (id) => {
     setLoading(true);
-    setError(null);
     setSuccess(false);
 
     try {
-      const response = await fetch(`${URL}/student/delete/${id}`, {
-        method: 'DELETE',
+      const response = await fetch(`http://localhost:8080/student/${id}`, {
+        method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete student');
+        throw new Error("Failed to delete student");
       }
 
-      setSuccess(true);
+      setSuccess(false);
+      const newStudentData = students.filter((student) => student.id !== id);
+      setStudents(newStudentData);
+      toast.success("Deleted SuccessFully!!", {
+        position: "top-right"
+      })
       return await response.json();
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message)
     } finally {
       setLoading(false);
     }
@@ -33,7 +37,6 @@ const useDeleteStudent = () => {
   return {
     deleteStudent,
     loading,
-    error,
     success,
   };
 };

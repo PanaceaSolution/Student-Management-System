@@ -29,82 +29,82 @@ const Fees = lazy(() => import("./pages/users/Fees"));
 // Define route configuration
 const routeConfig = [
   {
-    path: '/dashboard',
+    path: "/dashboard",
     element: <Dashboard />,
     allowedRoles: ['ADMIN', 'TEACHER', 'STUDENT', 'PARENT', 'ACCOUNTANT', 'LIBRARIAN']
   },
   {
-    path: '/portfolio',
+    path: "/portfolio",
     element: <Portfolio />,
     allowedRoles: ['TEACHER', 'STUDENT', 'PARENT', 'ACCOUNTANT', 'LIBRARIAN']
   },
   {
-    path: '/finance',
+    path: "/finance",
     element: <Finance />,
     allowedRoles: ['ADMIN', 'ACCOUNTANT']
   },
   {
-    path: '/library',
+    path: "/library",
     element: <Library />,
     allowedRoles: ['ADMIN', 'LIBRARIAN', 'STUDENT', 'TEACHER']
   },
   {
-    path: '/message',
+    path: "/message",
     element: <Message />,
     allowedRoles: ['TEACHER', 'PARENT']
   },
   {
-    path: '/teachers',
+    path: "/teachers",
     element: <Teachers />,
     allowedRoles: ['ADMIN']
   },
   {
-    path: '/students',
+    path: "/students",
     element: <Students />,
     allowedRoles: ['ADMIN']
   },
   {
-    path: '/staffs',
+    path: "/staffs",
     element: <Staffs />,
     allowedRoles: ['ADMIN']
   },
   {
-    path: '/subjects',
+    path: "/subjects",
     element: <Subjects />,
     allowedRoles: ['ADMIN']
   },
   {
-    path: '/classes',
+    path: "/classes",
     element: <Classes />,
     allowedRoles: ['ADMIN']
   },
   {
-    path: '/logistics',
+    path: "/logistics",
     element: <Logistics />,
     allowedRoles: ['ADMIN']
   },
   {
-    path: '/routine',
+    path: "/routine",
     element: <Routine />,
     allowedRoles: ['STUDENT', 'TEACHER']
   },
   {
-    path: '/resources',
+    path: "/resources",
     element: <Resources />,
     allowedRoles: ['STUDENT', 'TEACHER']
   },
   {
-    path: '/tasks',
+    path: "/tasks",
     element: <Tasks />,
     allowedRoles: ['STUDENT', 'TEACHER']
   },
   {
-    path: '/report',
+    path: "/report",
     element: <Report />,
     allowedRoles: ['PARENT']
   },
   {
-    path: '/fees',
+    path: "/fees",
     element: <Fees />,
     allowedRoles: ['PARENT']
   }
@@ -138,4 +138,3 @@ const App = () => {
 };
 
 export default App;
-
