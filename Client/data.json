@@ -1,0 +1,517 @@
+{
+  "student": [
+    {
+      "id": "STU45",
+      "firstName": "Elijah",
+      "lastName": "Moore",
+      "gender": "Male",
+      "Class": "BCA",
+      "email": "elijah.moore@example.com",
+      "class": "CS113",
+      "createdAt": "2024-01-22T12:00:00Z"
+    },
+    {
+      "id": "STU47",
+      "firstName": "Aiden",
+      "lastName": "Martin",
+      "gender": "Male",
+      "Class": "CSIT",
+      "email": "aiden.martin@example.com",
+      "class": "CS115",
+      "createdAt": "2024-01-24T12:00:00Z"
+    },
+    {
+      "id": "STU48",
+      "firstName": "Harper",
+      "lastName": "Lee",
+      "gender": "Female",
+      "Class": "BCA",
+      "email": "harper.lee@example.com",
+      "class": "CS116",
+      "createdAt": "2024-01-25T12:00:00Z"
+    },
+    {
+      "id": "STU50",
+      "firstName": "Sukraj",
+      "lastName": "Robinson",
+      "gender": "Female",
+      "Class": "CSIT",
+      "email": "ella.robinson@example.com",
+      "class": "CS118",
+      "createdAt": "2024-01-27T12:00:00Z"
+    },
+    {
+      "id": "STU51",
+      "firstName": "Daniel",
+      "lastName": "Clark",
+      "gender": "Male",
+      "Class": "BCA",
+      "email": "daniel.clark@example.com",
+      "class": "CS119",
+      "createdAt": "2024-01-28T12:00:00Z"
+    },
+    {
+      "id": "STU52",
+      "firstName": "Chloe",
+      "lastName": "Rodriguez",
+      "gender": "Female",
+      "Class": "BIM",
+      "email": "chloe.rodriguez@example.com",
+      "class": "CS120",
+      "createdAt": "2024-01-29T12:00:00Z"
+    },
+    {
+      "id": "STU54",
+      "firstName": "Samantha",
+      "lastName": "Lee",
+      "gender": "Female",
+      "Class": "BCA",
+      "email": "samantha.lee@example.com",
+      "class": "CS122",
+      "createdAt": "2024-01-31T12:00:00Z"
+    },
+    {
+      "id": "STU55",
+      "firstName": "Henry",
+      "lastName": "Walker",
+      "gender": "Male",
+      "Class": "BIM",
+      "email": "henry.walker@example.com",
+      "class": "CS123",
+      "createdAt": "2024-02-01T12:00:00Z"
+    },
+    {
+      "id": "STU56",
+      "firstName": "Avery",
+      "lastName": "Hall",
+      "gender": "Female",
+      "Class": "CSIT",
+      "email": "avery.hall@example.com",
+      "class": "CS124",
+      "createdAt": "2024-02-02T12:00:00Z"
+    },
+    {
+      "id": "STU57",
+      "firstName": "Leo",
+      "lastName": "Allen",
+      "gender": "Male",
+      "Class": "BCA",
+      "email": "leo.allen@example.com",
+      "class": "CS125",
+      "createdAt": "2024-02-03T12:00:00Z"
+    },
+    {
+      "id": "STU58",
+      "firstName": "Scarlett",
+      "lastName": "Young",
+      "gender": "Female",
+      "Class": "BIM",
+      "email": "scarlett.young@example.com",
+      "class": "CS126",
+      "createdAt": "2024-02-04T12:00:00Z"
+    },
+    {
+      "id": "STU60",
+      "firstName": "Layla",
+      "lastName": "Martinez",
+      "gender": "Female",
+      "Class": "BCA",
+      "email": "layla.martinez@example.com",
+      "class": "CS128",
+      "createdAt": "2024-02-06T12:00:00Z"
+    },
+    {
+      "id": "STU61",
+      "firstName": "Owen",
+      "lastName": "Taylor",
+      "gender": "Male",
+      "Class": "BIM",
+      "email": "owen.taylor@example.com",
+      "class": "CS129",
+      "createdAt": "2024-02-07T12:00:00Z"
+    },
+    {
+      "id": "STU62",
+      "firstName": "Nora",
+      "lastName": "Anderson",
+      "gender": "Female",
+      "Class": "CSIT",
+      "email": "nora.anderson@example.com",
+      "class": "CS130",
+      "createdAt": "2024-02-08T12:00:00Z"
+    },
+    {
+      "id": "STU63",
+      "firstName": "Caleb",
+      "lastName": "Thomas",
+      "gender": "Male",
+      "Class": "BCA",
+      "email": "caleb.thomas@example.com",
+      "class": "CS131",
+      "createdAt": "2024-02-09T12:00:00Z"
+    },
+    {
+      "id": "STU64",
+      "firstName": "Zoe",
+      "lastName": "Jackson",
+      "gender": "Female",
+      "Class": "BIM",
+      "email": "zoe.jackson@example.com",
+      "class": "CS132",
+      "createdAt": "2024-02-10T12:00:00Z"
+    },
+    {
+      "id": "STU65",
+      "firstName": "Gabriel",
+      "lastName": "White",
+      "gender": "Male",
+      "Class": "CSIT",
+      "email": "gabriel.white@example.com",
+      "class": "CS133",
+      "createdAt": "2024-02-11T12:00:00Z"
+    },
+    {
+      "id": "STU67",
+      "firstName": "Anthony",
+      "lastName": "Martin",
+      "gender": "Male",
+      "Class": "BIM",
+      "email": "anthony.martin@example.com",
+      "class": "CS135",
+      "createdAt": "2024-02-13T12:00:00Z"
+    },
+    {
+      "id": "STU68",
+      "firstName": "Lily",
+      "lastName": "Perez",
+      "gender": "Female",
+      "Class": "CSIT",
+      "email": "lily.perez@example.com",
+      "class": "CS136",
+      "createdAt": "2024-02-14T12:00:00Z"
+    },
+    {
+      "id": "STU69",
+      "firstName": "Sebastian",
+      "lastName": "Thompson",
+      "gender": "Male",
+      "Class": "BCA",
+      "email": "sebastian.thompson@example.com",
+      "class": "CS137",
+      "createdAt": "2024-02-15T12:00:00Z"
+    },
+    {
+      "id": "STU70",
+      "firstName": "Sofia",
+      "lastName": "Moore",
+      "gender": "Female",
+      "Class": "BIM",
+      "email": "sofia.moore@example.com",
+      "class": "CS138",
+      "createdAt": "2024-02-16T12:00:00Z"
+    },
+    {
+      "id": "STU71",
+      "firstName": "David",
+      "lastName": "Allen",
+      "gender": "Male",
+      "Class": "CSIT",
+      "email": "david.allen@example.com",
+      "class": "CS139",
+      "createdAt": "2024-02-17T12:00:00Z"
+    },
+    {
+      "id": "STU72",
+      "firstName": "Mila",
+      "lastName": "Young",
+      "gender": "Female",
+      "Class": "BCA",
+      "email": "mila.young@example.com",
+      "class": "CS140",
+      "createdAt": "2024-02-18T12:00:00Z"
+    },
+    {
+      "id": "STU73",
+      "firstName": "Luke",
+      "lastName": "Hernandez",
+      "gender": "Male",
+      "Class": "BIM",
+      "email": "luke.hernandez@example.com",
+      "class": "CS141",
+      "createdAt": "2024-02-19T12:00:00Z"
+    },
+    {
+      "id": "STU74",
+      "firstName": "Madison",
+      "lastName": "Lopez",
+      "gender": "Female",
+      "Class": "CSIT",
+      "email": "madison.lopez@example.com",
+      "class": "CS142",
+      "createdAt": "2024-02-20T12:00:00Z"
+    },
+    {
+      "id": "STU75",
+      "firstName": "Isaiah",
+      "lastName": "Scott",
+      "gender": "Male",
+      "Class": "BCA",
+      "email": "isaiah.scott@example.com",
+      "class": "CS143",
+      "createdAt": "2024-02-21T12:00:00Z"
+    },
+    {
+      "id": "STU76",
+      "firstName": "Emily",
+      "lastName": "Martinez",
+      "gender": "Female",
+      "Class": "BIM",
+      "email": "emily.martinez@example.com",
+      "class": "CS144",
+      "createdAt": "2024-02-22T12:00:00Z"
+    },
+    {
+      "id": "STU77",
+      "firstName": "Oliver",
+      "lastName": "Robinson",
+      "gender": "Male",
+      "Class": "CSIT",
+      "email": "oliver.robinson@example.com",
+      "class": "CS145",
+      "createdAt": "2024-02-23T12:00:00Z"
+    },
+    {
+      "id": "STU78",
+      "firstName": "Aubrey",
+      "lastName": "Clark",
+      "gender": "Female",
+      "Class": "BCA",
+      "email": "aubrey.clark@example.com",
+      "class": "CS146",
+      "createdAt": "2024-02-24T12:00:00Z"
+    },
+    {
+      "id": "STU79",
+      "firstName": "Wyatt",
+      "lastName": "Lee",
+      "gender": "Male",
+      "Class": "BIM",
+      "email": "wyatt.lee@example.com",
+      "class": "CS147",
+      "createdAt": "2024-02-25T12:00:00Z"
+    },
+    {
+      "id": "STU80",
+      "firstName": "Ella",
+      "lastName": "Gonzalez",
+      "gender": "Female",
+      "Class": "CSIT",
+      "email": "ella.gonzalez@example.com",
+      "class": "CS148",
+      "createdAt": "2024-02-26T12:00:00Z"
+    },
+    {
+      "id": "STU81",
+      "firstName": "Grayson",
+      "lastName": "Perez",
+      "gender": "Male",
+      "Class": "BCA",
+      "email": "grayson.perez@example.com",
+      "class": "CS149",
+      "createdAt": "2024-02-27T12:00:00Z"
+    },
+    {
+      "id": "STU82",
+      "firstName": "Natalie",
+      "lastName": "Brown",
+      "gender": "Female",
+      "Class": "BIM",
+      "email": "natalie.brown@example.com",
+      "class": "CS150",
+      "createdAt": "2024-02-28T12:00:00Z"
+    },
+    {
+      "id": "STU83",
+      "firstName": "Dylan",
+      "lastName": "Garcia",
+      "gender": "Male",
+      "Class": "CSIT",
+      "email": "dylan.garcia@example.com",
+      "class": "CS151",
+      "createdAt": "2024-02-29T12:00:00Z"
+    },
+    {
+      "id": "STU84",
+      "firstName": "Lila",
+      "lastName": "Roberts",
+      "gender": "Female",
+      "Class": "BCA",
+      "email": "lila.roberts@example.com",
+      "class": "CS152",
+      "createdAt": "2024-03-01T12:00:00Z"
+    },
+    {
+      "id": "STU85",
+      "firstName": "Jonathan",
+      "lastName": "Wright",
+      "gender": "Male",
+      "Class": "BIM",
+      "email": "jonathan.wright@example.com",
+      "class": "CS153",
+      "createdAt": "2024-03-02T12:00:00Z"
+    },
+    {
+      "id": "STU86",
+      "firstName": "Victoria",
+      "lastName": "Evans",
+      "gender": "Female",
+      "Class": "CSIT",
+      "email": "victoria.evans@example.com",
+      "class": "CS154",
+      "createdAt": "2024-03-03T12:00:00Z"
+    },
+    {
+      "id": "STU87",
+      "firstName": "Lucas",
+      "lastName": "Jackson",
+      "gender": "Male",
+      "Class": "BCA",
+      "email": "lucas.jackson@example.com",
+      "class": "CS155",
+      "createdAt": "2024-03-04T12:00:00Z"
+    },
+    {
+      "id": "STU88",
+      "firstName": "Sophie",
+      "lastName": "Garcia",
+      "gender": "Female",
+      "Class": "BIM",
+      "email": "sophie.garcia@example.com",
+      "class": "CS156",
+      "createdAt": "2024-03-05T12:00:00Z"
+    },
+    {
+      "id": "STU89",
+      "firstName": "Matthew",
+      "lastName": "Martinez",
+      "gender": "Male",
+      "Class": "CSIT",
+      "email": "matthew.martinez@example.com",
+      "class": "CS157",
+      "createdAt": "2024-03-06T12:00:00Z"
+    },
+    {
+      "id": "STU90",
+      "firstName": "Ariana",
+      "lastName": "Taylor",
+      "gender": "Female",
+      "Class": "BCA",
+      "email": "ariana.taylor@example.com",
+      "class": "CS158",
+      "createdAt": "2024-03-07T12:00:00Z"
+    },
+    {
+      "id": "STU91",
+      "firstName": "Jack",
+      "lastName": "Brown",
+      "gender": "Male",
+      "Class": "BIM",
+      "email": "jack.brown@example.com",
+      "class": "CS159",
+      "createdAt": "2024-03-08T12:00:00Z"
+    },
+    {
+      "id": "STU93",
+      "firstName": "Aiden",
+      "lastName": "Johnson",
+      "gender": "Male",
+      "Class": "BCA",
+      "email": "aiden.johnson@example.com",
+      "class": "CS161",
+      "createdAt": "2024-03-10T12:00:00Z"
+    },
+    {
+      "id": "STU94",
+      "firstName": "Ella",
+      "lastName": "Moore",
+      "gender": "Female",
+      "Class": "BIM",
+      "email": "ella.moore@example.com",
+      "class": "CS162",
+      "createdAt": "2024-03-11T12:00:00Z"
+    },
+    {
+      "id": "STU95",
+      "firstName": "Lucas",
+      "lastName": "Garcia",
+      "gender": "Male",
+      "Class": "CSIT",
+      "email": "lucas.garcia@example.com",
+      "class": "CS163",
+      "createdAt": "2024-03-12T12:00:00Z"
+    },
+    {
+      "id": "STU96",
+      "firstName": "Chloe",
+      "lastName": "Martinez",
+      "gender": "Female",
+      "Class": "BCA",
+      "email": "chloe.martinez@example.com",
+      "class": "CS164",
+      "createdAt": "2024-03-13T12:00:00Z"
+    },
+    {
+      "id": "STU97",
+      "firstName": "Gabriel",
+      "lastName": "Hernandez",
+      "gender": "Male",
+      "Class": "BIM",
+      "email": "gabriel.hernandez@example.com",
+      "class": "CS165",
+      "createdAt": "2024-03-14T12:00:00Z"
+    },
+    {
+      "id": "STU98",
+      "firstName": "Samantha",
+      "lastName": "Clark",
+      "gender": "Female",
+      "Class": "CSIT",
+      "email": "samantha.clark@example.com",
+      "class": "CS166",
+      "createdAt": "2024-03-15T12:00:00Z"
+    },
+    {
+      "id": "STU99",
+      "firstName": "Wyatt",
+      "lastName": "Smith",
+      "gender": "Male",
+      "Class": "BCA",
+      "email": "wyatt.smith@example.com",
+      "class": "CS167",
+      "createdAt": "2024-03-16T12:00:00Z"
+    },
+    {
+      "id": "STU100",
+      "firstName": "Avery",
+      "lastName": "Johnson",
+      "gender": "Female",
+      "Class": "BIM",
+      "email": "avery.johnson@example.com",
+      "class": "CS168",
+      "createdAt": "2024-03-17T12:00:00Z"
+    },
+    {
+      "id": "41e6",
+      "firstName": "Aayush",
+      "lastName": "Ghimire",
+      "fatherName": "Aayush Ghimire",
+      "motherName": "Aayush Ghimire",
+      "gender": "Male",
+      "bloodType": "O",
+      "address": "Chitwan",
+      "class": "1",
+      "dob": "2024-10-09",
+      "email": "aayush@gmail.com"
+    }
+  ]
+}

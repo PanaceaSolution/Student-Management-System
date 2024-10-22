@@ -1,24 +1,18 @@
-import { addDays, format } from "date-fns"
-import { Calendar as CalendarIcon } from "lucide-react"
+import { addDays, format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { cn } from "@/utils/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useState } from "react";
 
-import { cn } from "@/utils/utils"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import {
-   Popover,
-   PopoverContent,
-   PopoverTrigger,
-} from "@/components/ui/popover"
-import { useState } from "react"
+export function DateSelect({ className, onChange }) {
+   const [date, setDate] = useState(null);
 
-export function DateSelect({ className }) {
-   const today = new Date();
-   const [date, setDate] = useState({
-      from: today,
-      to: addDays(today, 7),
-   })
-   console.log(date);
-
+   const handleSelect = (selectedDate) => {
+      setDate(selectedDate);
+      onChange(selectedDate);
+   };
 
    return (
       <div className={cn("grid gap-2", className)}>
@@ -28,7 +22,7 @@ export function DateSelect({ className }) {
                   id="date"
                   variant={"outline"}
                   className={cn(
-                     "w-[300px] justify-start text-left font-normal",
+                     " justify-start text-left font-normal",
                      !date && "text-muted-foreground"
                   )}
                   aria-label="Select a date range"
@@ -44,7 +38,7 @@ export function DateSelect({ className }) {
                         format(date.from, "LLL dd, y")
                      )
                   ) : (
-                     <span>Pick a date</span>
+                     <span className="text-gray-900 text-sm">Pick a date</span>
                   )}
                </Button>
             </PopoverTrigger>
@@ -52,7 +46,7 @@ export function DateSelect({ className }) {
                <Calendar
                   initialFocus
                   mode="range"
-                  defaultMonth={date?.from}
+                  defaultMonth={new Date()}
                   selected={date}
                   onSelect={setDate}
                   numberOfMonths={1}
@@ -60,5 +54,5 @@ export function DateSelect({ className }) {
             </PopoverContent>
          </Popover>
       </div>
-   )
+   );
 }
