@@ -12,6 +12,7 @@ model Login {
   username String   @unique
   password String
   role     String
+  refreshToken String? // to store access token
   admin    Admin? // Relation to Admin
   student  Student? // Relation to Student
   parent   Parent? // Relation to Parent

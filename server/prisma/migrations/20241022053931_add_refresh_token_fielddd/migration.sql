@@ -1,9 +1,13 @@
+-- CreateEnum
+CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE', 'OTHER');
+
 -- CreateTable
 CREATE TABLE "Login" (
     "id" SERIAL NOT NULL,
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "role" TEXT NOT NULL,
+    "refreshToken" TEXT,
 
     CONSTRAINT "Login_pkey" PRIMARY KEY ("id")
 );
@@ -21,17 +25,20 @@ CREATE TABLE "Admin" (
 -- CreateTable
 CREATE TABLE "Student" (
     "id" SERIAL NOT NULL,
-    "username" TEXT NOT NULL,
+    "username" TEXT,
     "fname" TEXT NOT NULL,
     "lname" TEXT NOT NULL,
     "address" TEXT NOT NULL,
     "sex" TEXT NOT NULL,
     "bloodtype" TEXT NOT NULL,
-    "parentId" INTEGER NOT NULL,
-    "classId" INTEGER NOT NULL,
+    "father_name" TEXT,
+    "mother_name" TEXT,
+    "parentId" INTEGER,
+    "classId" INTEGER,
     "dob" TIMESTAMP(3) NOT NULL,
+    "admission_date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "email" TEXT NOT NULL,
-    "loginId" INTEGER NOT NULL,
+    "loginId" INTEGER,
 
     CONSTRAINT "Student_pkey" PRIMARY KEY ("id")
 );
@@ -44,7 +51,7 @@ CREATE TABLE "Parent" (
     "phoneNumber" TEXT NOT NULL,
     "address" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "loginId" INTEGER NOT NULL,
+    "loginId" INTEGER,
 
     CONSTRAINT "Parent_pkey" PRIMARY KEY ("id")
 );
@@ -52,7 +59,7 @@ CREATE TABLE "Parent" (
 -- CreateTable
 CREATE TABLE "Staff" (
     "id" SERIAL NOT NULL,
-    "username" TEXT NOT NULL,
+    "username" TEXT,
     "fname" TEXT NOT NULL,
     "lname" TEXT NOT NULL,
     "dob" TIMESTAMP(3) NOT NULL,
@@ -64,7 +71,7 @@ CREATE TABLE "Staff" (
     "email" TEXT NOT NULL,
     "role" TEXT NOT NULL,
     "salary" DOUBLE PRECISION NOT NULL,
-    "loginId" INTEGER NOT NULL,
+    "loginId" INTEGER,
 
     CONSTRAINT "Staff_pkey" PRIMARY KEY ("id")
 );
@@ -114,13 +121,34 @@ CREATE TABLE "Submission" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Login_username_key" ON "Login"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Admin_username_key" ON "Admin"("username");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Admin_loginId_key" ON "Admin"("loginId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Student_username_key" ON "Student"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Student_email_key" ON "Student"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Student_loginId_key" ON "Student"("loginId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Parent_email_key" ON "Parent"("email");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Parent_loginId_key" ON "Parent"("loginId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Staff_username_key" ON "Staff"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Staff_email_key" ON "Staff"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Staff_loginId_key" ON "Staff"("loginId");
@@ -132,19 +160,19 @@ CREATE UNIQUE INDEX "Teacher_staffId_key" ON "Teacher"("staffId");
 ALTER TABLE "Admin" ADD CONSTRAINT "Admin_loginId_fkey" FOREIGN KEY ("loginId") REFERENCES "Login"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Student" ADD CONSTRAINT "Student_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Parent"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Student" ADD CONSTRAINT "Student_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Parent"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Student" ADD CONSTRAINT "Student_loginId_fkey" FOREIGN KEY ("loginId") REFERENCES "Login"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Student" ADD CONSTRAINT "Student_loginId_fkey" FOREIGN KEY ("loginId") REFERENCES "Login"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Student" ADD CONSTRAINT "Student_classId_fkey" FOREIGN KEY ("classId") REFERENCES "Class"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Student" ADD CONSTRAINT "Student_classId_fkey" FOREIGN KEY ("classId") REFERENCES "Class"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Parent" ADD CONSTRAINT "Parent_loginId_fkey" FOREIGN KEY ("loginId") REFERENCES "Login"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Parent" ADD CONSTRAINT "Parent_loginId_fkey" FOREIGN KEY ("loginId") REFERENCES "Login"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Staff" ADD CONSTRAINT "Staff_loginId_fkey" FOREIGN KEY ("loginId") REFERENCES "Login"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Staff" ADD CONSTRAINT "Staff_loginId_fkey" FOREIGN KEY ("loginId") REFERENCES "Login"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Teacher" ADD CONSTRAINT "Teacher_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
