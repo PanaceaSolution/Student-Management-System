@@ -6,6 +6,10 @@ import {
   Param,
   Put,
   Delete,
+  Query,
+  UseInterceptors,
+  UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
 import { StudentService } from './student.service';
 import {
@@ -14,21 +18,29 @@ import {
   LinkParentDto,
   FilterStudentDto,
 } from './dto/student.dto';
-import { Query } from '@nestjs/common';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
 
 @Controller('student')
 export class StudentController {
   constructor(private readonly studentService: StudentService) {}
 
-  @Get('all-students')
+  @Get('/')
   async getStudents(@Query() filterDto: FilterStudentDto) {
     return this.studentService.GetAllStudents(filterDto);
   }
-  @Post('create')
+
+  @Post('/create')
+  @UseInterceptors(
+    FileInterceptor('profilePicture'), // Assuming 'profilePicture' is the field name in the form data
+    FilesInterceptor('documents'), // Assuming 'documents' is the field name for multiple file uploads
+  )
   async createStudent(
     @Body() createStudentDto: CreateStudentDto,
-  ): Promise<{ status: number; message: string; student?: any }> {
-    return this.studentService.createStudent(createStudentDto);
+    @UploadedFile() profilePicture: Express.Multer.File,
+    @UploadedFiles() documentFiles: Express.Multer.File[],
+  ): Promise<{ status: number; message: string; student?: any; login?: any }> {
+    return this.studentService.createStudent(createStudentDto, profilePicture, documentFiles);
   }
 
   @Get('/:studentId')

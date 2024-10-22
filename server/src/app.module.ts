@@ -19,7 +19,7 @@ import { ClassModule } from './class/class.module';
     AuthenticationModule,
     ParentModule,
     StudentModule,
-    ClassModule
+    ClassModule,
   ],
   controllers: [AppController],
   providers: [AppService],

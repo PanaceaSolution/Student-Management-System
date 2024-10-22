@@ -41,6 +41,7 @@ model Student {
   parentId       Int?
   classId        Int?
   dob            DateTime
+  profilePicture String?
   admission_date DateTime     @default(now())
   email          String       @unique
   parent         Parent?      @relation(fields: [parentId], references: [id])

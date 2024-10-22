@@ -1,19 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../DB/prisma.service';
-import {
-  CreateStudentDto,
-  UpdateStudentDto,
-  LinkParentDto,
-  FilterStudentDto,
-} from './dto/student.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { CreateStudentDto, UpdateStudentDto, LinkParentDto, FilterStudentDto} from './dto/student.dto';
+import Express from 'express';
 
 @Injectable()
 export class StudentService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
 
   async createStudent(
     createStudentDto: CreateStudentDto,
-  ): Promise<{ status: number; message: string; student?: any; login?: any }> {
+    profilePicture: Express.Multer.File,
+    documentFiles: Express.Multer.File[],
+  ): Promise<{ status: number; message: string; student?: any; login?: any; documentUrls?: string[]; profilePictureUrl: string; }> {
     const {
       fname,
       lname,
@@ -27,15 +29,22 @@ export class StudentService {
       mother_name,
       admission_date,
     } = createStudentDto;
-
+     
+  
+    // Check if student already exists
     const studentExist = await this.prisma.student.findUnique({
       where: { email },
     });
-
+  
     if (studentExist) {
-      return { status: 400, message: 'Student already exists in the database' };
+      // Modify this return statement to include all required properties
+      return { 
+        status: 400, 
+        message: 'Student already exists in the database',
+        profilePictureUrl: '', // or any default value you want to use
+      };
     }
-
+  
     const address = await this.prisma.address.create({
       data: {
         permanentAddress: {
@@ -46,7 +55,17 @@ export class StudentService {
         },
       },
     });
-
+  
+    // Upload profile picture to Cloudinary
+    const uploadedProfilePicture = await this.cloudinaryService.uploadImage(profilePicture);
+    const profilePictureUrl = uploadedProfilePicture.secure_url;
+  
+    // Upload documents to Cloudinary
+    const uploadedDocuments = await Promise.all(
+      documentFiles.map((file) => this.cloudinaryService.uploadImage(file)),
+    );
+  
+    // Create student entry with separate profile picture
     const student = await this.prisma.student.create({
       data: {
         fname,
@@ -59,15 +78,21 @@ export class StudentService {
         father_name,
         mother_name,
         admission_date,
+        profilePicture: profilePictureUrl,
+        documents: {
+          create: uploadedDocuments.map((doc) => ({
+            type: 'document',
+            url: doc.secure_url,
+            ownerType: 'STUDENT',
+          })),
+        },
       },
     });
-
+  
     const paddedId = student.id.toString().padStart(4, '0');
-    let studentUsername = `ST-${fname.charAt(0)}${lname.charAt(
-      0,
-    )}${paddedId}`.toUpperCase();
+    const studentUsername = `ST-${fname.charAt(0)}${lname.charAt(0)}${paddedId}`.toUpperCase();
     const studentPassword = this.generateRandomPassword();
-
+  
     const login = await this.prisma.login.create({
       data: {
         username: studentUsername,
@@ -75,17 +100,21 @@ export class StudentService {
         role: 'STUDENT',
       },
     });
-
+  
     const newStudent = await this.prisma.student.update({
       where: { id: student.id },
       data: { username: studentUsername, loginId: login.id },
     });
-
+  
+    const documentUrls = uploadedDocuments.map(doc => doc.secure_url);
+  
     return {
       status: 200,
       message: 'Student created successfully',
       student: newStudent,
       login,
+      documentUrls,
+      profilePictureUrl,
     };
   }
 
