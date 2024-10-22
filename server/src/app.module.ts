@@ -8,6 +8,7 @@ import { AuthenticationModule } from './authentication/authentication.module';
 import { ParentModule } from './parent/parent.module';
 import { StudentModule } from './student/student.module';
 import { ClassModule } from './class/class.module';
+import { FeeModule } from './fee/fee.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -19,7 +20,8 @@ import { ClassModule } from './class/class.module';
     AuthenticationModule,
     ParentModule,
     StudentModule,
-    ClassModule
+    ClassModule,
+    FeeModule
   ],
   controllers: [AppController],
   providers: [AppService],

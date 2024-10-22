@@ -182,3 +182,17 @@ model TemporaryAddress {
   postalcode  String
   Address     Address[]
 }
+
+model Fee {
+  id           String   @id @default(uuid())       // Keep UUID as a string
+  amount       String                                // Numeric field as String
+  tax          String                                // Numeric field as String
+  extraCharges String                                // Numeric field as String
+  discount     String                                // Numeric field as String
+  fine         String                                // Numeric field as String
+  total        String                                // Numeric field as String
+  priceInWords String                                // Already a String
+  dueDate      DateTime                              // Keep as DateTime
+  paid         Boolean   @default(false)             // Keep as Boolean
+  paymentDate  DateTime?                                 // Optional Date
+}

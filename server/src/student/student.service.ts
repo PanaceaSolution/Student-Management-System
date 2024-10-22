@@ -239,9 +239,7 @@ export class StudentService {
     if (!studentIds || studentIds.length === 0) {
       return { status: 400, message: 'No student IDs provided' };
     }
-  
-    const ids = studentIds.map(Number).filter(id => !isNaN(id));
-  
+    const ids = studentIds.map(Number).filter((id) => !isNaN(id));
     const findStudents = await this.prisma.student.findMany({
       where: { id: { in: ids } },
     });
@@ -252,10 +250,11 @@ export class StudentService {
     await this.prisma.student.deleteMany({
       where: { id: { in: ids } },
     });
-    
-    return { status: 200, message: `${findStudents.length} students deleted successfully` };
+    return {
+      status: 200,
+      message: `${findStudents.length} students deleted successfully`,
+    };
   }
-  
 
   private generateRandomPassword(): string {
     return Math.random().toString(36).slice(-8);
