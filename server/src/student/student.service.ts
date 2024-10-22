@@ -26,18 +26,16 @@ export class StudentService {
       mother_name,
       admission_date,
     } = createStudentDto;
-    console.log(
-      'Incoming request to create student:',
-      JSON.stringify(createStudentDto, null, 2),
-    );
     const DOB = moment(dob, 'YYYY-MM-DD');
     if (!DOB.isValid()) {
       throw new BadRequestException('Invalid date format for Date of Birth');
     }
     const DobIsoString = DOB.toISOString();
-    if (!father_name) {
-      return { status: 400, message: 'father name not found' };
-    }
+      const admissionDateIso = moment(admission_date, 'YYYY-MM-DD');
+      if (!DOB.isValid()) {
+        throw new BadRequestException('Invalid date format for Date of Birth');
+      }
+      const AdmissionIsoString = admissionDateIso.toISOString();
     const studentExist = await this.prisma.student.findFirst({
       where: {
         email,
@@ -59,7 +57,7 @@ export class StudentService {
         dob: DobIsoString,
         father_name,
         mother_name,
-        admission_date:DobIsoString,
+        admission_date: AdmissionIsoString,
       },
     });
 
