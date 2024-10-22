@@ -1,13 +1,12 @@
 import { DateSelect } from '@/components/DateSelect';
-import ProfileCard from '@/components/ProfileCard';
 import SearchBox from '@/components/SearchBox';
 import Select from '@/components/Select';
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button';
 import useStaffStore from '@/store/staffStore';
-import React, { useCallback, useEffect, useState } from 'react'
-import Table from "@/components/Tables";
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import StaffTable from '@/components/admin/staffTable';
 import DetailsCard from '@/components/admin/DetailsCard';
+import { Link } from 'react-router-dom';
 
 const Exports = [
   { value: "", label: "EXPORT" },
@@ -22,12 +21,19 @@ const Gender = [
   { value: "Others", label: "Others" },
 ];
 
-const Staffs = () => {
+const Role = [
+  { value: "", label: "Role" },
+  { value: "Accountant", label: "Accountant" },
+  { value: "Librarian", label: "Librarian" },
+  { value: "Janitor", label: "Janitor" },
+];
 
-  const { staff, getAllStaff } = useStaffStore()
+const Staffs = () => {
+  const { staff, getAllStaff } = useStaffStore();
 
   const [selectedExport, setSelectedExport] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
+  const [selectedRole, setSelectedRole] = useState("");
   const [date, setDate] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
@@ -37,6 +43,26 @@ const Staffs = () => {
     getAllStaff();
   }, [getAllStaff]);
 
+  // Memoized filtered staff data
+  const filteredStaff = useMemo(() => {
+    return staff.filter((item) => {
+      const matchesSearchTerm =
+        searchTerm === "" ||
+        item.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.userName.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesGender =
+        selectedGender === "" || item.gender === selectedGender;
+
+      const matchesRole = selectedRole === "" || item.role === selectedRole;
+
+      const matchesDate =
+        !date || new Date(item.dob).toDateString() === date.toDateString();
+
+      return matchesSearchTerm && matchesGender && matchesRole && matchesDate;
+    });
+  }, [staff, searchTerm, selectedGender, selectedRole, date]);
 
   // Handle format selection and trigger export
   const handleExportChange = (event) => {
@@ -49,17 +75,18 @@ const Staffs = () => {
     }
   };
 
-  // Update selected gender from dropdown
   const handleGenderChange = (event) => {
     setSelectedGender(event.target.value);
   };
 
-  // Update search term for filtering
+  const handleRoleChange = (event) => {
+    setSelectedRole(event.target.value);
+  };
+
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
 
-  // Update selected date from date picker
   const handleDateChange = (selectedDate) => {
     setDate(selectedDate);
   };
@@ -68,9 +95,9 @@ const Staffs = () => {
     setActiveTab(tab);
   }, []);
 
-  const handleStaffId = (id) => {
+  const handleUserId = (id) => {
     setSelectedId(id);
-  }
+  };
 
   return (
     <section>
@@ -88,9 +115,14 @@ const Staffs = () => {
                   onChange={handleExportChange}
                   className="w-32 bg-white"
                 />
-                <Button variant="create">
-                  ADD Staff
-                </Button>
+                <Link to="/staffs/create">
+                  <Button
+                    variant="create"
+                    className="uppercase"
+                  >
+                    Create Staff
+                  </Button>
+                </Link>
               </div>
             </div>
             <div className="border-b-2 p-2">
@@ -109,6 +141,12 @@ const Staffs = () => {
                     onChange={handleGenderChange}
                     className="w-full bg-white"
                   />
+                  <Select
+                    options={Role}
+                    selectedValue={selectedRole}
+                    onChange={handleRoleChange}
+                    className="w-full bg-white"
+                  />
                   <div className="col-span-1">
                     <DateSelect onChange={handleDateChange} />
                   </div>
@@ -120,23 +158,28 @@ const Staffs = () => {
                 <div key={tab}>
                   <a
                     href="#"
-                    className={`font-semibold cursor-pointer ${activeTab === tab ? "border-b-2 border-blue-600" : ""
+                    className={`font-semibold cursor-pointer ${activeTab === tab ? "border-b-2 border-blue-600" : "text-gray-500"
                       }`}
                     onClick={() => handleTabClick(tab)}
                   >
                     {tab.toUpperCase()}{" "}
-                    <span className="text-blue-600 bg-white rounded-lg">
-                      {staff.length}
+                    <span
+                      className={`text-primary bg-gray-200 px-1 rounded ${activeTab === tab ? "" : ""}`}
+                    >
+                      {filteredStaff.length}
                     </span>
                   </a>
                 </div>
               ))}
             </div>
             <div className="relative w-full overflow-x-auto shadow-md">
+              <StaffTable
+                title="Staff"
+                user={filteredStaff}
+                handleUserId={handleUserId}
+              />
 
-              <StaffTable staff={staff} handleStaffId={handleStaffId} />
-
-              {staff?.length === 0 && (
+              {filteredStaff?.length === 0 && (
                 <p className="text-center">Result Not Found</p>
               )}
             </div>
@@ -148,14 +191,14 @@ const Staffs = () => {
               <DetailsCard
                 title="Staff"
                 selectedId={selectedId}
-                user={staff}
+                user={filteredStaff}
               />
             </div>
           )}
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
 export default Staffs;
