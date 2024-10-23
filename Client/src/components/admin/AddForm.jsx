@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from '../ui/button';
 import useStaffStore from '@/store/staffStore';
-import toast from 'react-hot-toast';
 
 const AddForm = ({ user }) => {
    const { addStaff, loading, error } = useStaffStore();
@@ -30,10 +29,8 @@ const AddForm = ({ user }) => {
          salary: Number(data.salary),
       };
 
-      const res = await addStaff(formattedData);
-      if (res.status === 200) {
-         toast.success(`${user} added successfully`);
-      }
+      await addStaff(formattedData);
+
    };
 
    return (

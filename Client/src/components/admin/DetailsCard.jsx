@@ -50,7 +50,7 @@ const studentContent = [
 ];
 
 const DetailsCard = ({ title, selectedId }) => {
-   const { staffById, getStaffById } = useStaffStore();
+   const { staffById, getStaffById, deleteStaff } = useStaffStore();
 
    useEffect(() => {
       if (selectedId) {
@@ -75,6 +75,10 @@ const DetailsCard = ({ title, selectedId }) => {
          content = [];
          break;
    }
+
+   const handleDelete = (id) => {
+      deleteStaff(id);
+   };
 
    return (
       <Card>
@@ -104,7 +108,11 @@ const DetailsCard = ({ title, selectedId }) => {
                </CardContent>
                <CardFooter className="flex justify-end gap-2">
                   <EditForm user={title} staffData={userDetails} />
-                  <Button variant="destructive">Delete</Button>
+                  <Button
+                     variant="destructive"
+                     onClick={() => handleDelete(userDetails.id)}
+                  >
+                     Delete</Button>
                </CardFooter>
             </>
          ) : (

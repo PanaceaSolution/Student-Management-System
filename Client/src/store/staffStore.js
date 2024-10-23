@@ -1,4 +1,5 @@
 import { createStaffService, deleteStaffService, getAllStaffService, getStaffByIdService, updateStaffService } from "@/services/staffServices";
+import toast from "react-hot-toast";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
@@ -16,7 +17,14 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await getAllStaffService();
-                  set({ staff: data.payload || data, loading: false });
+
+                  if (data && data.payload) {
+                     set({ staff: data, loading: false });
+                  } else {
+                     set({ staff: [], loading: false });
+                     toast.error("Failed to fetch data");
+                  }
+
                   return data;
                } catch (error) {
                   set({ error: error.message, loading: false });
@@ -42,11 +50,19 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await createStaffService(staffData);
-                  const state = get();
-                  set({
-                     staff: [...state.staff, data],
-                     loading: false,
-                  });
+                  if (data.status === 200) {
+                     toast.success(data.message);
+                     const currentStaff = get().staff;
+                     set({
+                        staff: [...currentStaff, data],
+                        loading: false,
+                     });
+                     // Refresh the staff list
+                     await get().getAllStaff();
+                  } else {
+                     toast.error("Failed to add");
+                     set({ loading: false });
+                  }
                   return data;
                } catch (error) {
                   set({ error: error.message, loading: false });
@@ -59,11 +75,21 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await updateStaffService(staffId, updatedStaffData);
-                  const state = get();
-                  set({
-                     staff: state.staff.map((staff) => (staff.id === staffId ? data : staff)),
-                     loading: false,
-                  });
+                  if (data.status === 200) {
+                     toast.success(data.message);
+                     const currentStaff = get().staff;
+                     set({
+                        staff: currentStaff.map((staff) =>
+                           staff.id === staffId ? data : staff
+                        ),
+                        loading: false,
+                     });
+                     // Refresh the staff list
+                     await get().getAllStaff();
+                  } else {
+                     toast.error("Failed to update");
+                     set({ loading: false });
+                  }
                   return data;
                } catch (error) {
                   set({ error: error.message, loading: false });
@@ -76,11 +102,19 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await deleteStaffService(staffId);
-                  const state = get();
-                  set({
-                     staff: state.staff.filter((staff) => staff.id !== staffId),
-                     loading: false,
-                  });
+                  if (data.status === 200) {
+                     toast.success(data.message);
+                     const currentStaff = get().staff;
+                     set({
+                        staff: currentStaff.filter((staff) => staff.id !== staffId),
+                        loading: false,
+                     });
+                     // Refresh the staff list
+                     await get().getAllStaff();
+                  } else {
+                     toast.error("Failed to delete");
+                     set({ loading: false });
+                  }
                   return data;
                } catch (error) {
                   set({ error: error.message, loading: false });
