@@ -8,6 +8,8 @@ import { AuthenticationModule } from './authentication/authentication.module';
 import { ParentModule } from './parent/parent.module';
 import { StudentModule } from './student/student.module';
 import { ClassModule } from './class/class.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { CloudinaryService } from './cloudinary/cloudinary.service';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -20,6 +22,8 @@ import { ClassModule } from './class/class.module';
     ParentModule,
     StudentModule,
     ClassModule,
+    CloudinaryModule,
+    CloudinaryService
   ],
   controllers: [AppController],
   providers: [AppService],
