@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../DB/prisma.service';
+import { Gender } from '@prisma/client';
 import {
   CreateStudentDto,
   UpdateStudentDto,
@@ -18,7 +19,8 @@ export class StudentService {
       fname,
       lname,
       email,
-      address,
+      permanentAddress,
+      temporaryAddress,
       sex,
       bloodtype,
       dob,
@@ -26,16 +28,20 @@ export class StudentService {
       mother_name,
       admission_date,
     } = createStudentDto;
+
+
     const DOB = moment(dob, 'YYYY-MM-DD');
     if (!DOB.isValid()) {
       throw new BadRequestException('Invalid date format for Date of Birth');
     }
     const DobIsoString = DOB.toISOString();
-      const admissionDateIso = moment(admission_date, 'YYYY-MM-DD');
-      if (!DOB.isValid()) {
-        throw new BadRequestException('Invalid date format for Date of Birth');
-      }
-      const AdmissionIsoString = admissionDateIso.toISOString();
+
+    const admissionDateIso = new Date(admission_date);
+    if (isNaN(admissionDateIso.getTime())) {
+      throw new BadRequestException('Invalid date format for Admission Date');
+    }
+    const AdmissionIsoString = admissionDateIso.toISOString();
+
     const studentExist = await this.prisma.student.findFirst({
       where: {
         email,
@@ -46,12 +52,23 @@ export class StudentService {
       return { status: 400, message: 'Student already exists in the database' };
     }
 
+    const address = await this.prisma.address.create({
+      data: {
+        permanentAddress: {
+          create: permanentAddress,
+        },
+        temporaryAddress: {
+          create: temporaryAddress,
+        },
+      },
+    });
+
     await this.prisma.student.create({
       data: {
         fname,
         lname,
         email,
-        address,
+        addressId: address.id,
         sex,
         bloodtype,
         dob: DobIsoString,
@@ -80,6 +97,7 @@ export class StudentService {
         role: 'STUDENT',
       },
     });
+
     const newStudent = await this.prisma.student.update({
       where: { id: studentId },
       data: { username: studentUsername, loginId: login.id },
@@ -130,25 +148,42 @@ export class StudentService {
     };
   }
 
-  async findStudent(
-    studentId: number,
-  ): Promise<{ status: number; message?: string; student?: any }> {
-    const findStudent = await this.prisma.student.findUnique({
-      where: {
-        id: Number(studentId),
-      },
-    });
-    if (!findStudent) {
+  async findStudent(studentId: number): Promise<{
+    status: number;
+    message?: string;
+    student?: any;
+    loginData?: any;
+  }> {
+    try {
+      const findStudent = await this.prisma.student.findUnique({
+        where: {
+          id: studentId, // No need to convert to Number since it's already a number
+        },
+      });
+      const loginData = await this.prisma.login.findFirst({
+        where: {
+          id: findStudent.loginId,
+        },
+      });
+      if (!findStudent) {
+        return {
+          status: 400,
+          message: 'student does not exist',
+        };
+      }
       return {
-        status: 400,
-        message: 'student does not exist',
+        status: 200,
+        message: 'student found',
+        student: findStudent,
+        loginData: loginData,
+      };
+    } catch (error) {
+      console.error('Error finding student:', error);
+      return {
+        status: 500,
+        message: 'Internal server error',
       };
     }
-    return {
-      status: 200,
-      message: 'student found',
-      student: findStudent,
-    };
   }
 
   async updateStudent(
@@ -161,7 +196,8 @@ export class StudentService {
         fname,
         lname,
         email,
-        address,
+        permanentAddress,
+        temporaryAddress,
         sex,
         bloodtype,
         dob,
@@ -169,6 +205,22 @@ export class StudentService {
         mother_name,
         admission_date,
       } = updateStudentDto;
+
+      await this.prisma.address.update({
+        where: { id: (await findStudent).student.addressId },
+        data: {
+          ...(permanentAddress && {
+            permanentAddress: {
+              update: permanentAddress,
+            },
+          }),
+          ...(temporaryAddress && {
+            temporaryAddress: {
+              update: temporaryAddress,
+            },
+          }),
+        },
+      });
       const updatedStudent = await this.prisma.student.update({
         where: {
           id: Number(studentId),
@@ -177,7 +229,6 @@ export class StudentService {
           ...(fname !== undefined && { fname }),
           ...(lname !== undefined && { lname }),
           ...(email !== undefined && { email }),
-          ...(address !== undefined && { address }),
           ...(sex !== undefined && { sex }),
           ...(bloodtype !== undefined && { bloodtype }),
           ...(dob !== undefined && { dob }),
