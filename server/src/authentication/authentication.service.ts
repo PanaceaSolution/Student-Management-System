@@ -124,7 +124,7 @@ export class AuthenticationService {
       // Only set the cookie if all validations pass
       const payload = { username: user.username, role: user.role };
       const AccessToken = this.jwtService.sign(payload, {
-        expiresIn: '15m', // short lifespan for access token
+        expiresIn: '1d', // short lifespan for access token
       });
 
       const RefreshToken = this.jwtService.sign(payload, {
