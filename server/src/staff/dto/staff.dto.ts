@@ -1,5 +1,16 @@
-import { IsString, IsNotEmpty, IsOptional, IsEmail, IsNumber } from 'class-validator';
-
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEmail,
+  IsNumber,
+  IsEnum,
+} from 'class-validator';
+export enum Gender {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+  OTHER = 'OTHER',
+}
 export class CreateStaffDto {
   @IsString()
   @IsOptional()
@@ -25,9 +36,9 @@ export class CreateStaffDto {
   @IsNotEmpty()
   phoneNumber: string; // Phone number of the staff member
 
-  @IsString()
+  @IsEnum(Gender)
   @IsNotEmpty()
-  sex: string; // Gender of the staff member
+  sex: Gender; // Gender of the staff member
 
   @IsString()
   @IsNotEmpty()
