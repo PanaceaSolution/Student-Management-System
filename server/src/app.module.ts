@@ -9,7 +9,6 @@ import { ParentModule } from './parent/parent.module';
 import { StudentModule } from './student/student.module';
 import { ClassModule } from './class/class.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
-import { CloudinaryService } from './cloudinary/cloudinary.service';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,7 +22,6 @@ import { CloudinaryService } from './cloudinary/cloudinary.service';
     StudentModule,
     ClassModule,
     CloudinaryModule,
-    CloudinaryService
   ],
   controllers: [AppController],
   providers: [AppService],

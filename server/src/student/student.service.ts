@@ -15,7 +15,7 @@ export class StudentService {
     createStudentDto: CreateStudentDto,
     profilePicture: Express.Multer.File,
     documentFiles: Express.Multer.File[],
-  ): Promise<{ status: number; message: string; student?: any; login?: any; documentUrls?: string[]; profilePictureUrl: string; }> {
+  ): Promise<{ status: number; message: string; student?: any; login?: any; documentUrls?: string[]; profilePictureUrl?: string; }> {
     const {
       fname,
       lname,
@@ -60,7 +60,7 @@ export class StudentService {
     const uploadedProfilePicture = await this.cloudinaryService.uploadImage(profilePicture);
     const profilePictureUrl = uploadedProfilePicture.secure_url;
   
-    // Upload documents to Cloudinary
+    // // Upload documents to Cloudinary
     const uploadedDocuments = await Promise.all(
       documentFiles.map((file) => this.cloudinaryService.uploadImage(file)),
     );
