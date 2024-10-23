@@ -6,7 +6,7 @@ import useStaffStore from '@/store/staffStore';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import StaffTable from '@/components/admin/staffTable';
 import DetailsCard from '@/components/admin/DetailsCard';
-import Form from '@/components/admin/AddForm';
+import AddStaffForm from '@/components/admin/StaffForm/AddStaffForm';
 
 const Exports = [
   { value: "", label: "EXPORT" },
@@ -96,7 +96,7 @@ const Staffs = () => {
                   onChange={handleExportChange}
                   className="w-32 bg-white"
                 />
-                <Form title="Create" user="Staff" />
+                <AddStaffForm title="Create" user="Staff" />
               </div>
             </div>
             <div className="border-b-2 p-2">

@@ -3,10 +3,10 @@ import SearchBox from '@/components/SearchBox';
 import Select from '@/components/Select';
 import { Button } from '@/components/ui/button';
 import useStaffStore from '@/store/staffStore';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import StaffTable from '@/components/admin/staffTable';
 import DetailsCard from '@/components/admin/DetailsCard';
-import Form from '@/components/admin/AddForm';
+import AddStaffForm from '@/components/admin/StaffForm/AddStaffForm';
 
 const Exports = [
   { value: "", label: "EXPORT" },
@@ -98,7 +98,7 @@ const Teachers = () => {
                   className="w-32 bg-white"
                 />
 
-                <Form title="Create" user="Teacher" />
+                <AddStaffForm title="Create" user="Teacher" />
               </div>
             </div>
             <div className="border-b-2 p-2">
