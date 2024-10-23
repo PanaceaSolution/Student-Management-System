@@ -38,25 +38,7 @@ const Teachers = () => {
   }, [getAllStaff]);
 
   // Memoized filtered staff data
-  const filteredStaff = useMemo(() => {
-    return staff.filter((item) => {
-      const matchesSearchTerm =
-        searchTerm === "" ||
-        item.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.userName.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesGender =
-        selectedGender === "" || item.gender === selectedGender;
-
-     
-
-      const matchesDate =
-        !date || new Date(item.dob).toDateString() === date.toDateString();
-
-      return matchesSearchTerm && matchesGender  && matchesDate;
-    });
-  }, [staff, searchTerm, selectedGender, date]);
+  const filteredUser = staff.filter((staffMember) => staffMember.role === "Teacher")
 
   // Handle format selection and trigger export
   const handleExportChange = (event) => {
@@ -147,7 +129,7 @@ const Teachers = () => {
                     <span
                       className={`text-primary bg-gray-200 px-1 rounded ${activeTab === tab ? "" : ""}`}
                     >
-                      {filteredStaff.length}
+                      {filteredUser.length}
                     </span>
                   </a>
                 </div>
@@ -156,11 +138,11 @@ const Teachers = () => {
             <div className="relative w-full overflow-x-auto shadow-md">
               <StaffTable
                 title="Teacher"
-                user={filteredStaff}
+                user={filteredUser}
                 handleUserId={handleUserId}
               />
 
-              {filteredStaff?.length === 0 && (
+              {filteredUser?.length === 0 && (
                 <p className="text-center">Result Not Found</p>
               )}
             </div>
@@ -172,7 +154,7 @@ const Teachers = () => {
               <DetailsCard
                 title="Teacher"
                 selectedId={selectedId}
-                user={filteredStaff}
+                user={filteredUser}
               />
             </div>
           )}

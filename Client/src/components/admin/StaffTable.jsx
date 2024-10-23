@@ -9,17 +9,12 @@ import {
 import { useState } from "react";
 import { Pagination } from "./Pagination";
 
-const tableHead = ["", "Username", "First Name", "Last Name", "Gender", "Role"];
+const staffTableHead = ["", "Username", "First Name", "Last Name", "Gender", "Role"];
+const teacherTableHead = ["", "Username", "First Name", "Last Name", "Gender",];
 const ITEMS_PER_PAGE = 10;
 
 const StaffTable = ({ user, handleUserId, title }) => {
 
-   const userContent =
-      title === "Staff"
-         ? user.filter((staffMember) => staffMember.role !== "Teacher")
-         : title === "Teacher"
-            ? user.filter((staffMember) => staffMember.role === "Teacher")
-            : user;
 
    const [selectedUserId, setSelectedUserId] = useState(null);
    const [currentPage, setCurrentPage] = useState(1);
@@ -30,14 +25,14 @@ const StaffTable = ({ user, handleUserId, title }) => {
       handleUserId(newSelectedId);
    };
 
-   const totalPages = Math.ceil(userContent.length / ITEMS_PER_PAGE);
+   const totalPages = Math.ceil(user.length / ITEMS_PER_PAGE);
    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-   const currentPageData = userContent.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+   const currentPageData = user.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
    // Calculate the range of results being displayed
    const startResult = startIndex + 1;
-   const endResult = Math.min(startIndex + ITEMS_PER_PAGE, userContent.length);
-   const totalResults = userContent.length;
+   const endResult = Math.min(startIndex + ITEMS_PER_PAGE, user.length);
+   const totalResults = user.length;
 
    return (
       <>
@@ -56,11 +51,17 @@ const StaffTable = ({ user, handleUserId, title }) => {
          <Table>
             <TableHeader>
                <TableRow>
-                  {tableHead.map((head) => (
-                     <TableHead key={head} className="uppercase text-base">
-                        {head}
-                     </TableHead>
-                  ))}
+                  {title === "Staff"
+                     ? staffTableHead.map((head) => (
+                        <TableHead key={head} className="uppercase text-base">
+                           {head}
+                        </TableHead>
+                     ))
+                     : teacherTableHead.map((head) => (
+                        <TableHead key={head} className="uppercase text-base">
+                           {head}
+                        </TableHead>
+                     ))}
                </TableRow>
             </TableHeader>
             <TableBody>
@@ -77,7 +78,7 @@ const StaffTable = ({ user, handleUserId, title }) => {
                      <TableCell className="font-medium">{staffMember.fname}</TableCell>
                      <TableCell className="font-medium">{staffMember.lname}</TableCell>
                      <TableCell>{staffMember.sex}</TableCell>
-                     <TableCell>{staffMember.role}</TableCell>
+                     {title === "Staff" && <TableCell>{staffMember.role}</TableCell>}
                   </TableRow>
                ))}
             </TableBody>
