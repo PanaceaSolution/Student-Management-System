@@ -346,5 +346,92 @@
     "phone": "+1223344556",
     "status": "Active"
   }
+  ],
+  "subjects": [
+    {
+      "id": 1,
+      "subjectName": "English",
+      "class":"1"
+    },
+    {
+      "id": 2,
+      "subjectName": "Maths",
+      "class":"2"
+    },
+    {
+      "id": 3,
+      "subjectName": "Science",
+      "class":"2"
+    },
+    {
+      "id": 4,
+      "subjectName": "Social Studies",
+      "class":"3"
+    },
+    {
+      "id": 5,
+      "subjectName": "English",
+      "class":"3"
+    },
+    {
+      "id": 6,
+      "subjectName": "Maths",
+      "class":"4"
+    },
+    {
+      "id": 7,
+      "subjectName": "Science",
+      "class":"4"
+    },
+    {
+      "id": 8,
+      "subjectName": "Social Studies",
+      "class":"4"
+    },
+    {
+      "id": 9,
+      "subjectName": "English",
+      "class":"5"
+    },
+    {
+      "id": 10,
+      "subjectName": "Maths",
+      "class":"6"
+    },
+    {
+      "id": 11,
+      "subjectName": "Science",
+      "class":"6"
+    },
+    {
+      "id": 12,
+      "subjectName": "Social Studies",
+      "class":"6"
+    },
+    {
+      "id": 13,
+      "subjectName": "English",
+      "class":"7"
+    },
+    {
+      "id": 14,
+      "subjectName": "Maths",
+      "class":"8"
+    },
+    {
+      "id": 15,
+      "subjectName": "Science",
+      "class":"9"
+    },
+    {
+      "id": 16,
+      "subjectName": "Social Studies",
+      "class":"10"
+    },
+    {
+      "id": 17,
+      "subjectName": "English",
+      "class":"10"
+    }
   ]
 }

@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from '../../ui/button';
 import useStaffStore from '@/store/staffStore';
-import Form from './Form';
 import StepIndicator from '@/pages/admin/StudentForm/StepIndicator';
+import StaffForm from './StaffForm';
 
 const AddStaffForm = ({ user }) => {
    const { addStaff, loading, error } = useStaffStore();
@@ -97,7 +97,7 @@ const AddStaffForm = ({ user }) => {
                </DialogDescription>
             </DialogHeader>
             <hr />
-            <Form
+            <StaffForm
                handleSubmit={handleSubmit}
                onSubmit={onSubmit}
                register={register}

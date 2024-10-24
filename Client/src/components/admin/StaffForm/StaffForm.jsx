@@ -3,7 +3,7 @@ import StaffInfo from './StaffInfo';
 import AddressInfo from '@/pages/admin/StudentForm/AddressInfo';
 import DocumentUpload from '@/pages/admin/StudentForm/DocumentUpload';
 
-const Form = ({
+const StaffForm = ({
    handleSubmit,
    register,
    errors,
@@ -91,4 +91,4 @@ const Form = ({
    );
 };
 
-export default Form;
+export default StaffForm;
