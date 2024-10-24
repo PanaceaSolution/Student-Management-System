@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { StudentController } from './student.controller';
 import { PrismaModule } from '../DB/prisma.module';
-import { CloudinaryModule } from '../cloudinary/cloudinary.module';
+import { CloudinaryProvider } from '../uploads/cloudinary.provider';
 
 @Module({
-  imports: [PrismaModule, CloudinaryModule],
+  imports: [PrismaModule, CloudinaryProvider],
   controllers: [StudentController],
   providers: [StudentService],
 })

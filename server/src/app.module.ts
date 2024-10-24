@@ -8,7 +8,8 @@ import { AuthenticationModule } from './authentication/authentication.module';
 import { ParentModule } from './parent/parent.module';
 import { StudentModule } from './student/student.module';
 import { ClassModule } from './class/class.module';
-import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { CloudinaryProvider } from './uploads/cloudinary.provider';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -21,9 +22,9 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     ParentModule,
     StudentModule,
     ClassModule,
-    CloudinaryModule,
+    
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,CloudinaryProvider],
 })
 export class AppModule {}

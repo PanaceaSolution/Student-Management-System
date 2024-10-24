@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../DB/prisma.service';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { CloudinaryProvider } from '../uploads/cloudinary.provider';
 import { CreateStudentDto, UpdateStudentDto, LinkParentDto, FilterStudentDto} from './dto/student.dto';
 import Express from 'express';
 
@@ -8,7 +8,7 @@ import Express from 'express';
 export class StudentService {
   constructor(
     private prisma: PrismaService,
-    private cloudinaryService: CloudinaryService,
+    private cloudinaryProvider: CloudinaryProvider,
   ) {}
 
   async createStudent(
@@ -57,12 +57,12 @@ export class StudentService {
     });
   
     // Upload profile picture to Cloudinary
-    const uploadedProfilePicture = await this.cloudinaryService.uploadImage(profilePicture);
+    const uploadedProfilePicture = await this.cloudinaryProvider.uploadImage(profilePicture);
     const profilePictureUrl = uploadedProfilePicture.secure_url;
   
     // // Upload documents to Cloudinary
     const uploadedDocuments = await Promise.all(
-      documentFiles.map((file) => this.cloudinaryService.uploadImage(file)),
+      documentFiles.map((file) => this.cloudinaryProvider.uploadImage(file)),
     );
   
     // Create student entry with separate profile picture
