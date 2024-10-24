@@ -9,6 +9,7 @@ import { ParentModule } from './parent/parent.module';
 import { StudentModule } from './student/student.module';
 import { ClassModule } from './class/class.module';
 import { FeeModule } from './fee/fee.module';
+import { CloudinaryProvider } from './uploads/cloudinary.provider';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -24,6 +25,6 @@ import { FeeModule } from './fee/fee.module';
     FeeModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, CloudinaryProvider],
 })
 export class AppModule {}
