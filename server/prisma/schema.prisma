@@ -7,11 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ROLE {
+  STUDENT
+  PARENT
+  STAFF
+  TEACHER
+}
+
 model Login {
   id           Int      @id @default(autoincrement())
   username     String   @unique
   password     String
-  role         String
+  role         ROLE
   refreshToken String?
   admin        Admin?
   student      Student? @relation

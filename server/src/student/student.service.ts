@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../DB/prisma.service';
+import { uploadSingleFileToCloudinary } from '../utils/file-upload.helper';
 import {
   CreateStudentDto,
   UpdateStudentDto,
   LinkParentDto,
   FilterStudentDto,
 } from './dto/student.dto';
+import { Express } from 'express';
+
 
 @Injectable()
 export class StudentService {
@@ -13,6 +16,7 @@ export class StudentService {
 
   async createStudent(
     createStudentDto: CreateStudentDto,
+    file: Express.Multer.File,
   ): Promise<{ status: number; message: string; student?: any; login?: any }> {
     const {
       fname,
@@ -34,6 +38,16 @@ export class StudentService {
 
     if (studentExist) {
       return { status: 400, message: 'Student already exists in the database' };
+    }
+
+    let imageUrl = null;
+    if (file) {
+      try {
+        const uploadResult = await uploadSingleFileToCloudinary(file, 'students');
+        imageUrl = uploadResult.secure_url; // Save the uploaded image URL
+      } catch (error) {
+        return { status: 500, message: 'File upload failed' };
+      }
     }
 
     const address = await this.prisma.address.create({
@@ -58,7 +72,7 @@ export class StudentService {
         dob,
         father_name,
         mother_name,
-        admission_date,
+        admission_date
       },
     });
 
@@ -80,6 +94,8 @@ export class StudentService {
       where: { id: student.id },
       data: { username: studentUsername, loginId: login.id },
     });
+
+    console.log(imageUrl)
 
     return {
       status: 200,

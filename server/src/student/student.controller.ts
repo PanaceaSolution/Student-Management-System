@@ -6,7 +6,11 @@ import {
   Param,
   Put,
   Delete,
+  UseInterceptors,
+  UploadedFile
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
 import { StudentService } from './student.service';
 import {
   CreateStudentDto,
@@ -25,10 +29,12 @@ export class StudentController {
     return this.studentService.GetAllStudents(filterDto);
   }
   @Post('create')
+  @UseInterceptors(FileInterceptor('file'))
   async createStudent(
     @Body() createStudentDto: CreateStudentDto,
+    @UploadedFile() file: Express.Multer.File,
   ): Promise<{ status: number; message: string; student?: any }> {
-    return this.studentService.createStudent(createStudentDto);
+    return this.studentService.createStudent(createStudentDto, file);
   }
 
   @Get('/:studentId')
