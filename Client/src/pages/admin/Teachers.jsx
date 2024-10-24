@@ -3,10 +3,10 @@ import SearchBox from '@/components/SearchBox';
 import Select from '@/components/Select';
 import { Button } from '@/components/ui/button';
 import useStaffStore from '@/store/staffStore';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import StaffTable from '@/components/admin/staffTable';
 import DetailsCard from '@/components/admin/DetailsCard';
-import Form from '@/components/admin/AddForm';
+import AddStaffForm from '@/components/admin/StaffForm/AddStaffForm';
 
 const Exports = [
   { value: "", label: "EXPORT" },
@@ -76,7 +76,7 @@ const Teachers = () => {
   return (
     <section>
       <div className='max-w-full mx-auto'>
-        <div className={`grid grid-cols-1 gap-4 ${selectedId ? 'lg:grid-cols-7 2xl:grid-cols-4 lg:gap-1' : 'pr-4'} transition-all duration-300`}>
+        <div className={`grid grid-cols-1 gap-4 ${selectedId ? 'lg:grid-cols-7 2xl:grid-cols-4 lg:gap-1' : 'lg:pr-4'}  transition-all duration-300`}>
           <div className='rounded-sm bg-card lg:col-span-5 2xl:col-span-3 p-3'>
             <div className="flex justify-evenly sm:justify-end border-b-2 p-3">
               <div className="flex gap-3 md:gap-4">
@@ -90,7 +90,7 @@ const Teachers = () => {
                   className="w-32 bg-white"
                 />
 
-                <Form title="Create" user="Teacher" />
+                <AddStaffForm title="Create" user="Teacher" />
               </div>
             </div>
             <div className="border-b-2 p-2">
@@ -136,14 +136,14 @@ const Teachers = () => {
               ))}
             </div>
             <div className="relative w-full overflow-x-auto shadow-md">
-              <StaffTable
-                title="Teacher"
-                user={filteredUser}
-                handleUserId={handleUserId}
-              />
-
-              {filteredUser?.length === 0 && (
-                <p className="text-center">Result Not Found</p>
+              {filteredUser?.length === 0 ? (
+                <p className="text-center">No data available</p>
+              ) : (
+                <StaffTable
+                  title="Teacher"
+                  user={filteredUser}
+                  handleUserId={handleUserId}
+                />
               )}
             </div>
           </div>
