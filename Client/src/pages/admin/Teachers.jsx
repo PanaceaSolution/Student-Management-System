@@ -21,19 +21,13 @@ const Gender = [
   { value: "Others", label: "Others" },
 ];
 
-const Role = [
-  { value: "", label: "Role" },
-  { value: "Accountant", label: "Accountant" },
-  { value: "Librarian", label: "Librarian" },
-  { value: "Janitor", label: "Janitor" },
-];
+
 
 const Teachers = () => {
   const { staff, getAllStaff } = useStaffStore();
 
   const [selectedExport, setSelectedExport] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
-  const [selectedRole, setSelectedRole] = useState("");
   const [date, setDate] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
@@ -61,9 +55,7 @@ const Teachers = () => {
     setSelectedGender(event.target.value);
   };
 
-  const handleRoleChange = (event) => {
-    setSelectedRole(event.target.value);
-  };
+
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -117,12 +109,7 @@ const Teachers = () => {
                     onChange={handleGenderChange}
                     className="w-full bg-white"
                   />
-                  <Select
-                    options={Role}
-                    selectedValue={selectedRole}
-                    onChange={handleRoleChange}
-                    className="w-full bg-white"
-                  />
+                
                   <div className="col-span-1">
                     <DateSelect onChange={handleDateChange} />
                   </div>
