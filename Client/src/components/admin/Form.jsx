@@ -21,7 +21,7 @@ const Form = ({ formFields, register, errors, clearErrors, handleSubmit, onSubmi
                Add Class
             </Button>
          </DialogTrigger>
-         <DialogContent className="sm:max-w-[425px]">
+         <DialogContent className="sm:max-w-[425px] bg-white">
             <DialogHeader>
                <DialogTitle className="text-xl font-bold text-center uppercase">
                   Create Class

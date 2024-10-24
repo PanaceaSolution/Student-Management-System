@@ -1,4 +1,5 @@
 import { createSubjectService, deleteSubjectService, getAllSubjectsService, getSubjectByIdService, updateSubjectService } from '@/services/subjectServices'
+import toast from 'react-hot-toast'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 

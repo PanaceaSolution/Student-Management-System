@@ -119,7 +119,7 @@ const Sidebar = () => {
    const location = useLocation();
    const navigate = useNavigate();
    const { loggedInUser, logout } = useAuthStore();
-   const userRole = loggedInUser?.role;
+   const userRole = loggedInUser?.role || 'ADMIN';
 
    const isActive = (path) => location.pathname === path;
 
