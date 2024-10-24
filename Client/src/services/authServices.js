@@ -11,14 +11,10 @@ export const login = async (userData) => {
          body: JSON.stringify(userData),
       });
 
-      if (!response.ok) {
-         throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
-
       const data = await response.json();
       return data;
    } catch (error) {
-      console.error("Registration error:", error);
+      console.error("Login error:", error);
       throw error;
    }
 }

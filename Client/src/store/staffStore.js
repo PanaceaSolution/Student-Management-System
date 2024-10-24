@@ -1,5 +1,5 @@
-
-import { createStaffService, getAllStaffService } from "@/services/staffServices";
+import { createStaffService, deleteStaffService, getAllStaffService, getStaffByIdService, updateStaffService } from "@/services/staffServices";
+import toast from "react-hot-toast";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
@@ -10,13 +10,34 @@ const useStaffStore = create(
             loading: false,
             error: null,
             staff: [],
+            staffById: [],
 
             // Get all staff
             getAllStaff: async () => {
                set({ loading: true, error: null });
                try {
                   const data = await getAllStaffService();
-                  set({ staff: data.payload || data, loading: false });
+
+                  if (data && data.payload) {
+                     set({ staff: data, loading: false });
+                  } else {
+                     set({ staff: [], loading: false });
+                     toast.error("Failed to fetch data");
+                  }
+
+                  return data;
+               } catch (error) {
+                  set({ error: error.message, loading: false });
+                  return error;
+               }
+            },
+
+            // Get staff by ID
+            getStaffById: async (staffId) => {
+               set({ loading: true, error: null });
+               try {
+                  const data = await getStaffByIdService(staffId);
+                  set({ staffById: data, loading: false });
                   return data;
                } catch (error) {
                   set({ error: error.message, loading: false });
@@ -26,13 +47,22 @@ const useStaffStore = create(
 
             // Add a new staff member
             addStaff: async (staffData) => {
-               set({ loading: true, error: null, });
+               set({ loading: true, error: null });
                try {
                   const data = await createStaffService(staffData);
-                  set({
-                     staff: [...state.staff, data.payload],
-                     loading: false,
-                  });
+                  if (data.status === 200) {
+                     toast.success(data.message);
+                     const currentStaff = get().staff;
+                     set({
+                        staff: [...currentStaff, data],
+                        loading: false,
+                     });
+                     // Refresh the staff list
+                     await get().getAllStaff();
+                  } else {
+                     toast.error("Failed to add");
+                     set({ loading: false });
+                  }
                   return data;
                } catch (error) {
                   set({ error: error.message, loading: false });
@@ -45,10 +75,21 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await updateStaffService(staffId, updatedStaffData);
-                  set({
-                     staff: state.staff.map((staff) => (staff.id === staffId ? data.payload : staff)),
-                     loading: false,
-                  });
+                  if (data.status === 200) {
+                     toast.success(data.message);
+                     const currentStaff = get().staff;
+                     set({
+                        staff: currentStaff.map((staff) =>
+                           staff.id === staffId ? data : staff
+                        ),
+                        loading: false,
+                     });
+                     // Refresh the staff list
+                     await get().getAllStaff();
+                  } else {
+                     toast.error("Failed to update");
+                     set({ loading: false });
+                  }
                   return data;
                } catch (error) {
                   set({ error: error.message, loading: false });
@@ -61,18 +102,27 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await deleteStaffService(staffId);
-                  const currentStaff = get().staff;
-                  set({
-                     staff: currentStaff.filter((staff) => staff.id !== staffId),
-                     loading: false,
-                  });
+                  if (data.status === 200) {
+                     toast.success(data.message);
+                     const currentStaff = get().staff;
+                     set({
+                        staff: currentStaff.filter((staff) => staff.id !== staffId),
+                        loading: false,
+                     });
+                     // Refresh the staff list
+                     await get().getAllStaff();
+                  } else {
+                     toast.error("Failed to delete");
+                     set({ loading: false });
+                  }
                   return data;
                } catch (error) {
                   set({ error: error.message, loading: false });
                   return error;
                }
             },
-         })
+         }),
+         { name: "staff-storage" }
       )
    )
 );

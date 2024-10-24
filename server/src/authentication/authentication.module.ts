@@ -13,5 +13,6 @@ import { JwtModule } from '@nestjs/jwt';
   ],
   controllers: [AuthenticationController],
   providers: [AuthenticationService, PrismaService],
+  exports:[JwtModule],
 })
 export class AuthenticationModule {}

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Post, Res, Req } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { LoginDto } from './dto/login.dto';
 import { Response } from 'express';
@@ -17,4 +17,10 @@ export class AuthenticationController {
   async login(@Body() LoginDto: LoginDto, @Res() res: Response) {
     return this.authenticationService.login(LoginDto, res);
   }
+
+  @Post('refresh-token')
+  async refreshToken(@Req() req: Request, @Res() res: Response){
+    return this.authenticationService.refreshToken(req, res)
+  }
+
 }

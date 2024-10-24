@@ -6,7 +6,7 @@ import useStaffStore from '@/store/staffStore';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import StaffTable from '@/components/admin/staffTable';
 import DetailsCard from '@/components/admin/DetailsCard';
-import Form from '@/components/admin/Form';
+import AddStaffForm from '@/components/admin/StaffForm/AddStaffForm';
 
 const Exports = [
   { value: "", label: "EXPORT" },
@@ -43,26 +43,7 @@ const Staffs = () => {
     getAllStaff();
   }, [getAllStaff]);
 
-  // Memoized filtered staff data
-  const filteredStaff = useMemo(() => {
-    return staff.filter((item) => {
-      const matchesSearchTerm =
-        searchTerm === "" ||
-        item.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.userName.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesGender =
-        selectedGender === "" || item.gender === selectedGender;
-
-      const matchesRole = selectedRole === "" || item.role === selectedRole;
-
-      const matchesDate =
-        !date || new Date(item.dob).toDateString() === date.toDateString();
-
-      return matchesSearchTerm && matchesGender && matchesRole && matchesDate;
-    });
-  }, [staff, searchTerm, selectedGender, selectedRole, date]);
+  const filteredUser = staff.filter((staffMember) => staffMember.role !== "Teacher")
 
   // Handle format selection and trigger export
   const handleExportChange = (event) => {
@@ -102,7 +83,7 @@ const Staffs = () => {
   return (
     <section>
       <div className='max-w-full mx-auto'>
-        <div className={`grid grid-cols-1 gap-4 ${selectedId ? 'lg:grid-cols-7 2xl:grid-cols-4 lg:gap-1' : 'pr-4'} transition-all duration-300`}>
+        <div className={`grid grid-cols-1 gap-4 ${selectedId ? 'lg:grid-cols-7 2xl:grid-cols-4 lg:gap-1' : 'lg:pr-4'} transition-all duration-300`}>
           <div className='rounded-sm bg-card lg:col-span-5 2xl:col-span-3 p-3'>
             <div className="flex justify-evenly sm:justify-end border-b-2 p-3">
               <div className="flex gap-3 md:gap-4">
@@ -115,7 +96,7 @@ const Staffs = () => {
                   onChange={handleExportChange}
                   className="w-32 bg-white"
                 />
-                <Form />
+                <AddStaffForm title="Create" user="Staff" />
               </div>
             </div>
             <div className="border-b-2 p-2">
@@ -159,21 +140,21 @@ const Staffs = () => {
                     <span
                       className={`text-primary bg-gray-200 px-1 rounded ${activeTab === tab ? "" : ""}`}
                     >
-                      {filteredStaff.length}
+                      {filteredUser.length}
                     </span>
                   </a>
                 </div>
               ))}
             </div>
             <div className="relative w-full overflow-x-auto shadow-md">
-              <StaffTable
-                title="Staff"
-                user={filteredStaff}
-                handleUserId={handleUserId}
-              />
-
-              {filteredStaff?.length === 0 && (
-                <p className="text-center">Result Not Found</p>
+              {filteredUser?.length === 0 ? (
+                <p className="text-center">No data available</p>
+              ) : (
+                <StaffTable
+                  title="Teacher"
+                  user={filteredUser}
+                  handleUserId={handleUserId}
+                />
               )}
             </div>
           </div>
@@ -184,7 +165,7 @@ const Staffs = () => {
               <DetailsCard
                 title="Staff"
                 selectedId={selectedId}
-                user={filteredStaff}
+                user={filteredUser}
               />
             </div>
           )}
