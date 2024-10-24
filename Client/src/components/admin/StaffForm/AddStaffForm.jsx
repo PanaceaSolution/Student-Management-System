@@ -11,24 +11,49 @@ import {
 import { Button } from '../../ui/button';
 import useStaffStore from '@/store/staffStore';
 import Form from './Form';
+import StepIndicator from '@/pages/admin/StudentForm/StepIndicator';
 
 const AddStaffForm = ({ user }) => {
    const { addStaff, loading, error } = useStaffStore();
+   const steps = ["Personal Info", "Address Info", "Document Upload"];
+   const [currentStep, setCurrentStep] = useState(0);
    const [profilePic, setProfilePic] = useState(null);
+   const [documents, setDocuments] = useState({
+      birthCertificate: null,
+      citizenship: null,
+      marksheet: null,
+   });
 
-   const { register, handleSubmit, formState: { errors }, clearErrors } = useForm({});
+   const {
+      register,
+      handleSubmit,
+      formState: { errors },
+      trigger,
+      clearErrors,
+      reset
+   } = useForm({});
 
    const onSubmit = async (data) => {
-      if (user === "Teacher") {
-         data.role = "Teacher";
-      }
-      const formattedData = {
+      const formData = {
          ...data,
-         salary: Number(data.salary),
+         profilePic
       };
-      console.log(formattedData);
+      console.log(formData);
 
-      await addStaff(formattedData);
+
+      // if (user === "Teacher") {
+      //    data.role = "Teacher";
+      // }
+      // const formattedData = {
+      //    ...data,
+      //    salary: Number(data.salary),
+      // };
+      // console.log(formattedData);
+
+      // const res = await addStaff(formattedData);
+      // if (res.statusCode === 200) {
+      //    reset()
+      // }
    };
 
    const handleFileChange = (e) => {
@@ -41,6 +66,17 @@ const AddStaffForm = ({ user }) => {
       clearErrors("profilePic");
    };
 
+   const handleNext = async () => {
+      const isValid = await trigger();
+      if (isValid) {
+         setCurrentStep((prevStep) => Math.min(prevStep + 1, steps.length - 1));
+      }
+   };
+
+   const handlePrevious = () => {
+      setCurrentStep((prevStep) => Math.max(prevStep - 1, 0));
+   };
+
    return (
       <Dialog>
          <DialogTrigger asChild>
@@ -51,18 +87,19 @@ const AddStaffForm = ({ user }) => {
                Create {user}
             </Button>
          </DialogTrigger>
-         <DialogContent className="bg-white">
+         <DialogContent className="bg-white overflow-y-auto">
             <DialogHeader>
                <DialogTitle className="text-xl font-bold text-center uppercase">
                   {user} Registration
                </DialogTitle>
                <DialogDescription>
-                  Enter {user} Information Here...
+                  <StepIndicator steps={steps} currentStep={currentStep} />
                </DialogDescription>
             </DialogHeader>
             <hr />
             <Form
-               handleSubmit={handleSubmit(onSubmit)}
+               handleSubmit={handleSubmit}
+               onSubmit={onSubmit}
                register={register}
                errors={errors}
                loading={loading}
@@ -71,6 +108,13 @@ const AddStaffForm = ({ user }) => {
                profilePic={profilePic}
                removeFile={removeFile}
                clearErrors={clearErrors}
+               currentStep={currentStep}
+               setCurrentStep={setCurrentStep}
+               handleNext={handleNext}
+               handlePrevious={handlePrevious}
+               documents={documents}
+               setDocuments={setDocuments}
+               steps={steps}
             />
          </DialogContent>
       </Dialog>

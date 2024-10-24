@@ -1,11 +1,19 @@
 import { Label } from '../../ui/label';
 import { Input } from '../../ui/input';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../ui/select';
 import { Upload, X } from 'lucide-react';
 
 
+const StaffInfo = ({
+   register,
+   errors,
+   user,
+   handleFileChange,
+   profilePic,
+   removeFile,
+   clearErrors
+}) => {
+   console.log(user);
 
-const StaffInfo = ({ register, errors, user, handleFileChange, profilePic, removeFile }) => {
 
    const formFields = [
       {
@@ -14,7 +22,7 @@ const StaffInfo = ({ register, errors, user, handleFileChange, profilePic, remov
          required: "First Name is required",
          placeholder: "Enter First Name",
          type: "text",
-         condition: true,  // Always shown
+         condition: true,
       },
       {
          name: "lname",
@@ -74,14 +82,6 @@ const StaffInfo = ({ register, errors, user, handleFileChange, profilePic, remov
          condition: true,
       },
       {
-         name: "address",
-         label: "Address",
-         required: "Address is required",
-         placeholder: "Enter Address",
-         type: "text",
-         condition: true,
-      },
-      {
          name: "role",
          label: "Role",
          required: "Role is required",
@@ -90,6 +90,15 @@ const StaffInfo = ({ register, errors, user, handleFileChange, profilePic, remov
          options: ["Accountant", "Librarian", "Janitor"],
          condition: user !== "Teacher",
       },
+      {
+         name: "class",
+         label: "Class",
+         required: "Class is required",
+         placeholder: "Select Class",
+         type: "text",
+         condition: user === "Teacher",
+      },
+
    ];
    return (
       <div className='space-y-6'>
@@ -99,21 +108,26 @@ const StaffInfo = ({ register, errors, user, handleFileChange, profilePic, remov
                   <div key={index}>
                      <Label htmlFor={field.name} className="block text-sm font-medium text-gray-900">{field.label}</Label>
                      {field.type === "select" ? (
-                        <Select
-                           onValueChange={(value) => register(field.name).onChange(value)}
+                        <select
+                           id={field.name}
                            defaultValue=""
+                           {...register(field.name, {
+                              required: field.required,
+                              validate: (value) => value !== "" || "This field is required",
+                              onChange: () => clearErrors(field.name),
+                           })}
+                           className={`w-full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${errors[field.name] ? "border-red-500" : ""
+                              }`}
                         >
-                           <SelectTrigger className={`w-full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${errors[field.name] ? "border-red-500" : ""}`}>
-                              <SelectValue placeholder={field.placeholder} />
-                           </SelectTrigger>
-                           <SelectContent>
-                              {field.options.map((option, idx) => (
-                                 <SelectItem key={idx} value={option}>
-                                    {option}
-                                 </SelectItem>
-                              ))}
-                           </SelectContent>
-                        </Select>
+                           <option value="" disabled>
+                              {field.placeholder}
+                           </option>
+                           {field.options.map((option, idx) => (
+                              <option key={idx} value={option}>
+                                 {option}
+                              </option>
+                           ))}
+                        </select>
                      ) : (
                         <Input
                            id={field.name}
@@ -126,7 +140,7 @@ const StaffInfo = ({ register, errors, user, handleFileChange, profilePic, remov
                         />
                      )}
                      {errors[field.name] && (
-                        <p className="text-red-600">{errors[field.name].message}</p>
+                        <p className="text-red-600 text-sm">{errors[field.name].message}</p>
                      )}
                   </div>
                )
