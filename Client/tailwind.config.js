@@ -12,6 +12,12 @@ export default {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
+		  scrollbar: {
+			thin: {
+			  'scrollbar-width': '8px',
+			  'height': '20px', // Adjust as necessary
+			},
+		  },
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',

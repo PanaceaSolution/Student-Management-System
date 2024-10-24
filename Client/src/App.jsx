@@ -7,7 +7,7 @@ import PrivateRoute from "./routes/PrivateRoute";
 import Loader from "./components/Loader/Loader";
 
 // Lazy load components
-const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Dashboard = lazy(() => import("./pages/AdminDashboard/Dashboard"));
 const Library = lazy(() => import("./pages/Library"));
 const Finance = lazy(() => import("./pages/admin/Finance"));
 const Classes = lazy(() => import("./pages/admin/Classes"));
