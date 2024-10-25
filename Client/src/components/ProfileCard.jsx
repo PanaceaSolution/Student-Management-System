@@ -3,11 +3,14 @@ import Button from "@/components/Button";
 import Loadding from "./Loader/Loadding";
 import Modal from "./common/Modal";
 import AddStudentFormModal from "@/pages/admin/StudentForm/AddStudentFormModal";
-
-const ProfileCard = ({ onEdit, onDelete, studentInfo, loading }) => {
+import { User2Icon } from "lucide-react";
+import suk from "../assets/suk.jpg"
+const ProfileCard = ({ onDelete, studentInfo, loading }) => {
   const [keys, setKeys] = useState([]);
   const [openModal, setOpenModal] = useState(-1);
   const [showAddStudentModal, setShowAddStudentModal] = useState(-1);
+  const [showAllDetails, setShowAllDetails] = useState(false);
+
   useEffect(() => {
     if (studentInfo) {
       const keyArray = Object.keys(studentInfo);
@@ -17,19 +20,14 @@ const ProfileCard = ({ onEdit, onDelete, studentInfo, loading }) => {
     }
   }, [studentInfo]);
 
-  const studentId = studentInfo?.id;
-
-  const handleEdit = () => {
-    if (studentId) {
-      onEdit(studentId);
-    }
-  };
 
   const handleDelete = (id) => {
     if (id) {
       onDelete(id);
     }
   };
+
+  const limitedKeys = keys.slice(0, 5);
 
   return (
     <>
@@ -40,12 +38,24 @@ const ProfileCard = ({ onEdit, onDelete, studentInfo, loading }) => {
           </h2>
         </div>
 
+        <div className="bg-red-300 mx-auto h-24 w-24 rounded-full flex items-center justify-center mt-4">
+          {/* {studentInfo?.profilePicUrl ? ( */}
+            <img
+              src={suk}
+              alt={`${studentInfo.firstName}'s profile`}
+              className="w-full h-full rounded-full border-2 object-cover"
+            />
+          {/* ) : (
+            <User2Icon className="w-16 h-16 text-[#233255CC]" />
+          )} */}
+        </div>
+
         <div className="mt-4 flex-1 flex-wrap break-words">
-          {keys?.length === 0 ? (
+          {limitedKeys.length === 0 ? (
             <p className="text-center">Please Select ID To view Details</p>
           ) : (
-            keys.map((key) => (
-              <div key={key} className="mb-2">
+            limitedKeys.map((key) => (
+              <div key={key} className="mb-2 pt-1">
                 <p className="font-thin capitalize">{key}</p>
                 <p className="font-semibold text-[#233255CC]">
                   {studentInfo[key] !== undefined
@@ -55,15 +65,36 @@ const ProfileCard = ({ onEdit, onDelete, studentInfo, loading }) => {
               </div>
             ))
           )}
+          {showAllDetails &&
+            keys.length > limitedKeys.length &&
+            keys.slice(3).map((key) => (
+              <div key={key} className="mb-2 pt-1">
+                <p className="font-thin capitalize">{key}</p>
+                <p className="font-semibold text-[#233255CC]">
+                  {studentInfo[key] !== undefined
+                    ? studentInfo[key].toString()
+                    : "N/A"}
+                </p>
+              </div>
+            ))}
         </div>
+
+        <button
+          className="mt-0 inline text-blue-700 hover:text-blue-800 hover:underline ml-auto"
+          onClick={() => setShowAllDetails((prev) => !prev)}
+        >
+          {showAllDetails ? "Show Less" : "View All"}
+        </button>
+
         <Modal
           title={`Delete ${studentInfo?.firstName}`}
-          desc="Are You Sure ?"
+          desc="Are You Sure?"
           actionName="Delete"
           dangerAction={(e) => handleDelete(studentInfo?.id)}
           showModal={openModal === studentInfo?.id}
           cancelOption={() => setOpenModal(-1)}
         />
+
         <AddStudentFormModal
           cancelOption={() => setShowAddStudentModal(false)}
           showModal={showAddStudentModal === studentInfo?.id}
@@ -71,7 +102,7 @@ const ProfileCard = ({ onEdit, onDelete, studentInfo, loading }) => {
           initialData={studentInfo}
         />
 
-        <div className="flex justify-center space-x-2 mt-4">
+        <div className="flex justify-center space-x-2 mt-2">
           <Button
             type="edit"
             className="flex-shrink-0"

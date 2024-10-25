@@ -91,6 +91,29 @@
       "birthCertificate": "noah_martinez_birth_cert.jpg",
       "citizenship": "noah_martinez_citizenship.jpg",
       "marksheet": "noah_martinez_marksheet.jpg"
+    },
+    {
+      "id": "7",
+      "firstName": "Mia",
+      "lastName": "Johnson",
+      "fatherName": "Michael Johnson",
+      "motherName": "Sarah Johnson",
+      "gender": "Female",
+      "bloodType": "A+",
+      "class": "Grade II",
+      "dob": "2024-10-30",
+      "admissionDate": "2024-10-26",
+      "permanentAddress": "789 Pine Road",
+      "temporaryAddress": "321 Maple Lane",
+      "city": "Biratnagar",
+      "province": "Province No. 1",
+      "state": "Nepal",
+      "villageName": "Kankai",
+      "postalCode": "56700",
+      "profilePic": "mia_johnson_profile.jpg",
+      "birthCertificate": "mia_johnson_birth_cert.jpg",
+      "citizenship": "mia_johnson_citizenship.jpg",
+      "marksheet": "mia_johnson_marksheet.jpg"
     }
   ]
 }
