@@ -10,7 +10,6 @@ const useSubjectStore = create(
             loading: false,
             error: null,
             subjects: [],
-            subjectById: {},
 
             // Get all subjects
             getAllSubjects: async () => {
@@ -35,7 +34,7 @@ const useSubjectStore = create(
                set({ loading: true, error: null })
                try {
                   const data = await getSubjectByIdService(subjectId)
-                  set({ subjectById: data, loading: false })
+                  set({ loading: false })
                   return data
                } catch (error) {
                   set({ error: error.message, loading: false })
@@ -48,13 +47,12 @@ const useSubjectStore = create(
                set({ loading: true, error: null })
                try {
                   const data = await createSubjectService(subjectData)
-                  if (data.status === 200) {
+                  if (data) {
                      toast.success(data.message)
-                     const currentSubjects = get().subjects
-                     set({
-                        subjects: [...currentSubjects, data],
+                     set((state) => ({
+                        subjects: [...state.subjects, data],
                         loading: false
-                     })
+                     }))
                      await get().getAllSubjects()
                   } else {
                      toast.error('Failed to add')
@@ -69,49 +67,52 @@ const useSubjectStore = create(
 
             // Update an existing subject
             updateSubject: async (subjectId, updatedSubjectData) => {
-               set({ loading: true, error: null })
+               set({ loading: true, error: null });
+
                try {
-                  const data = await updateSubjectService(subjectId, updatedSubjectData)
-                  if (data.status === 200) {
-                     toast.success(data.message)
-                     const currentSubjects = get().subjects
-                     set({
-                        subjects: currentSubjects.map((subject) =>
-                           subject.id === subjectId ? data : subject
+                  const data = await updateSubjectService(subjectId, updatedSubjectData);
+
+                  if (data) {
+                     toast.success(data.message);
+                     set((state) => ({
+                        subjects: state.subjects.map((subject) =>
+                           subject.id === subjectId ? { ...subject, ...updatedSubjectData } : subject
                         ),
-                        loading: false
-                     })
-                     await get().getAllSubjects()
+                        loading: false,
+                     }));
+
+                     await get().getAllSubjects();
                   } else {
-                     toast.error('Failed to update')
-                     set({ loading: false })
+                     toast.error('Failed to update');
+                     set({ loading: false });
                   }
-                  return data
+
+                  return data;
                } catch (error) {
-                  set({ error: error.message, loading: false })
-                  return error
+                  set({ error: error.message, loading: false });
+                  toast.error(`Error: ${error.message}`); // Show error message to user
+                  return error; // Consider returning an object instead for better error handling
                }
             },
+
 
             // Delete an existing subject
             deleteSubject: async (subjectId) => {
                set({ loading: true, error: null })
                try {
                   const data = await deleteSubjectService(subjectId)
-                  if (data.status === 200) {
+                  if (200) {
                      toast.success(data.message)
-                     const currentSubjects = get().subjects
-                     set({
-                        subjects: currentSubjects.filter((subject) => subject.id !== subjectId),
+                     set((state) => ({
+                        subjects: state.subjects.filter((subject) => subject.id !== subjectId),
                         loading: false
-                     })
+                     }))
                      await get().getAllSubjects()
                      return data
                   } else {
                      toast.error('Failed to delete')
                      set({ loading: false })
                   }
-
                } catch (error) {
                   set({ error: error.message, loading: false })
                   return error

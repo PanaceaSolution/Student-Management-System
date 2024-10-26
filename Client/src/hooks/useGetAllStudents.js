@@ -7,12 +7,12 @@ const useGetAllStudents = (query) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { students, setStudents } = useStudent();
-  console.log(`http://localhost:8080/student${query}`);
+  const URL = import.meta.env.VITE_API_URL;
   const fetchStudents = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${URL}/student/all-students`);
+      const response = await fetch(`http://localhost:8080/student${query}/student`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch students");

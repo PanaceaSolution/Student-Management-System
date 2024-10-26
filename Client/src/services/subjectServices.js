@@ -9,7 +9,6 @@ export const getAllSubjectsService = async () => {
             "Content-Type": "application/json",
          },
       });
-
       const data = await response.json();
       return data;
    } catch (error) {
@@ -38,10 +37,8 @@ export const getSubjectByIdService = async (id) => {
 
 
 export const createSubjectService = async (subjectData) => {
-   console.log(subjectData);
-
    try {
-      const response = await fetch(`${URL}/subjects/create`, {
+      const response = await fetch(`${URL}/subjects`, {
          method: "POST",
          headers: {
             "Content-Type": "application/json",
@@ -60,7 +57,7 @@ export const createSubjectService = async (subjectData) => {
 
 export const updateSubjectService = async (id, updatedSubjectData) => {
    try {
-      const response = await fetch(`${URL}/subjects/update/${id}`, {
+      const response = await fetch(`${URL}/subjects/${id}`, {
          method: "PUT",
          headers: {
             "Content-Type": "application/json",
@@ -79,7 +76,7 @@ export const updateSubjectService = async (id, updatedSubjectData) => {
 
 export const deleteSubjectService = async (id) => {
    try {
-      const response = await fetch(`${URL}/subjects/delete/${id}`, {
+      const response = await fetch(`${URL}/subjects/${id}`, {
          method: "DELETE",
          headers: {
             "Content-Type": "application/json",
