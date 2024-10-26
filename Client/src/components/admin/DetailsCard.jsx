@@ -10,45 +10,8 @@ import { useEffect } from "react";
 import useStaffStore from "@/store/staffStore";
 import EditStaffForm from "./StaffForm/EditStaffForm";
 
-const staffContent = [
-   { label: "Username", key: "username" },
-   { label: "First Name", key: "fname" },
-   { label: "Last Name", key: "lname" },
-   { label: "Gender", key: "sex" },
-   { label: "Blood Type", key: "bloodType" },
-   { label: "Date of Birth", key: "dob" },
-   { label: "Address", key: "address" },
-   { label: "Email", key: "email" },
-   { label: "Phone", key: "phoneNumber" },
-   { label: "Role", key: "role" },
-];
 
-const teacherContent = [
-   { label: "Username", key: "username" },
-   { label: "First Name", key: "fname" },
-   { label: "Last Name", key: "lname" },
-   { label: "Gender", key: "sex" },
-   { label: "Blood Type", key: "bloodType" },
-   { label: "Date of Birth", key: "dob" },
-   { label: "Address", key: "address" },
-   { label: "Email", key: "email" },
-   { label: "Phone", key: "phoneNumber" },
-
-];
-
-const studentContent = [
-   { label: "Username", key: "userName" },
-   { label: "First Name", key: "firstName" },
-   { label: "Last Name", key: "lastName" },
-   { label: "Gender", key: "gender" },
-   { label: "Date of Birth", key: "dob" },
-   { label: "Address", key: "address" },
-   { label: "Email", key: "email" },
-   { label: "Phone", key: "phone" },
-   { label: "Enrollment Date", key: "enrollmentDate" },
-];
-
-const DetailsCard = ({ title, selectedId }) => {
+const DetailsCard = ({ title, selectedId, setSelectedId, content }) => {
    const { staffById, getStaffById, deleteStaff } = useStaffStore();
 
    useEffect(() => {
@@ -59,24 +22,9 @@ const DetailsCard = ({ title, selectedId }) => {
 
    const userDetails = selectedId ? staffById : null;
 
-   let content;
-   switch (title.toLowerCase()) {
-      case "staff":
-         content = staffContent;
-         break;
-      case "teacher":
-         content = teacherContent;
-         break;
-      case "student":
-         content = studentContent;
-         break;
-      default:
-         content = [];
-         break;
-   }
-
-   const handleDelete = (id) => {
-      deleteStaff(id);
+   const handleDelete = () => {
+      deleteStaff(selectedId);
+      setSelectedId(null);
    };
 
    return (
@@ -90,7 +38,7 @@ const DetailsCard = ({ title, selectedId }) => {
             <>
                <CardContent>
                   <img
-                     src={userDetails.image || "/default-profile.png"}
+                     src={userDetails.profilePic || "/default-profile.png"}
                      alt={`${title} profile`}
                      className="w-16 h-16 rounded-full border-2 border-gray-300 mb-4"
                   />
@@ -106,7 +54,7 @@ const DetailsCard = ({ title, selectedId }) => {
                   ))}
                </CardContent>
                <CardFooter className="flex justify-end gap-2">
-                  <EditStaffForm user={title} staffData={userDetails} />
+                  <EditStaffForm user={title} id={userDetails.id} />
                   <Button
                      variant="destructive"
                      onClick={() => handleDelete(userDetails.id)}

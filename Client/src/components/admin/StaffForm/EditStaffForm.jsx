@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
    Dialog,
@@ -10,69 +10,125 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from '../../ui/button';
 import useStaffStore from '@/store/staffStore';
+import StepIndicator from '@/pages/admin/StudentForm/StepIndicator';
+import StaffForm from './StaffForm';
 
-const EditStaffForm = ({ user, staffData }) => {
-   const { updateStaff, loading, error } = useStaffStore();
+const AddStaffForm = ({ user, id }) => {
+   const { staffById, getStaffById, updateStaff, loading } = useStaffStore();
+   const steps = ["Personal Info", "Address Info", "Document Upload"];
+   const [isOpen, setIsOpen] = useState(false);
+   const [currentStep, setCurrentStep] = useState(0);
+   const [profilePic, setProfilePic] = useState(null);
+   const [documents, setDocuments] = useState({
+      birthCertificate: null,
+      citizenship: null,
+      marksheet: null,
+   });
 
-   const { register, handleSubmit, formState: { errors }, reset } = useForm();
-   const defaultDob = staffData?.dob ? new Date(staffData.dob).toISOString().split('T')[0] : '';
 
    useEffect(() => {
-      if (staffData) {
-         reset({
-            fname: staffData.fname,
-            lname: staffData.lname,
-            username: staffData.username,
-            email: staffData.email,
-            phoneNumber: staffData.phoneNumber,
-            address: staffData.address,
-            role: staffData.role,
-            salary: staffData.salary,
-            dob: defaultDob,
-            sex: staffData.sex,
-            bloodType: staffData.bloodType,
-         });
+      if (id) {
+         getStaffById(id);
       }
-   }, [staffData, reset]);
+   }, [id, getStaffById]);
+
+   const {
+      register,
+      handleSubmit,
+      formState: { errors },
+      trigger,
+      clearErrors,
+      reset
+   } = useForm({});
 
    const onSubmit = async (data) => {
-      const formattedData = {
-         ...data,
-         salary: Number(data.salary),
-      };
-      await updateStaff(staffData.id, formattedData);
+      try {
+         const res = await updateStaff(id, data);
+         if (res) {
+            setIsOpen(false);
+            reset();
+            setCurrentStep(0);
+            setProfilePic(null);
+            setDocuments({
+               birthCertificate: null,
+               citizenship: null,
+               marksheet: null,
+            })
+         }
+      } catch (error) {
+         console.error("Error adding staff:", error);
+      }
+   };
+
+
+   const handleFileChange = (e) => {
+      setProfilePic(e.target.files[0]);
+      clearErrors("profilePic");
+   };
+
+   const removeFile = () => {
+      setProfilePic(null);
+      clearErrors("profilePic");
+   };
+
+   const handleNext = async () => {
+      const isValid = await trigger();
+      if (isValid) {
+         setCurrentStep((prevStep) => Math.min(prevStep + 1, steps.length - 1));
+      }
+   };
+
+   const handlePrevious = () => {
+      setCurrentStep((prevStep) => Math.max(prevStep - 1, 0));
    };
 
    return (
-      <Dialog>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
          <DialogTrigger asChild>
             <Button
-               variant="create"
+               variant="edit"
                className="uppercase"
+               onClick={() => {
+                  reset({
+                     ...staffById,
+                  });
+               }}
             >
                Edit
             </Button>
          </DialogTrigger>
-         <DialogContent>
+         <DialogContent className="bg-white overflow-y-auto">
             <DialogHeader>
-               <DialogTitle>
+               <DialogTitle className="text-xl font-bold text-center uppercase">
                   Update {user}
                </DialogTitle>
                <DialogDescription>
-                  Enter Staff Information Here...
+                  <StepIndicator steps={steps} currentStep={currentStep} />
                </DialogDescription>
             </DialogHeader>
-            <Form
+            <hr />
+            <StaffForm
                handleSubmit={handleSubmit}
+               onSubmit={onSubmit}
                register={register}
                errors={errors}
-               onSubmit={onSubmit}
                loading={loading}
                user={user}
+               handleFileChange={handleFileChange}
+               profilePic={profilePic}
+               removeFile={removeFile}
+               clearErrors={clearErrors}
+               currentStep={currentStep}
+               setCurrentStep={setCurrentStep}
+               handleNext={handleNext}
+               handlePrevious={handlePrevious}
+               documents={documents}
+               setDocuments={setDocuments}
+               steps={steps}
             />
          </DialogContent>
       </Dialog>
    );
 };
 
-export default EditStaffForm;
+export default AddStaffForm;

@@ -22,6 +22,28 @@ const Gender = [
 ];
 
 
+const teacherTableHead = ["", "First Name", "Last Name", "Phone Number", "Gender"];
+const teacherTableFields = ["fname", "lname", "phoneNumber", "gender"];
+
+const teacherContent = [
+  { label: "First Name", key: "fname" },
+  { label: "Last Name", key: "lname" },
+  { label: "Gender", key: "gender" },
+  { label: "Blood Type", key: "bloodType" },
+  { label: "Date of Birth", key: "dob" },
+  { label: "Email", key: "email" },
+  { label: "Phone", key: "phoneNumber" },
+  { label: "Permanent Address", key: "permanentAddress" },
+  { label: "Temporary Address", key: "temporaryAddress" },
+  { label: "City", key: "city" },
+  { label: "Province", key: "province" },
+  { label: "Postal Code", key: "postalCode" },
+  { label: "State", key: "state" },
+  { label: "Village Name", key: "villageName" },
+  { label: "Enrollment Date", key: "enrollDate" },
+  { label: "Salary", key: "salary" },
+];
+
 
 const Teachers = () => {
   const { staff, getAllStaff } = useStaffStore();
@@ -109,7 +131,7 @@ const Teachers = () => {
                     onChange={handleGenderChange}
                     className="w-full bg-white"
                   />
-                
+
                   <div className="col-span-1">
                     <DateSelect onChange={handleDateChange} />
                   </div>
@@ -141,6 +163,8 @@ const Teachers = () => {
               ) : (
                 <StaffTable
                   title="Teacher"
+                  tableHead={teacherTableHead}
+                  tableFields={teacherTableFields}
                   user={filteredUser}
                   handleUserId={handleUserId}
                 />
@@ -155,6 +179,7 @@ const Teachers = () => {
                 title="Teacher"
                 selectedId={selectedId}
                 user={filteredUser}
+                content={teacherContent}
               />
             </div>
           )}

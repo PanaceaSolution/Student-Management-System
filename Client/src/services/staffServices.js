@@ -30,15 +30,16 @@ export const getStaffByIdService = async (id) => {
       const data = await response.json();
       return data;
    } catch (error) {
-      console.error("Error while getting staff by id:", error);
+      console.error("Error while getting all staff:", error);
       throw error;
    }
 }
 
+
 export const createStaffService = async (staffData) => {
 
    try {
-      const response = await fetch(`${URL}/staff/create`, {
+      const response = await fetch(`${URL}/staff`, {
          method: "POST",
          headers: {
             "Content-Type": "application/json",
@@ -56,7 +57,7 @@ export const createStaffService = async (staffData) => {
 
 export const updateStaffService = async (id, staffData) => {
    try {
-      const response = await fetch(`${URL}/staff/update/${id}`, {
+      const response = await fetch(`${URL}/staff/${id}`, {
          method: "PUT",
          headers: {
             "Content-Type": "application/json",
@@ -74,7 +75,7 @@ export const updateStaffService = async (id, staffData) => {
 
 export const deleteStaffService = async (id) => {
    try {
-      const response = await fetch(`${URL}/staff/delete/${id}`, {
+      const response = await fetch(`${URL}/staff/${id}`, {
          method: "DELETE",
          headers: {
             "Content-Type": "application/json",

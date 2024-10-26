@@ -10,21 +10,19 @@ const useStaffStore = create(
             loading: false,
             error: null,
             staff: [],
-            staffById: [],
+            staffById: {},
 
             // Get all staff
             getAllStaff: async () => {
                set({ loading: true, error: null });
                try {
                   const data = await getAllStaffService();
-
-                  if (data && data.payload) {
+                  if (data) {
                      set({ staff: data, loading: false });
                   } else {
                      set({ staff: [], loading: false });
                      toast.error("Failed to fetch data");
                   }
-
                   return data;
                } catch (error) {
                   set({ error: error.message, loading: false });
@@ -50,14 +48,12 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await createStaffService(staffData);
-                  if (data.status === 200) {
+                  if (data) {
                      toast.success(data.message);
-                     const currentStaff = get().staff;
-                     set({
-                        staff: [...currentStaff, data],
+                     set((state) => ({
+                        staff: [...state.staff, data],
                         loading: false,
-                     });
-                     // Refresh the staff list
+                     }))
                      await get().getAllStaff();
                   } else {
                      toast.error("Failed to add");
@@ -75,15 +71,14 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await updateStaffService(staffId, updatedStaffData);
-                  if (data.status === 200) {
+                  if (data) {
                      toast.success(data.message);
-                     const currentStaff = get().staff;
-                     set({
-                        staff: currentStaff.map((staff) =>
-                           staff.id === staffId ? data : staff
+                     set((state) => ({
+                        staff: state.staff.map((staff) =>
+                           staff.id === staffId ? { ...staff, ...updatedStaffData } : staff
                         ),
                         loading: false,
-                     });
+                     }))
                      // Refresh the staff list
                      await get().getAllStaff();
                   } else {
@@ -102,13 +97,12 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await deleteStaffService(staffId);
-                  if (data.status === 200) {
+                  if (data) {
                      toast.success(data.message);
-                     const currentStaff = get().staff;
-                     set({
-                        staff: currentStaff.filter((staff) => staff.id !== staffId),
+                     set((state) => ({
+                        staff: state.staff.filter((staff) => staff.id !== staffId),
                         loading: false,
-                     });
+                     }));
                      // Refresh the staff list
                      await get().getAllStaff();
                   } else {
@@ -122,7 +116,7 @@ const useStaffStore = create(
                }
             },
          }),
-         { name: "staff-storage" }
+         { name: "staffs" }
       )
    )
 );

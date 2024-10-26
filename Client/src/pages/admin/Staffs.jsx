@@ -28,6 +28,31 @@ const Role = [
   { value: "Janitor", label: "Janitor" },
 ];
 
+const staffTableHead = ["", "First Name", "Last Name", "Phone Number", "Gender", "Role"];
+const staffTableFields = ["fname", "lname", "phoneNumber", "gender", "role"];
+
+const staffContent = [
+  { label: "First Name", key: "fname" },
+  { label: "Last Name", key: "lname" },
+  { label: "Gender", key: "gender" },
+  { label: "Blood Type", key: "bloodType" },
+  { label: "Date of Birth", key: "dob" },
+  { label: "Email", key: "email" },
+  { label: "Phone", key: "phoneNumber" },
+  { label: "Role", key: "role" },
+  { label: "Permanent Address", key: "permanentAddress" },
+  { label: "Temporary Address", key: "temporaryAddress" },
+  { label: "City", key: "city" },
+  { label: "Province", key: "province" },
+  { label: "Postal Code", key: "postalCode" },
+  { label: "State", key: "state" },
+  { label: "Village Name", key: "villageName" },
+  { label: "Enrollment Date", key: "enrollDate" },
+  { label: "Salary", key: "salary" },
+];
+
+
+
 const Staffs = () => {
   const { staff, getAllStaff } = useStaffStore();
 
@@ -151,7 +176,9 @@ const Staffs = () => {
                 <p className="text-center">No data available</p>
               ) : (
                 <StaffTable
-                  title="Teacher"
+                  title="Staff"
+                  tableHead={staffTableHead}
+                  tableFields={staffTableFields}
                   user={filteredUser}
                   handleUserId={handleUserId}
                 />
@@ -165,7 +192,9 @@ const Staffs = () => {
               <DetailsCard
                 title="Staff"
                 selectedId={selectedId}
+                setSelectedId={setSelectedId}
                 user={filteredUser}
+                content={staffContent}
               />
             </div>
           )}

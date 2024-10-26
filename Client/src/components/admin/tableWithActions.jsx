@@ -45,8 +45,8 @@ const TableWithActions = ({
       <Table className="border-b">
         <TableHeader>
           <TableRow>
-            {tableHead.map((head, index) => (
-              <TableHead key={index}>{head}</TableHead>
+            {tableHead.map((head) => (
+              <TableHead key={head}>{head}</TableHead>
             ))}
           </TableRow>
         </TableHeader>

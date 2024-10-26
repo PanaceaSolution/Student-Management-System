@@ -12,9 +12,6 @@ const StaffInfo = ({
    removeFile,
    clearErrors
 }) => {
-   console.log(user);
-
-
    const formFields = [
       {
          name: "fname",
@@ -49,7 +46,7 @@ const StaffInfo = ({
          condition: true,
       },
       {
-         name: "sex",
+         name: "gender",
          label: "Gender",
          required: "Gender is required",
          placeholder: "Select Gender",
@@ -64,13 +61,6 @@ const StaffInfo = ({
          placeholder: "Select Blood Type",
          type: "select",
          options: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
-         condition: true,
-      },
-      {
-         name: "dob",
-         label: "Date of Birth",
-         required: "Date of Birth is required",
-         type: "date",
          condition: true,
       },
       {
@@ -91,13 +81,19 @@ const StaffInfo = ({
          condition: user !== "Teacher",
       },
       {
-         name: "class",
-         label: "Class",
-         required: "Class is required",
-         placeholder: "Select Class",
-         type: "text",
-         condition: user === "Teacher",
+         name: "dob",
+         label: "Date of Birth",
+         required: "Date of Birth is required",
+         type: "date",
+         condition: true,
       },
+      {
+         name: "enrollDate",
+         label: "Enrollment Date",
+         required: "Enrollment Date is required",
+         type: "date",
+         condition: true,
+      }
 
    ];
    return (

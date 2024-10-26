@@ -16,6 +16,7 @@ import StaffForm from './StaffForm';
 const AddStaffForm = ({ user }) => {
    const { addStaff, loading, error } = useStaffStore();
    const steps = ["Personal Info", "Address Info", "Document Upload"];
+   const [isOpen, setIsOpen] = useState(false);
    const [currentStep, setCurrentStep] = useState(0);
    const [profilePic, setProfilePic] = useState(null);
    const [documents, setDocuments] = useState({
@@ -34,27 +35,34 @@ const AddStaffForm = ({ user }) => {
    } = useForm({});
 
    const onSubmit = async (data) => {
-      const formData = {
+      const formattedData = {
          ...data,
-         profilePic
+         profilePic: profilePic,
+         role: user === 'Teacher' ? 'Teacher' : data.role || 'DefaultRole',
+         documents: {
+            birthCertificate: documents.birthCertificate,
+            citizenship: documents.citizenship,
+            marksheet: documents.marksheet,
+         }
       };
-      console.log(formData);
-
-
-      // if (user === "Teacher") {
-      //    data.role = "Teacher";
-      // }
-      // const formattedData = {
-      //    ...data,
-      //    salary: Number(data.salary),
-      // };
-      // console.log(formattedData);
-
-      // const res = await addStaff(formattedData);
-      // if (res.statusCode === 200) {
-      //    reset()
-      // }
+      try {
+         const res = await addStaff(formattedData);
+         if (res) {
+            setIsOpen(false);
+            reset();
+            setCurrentStep(0);
+            setProfilePic(null);
+            setDocuments({
+               birthCertificate: null,
+               citizenship: null,
+               marksheet: null,
+            })
+         }
+      } catch (error) {
+         console.error("Error adding staff:", error);
+      }
    };
+
 
    const handleFileChange = (e) => {
       setProfilePic(e.target.files[0]);
@@ -78,7 +86,7 @@ const AddStaffForm = ({ user }) => {
    };
 
    return (
-      <Dialog>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
          <DialogTrigger asChild>
             <Button
                variant="create"
