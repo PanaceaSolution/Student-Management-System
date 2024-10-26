@@ -3,7 +3,7 @@ import SearchBox from '@/components/SearchBox';
 import Select from '@/components/Select';
 import { Button } from '@/components/ui/button';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import ClassTable from '@/components/admin/Table';
+import TableWithActions from '@/components/admin/tableWithActions';
 
 
 const classTableHead = ["Teacher Name", "Gender", "Subject", "Class", "Action",];
@@ -127,7 +127,7 @@ const Class = () => {
           </div>
 
           <div className="relative w-full overflow-x-auto shadow-md">
-            <ClassTable
+            <TableWithActions
               tableHead={classTableHead}
               tableBody={classData}
               tableFields={["teacherName", "gender", "subject", "class"]}

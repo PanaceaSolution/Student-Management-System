@@ -14,7 +14,7 @@ import ResultShowing from '../common/ResultShowing'
 
 
 
-const Table = ({
+const TableWithActions = ({
   tableHead,
   tableBody,
   tableFields,
@@ -96,4 +96,4 @@ const Table = ({
   )
 }
 
-export default Table
+export default TableWithActions

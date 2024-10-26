@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import useSubjectStore from '@/store/subjectStore';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Table from '@/components/admin/Table';
+import TableWithActions from '@/components/admin/tableWithActions';
 
 const Exports = [
    { value: "", label: "EXPORT" },
@@ -145,7 +145,7 @@ const Subjects = () => {
                   </div>
                </div>
                <div className="relative w-full overflow-x-auto shadow-md">
-                  <Table
+                  <TableWithActions
                      tableHead={subjectsTableHead}
                      tableBody={filteredSubjects}
                      tableFields={subjectTableField}
