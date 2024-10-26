@@ -3,16 +3,15 @@ import useAuthStore from "@/store/authStore";
 import { Navigate, Outlet } from "react-router-dom";
 
 const PrivateRoute = ({ allowedRoles }) => {
-   // const { loggedInUser, success } = useAuthStore();
+   // const { loggedInUser, isAuthenticated } = useAuthStore();
    const loggedInUser = {
       username: 'Admin',
       role: 'ADMIN'
    }
-
-   const success = true
+   const isAuthenticated = true;
 
    // Check if the user is logged in
-   if (!loggedInUser || !success) {
+   if (!loggedInUser || !isAuthenticated) {
       return <Navigate to="/" replace />;
    }
 

@@ -1,10 +1,11 @@
 import React, { Suspense, lazy } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {BrowserRouter as Router, Routes, Route, Navigate} from "react-router-dom";
 import Login from './pages/Login';
 import PageNotFound from "./pages/PageNotFound";
 import Layout from "./components/Layout";
 import PrivateRoute from "./routes/PrivateRoute";
 import Loader from "./components/Loader/Loader";
+import useAuthStore from "@/store/authStore.js";
 
 
 // Lazy load components
@@ -111,11 +112,15 @@ const routeConfig = [
 ];
 
 const App = () => {
+ const {isAuthenticated} = useAuthStore()
   return (
     <Router>
       <Suspense fallback={<Loader />}>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route
+             path="/"
+             element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />}
+          />
 
           {/* Private routes */}
           <Route element={<Layout />}>

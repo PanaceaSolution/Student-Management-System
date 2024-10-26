@@ -30,10 +30,9 @@ const useAuthStore = create(
       }),
          {
             name: 'auth',
-            getStorage: () => localStorage,
             partialize: (state) => ({
                loggedInUser: state.loggedInUser,
-               success: state.success,
+               isAuthenticated: state.success,
             }),
          }
       ))
