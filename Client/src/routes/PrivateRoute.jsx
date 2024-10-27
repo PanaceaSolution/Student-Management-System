@@ -3,12 +3,8 @@ import useAuthStore from "@/store/authStore";
 import { Navigate, Outlet } from "react-router-dom";
 
 const PrivateRoute = ({ allowedRoles }) => {
-   // const { loggedInUser, isAuthenticated } = useAuthStore();
-   const loggedInUser = {
-      username: 'Admin',
-      role: 'ADMIN'
-   }
-   const isAuthenticated = true;
+   const { loggedInUser, isAuthenticated } = useAuthStore();
+
 
    // Check if the user is logged in
    if (!loggedInUser || !isAuthenticated) {

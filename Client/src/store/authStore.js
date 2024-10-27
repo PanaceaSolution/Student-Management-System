@@ -6,25 +6,28 @@ const useAuthStore = create(
    devtools(
       persist((set) => ({
          loading: false,
-         success: false,
-         loggedInUser: null,
+         isAuthenticated: true,
+         loggedInUser: {
+            username: "Aayush",
+            role: "STUDENT",
+         },
 
          // Login action
          login: async (userData) => {
             set({ loading: true });
             try {
                const data = await loginService(userData);
-               set({ success: data.success, loggedInUser: data.payload });
+               set({ isAuthenticated: data.success, loggedInUser: data.payload });
                return data;
             } catch (error) {
-               set({ success: false, loggedInUser: null });
+               set({ isAuthenticated: false, loggedInUser: null });
             } finally {
                set({ loading: false });
             }
          },
 
          logout: () => {
-            set({ loggedInUser: null, success: false });
+            set({ loggedInUser: null, isAuthenticated: false });
             localStorage.removeItem('auth');
          },
       }),
@@ -32,7 +35,7 @@ const useAuthStore = create(
             name: 'auth',
             partialize: (state) => ({
                loggedInUser: state.loggedInUser,
-               isAuthenticated: state.success,
+               isAuthenticated: state.isAuthenticated,
             }),
          }
       ))
