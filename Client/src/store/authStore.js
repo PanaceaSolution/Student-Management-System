@@ -9,7 +9,7 @@ const useAuthStore = create(
          isAuthenticated: true,
          loggedInUser: {
             username: "Aayush",
-            role: "STUDENT",
+            role: "ADMIN",
          },
 
          // Login action
