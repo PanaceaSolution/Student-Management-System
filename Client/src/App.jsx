@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from "react";
-import {BrowserRouter as Router, Routes, Route, Navigate} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from './pages/Login';
 import PageNotFound from "./pages/PageNotFound";
 import Layout from "./components/Layout";
@@ -15,6 +15,7 @@ const Finance = lazy(() => import("./pages/admin/Finance"));
 const Classes = lazy(() => import("./pages/admin/Classes"));
 const Staffs = lazy(() => import("./pages/admin/Staffs"));
 const Students = lazy(() => import("./pages/admin/Students"));
+const Parents = lazy(() => import("./pages/admin/parents"));
 const Subjects = lazy(() => import("./pages/admin/Subjects"));
 const Teachers = lazy(() => import("./pages/admin/Teachers"));
 const Logistics = lazy(() => import("./pages/admin/Logistics"));
@@ -65,6 +66,11 @@ const routeConfig = [
     allowedRoles: ['ADMIN']
   },
   {
+    path: '/parents',
+    element: <Parents />,
+    allowedRoles: ['ADMIN']
+  },
+  {
     path: "/staffs",
     element: <Staffs />,
     allowedRoles: ['ADMIN']
@@ -112,14 +118,14 @@ const routeConfig = [
 ];
 
 const App = () => {
- const {isAuthenticated} = useAuthStore()
+  const { isAuthenticated } = useAuthStore()
   return (
     <Router>
       <Suspense fallback={<Loader />}>
         <Routes>
           <Route
-             path="/"
-             element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />}
+            path="/"
+            element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />}
           />
 
           {/* Private routes */}

@@ -1,7 +1,7 @@
 
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-import { FaChalkboardTeacher, FaChartBar, FaNetworkWired, FaTasks, FaUserGraduate, FaUserTie, SiGoogleclassroom, SiGooglemessages, SiStorybook, IoLibrary, IoMdCalendar, GrResources, TbReportAnalytics, RiMoneyRupeeCircleLine, LuLogOut, MdDashboard } from '../components/Icons'
+import { FaChalkboardTeacher, FaChartBar, FaNetworkWired, FaTasks, FaUserGraduate, FaUserTie, SiGoogleclassroom, SiGooglemessages, SiStorybook, IoLibrary, IoMdCalendar, GrResources, TbReportAnalytics, RiMoneyRupeeCircleLine, LuLogOut, MdDashboard, FaHouseUser } from '../components/Icons'
 
 import {
    Tooltip,
@@ -27,6 +27,12 @@ const links = [
       name: 'Students',
       href: '/students',
       icon: <FaUserGraduate className="h-6 w-6" />,
+      roles: ["ADMIN"],
+   },
+   {
+      name: 'Parents',
+      href: '/parents',
+      icon: <FaHouseUser className="h-6 w-6" />,
       roles: ["ADMIN"],
    },
    {
