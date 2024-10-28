@@ -1,3 +1,4 @@
+
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -11,6 +12,8 @@ import { CloudinaryProvider } from './uploads/cloudinary.provider';
 import { UploadController } from './uploads/upload.controller';
 import { StudentModule } from './student/student.module';
 import { ParentModule } from './parent/parent.module';
+
+// import { ParentModule } from './parent/parent.module';
 
 @Module({
   imports: [

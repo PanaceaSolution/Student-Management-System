@@ -32,3 +32,4 @@ export class ParentController {
     return this.parentService.remove(+id);
   }
 }
+

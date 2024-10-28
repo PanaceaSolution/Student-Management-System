@@ -24,3 +24,4 @@ export class ParentService {
     return `This action removes a #${id} parent`;
   }
 }
+
