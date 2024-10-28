@@ -1,34 +1,59 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../DB/prisma.service';
-import { Gender } from '@prisma/client';
-import {
-  CreateStudentDto,
-  UpdateStudentDto,
-  LinkParentDto,
-} from './dto/student.dto';
+import { StudentDto } from './dto/student.dto';
 import moment from 'moment';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Student } from './entities/student.entity';
+import { StudentAddress } from './entities/studentAddress.entity';
+import { StudentContact } from './entities/studentContact.entity';
+import { Repository, DataSource } from 'typeorm';
+import { Parent } from '../parent/entities/parent.entity';
+import { User } from '../authentication/entities/authentication.entity';
+import { ROLE } from '../utils/role.helper';
+import { generateUsername } from '../utils/utils';
+import { generateRandomPassword } from '../utils/utils';
 
 @Injectable()
 export class StudentService {
-  constructor(private prisma: PrismaService) {}
+
+  private generateStudentUsername(fname: string, lname: string): string {
+   return generateUsername(fname, lname);
+  }
+  private generateStudentPassword(): string {
+   return generateRandomPassword();
+  }
+  constructor(
+    @InjectRepository(Student)
+    private readonly studentRepository: Repository<Student>,
+    @InjectRepository(StudentAddress)
+    private addressRepository: Repository<StudentAddress>,
+    @InjectRepository(StudentContact)
+    private contactRepository: Repository<StudentContact>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  
+  ) {}
 
   async createStudent(
-    createStudentDto: CreateStudentDto,
-  ): Promise<{ status: number; message: string; student?: any; login?: any }> {
+    createStudentDto: StudentDto,
+  ): Promise<{ status: number; message: string; student?: any; user?: any }> {
     const {
       fname,
       lname,
       email,
-      permanentAddress,
-      temporaryAddress,
-      sex,
-      bloodtype,
+      gender,
+      bloodType,
       dob,
-      father_name,
-      mother_name,
-      admission_date,
+      admissionDate,
+      address,
+      contact,
+      parentId,
+      transportationMode,
+      previousSchool,
+      rollNumber,
+      registrationNumber,
+      section,
+      studentClass,
     } = createStudentDto;
-
 
     const DOB = moment(dob, 'YYYY-MM-DD');
     if (!DOB.isValid()) {
@@ -36,78 +61,73 @@ export class StudentService {
     }
     const DobIsoString = DOB.toISOString();
 
-    const admissionDateIso = new Date(admission_date);
-    if (isNaN(admissionDateIso.getTime())) {
+    const AD = moment(admissionDate, 'YYYY-MM-DD');
+    if (!AD.isValid()) {
       throw new BadRequestException('Invalid date format for Admission Date');
     }
-    const AdmissionIsoString = admissionDateIso.toISOString();
-
-    const studentExist = await this.prisma.student.findFirst({
-      where: {
-        email,
-      },
+    const AdmissionIsoString = AD.toISOString();
+    const studentExist = await this.studentRepository.findOne({
+      where: [{ email }, { registrationNumber }, { rollNumber }],
     });
-
     if (studentExist) {
       return { status: 400, message: 'Student already exists in the database' };
     }
 
-    const address = await this.prisma.address.create({
-      data: {
-        permanentAddress: {
-          create: permanentAddress,
-        },
-        temporaryAddress: {
-          create: temporaryAddress,
-        },
+    const student = this.studentRepository.create({
+      fname,
+      lname,
+      gender,
+      dob: DobIsoString,
+      admissionDate: AdmissionIsoString,
+      email,
+      bloodType,
+      registrationNumber,
+      rollNumber,
+      section,
+      studentClass,
+      transportationMode,
+      previousSchool,
+    });
+    await this.studentRepository.save(student);
+
+    const studentAddress = this.addressRepository.create({
+      ...address,
+      student,
+    });
+    await this.addressRepository.save(studentAddress);
+
+    const studentContact = this.contactRepository.create({
+      ...contact,
+      student,
+    });
+    await this.contactRepository.save(studentContact);
+
+    const createdStudent = await this.studentRepository.findOne({
+      where: { studentId: student.studentId },
+      relations: {
+        addresses: true,
+        contacts: true,
+        parent: true,
       },
     });
 
-    await this.prisma.student.create({
-      data: {
-        fname,
-        lname,
-        email,
-        addressId: address.id,
-        sex,
-        bloodtype,
-        dob: DobIsoString,
-        father_name,
-        mother_name,
-        admission_date: AdmissionIsoString,
-      },
-    });
+    const studentUsername = this.generateStudentUsername(fname, lname);
 
-    const findStudent = await this.prisma.student.findUnique({
-      where: {
-        email: String(email),
-      },
-    });
+    const studentPassword = this.generateStudentPassword();
 
-    const studentId = findStudent.id;
-    const paddedId = studentId.toString().padStart(4, '0');
-    let studentUsername = `ST-${fname.charAt(0)}${lname.charAt(0)}${paddedId}`;
-    studentUsername = studentUsername.toUpperCase();
-    const studentPassword = this.generateRandomPassword();
-
-    const login = await this.prisma.login.create({
-      data: {
-        username: studentUsername,
-        password: studentPassword,
-        role: 'STUDENT',
-      },
+    const user = this.userRepository.create({
+      username: studentUsername,
+      password: studentPassword,
+      role: ROLE.STUDENT,
+      student: createdStudent,
     });
-
-    const newStudent = await this.prisma.student.update({
-      where: { id: studentId },
-      data: { username: studentUsername, loginId: login.id },
-    });
+    await this.userRepository.save(user);
 
     return {
-      status: 200,
-      message: 'Student created successfully',
-      student: newStudent,
-      login: login,
+      status: 201,
+      message: 'student created successfully',
+      student: createdStudent,
+      user: user,
     };
   }
 
@@ -116,7 +136,13 @@ export class StudentService {
     message: string;
     student?: any;
   }> {
-    const students = await this.prisma.student.findMany();
+    const students = await this.studentRepository.find({
+      relations: {
+        addresses: true,
+        contacts: true,
+        parent: true,
+      },
+    });
 
     return {
       status: 201,
@@ -125,44 +151,26 @@ export class StudentService {
     };
   }
 
-  async linkParent(
-    linkParentDto: LinkParentDto,
-  ): Promise<{ status: number; message: string; result?: any }> {
-    const { parentId, studentId } = linkParentDto;
-    const findStudent = this.findStudent(studentId);
-    if (!findStudent) {
-      return { status: 400, message: 'student not found' };
-    }
-    const result = await this.prisma.student.update({
-      where: {
-        id: studentId,
-      },
-      data: {
-        parentId: parentId,
-      },
-    });
-    return {
-      status: 200,
-      message: 'Parent linked successfully',
-      result: result,
-    };
-  }
-
   async findStudent(studentId: number): Promise<{
     status: number;
     message?: string;
     student?: any;
-    loginData?: any;
+    user?: any;
   }> {
     try {
-      const findStudent = await this.prisma.student.findUnique({
+      const findStudent = await this.studentRepository.findOne({
         where: {
-          id: studentId, // No need to convert to Number since it's already a number
+          studentId: studentId,
+        },
+        relations: {
+          addresses: true,
+          contacts: true,
+          parent: true,
         },
       });
-      const loginData = await this.prisma.login.findFirst({
+      const UserData = await this.userRepository.findOne({
         where: {
-          id: findStudent.loginId,
+          userId: findStudent.studentId,
         },
       });
       if (!findStudent) {
@@ -175,7 +183,7 @@ export class StudentService {
         status: 200,
         message: 'student found',
         student: findStudent,
-        loginData: loginData,
+        user: UserData,
       };
     } catch (error) {
       console.error('Error finding student:', error);
@@ -188,83 +196,138 @@ export class StudentService {
 
   async updateStudent(
     studentId: number,
-    updateStudentDto: UpdateStudentDto,
+    updateStudentDto: StudentDto,
   ): Promise<{ status: number; message?: string; student?: any }> {
-    const findStudent = this.findStudent(studentId);
-    if ((await findStudent).status == 200) {
+    const findStudent = await this.findStudent(studentId);
+    if (findStudent.status === 200) {
       const {
         fname,
         lname,
         email,
-        permanentAddress,
-        temporaryAddress,
-        sex,
-        bloodtype,
+        gender,
+        bloodType,
         dob,
-        father_name,
-        mother_name,
-        admission_date,
+        admissionDate,
+        address,
+        contact,
+        parentId,
+        transportationMode,
+        previousSchool,
+        rollNumber,
+        registrationNumber,
+        section,
+        studentClass,
       } = updateStudentDto;
+      console.log('findStudent:', findStudent);
+      if (rollNumber && rollNumber !== findStudent.student.rollNumber) {
+        const existingRollNumber = await this.studentRepository.findOne({
+          where: { rollNumber },
+        });
+        if (existingRollNumber) {
+          return { status: 400, message: 'Roll number already exists' };
+        }
+      }
 
-      await this.prisma.address.update({
-        where: { id: (await findStudent).student.addressId },
-        data: {
-          ...(permanentAddress && {
-            permanentAddress: {
-              update: permanentAddress,
-            },
-          }),
-          ...(temporaryAddress && {
-            temporaryAddress: {
-              update: temporaryAddress,
-            },
-          }),
-        },
+      if (
+        registrationNumber &&
+        registrationNumber !== findStudent.student.registrationNumber
+      ) {
+        const existingRegistrationNumber = await this.studentRepository.findOne(
+          {
+            where: { registrationNumber },
+          },
+        );
+        if (existingRegistrationNumber) {
+          return {
+            status: 400,
+            message: 'Registration number already exists',
+          };
+        }
+      }
+
+      if (
+        Array.isArray(findStudent.student.addresses) &&
+        findStudent.student.addresses.length > 0
+      ) {
+        if (address) {
+          for (const addr of findStudent.student.addresses) {
+            await this.addressRepository.update(addr.studentAddressId, {
+              ...address,
+            });
+          }
+        }
+      } else {
+        return { status: 400, message: 'Address not found' };
+      }
+
+      if (
+        Array.isArray(findStudent.student.contacts) &&
+        findStudent.student.contacts.length > 0
+      ) {
+        if (contact) {
+          for (const cont of findStudent.student.contacts) {
+            await this.contactRepository.update(cont.studentContactId, {
+              ...contact,
+            });
+          }
+        }
+      } else {
+        return { status: 400, message: 'Contact not found' };
+      }
+
+      await this.studentRepository.update(studentId, {
+        fname,
+        lname,
+        email,
+        gender,
+        bloodType,
+        dob,
+        admissionDate,
+        transportationMode,
+        previousSchool,
+        rollNumber,
+        registrationNumber,
+        section,
+        studentClass,
       });
-      const updatedStudent = await this.prisma.student.update({
-        where: {
-          id: Number(studentId),
-        },
-        data: {
-          ...(fname !== undefined && { fname }),
-          ...(lname !== undefined && { lname }),
-          ...(email !== undefined && { email }),
-          ...(sex !== undefined && { sex }),
-          ...(bloodtype !== undefined && { bloodtype }),
-          ...(dob !== undefined && { dob }),
-          ...(father_name !== undefined && { father_name }),
-          ...(mother_name !== undefined && { mother_name }),
-          ...(admission_date !== undefined && { admission_date }),
+
+      const updatedStudent = await this.studentRepository.findOne({
+        where: { studentId: studentId },
+        relations: {
+          addresses: true,
+          contacts: true,
+          parent: true,
         },
       });
       return {
         status: 200,
-        message: 'student updated successfully',
+        message: 'Student updated successfully',
         student: updatedStudent,
       };
     } else {
-      return {
-        status: 400,
-        message: 'student not found',
-      };
+      return { status: 404, message: 'Student not found' };
     }
   }
 
   async deleteStudent(
     studentId: number,
   ): Promise<{ status: number; message?: string }> {
-    const findStudent = await this.prisma.student.findFirst({
-      where: { id: Number(studentId) },
+    const findStudent = await this.studentRepository.findOne({
+      where: { studentId: studentId },
+      relations: {
+        addresses: true,
+        contacts: true,
+        parent: true,
+        user: true,
+      },
     });
+
     if (!findStudent) {
       return { status: 400, message: 'Student not found' };
     }
-    await this.prisma.student.delete({ where: { id: Number(studentId) } });
-    await this.prisma.login.delete({ where: { id: findStudent.loginId } });
-    return { status: 200, message: 'Student deleted successfully' };
-  }
+    await this.studentRepository.delete({ studentId: studentId });
+    await this.userRepository.delete({ userId: findStudent.user.userId });
 
-  private generateRandomPassword(): string {
-    return Math.random().toString(36).slice(-8);
+    return { status: 200, message: 'Student deleted successfully' };
   }
 }
