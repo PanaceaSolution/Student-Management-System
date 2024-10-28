@@ -5,19 +5,19 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
-  OneToOne
+  OneToOne,
 } from 'typeorm';
 
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 import { GENDER } from '../../utils/role.helper';
 
-import { Parent } from '../../parent/entities/parent.entity';
+// import { Parent } from '../../parent/entities/parent.entity';
 
 import { TRANSPORTATION_MODE } from '../../utils/role.helper';
 import { StudentContact } from './studentContact.entity';
 import { StudentAddress } from './studentAddress.entity';
-import { User } from '../../authentication/entities/authentication.entity';
+import { User } from '../../user/authentication/entities/authentication.entity';
 
 @Entity({ name: 'Student' })
 export class Student {
@@ -68,16 +68,25 @@ export class Student {
   @Column({ type: 'text', nullable: true })
   previousSchool: string;
 
-  @OneToMany(() => StudentContact, (contact) => contact.student,{cascade:true, onDelete: 'CASCADE'})
+  @OneToMany(() => StudentContact, (contact) => contact.student, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   contacts: StudentContact[];
 
-  @OneToMany(() => StudentAddress, (address) => address.student,{cascade:true, onDelete: 'CASCADE'})
+  @OneToMany(() => StudentAddress, (address) => address.student, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   addresses: StudentAddress[];
 
-  @OneToOne(() => User, (user) => user.student, {cascade:true, onDelete: 'CASCADE'})
+  @OneToOne(() => User, (user) => user.student, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   user: User;
 
-  @ManyToOne(() => Parent, (parent) => parent.students, { nullable: true })
-  @JoinColumn({ name: 'parentId' })
-  parent: Parent;
+  // @ManyToOne(() => Parent, (parent) => parent.students, { nullable: true })
+  // @JoinColumn({ name: 'parentId' })
+  // parent: Parent;
 }

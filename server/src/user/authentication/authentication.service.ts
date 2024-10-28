@@ -1,56 +1,49 @@
-
 import { Injectable, Req, Res } from '@nestjs/common';
 import { Response, Request } from 'express';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { LoginDto } from './dto/login.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RegisterDto } from './dto/register.dto';
+import { RegisterUserDto, LoginUserDto } from './dto/user.dto';
 import { User } from './entities/authentication.entity';
-import { ROLE } from '../utils/role.helper';
+import { ROLE } from '../../utils/role.helper';
+import { generateRandomPassword, generateUsername } from '../../utils/utils';
+
+import { UserAddress } from '../../common/address.entity';
+import { UserProfile } from '../../common/profile.entity';
+import { UserContact } from '../../common/contact.entity';
+import { UserDocuments } from '../../common/document.entity';
 
 @Injectable()
 export class AuthenticationService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>, // this is your database table
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(UserProfile)
+    private readonly profileRepository: Repository<UserProfile>,
+    @InjectRepository(UserAddress)
+    private readonly addressRepository: Repository<UserAddress>,
+    @InjectRepository(UserContact)
+    private readonly contactRepository: Repository<UserContact>,
+    @InjectRepository(UserDocuments)
+    private readonly documentRepository: Repository<UserDocuments>,
+
     private jwtService: JwtService,
   ) {}
-  async register(RegisterDto: RegisterDto) {
+  async register(RegisterDto: RegisterUserDto) {
     try {
-      const { username, password, role } = RegisterDto;
-      // console.log(username, password, role);
-      
+      const { email, role, profile, address, contact, document } = RegisterDto;
 
-      if (!username || !password || !role) {
+      if (!role || !email) {
         return {
           message: 'You must have to fill all the above fields',
           status: 500,
           success: false,
         };
       }
-      const UserCount = await this.userRepository.count({
-        where: {
-          role: ROLE.ADMIN,
-        },
-      });
-      if (UserCount >= 10) {
-        return {
-          message: "You can't create user more than 1",
-          status: 403,
-          success: false,
-        };
-      }
-      if (role !== 'ADMIN') {
-        return {
-          message: 'Only Admin can register',
-          status: 403,
-          success: false,
-        };
-      }
+
       const ExistingUser = await this.userRepository.findOne({
-        where: { username },
+        where: { email },
       });
       if (ExistingUser) {
         return {
@@ -59,31 +52,80 @@ export class AuthenticationService {
           success: false,
         };
       }
-      const HashedPassword = await bcrypt.hash(password, 10);
-      const newUser = await this.userRepository.create({
-        username,
-        password: HashedPassword,
-        role: ROLE.ADMIN,
-      });
 
+      const password = generateRandomPassword();
+      const username = generateUsername(profile.fname, profile.lname, role);
+
+      const newUser = this.userRepository.create({
+        email,
+        role,
+        isActivated: true,
+        password: password,
+        username: username,
+      });
       await this.userRepository.save(newUser);
+
+      //profile
+      const userProfile = this.profileRepository.create({
+        profilePicture: profile.profilePicture,
+        fname: profile.fname,
+        lname: profile.lname,
+        gender: profile.gender,
+        dob: new Date(profile.dob),
+        user: newUser,
+      });
+      await this.profileRepository.save(userProfile);
+
+      //address
+      if (Array.isArray(address)) {
+        const userAddress = address.map((addr) => {
+          return this.addressRepository.create({
+            addressType: addr.addressType,
+            wardNumber: addr.wardNumber,
+            municipality: addr.municipality,
+            province: addr.province,
+            district: addr.district,
+            user: newUser,
+          });
+        });
+        await this.addressRepository.save(userAddress);
+      }
+
+      //contact
+      const userContact = this.contactRepository.create({
+        ...contact,
+        user: newUser,
+      });
+      await this.contactRepository.save(userContact);
+
+      //documents
+      if (Array.isArray(document)) {
+        const userDocuments = document.map((doc) => {
+          return this.documentRepository.create({
+            documentName: doc.documentName,
+            documentFile: doc.documentFile,
+            user: newUser, // Associate the document with the user
+          });
+        });
+
+        // Save all user documents
+        await this.documentRepository.save(userDocuments);
+      }
+
       return {
-        message: `User ${newUser.username} has been created`,
-        user: {
-          username: newUser.username,
-          role: newUser.role,
-        },
-        success: true,
+        message: 'user created successfully',
+        status: 200,
+        user: newUser,
       };
     } catch (error) {
       return {
-        message:`${error} and error occurs`,
+        message: `${error} and error occurs`,
         status: 500,
       };
     }
   }
 
-  async login(loginDto: LoginDto, @Res() res: Response) {
+  async login(loginDto: LoginUserDto, @Res() res: Response) {
     const { username, password } = loginDto;
 
     try {
@@ -133,14 +175,14 @@ export class AuthenticationService {
         expiresIn: '7d',
         secret: process.env.JWT_SECRET,
       });
-        res.cookie('accessToken', AccessToken, {
-          httpOnly: true,
-          sameSite: 'strict',
-        });
-        res.cookie('refreshToken', RefreshToken, {
-          httpOnly: true,
-          sameSite: 'strict',
-        });
+      res.cookie('accessToken', AccessToken, {
+        httpOnly: true,
+        sameSite: 'strict',
+      });
+      res.cookie('refreshToken', RefreshToken, {
+        httpOnly: true,
+        sameSite: 'strict',
+      });
 
       await this.userRepository.update(
         { username: user.username }, // Use the correct syntax for the 'where' argument

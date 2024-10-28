@@ -64,8 +64,6 @@ export class StudentDto {
   @IsOptional()
   bloodType: string;
 
-
-
   @ValidateNested()
   @Type(() => StudentAddressDto)
   address: StudentAddressDto;

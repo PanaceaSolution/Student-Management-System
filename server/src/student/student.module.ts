@@ -2,20 +2,15 @@ import { Module, RequestMethod, MiddlewareConsumer } from '@nestjs/common';
 import { StudentController } from './student.controller';
 import { StudentService } from './student.service';
 // import { AuthMiddleware } from '../auth.middleware';
-import { AuthenticationModule } from '../authentication/authentication.module';
+import { AuthenticationModule } from '../user/authentication/authentication.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Student } from './entities/student.entity';
 import { StudentAddress } from './entities/studentAddress.entity';
 import { StudentContact } from './entities/studentContact.entity';
-import { User } from '../authentication/entities/authentication.entity';
+import { User } from '../user/authentication/entities/authentication.entity';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Student,
-      StudentAddress,
-      StudentContact,
-      User,
-    ]),
+    TypeOrmModule.forFeature([Student, StudentAddress, StudentContact, User]),
     AuthenticationModule,
   ],
   controllers: [StudentController],

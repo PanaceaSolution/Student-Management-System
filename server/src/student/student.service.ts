@@ -6,20 +6,18 @@ import { Student } from './entities/student.entity';
 import { StudentAddress } from './entities/studentAddress.entity';
 import { StudentContact } from './entities/studentContact.entity';
 import { Repository, DataSource } from 'typeorm';
-import { Parent } from '../parent/entities/parent.entity';
-import { User } from '../authentication/entities/authentication.entity';
+import { User } from '../user/authentication/entities/authentication.entity';
 import { ROLE } from '../utils/role.helper';
 import { generateUsername } from '../utils/utils';
 import { generateRandomPassword } from '../utils/utils';
 
 @Injectable()
 export class StudentService {
-
   private generateStudentUsername(fname: string, lname: string): string {
-   return generateUsername(fname, lname);
+    return generateUsername(fname, lname, ROLE.STUDENT);
   }
   private generateStudentPassword(): string {
-   return generateRandomPassword();
+    return generateRandomPassword();
   }
   constructor(
     @InjectRepository(Student)
@@ -30,7 +28,6 @@ export class StudentService {
     private contactRepository: Repository<StudentContact>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  
   ) {}
 
   async createStudent(
@@ -107,7 +104,7 @@ export class StudentService {
       relations: {
         addresses: true,
         contacts: true,
-        parent: true,
+        // parent: true,
       },
     });
 
@@ -140,7 +137,7 @@ export class StudentService {
       relations: {
         addresses: true,
         contacts: true,
-        parent: true,
+        // parent: true,
       },
     });
 
@@ -165,7 +162,7 @@ export class StudentService {
         relations: {
           addresses: true,
           contacts: true,
-          parent: true,
+          // parent: true,
         },
       });
       const UserData = await this.userRepository.findOne({
@@ -296,7 +293,7 @@ export class StudentService {
         relations: {
           addresses: true,
           contacts: true,
-          parent: true,
+          // parent: true,
         },
       });
       return {
@@ -317,7 +314,7 @@ export class StudentService {
       relations: {
         addresses: true,
         contacts: true,
-        parent: true,
+        // parent: true,
         user: true,
       },
     });

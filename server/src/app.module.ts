@@ -5,9 +5,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthenticationModule } from './authentication/authentication.module';
+import { AuthenticationModule } from './user/authentication/authentication.module';
 import { StudentModule } from './student/student.module';
-import { ParentModule } from './parent/parent.module';
+// import { ParentModule } from './parent/parent.module';
 
 @Module({
   imports: [
@@ -25,13 +25,13 @@ import { ParentModule } from './parent/parent.module';
         entities: [join(process.cwd(), 'dist/**/*.entity{.ts,.js}')],
         synchronize: true,
         ssl: {
-          rejectUnauthorized: false, // Disable strict SSL validation
+          rejectUnauthorized: false,
         },
       }),
     }),
     AuthenticationModule,
     StudentModule,
-    ParentModule
+    // ParentModule
   ],
   controllers: [AppController],
   providers: [AppService],
