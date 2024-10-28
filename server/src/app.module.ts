@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { StudentModule } from './student/student.module';
 import { ParentModule } from './parent/parent.module';
+import { AssignmentModule } from './assignment/assignment.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { ParentModule } from './parent/parent.module';
     }),
     AuthenticationModule,
     StudentModule,
-    ParentModule
+    ParentModule,
+    AssignmentModule
   ],
   controllers: [AppController],
   providers: [AppService],
