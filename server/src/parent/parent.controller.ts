@@ -1,45 +1,34 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Body,
-  Param,
-  Put,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { ParentService } from './parent.service';
-import { CreateParentDto, UpdateParentDto } from './dto/parent.dto';
+import { CreateParentDto } from './dto/create-parent.dto';
+import { UpdateParentDto } from './dto/update-parent.dto';
 
 @Controller('parent')
 export class ParentController {
   constructor(private readonly parentService: ParentService) {}
 
-  @Post('/create')
-  async createParent(
-    @Body() createParentDto: CreateParentDto,
-  ): Promise<{ status: number; message: string; parent?: any; login? : any;}> {
-    return this.parentService.createParent(createParentDto);
+  @Post()
+  create(@Body() createParentDto: CreateParentDto) {
+    return this.parentService.create(createParentDto);
   }
 
-  @Get('/:parentId')
-  async findParent(
-    @Param('parentId') parentId: number,
-  ): Promise<{ status: number; message?: string; parent?: any }> {
-    return this.parentService.findParent(parentId);
+  @Get()
+  findAll() {
+    return this.parentService.findAll();
   }
 
-  @Put('/update/:parentId')
-  async updateParent(
-    @Param('parentId') parentId: number,
-    @Body() updateParentDto: UpdateParentDto,
-  ): Promise<{ status: number; message?: string; parent?: any }> {
-    return this.parentService.updateParent(parentId, updateParentDto);
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.parentService.findOne(+id);
   }
 
-  @Delete('/delete/:parentLoginId')
-  async deleteParent(
-    @Param('parentLoginId') parentLoginId: number,
-  ): Promise<{ status: number; message?: string }> {
-    return this.parentService.deleteParent(parentLoginId);
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateParentDto: UpdateParentDto) {
+    return this.parentService.update(+id, updateParentDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.parentService.remove(+id);
   }
 }

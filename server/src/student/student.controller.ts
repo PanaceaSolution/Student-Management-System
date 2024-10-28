@@ -1,62 +1,34 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Body,
-  Param,
-  Put,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { StudentService } from './student.service';
-import {
-  CreateStudentDto,
-  UpdateStudentDto,
-  LinkParentDto,
-  FilterStudentDto,
-} from './dto/student.dto';
-import { Query } from '@nestjs/common';
+import { CreateStudentDto } from './dto/create-student.dto';
+import { UpdateStudentDto } from './dto/update-student.dto';
 
 @Controller('student')
 export class StudentController {
   constructor(private readonly studentService: StudentService) {}
 
-  @Get('all-students')
-  async getStudents(@Query() filterDto: FilterStudentDto) {
-    return this.studentService.GetAllStudents(filterDto);
-  }
-  @Post('create')
-  async createStudent(
-    @Body() createStudentDto: CreateStudentDto,
-  ): Promise<{ status: number; message: string; student?: any }> {
-    return this.studentService.createStudent(createStudentDto);
+  @Post()
+  create(@Body() createStudentDto: CreateStudentDto) {
+    return this.studentService.create(createStudentDto);
   }
 
-  @Get('/:studentId')
-  async findStudent(
-    @Param('studentId') studentId: number,
-  ): Promise<{ status: number; message?: string; student?: any }> {
-    return this.studentService.findStudent(studentId);
+  @Get()
+  findAll() {
+    return this.studentService.findAll();
   }
 
-  @Put('/update/:studentId')
-  async updateStudent(
-    @Param('studentId') studentId: number,
-    @Body() updateStudentDto: UpdateStudentDto,
-  ): Promise<{ status: number; message?: string; student?: any }> {
-    return this.studentService.updateStudent(studentId, updateStudentDto);
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.studentService.findOne(+id);
   }
 
-  @Delete('/delete')
-  async deleteStudent(
-    @Body('studentIds') studentIds: number[],
-  ): Promise<{ status: number; message?: string }> {
-    return this.studentService.deleteStudents(studentIds);
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto) {
+    return this.studentService.update(+id, updateStudentDto);
   }
 
-  @Put('/link-parent')
-  async linkParent(
-    @Body() linkParentDto: LinkParentDto,
-  ): Promise<{ status: number; message: string; result?: any }> {
-    return this.studentService.linkParent(linkParentDto);
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.studentService.remove(+id);
   }
 }
