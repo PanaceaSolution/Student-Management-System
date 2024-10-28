@@ -1,6 +1,6 @@
 import { Controller, Post,Get, Body, Param, Put, Delete, Query } from '@nestjs/common';
 import { StudentService } from './student.service';
-import { CreateStudentDto, UpdateStudentDto, LinkParentDto } from './dto/student.dto';
+import { StudentDto} from './dto/student.dto';
 
 @Controller('student')
 export class StudentController {
@@ -11,36 +11,29 @@ export class StudentController {
     return this.studentService.GetAllStudents();
   }
   @Post('create')
-  async createStudent(
-    @Body() createStudentDto: CreateStudentDto,
-  ): Promise<{ status: number; message: string; student?: any }> {
+  async createStudent(@Body() createStudentDto: StudentDto) {
     return this.studentService.createStudent(createStudentDto);
   }
 
-  @Put('/link-parent')
-  async linkParent(
-    @Body() linkParentDto: LinkParentDto,
-  ): Promise<{ status: number; message: string; result?: any }> {
-    return this.studentService.linkParent(linkParentDto);
-  }
   @Get('/:studentId')
   async findStudent(
-    @Param('studentId') studentId: string,
+    @Param('studentId') studentId: number,
   ): Promise<{ status: number; message?: string; student?: any }> {
-    const id = parseInt(studentId, 10);
-    if (isNaN(id)) {
-      return {
-        status: 400,
-        message: 'Invalid student ID',
-      };
-    }
-    return this.studentService.findStudent(id);
+    const uuid = studentId;
+    return this.studentService.findStudent(uuid);
   }
+
+  // @Put('/link-parent')
+  // async linkParent(
+  //   @Body() linkParentDto: LinkParentDto,
+  // ): Promise<{ status: number; message: string; result?: any }> {
+  //   return this.studentService.linkParent(linkParentDto);
+  // }
 
   @Put('/update/:studentId')
   async updateStudent(
     @Param('studentId') studentId: number,
-    @Body() updateStudentDto: UpdateStudentDto,
+    @Body() updateStudentDto: StudentDto,
   ): Promise<{ status: number; message?: string; student?: any }> {
     return this.studentService.updateStudent(studentId, updateStudentDto);
   }
