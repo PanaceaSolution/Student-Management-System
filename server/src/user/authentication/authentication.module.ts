@@ -4,10 +4,10 @@ import { AuthenticationController } from './authentication.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/authentication.entity';
-import { UserAddress } from '../../common/address.entity';
-import { UserProfile } from '../../common/profile.entity';
-import { UserDocuments } from '../../common/document.entity';
-import { UserContact } from '../../common/contact.entity';
+import { UserAddress } from '../userEntity/address.entity';
+import { UserProfile } from '../userEntity/profile.entity';
+import { UserDocuments } from '../userEntity/document.entity';
+import { UserContact } from '../userEntity/contact.entity';
 
 @Module({
   imports: [

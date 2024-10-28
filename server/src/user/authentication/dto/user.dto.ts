@@ -15,7 +15,7 @@ import {
   UserAddressDto,
   UserContactDto,
   UserDocumentsDto,
-} from '../../../common/dto/common.dto';
+} from '../../userEntity/dto/common.dto';
 
 export class RegisterUserDto {
   @IsString()

@@ -10,10 +10,10 @@ import {
 import { ROLE } from '../../../utils/role.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { Student } from '../../../student/entities/student.entity';
-import { UserProfile } from '../../../common/profile.entity';
-import { UserAddress } from '../../../common/address.entity';
-import { UserDocuments } from '../../../common/document.entity';
-import { UserContact } from '../../../common/contact.entity';
+import { UserProfile } from '../../userEntity/profile.entity';
+import { UserAddress } from '../../userEntity/address.entity';
+import { UserDocuments } from '../../userEntity/document.entity';
+import { UserContact } from '../../userEntity/contact.entity';
 
 @Entity({ name: 'User' })
 export class User {

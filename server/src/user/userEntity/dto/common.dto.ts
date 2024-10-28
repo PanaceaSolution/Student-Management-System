@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
-import { GENDER } from '../../utils/role.helper'; 
+import { GENDER } from '../../../utils/role.helper'; 
 
 export class UserProfileDto {
   @IsString()

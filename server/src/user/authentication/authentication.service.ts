@@ -9,10 +9,10 @@ import { User } from './entities/authentication.entity';
 import { ROLE } from '../../utils/role.helper';
 import { generateRandomPassword, generateUsername } from '../../utils/utils';
 
-import { UserAddress } from '../../common/address.entity';
-import { UserProfile } from '../../common/profile.entity';
-import { UserContact } from '../../common/contact.entity';
-import { UserDocuments } from '../../common/document.entity';
+import { UserAddress } from '../userEntity/address.entity';
+import { UserProfile } from '../userEntity/profile.entity';
+import { UserContact } from '../userEntity/contact.entity';
+import { UserDocuments } from '../userEntity/document.entity';
 
 @Injectable()
 export class AuthenticationService {

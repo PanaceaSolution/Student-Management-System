@@ -1,4 +1,4 @@
-import { numberToWords } from './number-to-words';
+import { numberToWords } from './number-to-words.helper';
 
 interface CalculateFeesParams {
   registrationFee: string;
