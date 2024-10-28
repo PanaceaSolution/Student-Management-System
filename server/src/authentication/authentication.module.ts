@@ -1,18 +1,18 @@
 import { Module } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { AuthenticationController } from './authentication.controller';
-import { PrismaService } from '../DB/prisma.service';
-import { PrismaModule } from '../DB/prisma.module';
 import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './entities/authentication.entity';
 @Module({
   imports: [
-    PrismaModule,
+    TypeOrmModule.forFeature([User]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
   ],
   controllers: [AuthenticationController],
-  providers: [AuthenticationService, PrismaService],
-  exports:[JwtModule],
+  providers: [AuthenticationService],
+  exports: [JwtModule], // Remove extra closing parenthesis and add missing comma
 })
 export class AuthenticationModule {}

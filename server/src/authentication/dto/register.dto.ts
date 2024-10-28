@@ -1,5 +1,6 @@
 // src/auth/dto/register.dto.ts
 import { IsString, IsNotEmpty } from 'class-validator';
+import { ROLE } from '../../utils/role.helper';
 
 export class RegisterDto {
   @IsString()
@@ -12,5 +13,5 @@ export class RegisterDto {
 
   @IsString()
   @IsNotEmpty()
-  role: string; // Add 'ADMIN', 'USER', etc.
+  role: ROLE; // Add 'ADMIN', 'USER', etc.
 }

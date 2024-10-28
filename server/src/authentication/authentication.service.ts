@@ -1,21 +1,27 @@
+
 import { Injectable, Req, Res } from '@nestjs/common';
 import { Response, Request } from 'express';
-
 import * as bcrypt from 'bcrypt';
-
 import { JwtService } from '@nestjs/jwt';
-
 import { LoginDto } from './dto/login.dto';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterDto } from './dto/register.dto';
-import { PrismaService } from '../DB/prisma.service';
+import { User } from './entities/authentication.entity';
+import { ROLE } from '../utils/role.helper';
 
 @Injectable()
 export class AuthenticationService {
-  constructor(private prisma: PrismaService, private jwtService: JwtService) {}
-
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>, // this is your database table
+    private jwtService: JwtService,
+  ) {}
   async register(RegisterDto: RegisterDto) {
     try {
       const { username, password, role } = RegisterDto;
+      // console.log(username, password, role);
+      
 
       if (!username || !password || !role) {
         return {
@@ -24,10 +30,9 @@ export class AuthenticationService {
           success: false,
         };
       }
-
-      const UserCount = await this.prisma.login.count({
+      const UserCount = await this.userRepository.count({
         where: {
-          role: 'ADMIN',
+          role: ROLE.ADMIN,
         },
       });
       if (UserCount >= 10) {
@@ -37,7 +42,6 @@ export class AuthenticationService {
           success: false,
         };
       }
-
       if (role !== 'ADMIN') {
         return {
           message: 'Only Admin can register',
@@ -45,10 +49,9 @@ export class AuthenticationService {
           success: false,
         };
       }
-      const ExistingUser = await this.prisma.login.findUnique({
+      const ExistingUser = await this.userRepository.findOne({
         where: { username },
       });
-
       if (ExistingUser) {
         return {
           message: 'User already exist',
@@ -56,16 +59,14 @@ export class AuthenticationService {
           success: false,
         };
       }
-
       const HashedPassword = await bcrypt.hash(password, 10);
-
-      const newUser = await this.prisma.login.create({
-        data: {
-          username,
-          password: HashedPassword,
-          role,
-        },
+      const newUser = await this.userRepository.create({
+        username,
+        password: HashedPassword,
+        role: ROLE.ADMIN,
       });
+
+      await this.userRepository.save(newUser);
       return {
         message: `User ${newUser.username} has been created`,
         user: {
@@ -76,7 +77,7 @@ export class AuthenticationService {
       };
     } catch (error) {
       return {
-        message: error,
+        message:`${error} and error occurs`,
         status: 500,
       };
     }
@@ -92,7 +93,7 @@ export class AuthenticationService {
           success: false,
         });
       }
-      const user = await this.prisma.login.findUnique({
+      const user = await this.userRepository.findOne({
         where: { username },
       });
 
@@ -101,16 +102,16 @@ export class AuthenticationService {
           message: 'User not found',
           success: false,
         });
-      } else if (user.role !== 'ADMIN' && user.role !== 'STUDENT') {
+      } else if (user.role !== ROLE.ADMIN && user.role !== ROLE.STUDENT) {
         return res.status(401).json({
           message: 'You are not authorized',
           success: false,
         });
       }
       let isPasswordValid = false;
-      if (user.role === 'ADMIN') {
+      if (user.role === ROLE.ADMIN) {
         isPasswordValid = await bcrypt.compare(password, user.password);
-      } else if (user.role === 'STUDENT') {
+      } else if (user.role === ROLE.STUDENT) {
         isPasswordValid = password === user.password;
       }
 
@@ -124,25 +125,27 @@ export class AuthenticationService {
       // Only set the cookie if all validations pass
       const payload = { username: user.username, role: user.role };
       const AccessToken = this.jwtService.sign(payload, {
-        expiresIn: '1d', // short lifespan for access token
+        expiresIn: '1d',
+        secret: process.env.JWT_SECRET, // short lifespan for access token
       });
 
       const RefreshToken = this.jwtService.sign(payload, {
         expiresIn: '7d',
+        secret: process.env.JWT_SECRET,
       });
+        res.cookie('accessToken', AccessToken, {
+          httpOnly: true,
+          sameSite: 'strict',
+        });
+        res.cookie('refreshToken', RefreshToken, {
+          httpOnly: true,
+          sameSite: 'strict',
+        });
 
-      res.cookie('accessToken', AccessToken, {
-        httpOnly: true,
-        sameSite: 'strict',
-      });
-      res.cookie('refreshToken', RefreshToken, {
-        httpOnly: true,
-        sameSite: 'strict',
-      });
-      await this.prisma.login.update({
-        where: { username: user.username },
-        data: { refreshToken: RefreshToken },
-      });
+      await this.userRepository.update(
+        { username: user.username }, // Use the correct syntax for the 'where' argument
+        { refreshToken: RefreshToken },
+      );
 
       return res.status(200).json({ payload, success: true });
     } catch (error) {
