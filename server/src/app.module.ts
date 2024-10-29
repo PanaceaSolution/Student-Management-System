@@ -5,10 +5,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthenticationModule } from './authentication/authentication.module';
-import { StudentModule } from './student/student.module';
-import { ParentModule } from './parent/parent.module';
+
 import { AssignmentModule } from './assignment/assignment.module';
+import { CourseModule } from './course/course.module';
 
 @Module({
   imports: [
@@ -30,10 +29,8 @@ import { AssignmentModule } from './assignment/assignment.module';
         },
       }),
     }),
-    AuthenticationModule,
-    StudentModule,
-    ParentModule,
-    AssignmentModule
+    AssignmentModule,
+    CourseModule
   ],
   controllers: [AppController],
   providers: [AppService],
