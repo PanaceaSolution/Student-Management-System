@@ -5,7 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthenticationModule } from './authentication/authentication.module';
+import { AuthenticationModule } from './user/authentication/authentication.module';
 import { StudentModule } from './student/student.module';
 import { ParentModule } from './parent/parent.module';
 

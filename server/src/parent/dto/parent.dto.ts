@@ -29,18 +29,18 @@ export class ParentDto {
   @IsNotEmpty()
   gender: GENDER;
 
-  @IsString()
-  @IsNotEmpty()
-  @IsOptional()
-  username: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // @IsOptional()
+  // username: string;
 
   @IsString()
   @IsOptional()
   profilePicture: string;
 
-  @IsString()
-  @IsNotEmpty()
-  password: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // password: string;
 
   // @IsNotEmpty()
   // students: string

@@ -5,9 +5,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Student } from './entities/student.entity';
 import { StudentAddress } from './entities/studentAddress.entity';
 import { StudentContact } from './entities/studentContact.entity';
-import { Repository, DataSource } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Parent } from '../parent/entities/parent.entity';
-import { User } from '../authentication/entities/authentication.entity';
+import { User } from '../user/authentication/entities/authentication.entity';
 import { ROLE } from '../utils/role.helper';
 import { generateUsername } from '../utils/utils';
 import { generateRandomPassword } from '../utils/utils';
@@ -16,7 +16,7 @@ import { generateRandomPassword } from '../utils/utils';
 export class StudentService {
 
   private generateStudentUsername(fname: string, lname: string): string {
-   return generateUsername(fname, lname);
+   return generateUsername(fname, lname, ROLE.STUDENT);
   }
   private generateStudentPassword(): string {
    return generateRandomPassword();
