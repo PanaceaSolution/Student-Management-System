@@ -16,7 +16,7 @@ export class HealthController {
   @HealthCheck()
   checkDatabase() {
     return this.health.check([
-      () => this.db.pingCheck('database'), // Checks if the database connection is live
+      () => this.db.pingCheck('database'), 
     ]);
   }
 }
