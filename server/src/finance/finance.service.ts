@@ -28,7 +28,6 @@ export class FinanceService {
 
   async create(createFinanceDto: CreateFinanceDto, file?: Express.Multer.File) {
     let agreementFileUrl: string | null = null;
-
     if (file) {
       const uploadedFile = await uploadSingleFileToCloudinary(
         file,
