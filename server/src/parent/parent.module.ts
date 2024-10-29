@@ -1,24 +1,29 @@
-import { Module } from "@nestjs/common";
-import { ParentController } from "./parent.controller";
-import { ParentService } from "./parent.service";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { Parent } from "./entities/parent.entity";
-import { Student } from "../student/entities/student.entity";
-import { StudentContact } from "../student/entities/studentContact.entity";
-import { StudentAddress } from "../student/entities/studentAddress.entity";
-import { User } from "../user/authentication/entities/authentication.entity";
-import { AuthenticationModule } from "../user/authentication/authentication.module"; // Ensure this path is correct
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ParentService } from './parent.service';
+import { ParentController } from './parent.controller';
+import { Parent } from './entities/parent.entity';
+import { User } from '../user/authentication/entities/authentication.entity';
+import { UserProfile } from '../user/userEntity/profile.entity';
+import { UserAddress } from '../user/userEntity/address.entity';
+import { UserContact } from '../user/userEntity/contact.entity';
+import { UserDocuments } from '../user/userEntity/document.entity';
+import { Student } from '../student/entities/student.entity'; // If needed for student-parent relation
 
 @Module({
-    imports:[
-        TypeOrmModule.forFeature([
-            Parent,
-            User,
-            Student,
-        ]),
-        AuthenticationModule
-    ],
-    controllers:[ParentController],
-    providers:[ParentService]
+  imports: [
+    TypeOrmModule.forFeature([
+      Parent,
+      User,
+      UserProfile,
+      UserAddress,
+      UserContact,
+      UserDocuments,
+      Student, // Include Student if Parent has a relation with Student
+    ]),
+  ],
+  controllers: [ParentController],
+  providers: [ParentService],
+  exports: [ParentService], // Export ParentService if needed elsewhere
 })
-export class ParentModule{}
+export class ParentModule {}

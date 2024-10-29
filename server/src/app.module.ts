@@ -12,7 +12,6 @@ import { CloudinaryProvider } from './uploads/cloudinary.provider';
 import { UploadController } from './uploads/upload.controller';
 import { StudentModule } from './student/student.module';
 import { ParentModule } from './parent/parent.module';
-
 // import { ParentModule } from './parent/parent.module';
 
 @Module({

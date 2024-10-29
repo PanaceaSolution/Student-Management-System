@@ -144,11 +144,6 @@ export class AuthenticationService {
           message: 'User not found',
           success: false,
         });
-      } else if (user.role !== ROLE.ADMIN && user.role !== ROLE.STUDENT) {
-        return res.status(401).json({
-          message: 'You are not authorized',
-          success: false,
-        });
       }
       // let isPasswordValid = false;
       // if (user.role === ROLE.ADMIN) {
@@ -166,7 +161,7 @@ export class AuthenticationService {
       const payload = { username: user.username, role: user.role };
       const AccessToken = this.jwtService.sign(payload, {
         expiresIn: '1d',
-        secret: process.env.JWT_SECRET, // short lifespan for access token
+        secret: process.env.JWT_SECRET, 
       });
 
       const RefreshToken = this.jwtService.sign(payload, {
@@ -183,7 +178,7 @@ export class AuthenticationService {
       });
 
       await this.userRepository.update(
-        { username: user.username }, // Use the correct syntax for the 'where' argument
+        { username: user.username }, 
         { refreshToken: RefreshToken },
       );
 
@@ -235,3 +230,10 @@ export class AuthenticationService {
     }
   }
 }
+//csrf token
+//session management
+//sql injection
+//xss
+//brute force attack
+//rate limiting
+//strick limiter

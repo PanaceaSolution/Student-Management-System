@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { StudentDto } from './dto/student.dto';
-import * as moment from "moment";
+import moment from 'moment';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Student } from './entities/student.entity';
 import { StudentAddress } from './entities/studentAddress.entity';
