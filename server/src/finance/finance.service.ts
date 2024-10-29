@@ -33,6 +33,7 @@ export class FinanceService {
         file,
         'agreements',
       );
+      
       agreementFileUrl = uploadedFile.secure_url;
     }
 
