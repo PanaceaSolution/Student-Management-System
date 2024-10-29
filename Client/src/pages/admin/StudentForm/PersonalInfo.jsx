@@ -37,6 +37,9 @@ const PersonalInfo = ({ register, errors, handleFileChange, profilePic, removeFi
               "Grade II",
               "Grade III",
               "Grade IV",
+              "Grade VI",
+              "Grade VII",
+              "Grade VIII",
             ],
           },
           {

@@ -9,7 +9,7 @@ import InfoChart from "./InfoChart";
 
 const Dashboard = () => {
   return (
-    <section className="max-w-full flex flex-col p-2 md:p-4 h-screen overflow-y-auto scrollbar-none space-y-8">
+    <section className="max-w-full flex flex-col p-2 md:p-0 h-screen overflow-y-auto scrollbar-none space-y-6">
       <div>
         <Info />
       </div>

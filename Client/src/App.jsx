@@ -8,7 +8,7 @@ import Loader from "./components/Loader/Loader";
 
 // Lazy load components
 const Dashboard = lazy(() => import("./pages/AdminDashboard/Dashboard"));
-const Library = lazy(() => import("./pages/Library"));
+const Library = lazy(() => import("./pages/LibraryDashboard/Library"));
 const Finance = lazy(() => import("./pages/admin/Finance"));
 const Classes = lazy(() => import("./pages/admin/Classes"));
 const Staffs = lazy(() => import("./pages/admin/Staffs"));

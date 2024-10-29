@@ -203,8 +203,8 @@ const Students = () => {
     <section>
       <div className="max-w-full mx-auto">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-5">
-          <div className="rounded-sm bg-[#F8F8F8] lg:col-span-3 p-3">
-            <div className="flex justify-evenly sm:justify-end border-b-2 p-3">
+          <div className="rounded-sm bg-[#F8F8F8] lg:col-span-3 p-2">
+            <div className="flex justify-evenly sm:justify-end border-b-2 p-1">
               <div className="flex gap-3 md:gap-4">
                 <Button type="print" onClick={exportToPDF}>
                   PRINT
@@ -253,7 +253,7 @@ const Students = () => {
               </div>
             </div>
 
-            <div className="bg-[#F8F8F8] flex gap-6 justify-start items-center p-4 border-b-2">
+            <div className="bg-[#F8F8F8] flex gap-6 justify-start items-center p-2 border-b-2">
               {["all", "present", "alumni"].map((tab) => (
                 <div key={tab}>
                   <a
