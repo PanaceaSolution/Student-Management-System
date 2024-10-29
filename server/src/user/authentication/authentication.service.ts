@@ -39,7 +39,7 @@ export class AuthenticationService {
       });
       if (ExistingUser) {
         return {
-          message: 'User already exist',
+          message: 'User already exist,',
           status: 409,
           success: false,
         };
