@@ -8,7 +8,7 @@ import {
   Delete,
 } from '@nestjs/common';
 import { ParentService } from './parent.service';
-import { CreateParentDto, UpdateParentDto } from './dto/parent.dto';
+import { ParentDto,  } from './dto/parent.dto';
 
 @Controller('parent')
 export class ParentController {
@@ -16,30 +16,30 @@ export class ParentController {
 
   @Post('/create')
   async createParent(
-    @Body() createParentDto: CreateParentDto,
-  ): Promise<{ status: number; message: string; parent?: any; login? : any;}> {
+    @Body() createParentDto: ParentDto,
+  ): Promise<{ status: number; message: string; parent?: any; login?: any }> {
     return this.parentService.createParent(createParentDto);
   }
 
-  @Get('/:parentId')
-  async findParent(
-    @Param('parentId') parentId: number,
-  ): Promise<{ status: number; message?: string; parent?: any }> {
-    return this.parentService.findParent(parentId);
-  }
+//   @Get('/:parentId')
+//   async findParent(
+//     @Param('parentId') parentId: number,
+//   ): Promise<{ status: number; message?: string; parent?: any }> {
+//     return this.parentService.findParent(parentId);
+//   }
 
-  @Put('/update/:parentId')
-  async updateParent(
-    @Param('parentId') parentId: number,
-    @Body() updateParentDto: UpdateParentDto,
-  ): Promise<{ status: number; message?: string; parent?: any }> {
-    return this.parentService.updateParent(parentId, updateParentDto);
-  }
+//   @Put('/update/:parentId')
+//   async updateParent(
+//     @Param('parentId') parentId: number,
+//     @Body() updateParentDto: UpdateParentDto,
+//   ): Promise<{ status: number; message?: string; parent?: any }> {
+//     return this.parentService.updateParent(parentId, updateParentDto);
+//   }
 
-  @Delete('/delete/:parentLoginId')
-  async deleteParent(
-    @Param('parentLoginId') parentLoginId: number,
-  ): Promise<{ status: number; message?: string }> {
-    return this.parentService.deleteParent(parentLoginId);
-  }
+//   @Delete('/delete/:parentLoginId')
+//   async deleteParent(
+//     @Param('parentLoginId') parentLoginId: number,
+//   ): Promise<{ status: number; message?: string }> {
+//     return this.parentService.deleteParent(parentLoginId);
+//   }
 }

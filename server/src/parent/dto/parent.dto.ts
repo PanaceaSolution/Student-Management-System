@@ -1,8 +1,18 @@
-import { IsString, IsOptional, IsEmail, IsEnum, IsInt, IsDate, IsNumber, IsNotEmpty, isNotEmpty } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEmail,
+  IsEnum,
+  IsInt,
+  IsDate,
+  IsNumber,
+  IsNotEmpty,
+  isNotEmpty,
+} from 'class-validator';
 import { Type } from 'class-transformer';
+import { GENDER } from '../../utils/role.helper';
 
-
-export class CreateParentDto {
+export class ParentDto {
   @IsString()
   @IsNotEmpty()
   fname: string;
@@ -11,47 +21,53 @@ export class CreateParentDto {
   @IsNotEmpty()
   lname: string;
 
-  @IsNotEmpty()
-  phoneNumber: string;
-
-  @IsString()
-  @IsNotEmpty()
-  address: string;
-
   @IsEmail()
   @IsNotEmpty()
   email: string;
-  
-  @IsNumber()
+
+  @IsEnum(GENDER)
   @IsNotEmpty()
-  loginId: number;
+  gender: GENDER;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  username: string;
+
+  @IsString()
+  @IsOptional()
+  profilePicture: string;
+
+  @IsString()
+  @IsNotEmpty()
+  password: string;
 
   // @IsNotEmpty()
   // students: string
 }
 
-export class UpdateParentDto {
-  @IsOptional()
-  @IsString()
-  fname?: string;
+// export class UpdateParentDto {
+//   @IsOptional()
+//   @IsString()
+//   fname?: string;
 
-  @IsOptional()
-  @IsString()
-  lname?: string;
+//   @IsOptional()
+//   @IsString()
+//   lname?: string;
 
-  @IsOptional()
-  @IsEmail()
-  email?: string;
+//   @IsOptional()
+//   @IsEmail()
+//   email?: string;
 
-  @IsOptional()
-  @IsString()
-  phoneNumber?: string;
+//   @IsOptional()
+//   @IsString()
+//   phoneNumber?: string;
 
-  @IsOptional()
-  @IsString()
-  address?: string;
+//   @IsOptional()
+//   @IsString()
+//   address?: string;
 
-  // @IsNotEmpty()
-  // @IsOptional()
-  // students: string
-}
+//   // @IsNotEmpty()
+//   // @IsOptional()
+//   // students: string
+// }
