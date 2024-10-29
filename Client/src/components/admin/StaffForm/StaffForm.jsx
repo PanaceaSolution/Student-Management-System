@@ -9,9 +9,8 @@ const StaffForm = ({
    errors,
    user,
    loading,
-   handleFileChange,
    profilePic,
-   removeFile,
+   setProfilePic,
    clearErrors,
    currentStep,
    documents,
@@ -35,9 +34,8 @@ const StaffForm = ({
                register={register}
                errors={errors}
                user={user}
-               handleFileChange={handleFileChange}
                profilePic={profilePic}
-               removeFile={removeFile}
+               setProfilePic={setProfilePic}
                clearErrors={clearErrors}
             />
          )}

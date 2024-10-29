@@ -154,53 +154,23 @@
       "profilePic": {}
     },
     {
-      "id": "b0a0",
-      "fname": "dddddd",
-      "lname": "dfgdf",
-      "email": "add@gmail.com",
-      "phoneNumber": "34534",
-      "gender": "Female",
-      "bloodType": "A-",
-      "salary": "3454",
-      "dob": "2024-10-13",
-      "enrollDate": "2024-10-03",
-      "permanentAddress": "dsfsd",
-      "temporaryAddress": "sdfsd",
-      "city": "fsdf",
-      "province": "Province No. 1",
-      "state": "sdfsdf",
-      "villageName": "sdfd",
-      "postalCode": "3424",
-      "birthCertificate": {
-        "0": {}
-      },
-      "citizenship": {
-        "0": {}
-      },
-      "marksheet": {
-        "0": {}
-      },
-      "role": "Teacher"
-    },
-    {
-      "id": "e1d6",
-      "fname": "dfgdf",
-      "lname": "dfgdf",
-      "email": "add@gmail.com",
-      "phoneNumber": "23423",
+      "id": "d947",
+      "fname": "Nira",
+      "lname": "Lamichanne",
+      "email": "niraj@gmail.com",
+      "phoneNumber": "567567",
       "gender": "Male",
-      "bloodType": "A-",
-      "salary": "2343",
-      "role": "Accountant",
-      "dob": "2024-10-11",
+      "bloodType": "B-",
+      "salary": "777676",
+      "dob": "2024-10-08",
       "enrollDate": "2024-10-02",
-      "permanentAddress": "sdfsd",
+      "permanentAddress": "test",
       "temporaryAddress": "sdfsd",
       "city": "sdfsd",
       "province": "Province No. 2",
-      "state": "ssdfsdf",
-      "villageName": "sdfds",
-      "postalCode": "32423",
+      "state": "test",
+      "villageName": "sdfsd",
+      "postalCode": "34534",
       "birthCertificate": {
         "0": {}
       },
@@ -210,7 +180,13 @@
       "marksheet": {
         "0": {}
       },
-      "profilePic": {}
+      "profilePic": {},
+      "role": "Teacher",
+      "documents": {
+        "birthCertificate": null,
+        "citizenship": null,
+        "marksheet": null
+      }
     }
   ],
   "subjects": [

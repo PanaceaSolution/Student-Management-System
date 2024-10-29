@@ -60,17 +60,6 @@ const AddStaffForm = ({ user, id }) => {
       }
    };
 
-
-   const handleFileChange = (e) => {
-      setProfilePic(e.target.files[0]);
-      clearErrors("profilePic");
-   };
-
-   const removeFile = () => {
-      setProfilePic(null);
-      clearErrors("profilePic");
-   };
-
    const handleNext = async () => {
       const isValid = await trigger();
       if (isValid) {
@@ -114,9 +103,8 @@ const AddStaffForm = ({ user, id }) => {
                errors={errors}
                loading={loading}
                user={user}
-               handleFileChange={handleFileChange}
                profilePic={profilePic}
-               removeFile={removeFile}
+               setProfilePic={setProfilePic}
                clearErrors={clearErrors}
                currentStep={currentStep}
                setCurrentStep={setCurrentStep}

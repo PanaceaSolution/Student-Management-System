@@ -11,21 +11,13 @@ import useStaffStore from "@/store/staffStore";
 import EditStaffForm from "./StaffForm/EditStaffForm";
 
 
-const DetailsCard = ({ title, selectedId, setSelectedId, content }) => {
-   const { staffById, getStaffById, deleteStaff } = useStaffStore();
-
-   useEffect(() => {
-      if (selectedId) {
-         getStaffById(selectedId);
-      }
-   }, [selectedId, getStaffById]);
-
-   const userDetails = selectedId ? staffById : null;
-
-   const handleDelete = () => {
-      deleteStaff(selectedId);
-      setSelectedId(null);
-   };
+const DetailsCard = ({
+   title,
+   selectedId,
+   handleDelete,
+   content,
+   userDetails
+}) => {
 
    return (
       <Card>
@@ -54,10 +46,10 @@ const DetailsCard = ({ title, selectedId, setSelectedId, content }) => {
                   ))}
                </CardContent>
                <CardFooter className="flex justify-end gap-2">
-                  <EditStaffForm user={title} id={userDetails.id} />
+                  <EditStaffForm user={title} id={selectedId} />
                   <Button
                      variant="destructive"
-                     onClick={() => handleDelete(userDetails.id)}
+                     onClick={() => handleDelete(selectedId)}
                   >
                      Delete</Button>
                </CardFooter>

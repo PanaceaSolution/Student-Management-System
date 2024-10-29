@@ -46,7 +46,6 @@ const teacherContent = [
 
 
 const Teachers = () => {
-  const { staff, getAllStaff } = useStaffStore();
 
   const [selectedExport, setSelectedExport] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
@@ -54,6 +53,8 @@ const Teachers = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const { staff, getAllStaff, staffById, getStaffById, deleteStaff } = useStaffStore();
 
   useEffect(() => {
     getAllStaff();
@@ -78,7 +79,6 @@ const Teachers = () => {
   };
 
 
-
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
@@ -93,6 +93,17 @@ const Teachers = () => {
 
   const handleUserId = (id) => {
     setSelectedId(id);
+  };
+
+  useEffect(() => {
+    if (selectedId) {
+      getStaffById(selectedId);
+    }
+  }, [selectedId, getStaffById]);
+
+  const handleDelete = () => {
+    deleteStaff(selectedId);
+    setSelectedId(null);
   };
 
   return (
@@ -178,8 +189,9 @@ const Teachers = () => {
               <DetailsCard
                 title="Teacher"
                 selectedId={selectedId}
-                user={filteredUser}
+                userDetails={staffById}
                 content={teacherContent}
+                handleDelete={handleDelete}
               />
             </div>
           )}

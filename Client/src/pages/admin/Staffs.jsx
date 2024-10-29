@@ -54,7 +54,6 @@ const staffContent = [
 
 
 const Staffs = () => {
-  const { staff, getAllStaff } = useStaffStore();
 
   const [selectedExport, setSelectedExport] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
@@ -63,6 +62,8 @@ const Staffs = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const { staff, getAllStaff, staffById, getStaffById, deleteStaff } = useStaffStore();
 
   useEffect(() => {
     getAllStaff();
@@ -103,6 +104,18 @@ const Staffs = () => {
 
   const handleUserId = (id) => {
     setSelectedId(id);
+  };
+
+  useEffect(() => {
+    if (selectedId) {
+      getStaffById(selectedId);
+    }
+  }, [selectedId, getStaffById]);
+
+
+  const handleDelete = () => {
+    deleteStaff(selectedId);
+    setSelectedId(null);
   };
 
   return (
@@ -192,9 +205,9 @@ const Staffs = () => {
               <DetailsCard
                 title="Staff"
                 selectedId={selectedId}
-                setSelectedId={setSelectedId}
-                user={filteredUser}
+                userDetails={staffById}
                 content={staffContent}
+                handleDelete={handleDelete}
               />
             </div>
           )}
