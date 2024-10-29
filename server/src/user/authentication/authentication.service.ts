@@ -154,7 +154,7 @@ export class AuthenticationService {
       }
       const decryptedPassword = decryptdPassword(user.password);
       let isPasswordValid = false;
-      if (user.role === ROLE.ADMIN || user.role === ROLE.STUDENT) {
+      if (user) {
         isPasswordValid = password === decryptedPassword;
       }
 
