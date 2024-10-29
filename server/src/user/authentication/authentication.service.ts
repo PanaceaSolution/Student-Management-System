@@ -14,8 +14,7 @@ import { UserContact } from '../../entities/contact.entity';
 import { UserDocuments } from '../../entities/document.entity';
 import { UserProfile } from '../../entities/profile.entity';
 
-import { generateRandomPassword } from '../../utils/utils';
-import { generateUsername } from '../../utils/utils';
+import { generateRandomPassword, generateUsername, encryptdPassword, decryptdPassword } from '../../utils/utils';
 @Injectable()
 export class AuthenticationService {
   constructor(
@@ -57,7 +56,7 @@ export class AuthenticationService {
           role: ROLE.ADMIN,
         },
       });
-      if (UserCount >= 10) {
+      if (UserCount >= 100) {
         return {
           message: "You can't create user more than 1",
           status: 403,
@@ -65,14 +64,16 @@ export class AuthenticationService {
         };
       }
       const password = generateRandomPassword();
+      const encryptPassword = encryptdPassword(password);
       const username = generateUsername(profile.fname, profile.lname, role);
       const newUser = await this.userRepository.create({
         email,
         isActivated: true,
         username,
-        password,
+        password: encryptPassword,
         role: ROLE.ADMIN,
-      });
+      }); 
+      
       await this.userRepository.save(newUser);
       //profile
       const userProfile = this.profileRepository.create({
@@ -121,6 +122,7 @@ export class AuthenticationService {
         message: 'user created successfully',
         status: 200,
         user: newUser,
+        plainPassword: password,
       };
     } catch (error) {
       return {
@@ -131,9 +133,9 @@ export class AuthenticationService {
   }
 
   async login(loginDto: LoginDto, @Res() res: Response) {
-    const { username, password } = loginDto;
-
+    
     try {
+      const { username, password } = loginDto;
       if (!username || !password) {
         return res.status(401).json({
           message: 'Please fill both username and password',
@@ -149,16 +151,11 @@ export class AuthenticationService {
           message: 'User not found',
           success: false,
         });
-      } else if (user.role !== ROLE.ADMIN && user.role !== ROLE.STUDENT) {
-        return res.status(401).json({
-          message: 'You are not authorized',
-          success: false,
-        });
       }
+      const decryptedPassword = decryptdPassword(user.password);
       let isPasswordValid = false;
-
       if (user.role === ROLE.ADMIN || user.role === ROLE.STUDENT) {
-        isPasswordValid = password === user.password;
+        isPasswordValid = password === decryptedPassword;
       }
 
       if (!isPasswordValid) {
