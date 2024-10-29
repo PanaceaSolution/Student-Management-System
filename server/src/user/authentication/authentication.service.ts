@@ -2,16 +2,19 @@ import { Injectable, Req, Res } from '@nestjs/common';
 import { Response, Request } from 'express';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from './dto/login.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RegisterUserDto, LoginUserDto } from './dto/user.dto';
-import { User } from './entities/user.entity';
-import { generateRandomPassword, generateUsername } from '../../utils/utils';
-import { UserAddress } from '../userEntity/address.entity';
-import { UserProfile } from '../userEntity/profile.entity';
-import { UserContact } from '../userEntity/contact.entity';
-import { UserDocuments } from '../userEntity/document.entity';
+import { RegisterUserDto } from './dto/register.dto';
+import { User } from './entities/authentication.entity';
+import { ROLE } from '../../utils/role.helper';
 
+import { UserAddress } from '../../entities/address.entity';
+import { UserContact } from '../../entities/contact.entity';
+import { UserDocuments } from '../../entities/document.entity';
+import { UserProfile } from '../../entities/profile.entity';
+
+import { generateRandomPassword, generateUsername, encryptdPassword, decryptdPassword } from '../../utils/utils';
 @Injectable()
 export class AuthenticationService {
   constructor(
@@ -25,44 +28,53 @@ export class AuthenticationService {
     private readonly contactRepository: Repository<UserContact>,
     @InjectRepository(UserDocuments)
     private readonly documentRepository: Repository<UserDocuments>,
-
     private jwtService: JwtService,
   ) {}
   async register(RegisterDto: RegisterUserDto) {
     try {
-      const { email, role, profile, address, contact, document } = RegisterDto;
-
-      if (!role || !email) {
-        return {
-          message: 'You must have to fill all the above fields',
-          status: 500,
-          success: false,
-        };
-      }
-
+      const { email, role, profile, contact, document, address } = RegisterDto;
       const ExistingUser = await this.userRepository.findOne({
         where: { email },
       });
       if (ExistingUser) {
         return {
-          message: 'User already exist',
+          message: 'User already exist,',
           status: 409,
           success: false,
         };
       }
 
-      const password = generateRandomPassword();
-      const username = generateUsername(profile.fname, profile.lname, role);
-
-      const newUser = this.userRepository.create({
-        email,
-        role,
-        isActivated: true,
-        password: password,
-        username: username,
+      if (role !== ROLE.ADMIN) {
+        return {
+          message: 'Only Admin can register',
+          status: 403,
+          success: false,
+        };
+      }
+      const UserCount = await this.userRepository.count({
+        where: {
+          role: ROLE.ADMIN,
+        },
       });
+      if (UserCount >= 100) {
+        return {
+          message: "You can't create user more than 1",
+          status: 403,
+          success: false,
+        };
+      }
+      const password = generateRandomPassword();
+      const encryptPassword = encryptdPassword(password);
+      const username = generateUsername(profile.fname, profile.lname, role);
+      const newUser = await this.userRepository.create({
+        email,
+        isActivated: true,
+        username,
+        password: encryptPassword,
+        role: ROLE.ADMIN,
+      }); 
+      
       await this.userRepository.save(newUser);
-
       //profile
       const userProfile = this.profileRepository.create({
         profilePicture: profile.profilePicture,
@@ -73,8 +85,7 @@ export class AuthenticationService {
         user: newUser,
       });
       await this.profileRepository.save(userProfile);
-
-      //address
+      // user address
       if (Array.isArray(address)) {
         const userAddress = address.map((addr) => {
           return this.addressRepository.create({
@@ -89,7 +100,7 @@ export class AuthenticationService {
         await this.addressRepository.save(userAddress);
       }
 
-      //contact
+      // user contact
       const userContact = this.contactRepository.create({
         ...contact,
         user: newUser,
@@ -102,18 +113,16 @@ export class AuthenticationService {
           return this.documentRepository.create({
             documentName: doc.documentName,
             documentFile: doc.documentFile,
-            user: newUser,
+            user: newUser, // Associate the document with the user
           });
         });
-
-        // Save all user documents
         await this.documentRepository.save(userDocuments);
       }
-
       return {
         message: 'user created successfully',
         status: 200,
         user: newUser,
+        plainPassword: password,
       };
     } catch (error) {
       return {
@@ -123,10 +132,10 @@ export class AuthenticationService {
     }
   }
 
-  async login(loginDto: LoginUserDto, @Res() res: Response) {
-    const { username, password } = loginDto;
-
+  async login(loginDto: LoginDto, @Res() res: Response) {
+    
     try {
+      const { username, password } = loginDto;
       if (!username || !password) {
         return res.status(401).json({
           message: 'Please fill both username and password',
@@ -143,23 +152,24 @@ export class AuthenticationService {
           success: false,
         });
       }
-      // let isPasswordValid = false;
-      // if (user.role === ROLE.ADMIN) {
-      //   isPasswordValid = await bcrypt.compare(password, user.password);
-      // } else if (user.role === ROLE.STUDENT) {
-      //   isPasswordValid = password === user.password;
-      // }
+      const decryptedPassword = decryptdPassword(user.password);
+      let isPasswordValid = false;
+      if (user) {
+        isPasswordValid = password === decryptedPassword;
+      }
 
-      // if (!isPasswordValid) {
-      //   return res.status(401).json({
-      //     message: 'Invalid password',
-      //     success: false,
-      //   });
-      // }
+      if (!isPasswordValid) {
+        return res.status(401).json({
+          message: 'Invalid password',
+          success: false,
+        });
+      }
+
+      // Only set the cookie if all validations pass
       const payload = { username: user.username, role: user.role };
       const AccessToken = this.jwtService.sign(payload, {
         expiresIn: '1d',
-        secret: process.env.JWT_SECRET, 
+        secret: process.env.JWT_SECRET, // short lifespan for access token
       });
 
       const RefreshToken = this.jwtService.sign(payload, {
@@ -176,7 +186,7 @@ export class AuthenticationService {
       });
 
       await this.userRepository.update(
-        { username: user.username }, 
+        { username: user.username }, // Use the correct syntax for the 'where' argument
         { refreshToken: RefreshToken },
       );
 
@@ -228,10 +238,3 @@ export class AuthenticationService {
     }
   }
 }
-//csrf token
-//session management
-//sql injection
-//xss
-//brute force attack
-//rate limiting
-//strick limiter

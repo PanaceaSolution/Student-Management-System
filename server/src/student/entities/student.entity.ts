@@ -17,7 +17,7 @@ import { GENDER } from '../../utils/role.helper';
 import { TRANSPORTATION_MODE } from '../../utils/role.helper';
 import { StudentContact } from './studentContact.entity';
 import { StudentAddress } from './studentAddress.entity';
-import { User } from '../../user/authentication/entities/user.entity';
+import { User } from '../../user/authentication/entities/authentication.entity';
 
 @Entity({ name: 'Student' })
 export class Student {

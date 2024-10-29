@@ -5,11 +5,14 @@ import { AuthenticationService } from '../user/authentication/authentication.ser
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Staff } from './entities/staff.entity';
 import { AuthenticationModule } from '../user/authentication/authentication.module';
-import { User } from '../user/authentication/entities/user.entity';
-
+import { User } from '../user/authentication/entities/authentication.entity';
+import { UserProfile } from '../user/userEntity/profile.entity';
+import { UserAddress } from 'src/entities/address.entity';
+import { UserContact } from 'src/entities/contact.entity';
+import { UserDocuments } from 'src/entities/document.entity';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Staff, User]),
+    TypeOrmModule.forFeature([Staff, User,UserProfile,UserAddress,UserContact,UserDocuments]),
     AuthenticationModule
   ],
   controllers: [StaffController],

@@ -15,6 +15,7 @@ import { UserProfile } from '../../userEntity/profile.entity';
 import { UserAddress } from '../../userEntity/address.entity';
 import { UserDocuments } from '../../userEntity/document.entity';
 import { UserContact } from '../../userEntity/contact.entity';
+import { Staff } from '../../../staff/entities/staff.entity';
 
 @Entity({ name: 'User' })
 export class User {
@@ -79,4 +80,10 @@ export class User {
     onDelete: 'CASCADE',
   })
   parent: Parent[];
+  @OneToOne(() => Staff, (staff) => staff.user, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'staffId' })
+  staff: Staff;
 }

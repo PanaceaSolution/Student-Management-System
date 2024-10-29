@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Staff } from './entities/staff.entity';
 import { CreateStaffDto, UpdateStaffDto } from './dto/staff.dto';
 import { AuthenticationService } from '../user/authentication/authentication.service';
-import { User } from '../user/authentication/entities/user.entity';
+import { User } from '../user/authentication/entities/authentication.entity';
 
 @Injectable()
 export class StaffService {

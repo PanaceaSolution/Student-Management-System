@@ -1,5 +1,6 @@
 import { ROLE } from './role.helper';
 import { STAFFROLE } from './role.helper';
+import * as crypto from 'crypto';
 
 export function generateRandomPassword(): string {
   return Math.random().toString(36).slice(-8);
@@ -25,10 +26,36 @@ export function generateUsername(
       prefix = 'AC';
     } else if (staffRole === STAFFROLE.LIBRARIAN) {
       prefix = 'LB';
-    } else {
-      prefix = 'STF'
     }
+    prefix = 'STF'
   }
 
   return `${prefix}-${fname.charAt(0)}${lname.charAt(0)}${random_number}`;
+}
+
+
+
+export function encryptdPassword(password: string): string {
+  const buffer = Buffer.from(password, 'utf8');
+  const encrypted = crypto.publicEncrypt(
+    {
+      key: process.env.PUBLIC_KEY,
+      padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+      oaepHash: 'sha256',
+    },
+    buffer,
+  );
+  return encrypted.toString('base64');
+}
+export function decryptdPassword(encryptedPassword: string): string {
+  const buffer = Buffer.from(encryptedPassword, 'base64');
+  const decrypted = crypto.privateDecrypt(
+    {
+      key: process.env.PRIVATE_KEY,
+      padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+      oaepHash: 'sha256',
+    },
+    buffer,
+  );
+  return decrypted.toString('utf8');
 }

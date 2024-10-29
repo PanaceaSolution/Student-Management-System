@@ -6,7 +6,7 @@ import { Student } from './entities/student.entity';
 import { StudentAddress } from './entities/studentAddress.entity';
 import { StudentContact } from './entities/studentContact.entity';
 import { Repository, DataSource } from 'typeorm';
-import { User } from '../user/authentication/entities/user.entity';
+import { User } from '../user/authentication/entities/authentication.entity';
 import { ROLE } from '../utils/role.helper';
 import { generateUsername } from '../utils/utils';
 import { generateRandomPassword } from '../utils/utils';
