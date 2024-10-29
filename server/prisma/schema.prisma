@@ -8,22 +8,22 @@ datasource db {
 }
 
 model Login {
-  id       Int      @id @default(autoincrement())
-  username String   @unique
-  password String
-  role     String
-  refreshToken String? // to store access token
-  admin    Admin? // Relation to Admin
-  student  Student? // Relation to Student
-  parent   Parent? // Relation to Parent
-  staff    Staff? // Relation to Staff
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  password     String
+  role         String
+  refreshToken String?
+  admin        Admin?
+  student      Student? @relation
+  parent       Parent?
+  staff        Staff?
 }
 
 model Admin {
   id       Int    @id @default(autoincrement())
   username String @unique
-  access   String // Description of admin access level
-  loginId  Int    @unique // Ensure loginId is unique
+  access   String
+  loginId  Int    @unique
   login    Login  @relation(fields: [loginId], references: [id])
 }
 
@@ -32,71 +32,77 @@ model Student {
   username       String?      @unique
   fname          String
   lname          String
-  address        String
-  sex            String
+  address        Address      @relation(fields: [addressId], references: [id])
+  addressId      Int
+  sex            Gender
   bloodtype      String
   father_name    String?
   mother_name    String?
   parentId       Int?
   classId        Int?
   dob            DateTime
+  profilePicture String?
   admission_date DateTime     @default(now())
   email          String       @unique
   parent         Parent?      @relation(fields: [parentId], references: [id])
-  loginId        Int?         @unique // Ensure loginId is unique
-  login          Login?       @relation(fields: [loginId], references: [id])
-  class          Class?       @relation(fields: [classId], references: [id]) // Relation to Class
-  submissions    Submission[] // Add the reverse relation for submissions
+  loginId        Int?         @unique
+  login          Login?       @relation(fields: [loginId], references: [id], onDelete: Cascade)
+  class          Class?       @relation(fields: [classId], references: [id])
+  submissions    Submission[]
+  documents      Document[]
 }
 
 model Parent {
-  id          Int       @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   fname       String
   lname       String
   phoneNumber String
   address     String
-  email       String    @unique
+  email       String     @unique
   students    Student[]
-  loginId     Int?      @unique // Ensure loginId is unique
-  login       Login?    @relation(fields: [loginId], references: [id])
+  loginId     Int?       @unique
+  login       Login?     @relation(fields: [loginId], references: [id])
+  documents   Document[]
 }
 
 model Staff {
-  id             Int      @id @default(autoincrement())
-  username       String?  @unique
+  id             Int        @id @default(autoincrement())
+  username       String?    @unique
   fname          String
   lname          String
   dob            DateTime
   profilePicture String?
   address        String
   phoneNumber    String
-  sex            String
+  sex            Gender
   bloodType      String
-  email          String   @unique
-  role           String // For example: Teacher, Librarian, etc.
+  email          String     @unique
+  role           String
   salary         Float
-  loginId        Int?     @unique // Ensure loginId is unique
-  login          Login?   @relation(fields: [loginId], references: [id], onDelete: Cascade)
-  teacher        Teacher? // Optional relation for teachers
+  loginId        Int?       @unique
+  login          Login?     @relation(fields: [loginId], references: [id], onDelete: Cascade)
+  teacher        Teacher?
+  documents      Document[]
 }
 
 model Teacher {
   id          Int          @id @default(autoincrement())
-  staffId     Int          @unique // Ensure staffId is unique
+  staffId     Int          @unique
   staff       Staff        @relation(fields: [staffId], references: [id])
   subjects    String[]
-  classId     Int
-  class       Class        @relation(fields: [classId], references: [id])
+  classId     Int?
+  class       Class?       @relation(fields: [classId], references: [id])
   profile     String?
-  assignments Assignment[] // New relation for teacher's assignments
+  assignments Assignment[]
+  documents   Document[]
 }
 
 model Class {
   id          Int          @id @default(autoincrement())
   className   String
   students    Student[]
-  teacher     Teacher[]
-  assignments Assignment[] // Relation for assignments linked to the class
+  teachers    Teacher[]
+  assignments Assignment[]
 }
 
 model Assignment {
@@ -105,18 +111,18 @@ model Assignment {
   description String
   dueDate     DateTime
   createdAt   DateTime     @default(now())
-  classId     Int // Which class the assignment is for
-  class       Class        @relation(fields: [classId], references: [id])
-  teacherId   Int // The teacher who created the assignment
+  classId     Int?
+  class       Class?       @relation(fields: [classId], references: [id])
+  teacherId   Int
   teacher     Teacher      @relation(fields: [teacherId], references: [id])
-  submissions Submission[] // Relation to track submissions
+  submissions Submission[]
 }
 
 model Submission {
   id           Int        @id @default(autoincrement())
-  assignmentId Int // Link to the assignment
+  assignmentId Int
   assignment   Assignment @relation(fields: [assignmentId], references: [id])
-  studentId    Int // Link to the student
+  studentId    Int
   student      Student    @relation(fields: [studentId], references: [id])
   submittedAt  DateTime   @default(now())
   grade        Float?
@@ -127,4 +133,53 @@ enum Gender {
   MALE
   FEMALE
   OTHER
+}
+
+model Document {
+  id        Int       @id @default(autoincrement())
+  type      String
+  url       String
+  ownerType OwnerType
+  ownerId   Int
+  student   Student?  @relation(fields: [ownerId], references: [id], onDelete: Cascade, map: "student_ownerId_fkey")
+  parent    Parent?   @relation(fields: [ownerId], references: [id], onDelete: Cascade, map: "parent_ownerId_fkey")
+  staff     Staff?    @relation(fields: [ownerId], references: [id], onDelete: Cascade, map: "staff_ownerId_fkey")
+  teacher   Teacher?  @relation(fields: [ownerId], references: [id], onDelete: Cascade, map: "teacher_ownerId_fkey")
+  createdAt DateTime  @default(now())
+}
+
+enum OwnerType {
+  STUDENT
+  PARENT
+  STAFF
+  TEACHER
+}
+
+model Address {
+  id                 Int              @id @default(autoincrement())
+  permanentAddress   PermanentAddress @relation(fields: [permanentAddressId], references: [id], onDelete: Cascade)
+  temporaryAddress   TemporaryAddress @relation(fields: [temporaryAddressId], references: [id], onDelete: Cascade)
+  permanentAddressId Int
+  temporaryAddressId Int
+  Student            Student[]
+}
+
+model PermanentAddress {
+  id          Int       @id @default(autoincrement())
+  city        String
+  province    String
+  state       String
+  villageName String
+  postalcode  String
+  Address     Address[]
+}
+
+model TemporaryAddress {
+  id          Int       @id @default(autoincrement())
+  city        String
+  province    String
+  state       String
+  villageName String
+  postalcode  String
+  Address     Address[]
 }
