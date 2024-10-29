@@ -32,7 +32,7 @@ class InfoChart extends Component {
     return (
       <div>
         <div className="flex  sticky top-0 justify-between px-4 p-2 border-b-2 ">
-          <p>Info</p>
+        <p className="text-lg text-black font-semibold">Info</p>
           <div className="flex space-x-2 cursor-pointer">
             <RefreshCcw size={20} className="text-green-600" />
 

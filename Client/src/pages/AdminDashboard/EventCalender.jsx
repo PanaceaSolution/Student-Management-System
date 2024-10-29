@@ -64,7 +64,7 @@ const EventCalendar = () => {
   };
 
   return (
-    <div className="bg-gray-100 p-1 rounded-lg shadow-md">
+    <div className="bg-gray-100 p-1 rounded-sm shadow-md">
       <Calendar
         localizer={localizer}
         events={events}

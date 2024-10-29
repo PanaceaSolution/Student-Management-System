@@ -4,7 +4,7 @@ import StepIndicator from "./StepIndicator";
 import PersonalInfo from "./PersonalInfo";
 import AddressInfo from "./AddressInfo";
 import DocumentUpload from "./DocumentUpload";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, InfoIcon } from "lucide-react";
 import useAddStudent from "@/hooks/useAddStudent";
 
 const AddStudentForm = ({ studentId, initialData }) => {
@@ -26,11 +26,12 @@ const AddStudentForm = ({ studentId, initialData }) => {
     citizenship: null,
     marksheet: null,
   });
-
+// hooks
   const { addStudent, updateStudent } = useAddStudent();
 
   useEffect(() => {
     if (initialData) {
+      console.log(initialData)
       Object.entries(initialData).forEach(([key, value]) => {
         setValue(key, value);
       });
@@ -54,7 +55,6 @@ const AddStudentForm = ({ studentId, initialData }) => {
 
     try {
       if (studentId) {
-        // await updateStudent.mutateAsync({ studentId, formData });
         console.log("Student updated:", formData);
       } else {
         await addStudent(formData);
