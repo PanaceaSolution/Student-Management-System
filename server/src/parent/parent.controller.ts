@@ -1,35 +1,38 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { ParentService } from './parent.service';
-import { CreateParentDto } from './dto/create-parent.dto';
-import { UpdateParentDto } from './dto/update-parent.dto';
+import { ParentDto,  } from './dto/parent.dto';
 
 @Controller('parent')
 export class ParentController {
   constructor(private readonly parentService: ParentService) {}
 
-  @Post()
-  create(@Body() createParentDto: CreateParentDto) {
-    return this.parentService.create(createParentDto);
+  @Post('/create')
+  async createParent(
+    @Body() createParentDto: ParentDto,
+  ): Promise<{ status: number; message: string; parent?: any; login?: any }> {
+    return this.parentService.createParent(createParentDto);
   }
 
-  @Get()
-  findAll() {
-    return this.parentService.findAll();
-  }
+  // @Get('/:parentId')
+  // async findParent(
+  //   @Param('parentId') parentId: number,
+  // ): Promise<{ status: number; message?: string; parent?: any }> {
+  //   return this.parentService.findParent(parentId);
+  // }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.parentService.findOne(+id);
-  }
+  // @Put('/update/:parentId')
+  // async updateParent(
+  //   @Param('parentId') parentId: number,
+  //   @Body() updateParentDto: UpdateParentDto,
+  // ): Promise<{ status: number; message?: string; parent?: any }> {
+  //   return this.parentService.updateParent(parentId, updateParentDto);
+  // }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateParentDto: UpdateParentDto) {
-    return this.parentService.update(+id, updateParentDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.parentService.remove(+id);
-  }
+  // @Delete('/delete/:parentLoginId')
+  // async deleteParent(
+  //   @Param('parentLoginId') parentLoginId: number,
+  // ): Promise<{ status: number; message?: string }> {
+  //   return this.parentService.deleteParent(parentLoginId);
+  // }
 }
 
