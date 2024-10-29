@@ -18,21 +18,13 @@ import {
 } from '../../userEntity/dto/common.dto';
 
 export class RegisterUserDto {
-  @IsString()
-  @IsOptional()
-  username: string;
-
-  @IsString()
-  @IsNotEmpty()
-  password: string;
-
   @IsEmail()
   @IsNotEmpty()
   email: string;
 
   @IsEnum(ROLE)
   @IsNotEmpty()
-  role: ROLE;
+  role: ROLE; //register user role= admin
 
   @IsString()
   @IsOptional()
@@ -64,9 +56,9 @@ export class RegisterUserDto {
 }
 
 export class LoginUserDto {
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Username is required' })
   username: string;
 
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Password is required' })
   password: string;
 }

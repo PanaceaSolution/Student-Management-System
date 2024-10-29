@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { StudentDto } from './dto/student.dto';
-import moment from 'moment';
+import * as moment from "moment";
 import { InjectRepository } from '@nestjs/typeorm';
 import { Student } from './entities/student.entity';
 import { StudentAddress } from './entities/studentAddress.entity';
@@ -43,7 +43,7 @@ export class StudentService {
       admissionDate,
       address,
       contact,
-      parentId,
+      // parentId,
       transportationMode,
       previousSchool,
       rollNumber,
@@ -52,7 +52,8 @@ export class StudentService {
       studentClass,
     } = createStudentDto;
 
-    const DOB = moment(dob, 'YYYY-MM-DD');
+    const DOB = 
+    moment(dob, 'YYYY-MM-DD');
     if (!DOB.isValid()) {
       throw new BadRequestException('Invalid date format for Date of Birth');
     }
@@ -207,7 +208,7 @@ export class StudentService {
         admissionDate,
         address,
         contact,
-        parentId,
+        // parentId,
         transportationMode,
         previousSchool,
         rollNumber,

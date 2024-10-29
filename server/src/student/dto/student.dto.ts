@@ -90,11 +90,11 @@ export class StudentDto {
   @IsOptional()
   previousSchool: string;
 
-  @IsUUID()
-  parentId: number;
+  // @IsUUID()
+  // parentId: number;
 
-  @IsUUID()
-  loginId: number;
+  // @IsUUID()
+  // loginId: number;
 
   @IsDate()
   @Type(() => Date)

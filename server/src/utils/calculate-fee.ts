@@ -23,7 +23,6 @@ export function calculateFees(params: CalculateFeesParams) {
     discount = '0',
   } = params;
 
-  // Calculate the total annual fee by summing all the fees
   const anualFee =
     parseFloat(registrationFee) +
     parseFloat(examinationFee) +
@@ -31,7 +30,6 @@ export function calculateFees(params: CalculateFeesParams) {
     parseFloat(securityDeposite) +
     parseFloat(otherCharges);
 
-  // Calculate the monthly fee by dividing the annual fee by 12
   const monthlyFee = anualFee / 12;
 
   // Handle tax

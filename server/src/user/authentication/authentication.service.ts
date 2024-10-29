@@ -150,21 +150,19 @@ export class AuthenticationService {
           success: false,
         });
       }
-      let isPasswordValid = false;
-      if (user.role === ROLE.ADMIN) {
-        isPasswordValid = await bcrypt.compare(password, user.password);
-      } else if (user.role === ROLE.STUDENT) {
-        isPasswordValid = password === user.password;
-      }
+      // let isPasswordValid = false;
+      // if (user.role === ROLE.ADMIN) {
+      //   isPasswordValid = await bcrypt.compare(password, user.password);
+      // } else if (user.role === ROLE.STUDENT) {
+      //   isPasswordValid = password === user.password;
+      // }
 
-      if (!isPasswordValid) {
-        return res.status(401).json({
-          message: 'Invalid password',
-          success: false,
-        });
-      }
-
-      // Only set the cookie if all validations pass
+      // if (!isPasswordValid) {
+      //   return res.status(401).json({
+      //     message: 'Invalid password',
+      //     success: false,
+      //   });
+      // }
       const payload = { username: user.username, role: user.role };
       const AccessToken = this.jwtService.sign(payload, {
         expiresIn: '1d',
