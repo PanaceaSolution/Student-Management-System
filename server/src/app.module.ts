@@ -7,7 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthenticationModule } from './user/authentication/authentication.module';
 import { StudentModule } from './student/student.module';
-// import { ParentModule } from './parent/parent.module';
+import { ParentModule } from './parent/parent.module';
 
 @Module({
   imports: [
@@ -25,13 +25,13 @@ import { StudentModule } from './student/student.module';
         entities: [join(process.cwd(), 'dist/**/*.entity{.ts,.js}')],
         synchronize: true,
         ssl: {
-          rejectUnauthorized: false,
+          rejectUnauthorized: false, // Disable strict SSL validation
         },
       }),
     }),
     AuthenticationModule,
     StudentModule,
-    // ParentModule
+    ParentModule
   ],
   controllers: [AppController],
   providers: [AppService],

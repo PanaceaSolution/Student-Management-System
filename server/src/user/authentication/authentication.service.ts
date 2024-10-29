@@ -2,18 +2,20 @@ import { Injectable, Req, Res } from '@nestjs/common';
 import { Response, Request } from 'express';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from './dto/login.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RegisterUserDto, LoginUserDto } from './dto/user.dto';
+import { RegisterUserDto } from './dto/register.dto';
 import { User } from './entities/authentication.entity';
 import { ROLE } from '../../utils/role.helper';
-import { generateRandomPassword, generateUsername } from '../../utils/utils';
 
-import { UserAddress } from '../../common/address.entity';
-import { UserProfile } from '../../common/profile.entity';
-import { UserContact } from '../../common/contact.entity';
-import { UserDocuments } from '../../common/document.entity';
+import { UserAddress } from '../../entities/address.entity';
+import { UserContact } from '../../entities/contact.entity';
+import { UserDocuments } from '../../entities/document.entity';
+import { UserProfile } from '../../entities/profile.entity';
 
+import { generateRandomPassword } from '../../utils/utils';
+import { generateUsername } from '../../utils/utils';
 @Injectable()
 export class AuthenticationService {
   constructor(
@@ -27,44 +29,51 @@ export class AuthenticationService {
     private readonly contactRepository: Repository<UserContact>,
     @InjectRepository(UserDocuments)
     private readonly documentRepository: Repository<UserDocuments>,
-
     private jwtService: JwtService,
   ) {}
   async register(RegisterDto: RegisterUserDto) {
     try {
-      const { email, role, profile, address, contact, document } = RegisterDto;
-
-      if (!role || !email) {
-        return {
-          message: 'You must have to fill all the above fields',
-          status: 500,
-          success: false,
-        };
-      }
-
+      const { email, role, profile, contact, document, address } = RegisterDto;
       const ExistingUser = await this.userRepository.findOne({
         where: { email },
       });
       if (ExistingUser) {
         return {
-          message: 'User already exist',
+          message: 'User already exist,',
           status: 409,
           success: false,
         };
       }
 
+      if (role !== ROLE.ADMIN) {
+        return {
+          message: 'Only Admin can register',
+          status: 403,
+          success: false,
+        };
+      }
+      const UserCount = await this.userRepository.count({
+        where: {
+          role: ROLE.ADMIN,
+        },
+      });
+      if (UserCount >= 10) {
+        return {
+          message: "You can't create user more than 1",
+          status: 403,
+          success: false,
+        };
+      }
       const password = generateRandomPassword();
       const username = generateUsername(profile.fname, profile.lname, role);
-
-      const newUser = this.userRepository.create({
+      const newUser = await this.userRepository.create({
         email,
-        role,
         isActivated: true,
-        password: password,
-        username: username,
+        username,
+        password,
+        role: ROLE.ADMIN,
       });
       await this.userRepository.save(newUser);
-
       //profile
       const userProfile = this.profileRepository.create({
         profilePicture: profile.profilePicture,
@@ -75,8 +84,7 @@ export class AuthenticationService {
         user: newUser,
       });
       await this.profileRepository.save(userProfile);
-
-      //address
+      // user address
       if (Array.isArray(address)) {
         const userAddress = address.map((addr) => {
           return this.addressRepository.create({
@@ -91,7 +99,7 @@ export class AuthenticationService {
         await this.addressRepository.save(userAddress);
       }
 
-      //contact
+      // user contact
       const userContact = this.contactRepository.create({
         ...contact,
         user: newUser,
@@ -107,11 +115,8 @@ export class AuthenticationService {
             user: newUser, // Associate the document with the user
           });
         });
-
-        // Save all user documents
         await this.documentRepository.save(userDocuments);
       }
-
       return {
         message: 'user created successfully',
         status: 200,
@@ -125,7 +130,7 @@ export class AuthenticationService {
     }
   }
 
-  async login(loginDto: LoginUserDto, @Res() res: Response) {
+  async login(loginDto: LoginDto, @Res() res: Response) {
     const { username, password } = loginDto;
 
     try {
@@ -151,9 +156,8 @@ export class AuthenticationService {
         });
       }
       let isPasswordValid = false;
-      if (user.role === ROLE.ADMIN) {
-        isPasswordValid = await bcrypt.compare(password, user.password);
-      } else if (user.role === ROLE.STUDENT) {
+
+      if (user.role === ROLE.ADMIN || user.role === ROLE.STUDENT) {
         isPasswordValid = password === user.password;
       }
 

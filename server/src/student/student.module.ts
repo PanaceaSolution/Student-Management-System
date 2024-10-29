@@ -10,7 +10,12 @@ import { StudentContact } from './entities/studentContact.entity';
 import { User } from '../user/authentication/entities/authentication.entity';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Student, StudentAddress, StudentContact, User]),
+    TypeOrmModule.forFeature([
+      Student,
+      StudentAddress,
+      StudentContact,
+      User,
+    ]),
     AuthenticationModule,
   ],
   controllers: [StudentController],

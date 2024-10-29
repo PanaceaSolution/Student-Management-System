@@ -1,19 +1,13 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  JoinColumn,
-  OneToOne,
-  OneToMany,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, OneToOne, OneToMany } from 'typeorm';
 
-import { ROLE } from '../../../utils/role.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { Student } from '../../../student/entities/student.entity';
-import { UserProfile } from '../../../common/profile.entity';
-import { UserAddress } from '../../../common/address.entity';
-import { UserDocuments } from '../../../common/document.entity';
-import { UserContact } from '../../../common/contact.entity';
+import { ROLE } from '../../../utils/role.helper';
+import { UserAddress } from '../../../entities/address.entity';
+import { UserContact } from '../../../entities/contact.entity';
+import { UserProfile } from '../../../entities/profile.entity';
+import { UserDocuments } from '../../../entities/document.entity';
+
 
 @Entity({ name: 'User' })
 export class User {
@@ -35,12 +29,13 @@ export class User {
   @Column({ type: 'text', nullable: true })
   refreshToken: string;
 
-  @Column({ type: 'boolean', nullable: true, default: true })
+  @Column({ type: 'boolean', nullable: true })
   isActivated: boolean;
 
   @OneToOne(() => UserProfile, (profile) => profile.user, {
     cascade: true,
     onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
     nullable: false,
   })
   profile: UserProfile;
@@ -48,6 +43,7 @@ export class User {
   @OneToMany(() => UserAddress, (address) => address.user, {
     cascade: true,
     onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
     nullable: false,
   })
   address: UserAddress;
@@ -55,6 +51,7 @@ export class User {
   @OneToOne(() => UserContact, (contact) => contact.user, {
     cascade: true,
     onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
     nullable: false,
   })
   contact: UserContact;
@@ -62,6 +59,7 @@ export class User {
   @OneToMany(() => UserDocuments, (document) => document.user, {
     cascade: true,
     onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
     nullable: false,
   })
   document: UserDocuments;
@@ -69,6 +67,7 @@ export class User {
   @OneToOne(() => Student, (student) => student.user, {
     nullable: true,
     onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn()
   student: Student;

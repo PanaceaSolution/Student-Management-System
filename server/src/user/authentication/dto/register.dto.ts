@@ -1,22 +1,21 @@
 // src/auth/dto/register.dto.ts
 import {
   IsString,
-  IsNotEmpty,
   IsOptional,
+  IsNotEmpty,
   IsEmail,
   IsEnum,
   ValidateNested,
   IsArray,
 } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
 import { ROLE } from '../../../utils/role.helper';
+import { Transform, Type } from 'class-transformer';
 import {
-  UserProfileDto,
   UserAddressDto,
   UserContactDto,
   UserDocumentsDto,
-} from '../../../common/dto/common.dto';
-
+  UserProfileDto,
+} from '../../../dtos/common.dto';
 export class RegisterUserDto {
   @IsString()
   @IsOptional()
@@ -61,12 +60,4 @@ export class RegisterUserDto {
     return date.toISOString().split('T')[0]; // Format as 'yyyy-mm-dd'
   })
   createdAt: string;
-}
-
-export class LoginUserDto {
-  @IsNotEmpty()
-  username: string;
-
-  @IsNotEmpty()
-  password: string;
 }

@@ -1,7 +1,8 @@
 import { Body, Controller, Post, Res, Req } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
+import { LoginDto } from './dto/login.dto';
 import { Response } from 'express';
-import { RegisterUserDto, LoginUserDto } from './dto/user.dto';
+import { RegisterUserDto } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthenticationController {
@@ -13,13 +14,12 @@ export class AuthenticationController {
   }
 
   @Post('login')
-  async login(@Body() LoginDto: LoginUserDto, @Res() res: Response) {
+  async login(@Body() LoginDto: LoginDto, @Res() res: Response) {
     return this.authenticationService.login(LoginDto, res);
   }
 
   @Post('refresh-token')
-  async refreshToken(@Req() req: Request, @Res() res: Response){
-    return this.authenticationService.refreshToken(req, res)
+  async refreshToken(@Req() req: Request, @Res() res: Response) {
+    return this.authenticationService.refreshToken(req, res);
   }
-
 }

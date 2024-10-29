@@ -1,7 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne } from 'typeorm';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
-import { User } from '../user/authentication/entities/authentication.entity'; 
-
+import { User } from '../user/authentication/entities/authentication.entity';
 @Entity({ name: 'userDocuments' })
 export class UserDocuments {
     @PrimaryGeneratedColumn('uuid')
