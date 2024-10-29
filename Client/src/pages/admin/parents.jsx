@@ -2,7 +2,14 @@ import SearchBox from '@/components/SearchBox';
 import Select from '@/components/Select';
 import { Button } from '@/components/ui/button';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import DetailsCard from '@/components/admin/DetailsCard';
+import {
+   Card,
+   CardContent,
+   CardDescription,
+   CardFooter,
+   CardHeader,
+   CardTitle,
+} from "@/components/ui/card"
 import ParentsForm from '@/components/admin/ParentsForm';
 import useParentStore from '@/store/parentsStore';
 import StaffTable from '@/components/admin/StaffTable';
@@ -24,10 +31,11 @@ const parentsTableHead = ["", "First Name", "Last Name", "Phone Number", "Email"
 const parentsTableFields = ["firstName", "lastName", "phoneNumber", "email"];
 
 const parentsContent = [
-   { label: "First Name", key: "fname" },
-   { label: "Last Name", key: "lname" },
+   { label: "First Name", key: "firstName" },
+   { label: "Last Name", key: "lastName" },
    { label: "Email", key: "email" },
-   { label: "Phone", key: "phoneNumber" }
+   { label: "Phone", key: "phoneNumber" },
+   { label: "Students", key: "studentId" }
 ];
 
 
@@ -39,7 +47,7 @@ const Parents = () => {
    const [selectedId, setSelectedId] = useState(null);
    const [searchTerm, setSearchTerm] = useState("");
 
-   const { parents, getAllParents } = useParentStore()
+   const { parents, getAllParents, parentById, getParentsById, deleteParent } = useParentStore()
 
    useEffect(() => {
       getAllParents();
@@ -73,6 +81,16 @@ const Parents = () => {
       setSelectedId(id);
    };
 
+   useEffect(() => {
+      if (selectedId) {
+         getParentsById(selectedId);
+      }
+   }, [selectedId, getParentsById])
+
+   const handleDelete = async (id) => {
+      await deleteParent(id);
+   };
+
    return (
       <section>
          <div className='max-w-full mx-auto'>
@@ -89,7 +107,7 @@ const Parents = () => {
                            onChange={handleExportChange}
                            className="w-32 bg-white"
                         />
-                        <ParentsForm />
+                        <ParentsForm title="Add Parent" />
                      </div>
                   </div>
                   <div className="border-b-2 p-2">
@@ -144,16 +162,45 @@ const Parents = () => {
                   </div>
                </div>
 
-               {/* Conditionally show the DetailsCard */}
                {selectedId && (
                   <div className="lg:col-span-2 2xl:col-span-1 px-3 lg:pr-4">
-                     <DetailsCard
-                        title="Parents"
-                        selectedId={selectedId}
-                        setSelectedId={setSelectedId}
-                        user={parents}
-                        content={parentsContent}
-                     />
+                     <Card>
+                        <CardHeader>
+                           <CardTitle className="text-2xl font-bold text-primary text-center">
+                              Parents Details
+                           </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                           <img
+                              src={" "}
+                              alt="Profile Preview"
+                              className="w-20 h-20 rounded-md border-2 border-gray-300 mb-4"
+                           />
+                           {parentsContent.map((field, index) => (
+                              <div key={index} className="mb-4">
+                                 <p className="text-xs uppercase text-gray-500">
+                                    {field.label}
+                                 </p>
+                                 <p className="text-lg font-medium text-gray-800">
+                                    {field.key === "studentId"
+                                       ? (parentById[field.key]?.length
+                                          ? parentById[field.key].join(", ") // Display as a comma-separated list
+                                          : "N/A")
+                                       : (parentById[field.key] || "N/A")
+                                    }
+                                 </p>
+                              </div>
+                           ))}
+                        </CardContent>
+                        <CardFooter className="flex justify-end gap-2">
+                           <ParentsForm title="Edit" data={parentById} />
+                           <Button
+                              variant="destructive"
+                              onClick={() => handleDelete(selectedId)}
+                           >
+                              Delete</Button>
+                        </CardFooter>
+                     </Card>
                   </div>
                )}
             </div>

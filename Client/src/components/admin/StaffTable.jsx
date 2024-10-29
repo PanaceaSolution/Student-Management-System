@@ -72,11 +72,11 @@ const StaffTable = ({ user, handleUserId, tableHead, tableFields }) => {
          </Table>
 
          {/* Pagination Controls */}
-         <Pagination
+         {user.length > 10 && <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
-         />
+         />}
       </>
    );
 };

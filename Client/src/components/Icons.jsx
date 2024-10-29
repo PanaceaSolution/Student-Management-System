@@ -7,8 +7,9 @@ import { TbReportAnalytics } from "react-icons/tb";
 import { RiMoneyRupeeCircleLine } from "react-icons/ri";
 import { LuLogOut } from "react-icons/lu";
 import { MdDashboard } from "react-icons/md";
+import { FaHouseUser } from "react-icons/fa";
 
 
 export {
-   FaChalkboardTeacher, FaChartBar, FaNetworkWired, FaTasks, FaUserGraduate, FaUserTie, SiGoogleclassroom, SiGooglemessages, SiStorybook, IoLibrary, IoMdCalendar, GrResources, TbReportAnalytics, RiMoneyRupeeCircleLine, LuLogOut, MdDashboard
+   FaChalkboardTeacher, FaChartBar, FaNetworkWired, FaTasks, FaUserGraduate, FaUserTie, SiGoogleclassroom, SiGooglemessages, SiStorybook, IoLibrary, IoMdCalendar, GrResources, TbReportAnalytics, RiMoneyRupeeCircleLine, LuLogOut, MdDashboard, FaHouseUser
 }
