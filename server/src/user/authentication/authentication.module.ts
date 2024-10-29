@@ -3,11 +3,11 @@ import { AuthenticationService } from './authentication.service';
 import { AuthenticationController } from './authentication.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entities/authentication.entity';
-import { UserAddress } from '../userEntity/address.entity';
-import { UserProfile } from '../userEntity/profile.entity';
-import { UserDocuments } from '../userEntity/document.entity';
-import { UserContact } from '../userEntity/contact.entity';
+import { User } from './entities/user.entity';
+import { UserAddress } from '../../user/userEntity/address.entity';
+import { UserProfile } from '../../user/userEntity/profile.entity';
+import { UserDocuments } from '../../user/userEntity/document.entity';
+import { UserContact } from '../../user/userEntity/contact.entity';
 
 @Module({
   imports: [
@@ -24,6 +24,6 @@ import { UserContact } from '../userEntity/contact.entity';
   ],
   controllers: [AuthenticationController],
   providers: [AuthenticationService],
-  exports: [JwtModule], // Remove extra closing parenthesis and add missing comma
+  exports: [JwtModule, AuthenticationService, TypeOrmModule],
 })
 export class AuthenticationModule {}

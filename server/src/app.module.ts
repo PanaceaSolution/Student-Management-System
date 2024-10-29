@@ -13,6 +13,7 @@ import { UploadController } from './uploads/upload.controller';
 import { StudentModule } from './student/student.module';
 import { ParentModule } from './parent/parent.module';
 // import { ParentModule } from './parent/parent.module';
+import { StaffModule } from './staff/staff.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ParentModule } from './parent/parent.module';
     FinanceModule,
     BillModule,
     StudentModule,
+    StaffModule,
     ParentModule,
   ],
   controllers: [HealthController, UploadController],

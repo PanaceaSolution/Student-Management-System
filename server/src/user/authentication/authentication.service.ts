@@ -5,10 +5,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterUserDto, LoginUserDto } from './dto/user.dto';
-import { User } from './entities/authentication.entity';
-import { ROLE } from '../../utils/role.helper';
+import { User } from './entities/user.entity';
 import { generateRandomPassword, generateUsername } from '../../utils/utils';
-
 import { UserAddress } from '../userEntity/address.entity';
 import { UserProfile } from '../userEntity/profile.entity';
 import { UserContact } from '../userEntity/contact.entity';
@@ -104,7 +102,7 @@ export class AuthenticationService {
           return this.documentRepository.create({
             documentName: doc.documentName,
             documentFile: doc.documentFile,
-            user: newUser, // Associate the document with the user
+            user: newUser,
           });
         });
 
