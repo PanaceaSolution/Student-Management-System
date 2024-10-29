@@ -33,15 +33,13 @@ export function generateUsername(
   return `${prefix}-${fname.charAt(0)}${lname.charAt(0)}${random_number}`;
 }
 
-const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-  modulusLength: 2048,
-});
+
 
 export function encryptdPassword(password: string): string {
   const buffer = Buffer.from(password, 'utf8');
   const encrypted = crypto.publicEncrypt(
     {
-      key: publicKey,
+      key: process.env.PUBLIC_KEY,
       padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
       oaepHash: 'sha256',
     },
@@ -53,7 +51,7 @@ export function decryptdPassword(encryptedPassword: string): string {
   const buffer = Buffer.from(encryptedPassword, 'base64');
   const decrypted = crypto.privateDecrypt(
     {
-      key: privateKey,
+      key: process.env.PRIVATE_KEY,
       padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
       oaepHash: 'sha256',
     },
