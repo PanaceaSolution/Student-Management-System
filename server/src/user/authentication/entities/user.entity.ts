@@ -9,11 +9,14 @@ import {
 
 import { ROLE } from '../../../utils/role.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
-import { Student } from '../../../student/entities/student.entity';
+
 import { UserProfile } from '../../../common/profile.entity';
 import { UserAddress } from '../../../common/address.entity';
 import { UserDocuments } from '../../../common/document.entity';
 import { UserContact } from '../../../common/contact.entity';
+
+import { Staff } from '../../../staff/entities/staff.entity';
+import { Student } from '../../../student/entities/student.entity';
 
 @Entity({ name: 'User' })
 export class User {
@@ -72,4 +75,11 @@ export class User {
   })
   @JoinColumn()
   student: Student;
+
+  @OneToOne(() => Staff, (staff) => staff.user, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'staffId' })
+  staff: Staff;
 }
