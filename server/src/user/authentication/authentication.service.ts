@@ -202,6 +202,26 @@ export class AuthenticationService {
     }
   }
 
+  async logout(@Res() res: Response, userId: UUID) {
+    try {
+      await this.userRepository.update(
+        { userId: userId }, // Use the correct syntax for the 'where' argument
+        { refreshToken: null },
+      );
+      res.clearCookie('accessToken');
+      res.clearCookie('refreshToken');
+      return res.status(200).json({
+        message: 'Logout successful',
+        success: true,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Internal server error',
+        success: false,
+      });
+    }
+  }
+
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     const refreshToken = req.cookies.refreshToken;
 

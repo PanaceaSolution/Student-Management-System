@@ -19,6 +19,11 @@ export class AuthenticationController {
     return this.authenticationService.login(loginDto, res);
   }
 
+  @Post('logout')
+  async logout(@Req() request: Request, userId:UUID, @Res() res: Response) {
+    return this.authenticationService.logout(res, userId);
+  }
+
   @Post('refresh-token')
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     return this.authenticationService.refreshToken(req, res);
