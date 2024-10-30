@@ -17,7 +17,7 @@ export class ParentDto {
   username: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Password is required' })
   password: string;
 
   @ValidateNested()
