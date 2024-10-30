@@ -13,7 +13,7 @@ export enum STAFFROLE {
 
 export enum GENDER {
   MALE = 'MALE',
-  FEMALE = 'FEMLAE',
+  FEMALE = 'FEMALE',
   OTHER = 'OTHER',
 }
 
