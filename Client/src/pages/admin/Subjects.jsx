@@ -6,6 +6,8 @@ import useSubjectStore from '@/store/subjectStore';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TableWithActions from '@/components/admin/tableWithActions';
+import useExport from '@/hooks/useExport';
+
 
 const Exports = [
    { value: "", label: "EXPORT" },
@@ -25,7 +27,7 @@ const Classes = [
    { value: "8", label: "8" },
    { value: "9", label: "9" },
    { value: "10", label: "10" },
-]
+];
 
 const formFields = [
    {
@@ -57,11 +59,11 @@ const Subjects = () => {
    const [isUpdating, setIsUpdating] = useState(false);
 
    const { subjects, getAllSubjects, deleteSubject } = useSubjectStore();
+   const { exportToCSV, exportToPDF } = useExport();
 
    useEffect(() => {
       getAllSubjects();
    }, [getAllSubjects]);
-
 
    const sortedSubjects = subjects.sort((a, b) => {
       return parseInt(a.class) - parseInt(b.class);
@@ -81,9 +83,14 @@ const Subjects = () => {
       const value = event.target.value;
       setSelectedExport(value);
       if (value === 'CSV') {
-         exportToCSV();
+         exportToCSV(sortedSubjects, "subjects.csv");
       } else if (value === 'PDF') {
-         exportToPDF();
+         const headers = [
+            { header: "Id", dataKey: "id" },
+            { header: "Subject Name", dataKey: "subjectName" },
+            { header: "Class", dataKey: "class" },
+         ];
+         exportToPDF(sortedSubjects, headers, "Subjects List", "subjects.pdf");
       }
    };
 
@@ -107,7 +114,6 @@ const Subjects = () => {
             <div className="rounded-sm bg-card lg:col-span-5 p-3">
                <div className="flex justify-evenly sm:justify-end border-b-2 p-3">
                   <div className="flex gap-3 md:gap-4">
-                     <Button variant="print">PRINT</Button>
                      <Select
                         options={Exports}
                         selectedValue={selectedExport}
@@ -160,4 +166,4 @@ const Subjects = () => {
    );
 };
 
-export default Subjects; 
+export default Subjects;

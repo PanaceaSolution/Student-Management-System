@@ -5,7 +5,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
    Card,
    CardContent,
-   CardDescription,
    CardFooter,
    CardHeader,
    CardTitle,
@@ -13,6 +12,7 @@ import {
 import ParentsForm from '@/components/admin/ParentsForm';
 import useParentStore from '@/store/parentsStore';
 import StaffTable from '@/components/admin/StaffTable';
+import useExport from '@/hooks/useExport';
 
 const Exports = [
    { value: "", label: "EXPORT" },
@@ -53,15 +53,23 @@ const Parents = () => {
       getAllParents();
    }, [getAllParents])
 
+   const { exportToCSV, exportToPDF } = useExport()
+
 
    // Handle format selection and trigger export
    const handleExportChange = (event) => {
       const value = event.target.value;
       setSelectedExport(value);
       if (value === "CSV") {
-         exportToCSV();
+         exportToCSV(parents, "parents.csv");
       } else if (value === "PDF") {
-         exportToPDF();
+         const headers = [
+            { header: "First Name", dataKey: "firstName" },
+            { header: "Last Name", dataKey: "lastName" },
+            { header: "Email", dataKey: "email" },
+            { header: "Phone", dataKey: "phoneNumber" },
+         ]
+         exportToPDF(parents, headers, "Parents List", "parents.pdf");
       }
    };
 
@@ -98,9 +106,6 @@ const Parents = () => {
                <div className='rounded-sm bg-card lg:col-span-5 2xl:col-span-3 p-3'>
                   <div className="flex justify-evenly sm:justify-end border-b-2 p-3">
                      <div className="flex gap-3 md:gap-4">
-                        <Button variant="print">
-                           PRINT
-                        </Button>
                         <Select
                            options={Exports}
                            selectedValue={selectedExport}

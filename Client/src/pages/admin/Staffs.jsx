@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import StaffTable from '@/components/admin/staffTable';
 import DetailsCard from '@/components/admin/DetailsCard';
 import AddStaffForm from '@/components/admin/StaffForm/AddStaffForm';
+import useExport from '@/hooks/useExport';
 
 const Exports = [
   { value: "", label: "EXPORT" },
@@ -71,14 +72,22 @@ const Staffs = () => {
 
   const filteredUser = staff.filter((staffMember) => staffMember.role !== "Teacher")
 
+  const { exportToCSV, exportToPDF } = useExport()
+
   // Handle format selection and trigger export
   const handleExportChange = (event) => {
     const value = event.target.value;
     setSelectedExport(value);
     if (value === "CSV") {
-      exportToCSV();
+      exportToCSV(filteredUser, "staffs.csv");
     } else if (value === "PDF") {
-      exportToPDF();
+      const headers = [
+        { header: "First Name", dataKey: "fname" },
+        { header: "Last Name", dataKey: "lname" },
+        { header: "Gender", dataKey: "gender" },
+        { header: "Role", dataKey: "role" },
+      ]
+      exportToPDF(filteredUser, headers, "Staff List", "staffs.pdf");
     }
   };
 
@@ -125,9 +134,6 @@ const Staffs = () => {
           <div className='rounded-sm bg-card lg:col-span-5 2xl:col-span-3 p-3'>
             <div className="flex justify-evenly sm:justify-end border-b-2 p-3">
               <div className="flex gap-3 md:gap-4">
-                <Button variant="print">
-                  PRINT
-                </Button>
                 <Select
                   options={Exports}
                   selectedValue={selectedExport}
