@@ -7,11 +7,12 @@ import {
 } from 'typeorm';
 
 import { User } from '../authentication/entities/authentication.entity'; 
+import { UUID } from 'crypto';
 
 @Entity({ name: 'userContact' })
 export class UserContact {
   @PrimaryGeneratedColumn('uuid')
-  contactId: string;
+  contactId: UUID;
 
   @Column({ type: 'text', nullable: false })
   phoneNumber: string;

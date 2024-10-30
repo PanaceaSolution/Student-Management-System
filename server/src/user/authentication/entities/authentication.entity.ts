@@ -6,6 +6,7 @@ import {
   JoinColumn,
   OneToOne,
   OneToMany,
+  CreateDateColumn,
 } from 'typeorm';
 
 import { ROLE } from '../../../utils/role.helper';
@@ -39,6 +40,9 @@ export class User {
 
   @Column({ type: 'boolean', nullable: true, default: true })
   isActivated: boolean;
+  
+  @CreateDateColumn()
+  createdAt: Date;
 
   @OneToOne(() => UserProfile, (profile) => profile.user, {
     cascade: true,

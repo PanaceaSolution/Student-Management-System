@@ -1,11 +1,12 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { GENDER } from '../../utils/role.helper';
 import { User } from '../authentication/entities/authentication.entity';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Entity({ name: 'userProfile' })
 export class UserProfile {
   @PrimaryGeneratedColumn('uuid')
-  profileId: string;
+  profileId: UUID;
 
   @Column({ type: 'text', nullable: true })
   profilePicture: string;
