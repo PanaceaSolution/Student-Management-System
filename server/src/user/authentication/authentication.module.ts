@@ -11,13 +11,19 @@ import { UserDocuments } from '../userEntity/document.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, UserAddress,UserContact,UserProfile, UserDocuments]),
+    TypeOrmModule.forFeature([
+      User,
+      UserAddress,
+      UserContact,
+      UserProfile,
+      UserDocuments,
+    ]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
   ],
   controllers: [AuthenticationController],
   providers: [AuthenticationService],
-  exports: [JwtModule], // Remove extra closing parenthesis and add missing comma
+  exports: [JwtModule, AuthenticationService, TypeOrmModule], // Remove extra closing parenthesis and add missing comma
 })
 export class AuthenticationModule {}

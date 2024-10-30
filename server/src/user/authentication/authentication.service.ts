@@ -43,25 +43,25 @@ export class AuthenticationService {
         };
       }
 
-      if (role !== ROLE.ADMIN) {
-        return {
-          message: 'Only Admin can register',
-          status: 403,
-          success: false,
-        };
-      }
-      const UserCount = await this.userRepository.count({
-        where: {
-          role: ROLE.ADMIN,
-        },
-      });
-      if (UserCount >= 100) {
-        return {
-          message: "You can't create user more than 1",
-          status: 403,
-          success: false,
-        };
-      }
+      // if (role !== ROLE.ADMIN) {
+      //   return {
+      //     message: 'Only Admin can register',
+      //     status: 403,
+      //     success: false,
+      //   };
+      // }
+      // const UserCount = await this.userRepository.count({
+      //   where: {
+      //     role: ROLE.ADMIN,
+      //   },
+      // });
+      // if (UserCount >= 100) {
+      //   return {
+      //     message: "You can't create user more than 1",
+      //     status: 403,
+      //     success: false,
+      //   };
+      // }
       const password = generateRandomPassword();
       const encryptPassword = encryptdPassword(password);
       const username = generateUsername(profile.fname, profile.lname, role);
@@ -133,7 +133,6 @@ export class AuthenticationService {
   }
 
   async login(loginDto: LoginDto, @Res() res: Response) {
-    
     try {
       const { username, password } = loginDto;
       if (!username || !password) {

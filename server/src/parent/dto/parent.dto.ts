@@ -1,4 +1,9 @@
-import { UserProfileDto ,UserAddressDto,UserContactDto,UserDocumentsDto} from '../../user/userEntity/dto/common.dto';
+import {
+  UserProfileDto,
+  UserAddressDto,
+  UserContactDto,
+  UserDocumentsDto,
+} from '../../user/userEntity/dto/common.dto';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, ValidateNested, IsString } from 'class-validator';
 
