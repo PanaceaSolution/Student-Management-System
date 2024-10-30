@@ -204,7 +204,7 @@ export class AuthenticationService {
       });
     }
   }
-  async logout(@Res() res: Response, userId: UUID): Promise<void> {
+  async logout(@Res() res: Response, userId: UUID) {
     try {
       await this.userRepository.update(
         { userId: userId }, // Use the correct syntax for the 'where' argument
