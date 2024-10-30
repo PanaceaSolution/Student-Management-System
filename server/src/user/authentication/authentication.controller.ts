@@ -1,8 +1,10 @@
-import { Body, Controller, Post, Res, Req } from '@nestjs/common';
+import { Body, Controller, Post, Res, Req, HttpStatus } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { LoginDto } from './dto/login.dto';
 import { Response } from 'express';
 import { RegisterUserDto } from './dto/register.dto';
+import { Request } from 'express';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Controller('auth')
 export class AuthenticationController {
@@ -18,6 +20,10 @@ export class AuthenticationController {
     return this.authenticationService.login(LoginDto, res);
   }
 
+  @Post('logout')
+  async logout(@Req() request: Request, userId:UUID, @Res() res: Response) {
+    return this.authenticationService.logout(res, userId);
+  }
   @Post('refresh-token')
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     return this.authenticationService.refreshToken(req, res);
