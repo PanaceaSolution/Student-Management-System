@@ -44,10 +44,17 @@ const formFields = [
       placeholder: "Enter Class Name",
       type: "text",
    },
+   {
+      name: "section",
+      label: "Section",
+      required: "Section is required",
+      placeholder: "Enter Section",
+      type: "text",
+   }
 ];
 
-const subjectsTableHead = ["Id", "Subject Name", "Class", "Actions"];
-const subjectTableField = ["id", "subjectName", "class"];
+const subjectsTableHead = ["Id", "Subject Name", "Class", "Section", "Actions"];
+const subjectTableField = ["id", "subjectName", "class", "section"];
 
 const Subjects = () => {
    const navigate = useNavigate();
