@@ -18,9 +18,8 @@ export class UserProfileDto {
   @IsNotEmpty()
   gender: GENDER;
 
-  @IsString()
   @IsNotEmpty()
-  dob: string;
+  dob: Date;
 }
 
 export class UserAddressDto {
