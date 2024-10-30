@@ -8,12 +8,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterUserDto } from './dto/register.dto';
 import { User } from './entities/authentication.entity';
 import { ROLE } from '../../utils/role.helper';
-
-import { UserAddress } from '../../entities/address.entity';
-import { UserContact } from '../../entities/contact.entity';
-import { UserDocuments } from '../../entities/document.entity';
-import { UserProfile } from '../../entities/profile.entity';
-
+import { UserAddress } from '../userEntity/address.entity';
+import { UserContact } from '../userEntity/contact.entity';
+import { UserDocuments } from '../userEntity/document.entity';
+import { UserProfile } from '../userEntity/profile.entity';
 import { generateRandomPassword, generateUsername, encryptdPassword, decryptdPassword } from '../../utils/utils';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 @Injectable()
@@ -341,6 +339,7 @@ export class AuthenticationService {
           });
         } else {
           userContact = this.contactRepository.create({ ...contact, user });
+          await this.contactRepository.save(userContact);
           await this.contactRepository.save(userContact);
         }
       }

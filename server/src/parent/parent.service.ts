@@ -44,6 +44,7 @@ export class ParentService {
       password,
       role: ROLE.PARENT,
       isActivated: true,
+      createdAt: new Date(),
     });
     await this.userRepository.save(user);
 

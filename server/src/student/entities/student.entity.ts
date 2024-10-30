@@ -24,16 +24,16 @@ export class Student {
   @PrimaryGeneratedColumn('uuid')
   studentId: UUID;
 
-  @Column({ type: 'text', nullable: false })
+  @Column({ type: 'text', nullable: true })
   fname: string;
 
-  @Column({ type: 'text', nullable: false })
+  @Column({ type: 'text', nullable: true })
   lname: string;
 
-  @Column({ type: 'text', nullable: false })
+  @Column({ type: 'text', nullable: true })
   gender: GENDER;
 
-  @Column({ type: 'date', nullable: false })
+  @Column({ type: 'date', nullable: true })
   dob: Date;
 
   @Column({ type: 'date', nullable: true })
@@ -45,7 +45,7 @@ export class Student {
   @Column({ type: 'text', default: 'defaultSection', nullable: false })
   section: string;
 
-  @Column({ type: 'text', nullable: false, unique: true })
+  @Column({ type: 'text', nullable: true, unique: true })
   email: string;
 
   @Column({ type: 'text', nullable: true })
