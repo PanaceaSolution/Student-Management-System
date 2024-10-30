@@ -14,7 +14,13 @@ import { UserContact } from '../../entities/contact.entity';
 import { UserDocuments } from '../../entities/document.entity';
 import { UserProfile } from '../../entities/profile.entity';
 
-import { generateRandomPassword, generateUsername, encryptdPassword, decryptdPassword } from '../../utils/utils';
+import {
+  generateRandomPassword,
+  generateUsername,
+  encryptdPassword,
+  decryptdPassword,
+} from '../../utils/utils';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 @Injectable()
 export class AuthenticationService {
   constructor(
@@ -72,8 +78,8 @@ export class AuthenticationService {
         username,
         password: encryptPassword,
         role: ROLE.ADMIN,
-      }); 
-      
+      });
+
       await this.userRepository.save(newUser);
       //profile
       const userProfile = this.profileRepository.create({
@@ -133,7 +139,6 @@ export class AuthenticationService {
   }
 
   async login(loginDto: LoginDto, @Res() res: Response) {
-    
     try {
       const { username, password } = loginDto;
       if (!username || !password) {
@@ -193,6 +198,25 @@ export class AuthenticationService {
       return res.status(200).json({ payload, success: true });
     } catch (error) {
       console.error('Error during login:', error);
+      return res.status(500).json({
+        message: 'Internal server error',
+        success: false,
+      });
+    }
+  }
+  async logout(@Res() res: Response, userId: UUID): Promise<void> {
+    try {
+      await this.userRepository.update(
+        { userId: userId }, // Use the correct syntax for the 'where' argument
+        { refreshToken: null },
+      );
+      res.clearCookie('accessToken');
+      res.clearCookie('refreshToken');
+      return res.status(200).json({
+        message: 'Logout successful',
+        success: true,
+      });
+    } catch (error) {
       return res.status(500).json({
         message: 'Internal server error',
         success: false,
