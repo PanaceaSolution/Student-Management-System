@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { MulterModule } from '@nestjs/platform-express';
 import { AuthenticationService } from './authentication.service';
 import { AuthenticationController } from './authentication.controller';
 import { JwtModule } from '@nestjs/jwt';
@@ -21,9 +22,10 @@ import { UserDocuments } from '../userEntity/document.entity';
     JwtModule.register({
       secret: process.env.JWT_SECRET,
     }),
+    MulterModule.register({ dest: './uploads' }), // Explicitly configure Multer
   ],
   controllers: [AuthenticationController],
   providers: [AuthenticationService],
-  exports: [JwtModule, AuthenticationService, TypeOrmModule], // Remove extra closing parenthesis and add missing comma
+  exports: [JwtModule, AuthenticationService, TypeOrmModule],
 })
 export class AuthenticationModule {}

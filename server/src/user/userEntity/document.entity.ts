@@ -17,7 +17,7 @@ export class UserDocuments {
   documentName: string;
 
   @Column({ type: 'text', nullable: false })
-  documentFile: string;
+  documentFile: Array<string>;
 
   @ManyToOne(() => User, (user) => user.document, { nullable: true })
   @JoinColumn({ name: 'userId' })

@@ -1,10 +1,11 @@
 import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
 import { GENDER } from '../../../utils/role.helper';
+import { Type, Transform } from 'class-transformer';
+import { Express } from 'express';
 
 export class UserProfileDto {
-  @IsString()
   @IsOptional()
-  profilePicture: string;
+  profilePicture: string | Express.Multer.File; // Allows file or URL as a string
 
   @IsString()
   @IsNotEmpty({ message: 'First name is required' })
@@ -19,51 +20,51 @@ export class UserProfileDto {
   gender: GENDER;
 
   @IsNotEmpty({ message: 'Date of birth is required' })
+  @Transform(({ value }) => (typeof value === 'string' ? new Date(value) : value))
   dob: Date;
 }
 
 export class UserAddressDto {
   @IsString()
-  @IsNotEmpty({ message: 'Address line 1 is required' })
+  @IsNotEmpty({ message: 'Address type is required' })
   addressType: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'wardNumber is required' })
+  @IsNotEmpty({ message: 'Ward number is required' })
   wardNumber: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'municipality is required' })
+  @IsNotEmpty({ message: 'Municipality is required' })
   municipality: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'district is required' })
+  @IsNotEmpty({ message: 'District is required' })
   district: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'province is required' })
+  @IsNotEmpty({ message: 'Province is required' })
   province: string;
 }
 
 export class UserContactDto {
   @IsString()
- @IsNotEmpty({ message: 'phoneNumber is required' })
+  @IsNotEmpty({ message: 'Phone number is required' })
   phoneNumber: string;
 
   @IsString()
   @IsOptional()
-  alternatePhoneNumber: string;
+  alternatePhoneNumber?: string;
 
   @IsString()
   @IsOptional()
-  telephoneNumber: string;
+  telephoneNumber?: string;
 }
 
 export class UserDocumentsDto {
   @IsString()
-  @IsNotEmpty({ message: 'documentName is required' })
+  @IsNotEmpty({ message: 'Document name is required' })
   documentName: string;
 
-  @IsString()
-  @IsNotEmpty({ message: 'documentFile is required' })
-  documentFile: string;
+  @IsNotEmpty({ message: 'Document file is required' })
+  documentFile: string | Express.Multer.File; // Allows file or URL as a string
 }

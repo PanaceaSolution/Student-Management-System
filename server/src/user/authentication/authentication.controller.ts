@@ -1,13 +1,50 @@
-import { Body, Controller, Post, Get, Put, Query, Param, Req, Res, Patch } from '@nestjs/common';
+import { Body, Controller, Post, Get, Put, Query, Param, Req, Res, Patch, BadRequestException, UploadedFiles } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterUserDto } from './dto/register.dto';
 import { Response, Request } from 'express';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { UploadedFile } from '@nestjs/common';
+import { UseInterceptors } from '@nestjs/common';
+import { memoryStorage } from 'multer';
 
 @Controller('auth')
 export class AuthenticationController {
   constructor(private authenticationService: AuthenticationService) {}
+  @Post('upload-multiple-files')
+  @UseInterceptors(FilesInterceptor('files', 10, { storage: memoryStorage() })) // Limit to 10 files
+  async uploadMultipleFiles(@UploadedFiles() files: Express.Multer.File[]) {
+    if (!files || files.length === 0) {
+      console.log("No files received in controller");
+      throw new BadRequestException('No files provided');
+    }
+    console.log("Files received in controller:", files);
+    return this.authenticationService.uploadMultipleFiles(files);
+  }
+  @Patch('update-profile-picture')
+  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
+  async updateProfilePicture(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('oldPublicId') oldPublicId?: string,
+  ) {
+    if (!file) {
+      throw new BadRequestException('No file provided');
+    }
+    return this.authenticationService.updateProfilePicture(file, oldPublicId);
+  }
+
+  @Patch('update-multiple-files')
+  @UseInterceptors(FilesInterceptor('files', 10, { storage: memoryStorage() }))
+  async updateMultipleFiles(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body('oldPublicIds') oldPublicIds: string[],
+  ) {
+    if (!files || files.length === 0) {
+      throw new BadRequestException('No files provided');
+    }
+    return this.authenticationService.updateMultipleFiles(files, oldPublicIds);
+  }
 
   @Post('register')
   async register(@Body() registerDto: RegisterUserDto) {
@@ -60,3 +97,12 @@ export class AuthenticationController {
   //   return this.authenticationService.deactivateUser(id);
   // }
 }
+// function UseInterceptors(interceptor: any) {
+//   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+//     Reflect.defineMetadata('interceptors', interceptor, target, propertyKey);
+//   };
+// }
+// function UseInterceptors(arg0: any): (target: AuthenticationController, propertyKey: "uploadProfilePicture", descriptor: TypedPropertyDescriptor<(file: Express.Multer.File) => Promise<any>>) => void | TypedPropertyDescriptor<...> {
+//   throw new Error('Function not implemented.');
+// }
+
