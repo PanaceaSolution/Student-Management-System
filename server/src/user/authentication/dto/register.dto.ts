@@ -22,19 +22,19 @@ export class RegisterUserDto {
   username: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Password is required' })
   password: string;
 
   @IsEmail()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Email is required' })
   email: string;
 
   @IsEnum(ROLE)
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Role is required' })
   role: ROLE;
 
   @IsString()
-  @IsOptional()
+  @IsOptional({ message: 'Refresh token is required' })
   refreshToken: string;
 
   @ValidateNested()

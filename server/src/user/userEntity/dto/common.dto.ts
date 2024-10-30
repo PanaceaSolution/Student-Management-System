@@ -7,46 +7,46 @@ export class UserProfileDto {
   profilePicture: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'First name is required' })
   fname: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Last name is required' })
   lname: string;
 
   @IsEnum(GENDER)
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Gender is required' })
   gender: GENDER;
 
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Date of birth is required' })
   dob: Date;
 }
 
 export class UserAddressDto {
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Address line 1 is required' })
   addressType: string;
 
   @IsString()
-  @IsOptional()
+  @IsNotEmpty({ message: 'wardNumber is required' })
   wardNumber: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'municipality is required' })
   municipality: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'district is required' })
   district: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'province is required' })
   province: string;
 }
 
 export class UserContactDto {
   @IsString()
-  @IsOptional()
+ @IsNotEmpty({ message: 'phoneNumber is required' })
   phoneNumber: string;
 
   @IsString()
@@ -60,10 +60,10 @@ export class UserContactDto {
 
 export class UserDocumentsDto {
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'documentName is required' })
   documentName: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'documentFile is required' })
   documentFile: string;
 }

@@ -1,4 +1,4 @@
-import { Injectable, Req, Res } from '@nestjs/common';
+import { BadRequestException, Injectable, Req, Res, InternalServerErrorException } from '@nestjs/common';
 import { Response, Request } from 'express';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -31,106 +31,92 @@ export class AuthenticationService {
   ) {}
   async register(RegisterDto: RegisterUserDto) {
     try {
-      const { email, role, profile, contact, document, address } = RegisterDto;
-      const ExistingUser = await this.userRepository.findOne({
-        where: { email },
-      });
-      if (ExistingUser) {
-        return {
-          message: 'User already exist,',
-          status: 409,
-          success: false,
-        };
-      }
+        const { email, role, profile, contact, document, address } = RegisterDto;
 
-      // if (role !== ROLE.ADMIN) {
-      //   return {
-      //     message: 'Only Admin can register',
-      //     status: 403,
-      //     success: false,
-      //   };
-      // }
-      // const UserCount = await this.userRepository.count({
-      //   where: {
-      //     role: ROLE.ADMIN,
-      //   },
-      // });
-      // if (UserCount >= 100) {
-      //   return {
-      //     message: "You can't create user more than 1",
-      //     status: 403,
-      //     success: false,
-      //   };
-      // }
-      const password = generateRandomPassword();
-      const encryptPassword = encryptdPassword(password);
-      const username = generateUsername(profile.fname, profile.lname, role);
-      const newUser = await this.userRepository.create({
-        email,
-        isActivated: true,
-        username,
-        password: encryptPassword,
-        role: ROLE.ADMIN,
-        createdAt: new Date(),
-      }); 
-      
-      await this.userRepository.save(newUser);
-      //profile
-      const userProfile = this.profileRepository.create({
-        profilePicture: profile.profilePicture,
-        fname: profile.fname,
-        lname: profile.lname,
-        gender: profile.gender,
-        dob: new Date(profile.dob),
-        user: newUser,
-      });
-      await this.profileRepository.save(userProfile);
-      // user address
-      if (Array.isArray(address)) {
-        const userAddress = address.map((addr) => {
-          return this.addressRepository.create({
-            addressType: addr.addressType,
-            wardNumber: addr.wardNumber,
-            municipality: addr.municipality,
-            province: addr.province,
-            district: addr.district,
+        // Check for existing user
+        const existingUser = await this.userRepository.findOne({ where: { email } });
+        if (existingUser) {
+            throw new BadRequestException('User with this email already exists');
+        }
+
+        const password = generateRandomPassword();
+        const encryptPassword = encryptdPassword(password);
+        const username = generateUsername(profile.fname, profile.lname, role);
+
+        const newUser = this.userRepository.create({
+            email,
+            isActivated: true,
+            username,
+            password: encryptPassword,
+            role: ROLE.ADMIN,
+            createdAt: new Date(),
+        });
+
+        await this.userRepository.save(newUser);
+
+        // Save user profile
+        const userProfile = this.profileRepository.create({
+            profilePicture: profile.profilePicture,
+            fname: profile.fname,
+            lname: profile.lname,
+            gender: profile.gender,
+            dob: new Date(profile.dob),
             user: newUser,
-          });
         });
-        await this.addressRepository.save(userAddress);
-      }
+        await this.profileRepository.save(userProfile);
 
-      // user contact
-      const userContact = this.contactRepository.create({
-        ...contact,
-        user: newUser,
-      });
-      await this.contactRepository.save(userContact);
+        // Save user address
+        if (Array.isArray(address)) {
+            const userAddress = address.map(addr => {
+                return this.addressRepository.create({
+                    addressType: addr.addressType,
+                    wardNumber: addr.wardNumber,
+                    municipality: addr.municipality,
+                    province: addr.province,
+                    district: addr.district,
+                    user: newUser,
+                });
+            });
+            await this.addressRepository.save(userAddress);
+        }
 
-      //documents
-      if (Array.isArray(document)) {
-        const userDocuments = document.map((doc) => {
-          return this.documentRepository.create({
-            documentName: doc.documentName,
-            documentFile: doc.documentFile,
-            user: newUser, // Associate the document with the user
-          });
+        // Save user contact
+        const userContact = this.contactRepository.create({
+            ...contact,
+            user: newUser,
         });
-        await this.documentRepository.save(userDocuments);
-      }
-      return {
-        message: 'user created successfully',
-        status: 200,
-        user: newUser,
-        plainPassword: password,
-      };
+        await this.contactRepository.save(userContact);
+
+        // Save user documents
+        if (Array.isArray(document)) {
+            const userDocuments = document.map(doc => {
+                return this.documentRepository.create({
+                    documentName: doc.documentName,
+                    documentFile: doc.documentFile,
+                    user: newUser,
+                });
+            });
+            await this.documentRepository.save(userDocuments);
+        }
+
+        return {
+            message: 'User created successfully',
+            status: 200,
+            user: newUser,
+            plainPassword: password,
+        };
     } catch (error) {
-      return {
-        message: `${error} and error occurs`,
-        status: 500,
-      };
+        // Log the error for debugging
+        console.error('Registration error:', error);
+
+        // Customize the error response based on the type of error
+        if (error instanceof BadRequestException) {
+            throw error; // Re-throw the specific BadRequestException
+        } else {
+            throw new InternalServerErrorException('An unexpected error occurred during registration');
+        }
     }
-  }
+}
 
   async login(loginDto: LoginDto, @Res() res: Response) {
     try {

@@ -54,4 +54,9 @@ export class AuthenticationController {
   ) {
     return this.authenticationService.searchUser(searchTerm, searchBy);
   }
+
+  // @Patch('deactivate/:id')
+  // async deactivateUser(@Param('id') id: UUID) {
+  //   return this.authenticationService.deactivateUser(id);
+  // }
 }
