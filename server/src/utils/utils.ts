@@ -45,10 +45,10 @@ export function encryptdPassword(password: string): string {
     },
     buffer,
   );
-  return encrypted.toString('base64');
+  return encrypted.toString('utf8');
 }
 export function decryptdPassword(encryptedPassword: string): string {
-  const buffer = Buffer.from(encryptedPassword, 'base64');
+  const buffer = Buffer.from(encryptedPassword, 'utf8');
   const decrypted = crypto.privateDecrypt(
     {
       key: process.env.PRIVATE_KEY,
