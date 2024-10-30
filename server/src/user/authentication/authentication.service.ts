@@ -8,11 +8,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterUserDto } from './dto/register.dto';
 import { User } from './entities/authentication.entity';
 import { ROLE } from '../../utils/role.helper';
-
-import { UserAddress } from '../../entities/address.entity';
-import { UserContact } from '../../entities/contact.entity';
-import { UserDocuments } from '../../entities/document.entity';
-import { UserProfile } from '../../entities/profile.entity';
+import { UserAddress } from '../userEntity/address.entity';
+import { UserContact } from '../userEntity/contact.entity';
+import { UserDocuments } from '../userEntity/document.entity';
+import { UserProfile } from '../userEntity/profile.entity';
 
 import {
   generateRandomPassword,
@@ -50,25 +49,25 @@ export class AuthenticationService {
         };
       }
 
-      if (role !== ROLE.ADMIN) {
-        return {
-          message: 'Only Admin can register',
-          status: 403,
-          success: false,
-        };
-      }
-      const UserCount = await this.userRepository.count({
-        where: {
-          role: ROLE.ADMIN,
-        },
-      });
-      if (UserCount >= 100) {
-        return {
-          message: "You can't create user more than 1",
-          status: 403,
-          success: false,
-        };
-      }
+      // if (role !== ROLE.ADMIN) {
+      //   return {
+      //     message: 'Only Admin can register',
+      //     status: 403,
+      //     success: false,
+      //   };
+      // }
+      // const UserCount = await this.userRepository.count({
+      //   where: {
+      //     role: ROLE.ADMIN,
+      //   },
+      // });
+      // if (UserCount >= 100) {
+      //   return {
+      //     message: "You can't create user more than 1",
+      //     status: 403,
+      //     success: false,
+      //   };
+      // }
       const password = generateRandomPassword();
       const encryptPassword = encryptdPassword(password);
       const username = generateUsername(profile.fname, profile.lname, role);

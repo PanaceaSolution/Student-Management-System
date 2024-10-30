@@ -6,7 +6,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 
-import { User } from '../user/authentication/entities/authentication.entity';
+import { User } from '../authentication/entities/authentication.entity';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Entity({ name: 'userContact' })

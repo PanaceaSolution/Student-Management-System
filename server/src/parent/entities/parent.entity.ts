@@ -4,7 +4,6 @@ import { UUID } from "typeorm/driver/mongodb/bson.typings";
 
 import { Student } from "../../student/entities/student.entity";
 import { GENDER } from "../../utils/role.helper";
-import { StudentContact } from "../../student/entities/studentContact.entity";
 
 @Entity({name:"Parent"})
 export class Parent {

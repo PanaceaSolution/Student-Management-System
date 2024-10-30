@@ -1,12 +1,20 @@
-import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, OneToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  JoinColumn,
+  OneToOne,
+  OneToMany,
+} from 'typeorm';
 
+
+import { ROLE } from '../../../utils/role.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { Student } from '../../../student/entities/student.entity';
-import { ROLE } from '../../../utils/role.helper';
-import { UserAddress } from '../../../entities/address.entity';
-import { UserContact } from '../../../entities/contact.entity';
-import { UserProfile } from '../../../entities/profile.entity';
-import { UserDocuments } from '../../../entities/document.entity';
+import { UserProfile } from '../../userEntity/profile.entity';
+import { UserAddress } from '../../userEntity/address.entity';
+import { UserDocuments } from '../../userEntity/document.entity';
+import { UserContact } from '../../userEntity/contact.entity';
 
 
 @Entity({ name: 'User' })

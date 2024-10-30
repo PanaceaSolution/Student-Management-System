@@ -8,10 +8,13 @@ import {
   IsNotEmpty,
   ValidateNested,
   IsUUID,
+  
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { GENDER } from '../../utils/role.helper';
 import { TRANSPORTATION_MODE } from '../../utils/role.helper';
+import { User } from '../../user/authentication/entities/authentication.entity';
+import { RegisterUserDto } from '../../user/authentication/dto/register.dto';
 
 export class StudentAddressDto {
   @IsString()
@@ -40,20 +43,7 @@ export class StudentContactDto {
   telephoneNumber?: string;
 }
 
-export class StudentDto {
-  @IsOptional()
-  @IsString()
-  username?: string;
-
-  @IsString()
-  fname: string;
-
-  @IsString()
-  lname: string;
-
-  @IsEmail()
-  email: string;
-
+export class StudentDto extends RegisterUserDto  {
   @IsString()
   studentClass: string;
 
@@ -62,24 +52,27 @@ export class StudentDto {
 
   @IsString()
   @IsOptional()
+  fatherName: string;
+
+  @IsString()
+  @IsOptional()
+  motherName: string;
+
+  @IsString()
+  @IsOptional()
+  guardianName: string;
+
+  @IsString()
+  @IsOptional()
+  religion:string;
+
+  @IsString()
+  @IsOptional()
   bloodType: string;
-
-
-
-  @ValidateNested()
-  @Type(() => StudentAddressDto)
-  address: StudentAddressDto;
-
-  @ValidateNested()
-  @Type(() => StudentContactDto)
-  contact: StudentContactDto;
-
-  @IsEnum(GENDER)
-  gender: GENDER;
 
   @IsEnum(TRANSPORTATION_MODE)
   @IsOptional()
-  transportationMode:TRANSPORTATION_MODE;
+  transportationMode: TRANSPORTATION_MODE;
 
   @IsString()
   rollNumber: string;
@@ -93,25 +86,20 @@ export class StudentDto {
   previousSchool: string;
 
   @IsUUID()
+  @IsOptional()
   parentId: number;
-
-  @IsUUID()
-  loginId: number;
-
-  @IsDate()
-  @Type(() => Date)
-  dob: Date;
 
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  admissionDate?: Date;
+  admissionDate?: Date; 
 
-  constructor() {
-    if (!this.admissionDate) {
-      this.admissionDate = new Date();
-    }
-  }
+  @Transform(({ value }) => {
+    const date = value ? new Date(value) : new Date();
+    return date.toISOString().split('T')[0]; // Format as 'yyyy-mm-dd'
+  })
+  createdAt: string;
+
 }
 
 // export class UpdateStudentDto {

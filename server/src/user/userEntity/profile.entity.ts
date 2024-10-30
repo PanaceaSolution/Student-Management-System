@@ -6,8 +6,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
-import { GENDER } from '../utils/role.helper';
-import { User } from '../user/authentication/entities/authentication.entity';
+import { GENDER } from '../../utils/role.helper';
+import { User } from '../authentication/entities/authentication.entity';
 @Entity({ name: 'userProfile' })
 export class UserProfile {
   @PrimaryGeneratedColumn('uuid')
