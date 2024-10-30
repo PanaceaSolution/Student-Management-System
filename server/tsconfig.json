@@ -1,20 +1,17 @@
 {
   "compilerOptions": {
-    "types": ["node", "class-validator", "class-transformer", "jest","@prisma/client"],
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
-    "esModuleInterop": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "target": "ES2021",
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
-    "moduleResolution": "node",
+    "baseUrl": "./",
+    "incremental": true,
     "skipLibCheck": true,
-    "strict": true, // Enabling strict mode
     "strictNullChecks": false,
     "noImplicitAny": false,
     "strictBindCallApply": false,
