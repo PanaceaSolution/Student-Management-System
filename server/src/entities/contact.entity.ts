@@ -7,11 +7,12 @@ import {
 } from 'typeorm';
 
 import { User } from '../user/authentication/entities/authentication.entity';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Entity({ name: 'userContact' })
 export class UserContact {
   @PrimaryGeneratedColumn('uuid')
-  contactId: string;
+  contactId: UUID;
 
   @Column({ type: 'text', nullable: false })
   phoneNumber: string;
