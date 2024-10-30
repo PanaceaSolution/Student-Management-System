@@ -12,10 +12,11 @@ import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 import { GENDER } from '../../utils/role.helper';
 
-import { Parent } from '../../parent/entities/parent.entity';
+// import { Parent } from '../../parent/entities/parent.entity';
 
 import { TRANSPORTATION_MODE } from '../../utils/role.helper';
 import { User } from '../../user/authentication/entities/authentication.entity';
+
 @Entity({ name: 'Student' })
 export class Student {
   @PrimaryGeneratedColumn('uuid')
@@ -60,8 +61,9 @@ export class Student {
   @OneToOne(() => User, (user) => user.student)
   @JoinColumn({ name: 'userId' })
   user: User;
+  parent: any;
 
-  @ManyToOne(() => Parent, (parent) => parent.students, { nullable: true })
-  @JoinColumn({ name: 'parentId' })
-  parent: Parent;
+  // @ManyToOne(() => Parent, (parent) => parent.students, { nullable: true })
+  // @JoinColumn({ name: 'parentId' })
+  // parent: Parent;
 }

@@ -1,37 +1,29 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { User } from '../../user/authentication/entities/authentication.entity';
+import { Student } from '../../student/entities/student.entity';
 
-import { UUID } from "typeorm/driver/mongodb/bson.typings";
-
-import { Student } from "../../student/entities/student.entity";
-import { GENDER } from "../../utils/role.helper";
-
-@Entity({name:"Parent"})
+@Entity({ name: 'parents' })
 export class Parent {
-    @PrimaryGeneratedColumn('uuid')
-    parentId : UUID;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column({type:'text', nullable:false})
-    fname:string;
+  @Column({ type: 'text', nullable: false })
+  fname: string;
 
-    @Column({type:'text', nullable:false})
-    lname:string;
+  @Column({ type: 'text', nullable: false })
+  lname: string;
 
-    @Column({type:'text', nullable:false , unique:true})
-    email:string;
- 
-    @Column({type:'text', nullable:false})
-    gender: GENDER
+  @Column({ type: 'text', nullable: false })
+  email: string;
 
-    @Column({type:'text', nullable:true, unique:true})
-    username:string;
+  @Column({ type: 'text', nullable: false })
+  gender: string;
 
-    @Column({type:'text', nullable:true})
-    password:string;
+  @ManyToOne(() => User, (user) => user.parent)
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
-    @Column({type:'text', nullable:true})
-    profilePicture:string;
-
-    @OneToMany(()=> Student, student =>student.parent)
-    students: Student[];
- 
+  @ManyToOne(() => Student, (student) => student.parent, { nullable: true })
+  @JoinColumn({ name: 'studentId' })
+  student: Student;
 }

@@ -1,11 +1,4 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsEnum,
-  IsDate,
-} from 'class-validator';
-
+import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
 import { GENDER } from '../../../utils/role.helper';
 
 export class UserProfileDto {
@@ -26,7 +19,6 @@ export class UserProfileDto {
   gender: GENDER;
 
   @IsNotEmpty()
-  @IsDate()
   dob: Date;
 }
 

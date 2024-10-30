@@ -6,11 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/authentication.entity';
 import { UserAddress } from '../userEntity/address.entity';
 import { UserContact } from '../userEntity/contact.entity';
-import { UserDocuments } from '../userEntity/document.entity';
 import { UserProfile } from '../userEntity/profile.entity';
-
-
-
+import { UserDocuments } from '../userEntity/document.entity';
 
 @Module({
   imports: [

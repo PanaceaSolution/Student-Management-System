@@ -1,3 +1,4 @@
+import { Parent } from '../../../parent/entities/parent.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -5,8 +6,8 @@ import {
   JoinColumn,
   OneToOne,
   OneToMany,
+  CreateDateColumn,
 } from 'typeorm';
-
 
 import { ROLE } from '../../../utils/role.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
@@ -15,7 +16,7 @@ import { UserProfile } from '../../userEntity/profile.entity';
 import { UserAddress } from '../../userEntity/address.entity';
 import { UserDocuments } from '../../userEntity/document.entity';
 import { UserContact } from '../../userEntity/contact.entity';
-
+import { Staff } from '../../../staff/entities/staff.entity';
 
 @Entity({ name: 'User' })
 export class User {
@@ -37,13 +38,15 @@ export class User {
   @Column({ type: 'text', nullable: true })
   refreshToken: string;
 
-  @Column({ type: 'boolean', nullable: true })
+  @Column({ type: 'boolean', nullable: true, default: true })
   isActivated: boolean;
+  
+  @CreateDateColumn()
+  createdAt: Date;
 
   @OneToOne(() => UserProfile, (profile) => profile.user, {
     cascade: true,
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
     nullable: false,
   })
   profile: UserProfile;
@@ -51,7 +54,6 @@ export class User {
   @OneToMany(() => UserAddress, (address) => address.user, {
     cascade: true,
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
     nullable: false,
   })
   address: UserAddress;
@@ -59,7 +61,6 @@ export class User {
   @OneToOne(() => UserContact, (contact) => contact.user, {
     cascade: true,
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
     nullable: false,
   })
   contact: UserContact;
@@ -67,7 +68,6 @@ export class User {
   @OneToMany(() => UserDocuments, (document) => document.user, {
     cascade: true,
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
     nullable: false,
   })
   document: UserDocuments;
@@ -75,8 +75,19 @@ export class User {
   @OneToOne(() => Student, (student) => student.user, {
     nullable: true,
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
   })
   @JoinColumn()
   student: Student;
+  // One-to-Many relationship with Parent (User can have multiple Parent entries)
+  @OneToMany(() => Parent, (parent) => parent.user, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  parent: Parent[];
+  @OneToOne(() => Staff, (staff) => staff.user, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'staffId' })
+  staff: Staff;
 }
