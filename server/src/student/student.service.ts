@@ -45,14 +45,13 @@ export class StudentService {
         document,
       } = createStudentDto;
 
-      // Parse and validate the admission date
+
       const AD = moment(admissionDate, 'YYYY-MM-DD');
       if (!AD.isValid()) {
         throw new BadRequestException('Invalid date format for Admission Date');
       }
       const AdmissionIsoString = AD.toISOString();
 
-      // Check if the student already exists
       const studentExist = await this.studentRepository.findOne({
         where: [{ registrationNumber }, { rollNumber }],
       });
@@ -60,13 +59,13 @@ export class StudentService {
         return { status: 400, message: 'Student already exists in the student database' };
       }
 
-      // Check if the user already exists
+
       const userExist = await this.userRepository.findOne({ where: { email } });
       if (userExist) {
         return { status: 400, message: 'Email already exists in the user database' };
       }
 
-      // Prepare registration DTO for the user with ISO string for `createdAt`
+
       const registerDto: RegisterUserDto = {
         email,
         role,
@@ -80,14 +79,14 @@ export class StudentService {
         refreshToken: null,
       };
 
-      // Register the user and handle files (profile picture and documents)
+
       const createUser = await this.userService.register(registerDto, files);
 
       if (!createUser || !createUser.user) {
         throw new InternalServerErrorException('Error occurs while creating user');
       }
 
-      // Retrieve a reference to the user from the database to ensure compatibility
+
       const userReference = await this.userRepository.findOne({
         where: { userId: createUser.user.id },
       });
