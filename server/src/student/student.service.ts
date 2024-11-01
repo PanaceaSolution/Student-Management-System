@@ -1,134 +1,130 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { StudentDto } from './dto/student.dto';
-import moment from 'moment';
+import * as moment from 'moment';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Student } from './entities/student.entity';
 import { Repository } from 'typeorm';
-import { Parent } from '../parent/entities/parent.entity';
 import { User } from '../user/authentication/entities/authentication.entity';
-import { ROLE } from '../utils/role.helper';
-import { generateUsername } from '../utils/utils';
-import { generateRandomPassword } from '../utils/utils';
-import { AuthenticationModule } from '../user/authentication/authentication.module';
 import { AuthenticationService } from '../user/authentication/authentication.service';
 import { RegisterUserDto } from '../user/authentication/dto/register.dto';
+import { generateRandomPassword, generateUsername } from 'src/utils/utils';
 
 @Injectable()
 export class StudentService {
-  // private generateStudentUsername(fname: string, lname: string): string {
-  //   return generateUsername(fname, lname, ROLE.STUDENT);
-  // }
-  // private generateStudentPassword(): string {
-  //   return generateRandomPassword();
-  // }
   constructor(
     @InjectRepository(Student)
     private readonly studentRepository: Repository<Student>,
     private readonly userService: AuthenticationService,
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async createStudent(
     createStudentDto: StudentDto,
-    registerUserDto: RegisterUserDto,
+    files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
   ): Promise<{ status: number; message: string; student?: any; user?: any }> {
-    const {
-      // yeti chaii student table ma janxa
-      fatherName,
-      motherName,
-      guardianName,
-      religion,
-      bloodType,
-      admissionDate,
-      parentId,
-      transportationMode,
-      previousSchool,
-      rollNumber,
-      registrationNumber,
-      section,
-      studentClass,
-      // // yo tala ko chaii User table ma janxa
-      email,
-      role,
-      profile,
-      address,
-      contact,
-      document,
-      username,
-      password,
-      createdAt,
-      refreshToken,
-    } = createStudentDto;
+    try {
+      const {
+        fatherName,
+        motherName,
+        guardianName,
+        religion,
+        bloodType,
+        admissionDate,
+        transportationMode,
+        previousSchool,
+        rollNumber,
+        registrationNumber,
+        section,
+        studentClass,
+        email,
+        role,
+        profile,
+        address,
+        contact,
+        document,
+      } = createStudentDto;
 
-    const registerDto = {
-      email,
-      role,
-      profile,
-      address,
-      contact,
-      document,
-      username,
-      password,
-      createdAt,
-      refreshToken,
-    };
-    const AD = moment(admissionDate, 'YYYY-MM-DD');
-    if (!AD.isValid()) {
-      throw new BadRequestException('Invalid date format for Admission Date');
-    }
-    const AdmissionIsoString = AD.toISOString();
+      // Parse and validate the admission date
+      const AD = moment(admissionDate, 'YYYY-MM-DD');
+      if (!AD.isValid()) {
+        throw new BadRequestException('Invalid date format for Admission Date');
+      }
+      const AdmissionIsoString = AD.toISOString();
 
-    const studentExist = await this.studentRepository.findOne({
-      where: [{ registrationNumber }, { rollNumber }],
-    });
-    if (studentExist) {
-      return {
-        status: 400,
-        message: 'Student already exists in the student database',
+      // Check if the student already exists
+      const studentExist = await this.studentRepository.findOne({
+        where: [{ registrationNumber }, { rollNumber }],
+      });
+      if (studentExist) {
+        return { status: 400, message: 'Student already exists in the student database' };
+      }
+
+      // Check if the user already exists
+      const userExist = await this.userRepository.findOne({ where: { email } });
+      if (userExist) {
+        return { status: 400, message: 'Email already exists in the user database' };
+      }
+
+      // Prepare registration DTO for the user with ISO string for `createdAt`
+      const registerDto: RegisterUserDto = {
+        email,
+        role,
+        profile,
+        address,
+        contact,
+        document,
+        username: generateUsername(profile.fname, profile.lname, role),
+        password: generateRandomPassword(),
+        createdAt: new Date().toISOString(), // Convert to ISO string
+        refreshToken: null,
       };
-    }
 
-    const userExist = await this.userRepository.findOne({
-      where: { email },
-    });
-    if (userExist) {
-      return {
-        status: 400,
-        message: 'Email already exists in the user database',
-      };
-    }
+      // Register the user and handle files (profile picture and documents)
+      const createUser = await this.userService.register(registerDto, files);
 
-    const createUser = await this.userService.register(registerDto);
-    if (!createUser || !createUser.user) {
+      if (!createUser || !createUser.user) {
+        throw new InternalServerErrorException('Error occurs while creating user');
+      }
+
+      // Retrieve a reference to the user from the database to ensure compatibility
+      const userReference = await this.userRepository.findOne({
+        where: { userId: createUser.user.id },
+      });
+
+      if (!userReference) {
+        return { status: 500, message: 'Error finding user after creation' };
+      }
+
+      // Create the student record with a reference to the user
+      const newStudent = this.studentRepository.create({
+        user: userReference, // Use the fully-compatible reference
+        fatherName,
+        motherName,
+        guardianName,
+        religion,
+        bloodType,
+        admissionDate: AdmissionIsoString,
+        registrationNumber,
+        rollNumber,
+        previousSchool,
+        section,
+        studentClass,
+        transportationMode,
+      });
+
+      await this.studentRepository.save(newStudent);
+
       return {
-        status: 500,
-        message: 'Error occrs while creating user',
+        status: 201,
+        message: 'Student created successfully',
+        student: newStudent,
+        user: createUser.user,
       };
+    } catch (error) {
+      console.error('Error in createStudent function:', error);
+      throw new InternalServerErrorException('An unexpected error occurred during student creation');
     }
-    //create the student finally here...
-    const newStudent = await this.studentRepository.create({
-      user: createUser.user,
-      fatherName,
-      motherName,
-      guardianName,
-      religion,
-      bloodType,
-      admissionDate: AdmissionIsoString,
-      registrationNumber,
-      rollNumber,
-      previousSchool,
-      section,
-      studentClass,
-      transportationMode,
-    });
-    await this.studentRepository.save(newStudent);
-    return {
-      status: 201,
-      message: 'student created successfully',
-      student: newStudent,
-      user: createUser.user,
-    };
   }
 
   // async GetAllStudents(): Promise<{

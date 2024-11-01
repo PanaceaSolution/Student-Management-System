@@ -6,6 +6,9 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
+import * as fs from 'fs';
+import { promisify } from 'util';
+const readFileAsync = promisify(fs.readFile);
 
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
@@ -18,13 +21,15 @@ import { UserAddress } from '../userEntity/address.entity';
 import { UserContact } from '../userEntity/contact.entity';
 import { UserDocuments } from '../userEntity/document.entity';
 import { UserProfile } from '../userEntity/profile.entity';
+import { Express } from 'express'; // Ensure this is imported if needed
+// Removed incorrect import for Multer file type
 import {
   generateRandomPassword,
   generateUsername,
   encryptdPassword,
   decryptdPassword,
 } from '../../utils/utils';
-import { uploadSingleFileToCloudinary, uploadFilesToCloudinary, deleteFileFromCloudinary } from '../../utils/file-upload.helper';
+import { uploadSingleFileToCloudinary, uploadFilesToCloudinary} from '../../utils/file-upload.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Injectable()
@@ -43,83 +48,86 @@ export class AuthenticationService {
     private readonly documentRepository: Repository<UserDocuments>,
     private jwtService: JwtService,
   ) {}
-  async updateProfilePicture(file: Express.Multer.File, oldPublicId?: string): Promise<string> {
+  // async updateProfilePicture(file: Express.Multer.File, oldPublicId?: string): Promise<string> {
+  //   try {
+  //     // Delete the old image if a public ID is provided
+  //     if (oldPublicId) {
+  //       await deleteFileFromCloudinary(oldPublicId);
+  //       console.log("Old profile picture deleted:", oldPublicId);
+  //     }
+
+  //     // Upload the new profile picture
+  //     const uploadedPicture = await uploadSingleFileToCloudinary(file, 'user_profile_pictures');
+  //     console.log("New profile picture uploaded:", uploadedPicture.secure_url);
+
+  //     // Return the secure URL of the new profile picture
+  //     return uploadedPicture.secure_url;
+  //   } catch (error) {
+  //     console.error("Failed to update profile picture:", error);
+  //     throw new InternalServerErrorException("Failed to update profile picture");
+  //   }
+  // }
+  // async updateMultipleFiles(files: Express.Multer.File[], oldPublicIds?: string[]): Promise<string[]> {
+  //   try {
+  //     // Delete old images if public IDs are provided
+  //     if (oldPublicIds && oldPublicIds.length > 0) {
+  //       await Promise.all(oldPublicIds.map(publicId => deleteFileFromCloudinary(publicId)));
+  //       console.log("Old documents deleted:", oldPublicIds);
+  //     }
+
+  //     // Upload new files
+  //     const uploadedUrls = await uploadFilesToCloudinary(files, 'user_documents');
+  //     console.log("New documents uploaded:", uploadedUrls);
+
+  //     // Return secure URLs of the new documents
+  //     return uploadedUrls;
+  //   } catch (error) {
+  //     console.error("Failed to update documents:", error);
+  //     throw new InternalServerErrorException("Failed to update documents");
+  //   }
+  // }
+  // async uploadProfilePicture(file: Express.Multer.File): Promise<any> {
+  //   if (!file) {
+  //     throw new BadRequestException('No file provided');
+  //   }
+
+  //   console.log("Uploading profile picture to Cloudinary");
+
+  //   try {
+  //     const uploadedPicture = await uploadSingleFileToCloudinary(file, 'user_profile_pictures');
+  //     console.log("Profile picture uploaded successfully:", uploadedPicture.secure_url);
+  //     return {
+  //       message: 'Profile picture uploaded successfully',
+  //       secureUrl: uploadedPicture.secure_url,
+  //     };
+  //   } catch (error) {
+  //     console.error("Failed to upload profile picture:", error);
+  //     throw new InternalServerErrorException("Failed to upload profile picture to Cloudinary");
+  //   }
+  // }
+  // async uploadMultipleFiles(files: Express.Multer.File[]): Promise<any> {
+  //   console.log("Uploading multiple files to Cloudinary");
+
+  //   try {
+  //     const uploadedFiles = await uploadFilesToCloudinary(files, 'user_documents');
+  //     console.log("Files uploaded successfully:", uploadedFiles);
+  //     return {
+  //       message: 'Files uploaded successfully',
+  //       uploadedFiles,
+  //     };
+  //   } catch (error) {
+  //     console.error("Failed to upload files:", error);
+  //     throw new InternalServerErrorException("Failed to upload files to Cloudinary");
+  //   }
+  // }
+
+  async register(
+    RegisterDto: RegisterUserDto,
+    files: { profilePicture?: Express.Multer.File[], documents?: Express.Multer.File[] } = { profilePicture: [], documents: [] }
+  ) {
     try {
-      // Delete the old image if a public ID is provided
-      if (oldPublicId) {
-        await deleteFileFromCloudinary(oldPublicId);
-        console.log("Old profile picture deleted:", oldPublicId);
-      }
-
-      // Upload the new profile picture
-      const uploadedPicture = await uploadSingleFileToCloudinary(file, 'user_profile_pictures');
-      console.log("New profile picture uploaded:", uploadedPicture.secure_url);
-
-      // Return the secure URL of the new profile picture
-      return uploadedPicture.secure_url;
-    } catch (error) {
-      console.error("Failed to update profile picture:", error);
-      throw new InternalServerErrorException("Failed to update profile picture");
-    }
-  }
-  async updateMultipleFiles(files: Express.Multer.File[], oldPublicIds?: string[]): Promise<string[]> {
-    try {
-      // Delete old images if public IDs are provided
-      if (oldPublicIds && oldPublicIds.length > 0) {
-        await Promise.all(oldPublicIds.map(publicId => deleteFileFromCloudinary(publicId)));
-        console.log("Old documents deleted:", oldPublicIds);
-      }
-
-      // Upload new files
-      const uploadedUrls = await uploadFilesToCloudinary(files, 'user_documents');
-      console.log("New documents uploaded:", uploadedUrls);
-
-      // Return secure URLs of the new documents
-      return uploadedUrls;
-    } catch (error) {
-      console.error("Failed to update documents:", error);
-      throw new InternalServerErrorException("Failed to update documents");
-    }
-  }
-  async uploadProfilePicture(file: Express.Multer.File): Promise<any> {
-    if (!file) {
-      throw new BadRequestException('No file provided');
-    }
-
-    console.log("Uploading profile picture to Cloudinary");
-
-    try {
-      const uploadedPicture = await uploadSingleFileToCloudinary(file, 'user_profile_pictures');
-      console.log("Profile picture uploaded successfully:", uploadedPicture.secure_url);
-      return {
-        message: 'Profile picture uploaded successfully',
-        secureUrl: uploadedPicture.secure_url,
-      };
-    } catch (error) {
-      console.error("Failed to upload profile picture:", error);
-      throw new InternalServerErrorException("Failed to upload profile picture to Cloudinary");
-    }
-  }
-  async uploadMultipleFiles(files: Express.Multer.File[]): Promise<any> {
-    console.log("Uploading multiple files to Cloudinary");
-
-    try {
-      const uploadedFiles = await uploadFilesToCloudinary(files, 'user_documents');
-      console.log("Files uploaded successfully:", uploadedFiles);
-      return {
-        message: 'Files uploaded successfully',
-        uploadedFiles,
-      };
-    } catch (error) {
-      console.error("Failed to upload files:", error);
-      throw new InternalServerErrorException("Failed to upload files to Cloudinary");
-    }
-  }
-
-  async register(RegisterDto: RegisterUserDto) {
-    try {
-      console.log("Register method called");
-      console.log("Received Register DTO:", RegisterDto);
+      console.log('Parsed Register DTO:', RegisterDto);
+      console.log('Received files:', files);
   
       const { email, role, profile, contact, document, address } = RegisterDto;
   
@@ -129,46 +137,31 @@ export class AuthenticationService {
         throw new BadRequestException('User with this email already exists');
       }
   
-      // Generate random password and encrypted password
       const password = generateRandomPassword();
-      const encryptPassword = encryptdPassword(password);
+      const encryptedPassword = encryptdPassword(password);
       const username = generateUsername(profile.fname, profile.lname, role);
   
-      // Create new user
+      // Create the new user entity
       const newUser = this.userRepository.create({
         email,
         isActivated: true,
         username,
-        password: encryptPassword,
-        role: ROLE.ADMIN,
+        password: encryptedPassword,
+        role,
         createdAt: new Date(),
       });
       await this.userRepository.save(newUser);
-      console.log("New user created:", newUser);
   
-      // Handle profile picture: check if it's a URL or file
-      let profilePictureUrl = null;
-      if (profile.profilePicture && typeof profile.profilePicture === 'string') {
-        // If profilePicture is a URL, use it directly
-        profilePictureUrl = profile.profilePicture;
-      } else if (profile.profilePicture && typeof profile.profilePicture !== 'string') {
-        // If it's a file, upload to Cloudinary
-        console.log("Uploading profile picture to Cloudinary");
-        try {
-          const uploadedPicture = await uploadSingleFileToCloudinary(
-            profile.profilePicture as Express.Multer.File,
-            'user_profile_pictures'
-          );
-          profilePictureUrl = uploadedPicture.secure_url;
-        } catch (error) {
-          console.error("Failed to upload profile picture:", error);
-          throw new InternalServerErrorException("Failed to upload profile picture to Cloudinary");
-        }
+      // Handle profile picture upload
+      let profilePictureUrl: string | null = null;
+      if (files.profilePicture && files.profilePicture.length > 0) {
+        const profilePictureUrls = await uploadFilesToCloudinary([files.profilePicture[0].path], 'profile_pictures');
+        profilePictureUrl = profilePictureUrls[0];
       }
   
-      // Save user profile
+      // Create and save user profile
       const userProfile = this.profileRepository.create({
-        profilePicture: profilePictureUrl || '',
+        profilePicture: profilePictureUrl,
         fname: profile.fname,
         lname: profile.lname,
         gender: profile.gender,
@@ -176,86 +169,90 @@ export class AuthenticationService {
         user: newUser,
       });
       await this.profileRepository.save(userProfile);
-      console.log("User profile saved:", userProfile);
   
-      // Save user address
-      if (Array.isArray(address) && address.length > 0) {
-        const userAddress = address.map((addr) => {
-          return this.addressRepository.create({
-            addressType: addr.addressType,
-            wardNumber: addr.wardNumber,
-            municipality: addr.municipality,
-            province: addr.province,
-            district: addr.district,
-            user: newUser,
-          });
-        });
-        await this.addressRepository.save(userAddress);
-        console.log("User address saved:", userAddress);
+      // Save user addresses if provided
+      let savedAddresses = [];
+      if (Array.isArray(address)) {
+        const userAddresses = address.map(addr => this.addressRepository.create({
+          addressType: addr.addressType,
+          wardNumber: addr.wardNumber,
+          municipality: addr.municipality,
+          province: addr.province,
+          district: addr.district,
+          user: newUser,
+        }));
+        savedAddresses = await this.addressRepository.save(userAddresses);
       }
   
-      // Save user contact
+      // Save user contact information
       const userContact = this.contactRepository.create({
         ...contact,
         user: newUser,
       });
       await this.contactRepository.save(userContact);
-      console.log("User contact saved:", userContact);
   
-      // Handle document uploads: Check if `documentFile` is a URL or file
-      let documentUrls = [];
-      if (Array.isArray(document) && document.length > 0) {
-        for (const doc of document) {
-          let documentFileUrl = doc.documentFile;
+      // Handle document files upload and save documents
+      let savedDocuments = [];
+      if (files.documents && files.documents.length > 0) {
+        const uploadedDocuments = await Promise.all(files.documents.map(async (documentFile, index) => {
+          const documentUrls = await uploadFilesToCloudinary([documentFile.path], 'documents');
+          const documentUrl = documentUrls[0]; // Use the first URL as a single string
   
-          if (doc.documentFile && typeof doc.documentFile !== 'string') {
-            // If it's a file, upload to Cloudinary
-            console.log("Uploading document to Cloudinary");
-            try {
-              const uploadedDocument = await uploadSingleFileToCloudinary(
-                doc.documentFile as Express.Multer.File,
-                'user_documents'
-              );
-              documentFileUrl = uploadedDocument.secure_url;
-            } catch (error) {
-              console.error(`Failed to upload document (${doc.documentName}):`, error);
-              throw new InternalServerErrorException(`Failed to upload document ${doc.documentName} to Cloudinary`);
-            }
-          }
-  
-          documentUrls.push({
-            documentName: doc.documentName,
-            documentFile: documentFileUrl,
+          return this.documentRepository.create({
+            documentName: document[index]?.documentName || `Document ${index + 1}`,
+            documentFile: documentUrl, // Pass as a single string
             user: newUser,
           });
-        }
+        }));
+        savedDocuments = await this.documentRepository.save(uploadedDocuments);
       }
   
-      // Save user documents
-      if (documentUrls.length > 0) {
-        const userDocuments = documentUrls.map((docData) => this.documentRepository.create(docData));
-        await this.documentRepository.save(userDocuments.flat());
-        console.log("User documents saved:", userDocuments);
-      }
+      console.log('User created successfully with profile picture and documents:', profilePictureUrl);
   
-      // Success response
-      console.log("User registration successful");
       return {
         message: 'User created successfully',
         status: 200,
-        user: newUser,
+        user: {
+          id: newUser.userId,
+          email: newUser.email,
+          username: newUser.username,
+          role: newUser.role,
+          isActivated: newUser.isActivated,
+          createdAt: newUser.createdAt,
+          profile: {
+            fname: userProfile.fname,
+            lname: userProfile.lname,
+            gender: userProfile.gender,
+            dob: userProfile.dob,
+            profilePicture: userProfile.profilePicture,
+          },
+          contact: {
+            phoneNumber: userContact.phoneNumber,
+            alternatePhoneNumber: userContact.alternatePhoneNumber,
+            telephoneNumber: userContact.telephoneNumber,
+          },
+          address: savedAddresses.map(addr => ({
+            addressType: addr.addressType,
+            wardNumber: addr.wardNumber,
+            municipality: addr.municipality,
+            district: addr.district,
+            province: addr.province,
+          })),
+          documents: savedDocuments.map(doc => ({
+            documentName: doc.documentName,
+            documentFile: doc.documentFile,
+          }))
+        },
         plainPassword: password,
       };
     } catch (error) {
-      console.error('Registration error:', error);
-      if (error instanceof BadRequestException) {
-        throw error;
-      } else {
-        throw new InternalServerErrorException('An unexpected error occurred during registration');
-      }
+      console.error('Error in register function:', error);
+      throw new InternalServerErrorException('An unexpected error occurred during registration');
     }
   }
-  async login(loginDto: LoginDto, @Res() res: Response) {
+  
+  
+    async login(loginDto: LoginDto, @Res() res: Response) {
     try {
       const { username, password } = loginDto;
       if (!username || !password) {

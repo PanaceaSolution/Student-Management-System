@@ -37,6 +37,7 @@ export class RegisterUserDto {
   @IsOptional({ message: 'Refresh token is required' })
   refreshToken: string;
 
+
   @ValidateNested()
   @Type(() => UserProfileDto)
   profile: UserProfileDto;
@@ -51,9 +52,8 @@ export class RegisterUserDto {
   contact: UserContactDto;
 
   @ValidateNested({ each: true })
-  @IsArray()
   @Type(() => UserDocumentsDto)
-  document: UserDocumentsDto[];
+  document: UserDocumentsDto;
 
   @Transform(({ value }) => {
     const date = value ? new Date(value) : new Date();

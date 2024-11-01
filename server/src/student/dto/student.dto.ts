@@ -94,11 +94,13 @@ export class StudentDto extends RegisterUserDto  {
   @Type(() => Date)
   admissionDate?: Date; 
 
-  @Transform(({ value }) => {
-    const date = value ? new Date(value) : new Date();
-    return date.toISOString().split('T')[0]; // Format as 'yyyy-mm-dd'
-  })
-  createdAt: string;
+  // @Transform(({ value }) => {
+  //   const date = value ? new Date(value) : new Date();
+  //   return date.toISOString().split('T')[0]; // Format as 'yyyy-mm-dd'
+  // })
+  // @IsOptional()
+  // @IsString()
+  // formattedAdmissionDate?: string;
 
 }
 

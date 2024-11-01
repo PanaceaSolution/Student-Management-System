@@ -5,7 +5,7 @@ import { Express } from 'express';
 
 export class UserProfileDto {
   @IsOptional()
-  profilePicture: string | Express.Multer.File; // Allows file or URL as a string
+  profilePicture: string ; // Allows file or URL as a string
 
   @IsString()
   @IsNotEmpty({ message: 'First name is required' })
@@ -66,5 +66,5 @@ export class UserDocumentsDto {
   documentName: string;
 
   @IsNotEmpty({ message: 'Document file is required' })
-  documentFile: string | Express.Multer.File; // Allows file or URL as a string
+  documentFile: string ; // Allows file or URL as a string
 }

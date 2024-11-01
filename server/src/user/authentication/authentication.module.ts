@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { AuthenticationService } from './authentication.service';
 import { AuthenticationController } from './authentication.controller';
@@ -9,7 +9,7 @@ import { UserAddress } from '../userEntity/address.entity';
 import { UserContact } from '../userEntity/contact.entity';
 import { UserProfile } from '../userEntity/profile.entity';
 import { UserDocuments } from '../userEntity/document.entity';
-
+import { JsonParserMiddleware } from '../../middlewares/json-parser.middleware';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -28,4 +28,5 @@ import { UserDocuments } from '../userEntity/document.entity';
   providers: [AuthenticationService],
   exports: [JwtModule, AuthenticationService, TypeOrmModule],
 })
-export class AuthenticationModule {}
+export class AuthenticationModule {
+}

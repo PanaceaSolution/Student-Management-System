@@ -57,21 +57,24 @@ export async function uploadSingleFileToCloudinary(
 }
 
 // Multiple file upload with error handling
-export async function uploadFilesToCloudinary(
-  files: Express.Multer.File[],
-  folder: string,
-): Promise<string[]> { // Return type is now an array of secure URLs
-  if (!Array.isArray(files) || files.length === 0) {
-    throw new Error("No files provided for upload");
-  }
-
-  const uploadPromises = files.map((file) =>
-    uploadSingleFileToCloudinary(file, folder)
-      .then((result) => result.secure_url) // Extract only the secure URL from the result
-      .catch((error) => {
-        console.error(`Error uploading ${file.originalname} to Cloudinary:`, error);
-        throw new Error(`Failed to upload ${file.originalname} to Cloudinary`);
-      })
+export async function uploadFilesToCloudinary(filePaths: string[], folder: string): Promise<string[]> {
+  const uploadPromises = filePaths.map((filePath) =>
+    new Promise<string>((resolve, reject) => {
+      Cloudinary.uploader.upload(
+        filePath,
+        { folder },
+        (error, result) => {
+          if (error) {
+            console.error('Error uploading to Cloudinary:', error);
+            return reject(new Error('Failed to upload to Cloudinary'));
+          }
+          if (!result) {
+            return reject(new Error('Upload failed, no result returned from Cloudinary'));
+          }
+          resolve(result.secure_url);
+        }
+      );
+    })
   );
 
   return Promise.all(uploadPromises);

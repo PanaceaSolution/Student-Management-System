@@ -46,7 +46,7 @@ export class RegisterUserDto {
   @ValidateNested({ each: true })
   @IsArray()
   @Type(() => UserDocumentsDto)
-  document: UserDocumentsDto[];
+  document: UserDocumentsDto;
 
   @Transform(({ value }) => {
     const date = value ? new Date(value) : new Date();
