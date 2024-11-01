@@ -21,8 +21,7 @@ import { UserAddress } from '../userEntity/address.entity';
 import { UserContact } from '../userEntity/contact.entity';
 import { UserDocuments } from '../userEntity/document.entity';
 import { UserProfile } from '../userEntity/profile.entity';
-import { Express } from 'express'; // Ensure this is imported if needed
-// Removed incorrect import for Multer file type
+
 import {
   generateRandomPassword,
   generateUsername,
@@ -131,7 +130,6 @@ export class AuthenticationService {
   
       const { email, role, profile, contact, document, address } = RegisterDto;
   
-      // Check for existing user
       const existingUser = await this.userRepository.findOne({ where: { email } });
       if (existingUser) {
         throw new BadRequestException('User with this email already exists');
@@ -141,7 +139,7 @@ export class AuthenticationService {
       const encryptedPassword = encryptdPassword(password);
       const username = generateUsername(profile.fname, profile.lname, role);
   
-      // Create the new user entity
+ 
       const newUser = this.userRepository.create({
         email,
         isActivated: true,
@@ -151,15 +149,13 @@ export class AuthenticationService {
         createdAt: new Date(),
       });
       await this.userRepository.save(newUser);
-  
-      // Handle profile picture upload
+
       let profilePictureUrl: string | null = null;
       if (files.profilePicture && files.profilePicture.length > 0) {
         const profilePictureUrls = await uploadFilesToCloudinary([files.profilePicture[0].path], 'profile_pictures');
         profilePictureUrl = profilePictureUrls[0];
       }
   
-      // Create and save user profile
       const userProfile = this.profileRepository.create({
         profilePicture: profilePictureUrl,
         fname: profile.fname,
@@ -169,8 +165,7 @@ export class AuthenticationService {
         user: newUser,
       });
       await this.profileRepository.save(userProfile);
-  
-      // Save user addresses if provided
+ 
       let savedAddresses = [];
       if (Array.isArray(address)) {
         const userAddresses = address.map(addr => this.addressRepository.create({
@@ -184,23 +179,22 @@ export class AuthenticationService {
         savedAddresses = await this.addressRepository.save(userAddresses);
       }
   
-      // Save user contact information
+
       const userContact = this.contactRepository.create({
         ...contact,
         user: newUser,
       });
       await this.contactRepository.save(userContact);
   
-      // Handle document files upload and save documents
       let savedDocuments = [];
       if (files.documents && files.documents.length > 0) {
         const uploadedDocuments = await Promise.all(files.documents.map(async (documentFile, index) => {
           const documentUrls = await uploadFilesToCloudinary([documentFile.path], 'documents');
-          const documentUrl = documentUrls[0]; // Use the first URL as a single string
+          const documentUrl = documentUrls[0]; 
   
           return this.documentRepository.create({
             documentName: document[index]?.documentName || `Document ${index + 1}`,
-            documentFile: documentUrl, // Pass as a single string
+            documentFile: documentUrl, 
             user: newUser,
           });
         }));

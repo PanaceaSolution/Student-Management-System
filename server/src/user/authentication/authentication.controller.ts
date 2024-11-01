@@ -56,10 +56,9 @@ export class AuthenticationController {
     { name: 'documents', maxCount: 10 },
   ]))
   async register(
-    @Body() body: any, // Receive raw body to parse manually
+    @Body() body: any, 
     @UploadedFiles() files: { profilePicture?: Express.Multer.File[], documents?: Express.Multer.File[] }
   ) {
-    // Parse nested objects from JSON strings
     try {
       const registerDto: RegisterUserDto = {
         email: body.email,
@@ -69,11 +68,9 @@ export class AuthenticationController {
         contact: JSON.parse(body.contact),
         address: JSON.parse(body.address),
         document: JSON.parse(body.document),
-
-        // Include missing fields with default values or values from the request body
-        username: body.username || '',  // Set a default value if not provided
-        refreshToken: body.refreshToken || null,  // Set to null if not provided
-        createdAt: body.createdAt || new Date().toISOString().split('T')[0],  // Set current date if not provided
+        username: body.username || '',  
+        refreshToken: body.refreshToken || null,  
+        createdAt: body.createdAt || new Date().toISOString().split('T')[0],  
       };
 
       console.log('Parsed Register DTO:', registerDto);
