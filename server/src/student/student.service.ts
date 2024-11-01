@@ -44,28 +44,34 @@ export class StudentService {
         contact,
         document,
       } = createStudentDto;
-
-
+  
+      // Ensure `profile` and its properties are defined before accessing `profile.fname`
+      if (!profile || !profile.fname || !profile.lname) {
+        throw new BadRequestException('Profile information (fname and lname) is required.');
+      }
+  
+      // Parse and validate the admission date
       const AD = moment(admissionDate, 'YYYY-MM-DD');
       if (!AD.isValid()) {
         throw new BadRequestException('Invalid date format for Admission Date');
       }
       const AdmissionIsoString = AD.toISOString();
-
+  
+      // Check if the student already exists
       const studentExist = await this.studentRepository.findOne({
         where: [{ registrationNumber }, { rollNumber }],
       });
       if (studentExist) {
         return { status: 400, message: 'Student already exists in the student database' };
       }
-
-
+  
+      // Check if the user already exists
       const userExist = await this.userRepository.findOne({ where: { email } });
       if (userExist) {
         return { status: 400, message: 'Email already exists in the user database' };
       }
-
-
+  
+      // Prepare registration DTO for the user with ISO string for `createdAt`
       const registerDto: RegisterUserDto = {
         email,
         role,
@@ -75,26 +81,26 @@ export class StudentService {
         document,
         username: generateUsername(profile.fname, profile.lname, role),
         password: generateRandomPassword(),
-        createdAt: new Date().toISOString(), 
+        createdAt: new Date().toISOString(), // Convert to ISO string
         refreshToken: null,
       };
-
-
+  
+      // Register the user and handle files (profile picture and documents)
       const createUser = await this.userService.register(registerDto, files);
-
+  
       if (!createUser || !createUser.user) {
         throw new InternalServerErrorException('Error occurs while creating user');
       }
-
-
+  
+      // Retrieve a reference to the user from the database to ensure compatibility
       const userReference = await this.userRepository.findOne({
         where: { userId: createUser.user.id },
       });
-
+  
       if (!userReference) {
         return { status: 500, message: 'Error finding user after creation' };
       }
-
+  
       // Create the student record with a reference to the user
       const newStudent = this.studentRepository.create({
         user: userReference, // Use the fully-compatible reference
@@ -111,9 +117,9 @@ export class StudentService {
         studentClass,
         transportationMode,
       });
-
+  
       await this.studentRepository.save(newStudent);
-
+  
       return {
         status: 201,
         message: 'Student created successfully',
@@ -125,7 +131,6 @@ export class StudentService {
       throw new InternalServerErrorException('An unexpected error occurred during student creation');
     }
   }
-
   // async GetAllStudents(): Promise<{
   //   status: number;
   //   message: string;

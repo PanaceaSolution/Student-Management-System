@@ -20,27 +20,26 @@ export class StudentController {
     ])
   )
   async createStudent(
-    @Body() createStudentDto: any, // Use `any` to allow parsing in the controller
+    @Body() createStudentDto: any, 
     @UploadedFiles() files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
   ) {
-    // Parse JSON strings for address, contact, and profile fields in `form-data`
     try {
+      if (typeof createStudentDto.profile === 'string') {
+        createStudentDto.profile = JSON.parse(createStudentDto.profile);
+      }
       if (typeof createStudentDto.address === 'string') {
         createStudentDto.address = JSON.parse(createStudentDto.address);
       }
       if (typeof createStudentDto.contact === 'string') {
         createStudentDto.contact = JSON.parse(createStudentDto.contact);
       }
-      if (typeof createStudentDto.profile === 'string') {
-        createStudentDto.profile = JSON.parse(createStudentDto.profile);
-      }
     } catch (error) {
       throw new BadRequestException('Invalid JSON format for address, contact, or profile');
     }
 
-    // Call the service with the parsed data and files
     return this.studentService.createStudent(createStudentDto, files);
   }
+
 
 
   // @Get('/:studentId')
