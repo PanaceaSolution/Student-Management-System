@@ -76,7 +76,7 @@ export class StudentService {
         document,
         username: generateUsername(profile.fname, profile.lname, role),
         password: generateRandomPassword(),
-        createdAt: new Date().toISOString(), // Convert to ISO string
+        createdAt: new Date().toISOString(), 
         refreshToken: null,
       };
 
