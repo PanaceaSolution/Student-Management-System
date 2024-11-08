@@ -16,92 +16,93 @@ import { TRANSPORTATION_MODE } from '../../utils/role.helper';
 import { User } from '../../user/authentication/entities/authentication.entity';
 import { RegisterUserDto } from '../../user/authentication/dto/register.dto';
 
-export class StudentAddressDto {
-  @IsString()
-  wardNumber: string;
+// export class StudentAddressDto {
+//   @IsString()
+//   wardNumber: string;
 
-  @IsString()
-  municipality: string;
+//   @IsString()
+//   municipality: string;
 
-  @IsString()
-  province: string;
+//   @IsString()
+//   province: string;
 
-  @IsString()
-  district: string;
-}
+//   @IsString()
+//   district: string;
+// }
 
-export class StudentContactDto {
-  @IsString()
-  phoneNumber: string;
+// export class StudentContactDto {
+//   @IsString()
+//   phoneNumber: string;
 
-  @IsOptional()
-  @IsString()
-  alternatePhoneNumber?: string;
+//   @IsOptional()
+//   @IsString()
+//   alternatePhoneNumber?: string;
 
-  @IsOptional()
-  @IsString()
-  telephoneNumber?: string;
-}
+//   @IsOptional()
+//   @IsString()
+//   telephoneNumber?: string;
+// }
 
-export class StudentDto extends RegisterUserDto  {
+export class StudentDto extends RegisterUserDto {
   @IsString()
+  @IsNotEmpty()
   studentClass: string;
 
   @IsString()
+  @IsNotEmpty()
   section: string;
 
   @IsString()
   @IsOptional()
-  fatherName: string;
+  fatherName?: string;
 
   @IsString()
   @IsOptional()
-  motherName: string;
+  motherName?: string;
 
   @IsString()
   @IsOptional()
-  guardianName: string;
+  guardianName?: string;
 
   @IsString()
   @IsOptional()
-  religion:string;
+  religion?: string;
 
   @IsString()
   @IsOptional()
-  bloodType: string;
+  bloodType?: string;
 
   @IsEnum(TRANSPORTATION_MODE)
   @IsOptional()
-  transportationMode: TRANSPORTATION_MODE;
+  transportationMode?: TRANSPORTATION_MODE;
 
   @IsString()
+  @IsNotEmpty()
   rollNumber: string;
 
   @IsString()
   @IsOptional()
-  registrationNumber: string;
+  registrationNumber?: string;
 
   @IsString()
   @IsOptional()
-  previousSchool: string;
+  previousSchool?: string;
 
   @IsUUID()
   @IsOptional()
-  parentId: number;
+  parentId?: string; // Change to string if it's a UUID
 
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  admissionDate?: Date; 
+  admissionDate?: Date;
 
-  // @Transform(({ value }) => {
-  //   const date = value ? new Date(value) : new Date();
-  //   return date.toISOString().split('T')[0]; // Format as 'yyyy-mm-dd'
-  // })
-  // @IsOptional()
-  // @IsString()
-  // formattedAdmissionDate?: string;
-
+  @Transform(({ value }) => {
+    return value ? new Date(value).toISOString().split('T')[0] : undefined;
+  })
+  @IsOptional()
+  @IsString()
+  formattedAdmissionDate?: string;
 }
 
 // export class UpdateStudentDto {

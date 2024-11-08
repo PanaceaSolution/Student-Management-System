@@ -13,33 +13,37 @@ export class StudentController {
   //   return this.studentService.GetAllStudents();
   // }
   @Post('create')
-  @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'profilePicture', maxCount: 1 },
-      { name: 'documents', maxCount: 10 },
-    ])
-  )
-  async createStudent(
-    @Body() createStudentDto: any, 
-    @UploadedFiles() files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
-  ) {
-    try {
-      if (typeof createStudentDto.profile === 'string') {
-        createStudentDto.profile = JSON.parse(createStudentDto.profile);
-      }
-      if (typeof createStudentDto.address === 'string') {
-        createStudentDto.address = JSON.parse(createStudentDto.address);
-      }
-      if (typeof createStudentDto.contact === 'string') {
-        createStudentDto.contact = JSON.parse(createStudentDto.contact);
-      }
-    } catch (error) {
-      throw new BadRequestException('Invalid JSON format for address, contact, or profile');
-    }
+@UseInterceptors(
+  FileFieldsInterceptor([
+    { name: 'profilePicture', maxCount: 1 },
+    { name: 'documents', maxCount: 10 },
+  ])
+)
+async createStudent(
+  @Body() createStudentDto: any,
+  @UploadedFiles() files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
+) {
+  console.log('Received files:', files);
+  console.log('Received body:', createStudentDto);
 
-    return this.studentService.createStudent(createStudentDto, files);
+  try {
+    // Parse JSON fields if they are in string format
+    if (typeof createStudentDto.profile === 'string') {
+      createStudentDto.profile = JSON.parse(createStudentDto.profile);
+    }
+    if (typeof createStudentDto.address === 'string') {
+      createStudentDto.address = JSON.parse(createStudentDto.address);
+    }
+    if (typeof createStudentDto.contact === 'string') {
+      createStudentDto.contact = JSON.parse(createStudentDto.contact);
+    }
+  } catch (error) {
+    throw new BadRequestException('Invalid JSON format for address, contact, or profile');
   }
 
+  // Call the student service to create a student record
+  return this.studentService.createStudent(createStudentDto, files);
+}
 
 
   // @Get('/:studentId')

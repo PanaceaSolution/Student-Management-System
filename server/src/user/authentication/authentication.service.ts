@@ -21,7 +21,8 @@ import { UserAddress } from '../userEntity/address.entity';
 import { UserContact } from '../userEntity/contact.entity';
 import { UserDocuments } from '../userEntity/document.entity';
 import { UserProfile } from '../userEntity/profile.entity';
-
+import { Express } from 'express'; // Ensure this is imported if needed
+// Removed incorrect import for Multer file type
 import {
   generateRandomPassword,
   generateUsername,
@@ -122,7 +123,7 @@ export class AuthenticationService {
 
   async register(
     RegisterDto: RegisterUserDto,
-    files: { profilePicture?: Express.Multer.File[], documents?: Express.Multer.File[] } = { profilePicture: [], documents: [] }
+    files: { profilePicture?: Express.Multer.File[], documents?: Express.Multer.File[] } = {  }
   ) {
     try {
       console.log('Parsed Register DTO:', RegisterDto);
@@ -244,7 +245,6 @@ export class AuthenticationService {
       throw new InternalServerErrorException('An unexpected error occurred during registration');
     }
   }
-  
   
     async login(loginDto: LoginDto, @Res() res: Response) {
     try {
