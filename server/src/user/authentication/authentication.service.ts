@@ -6,10 +6,6 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
-import * as fs from 'fs';
-import { promisify } from 'util';
-const readFileAsync = promisify(fs.readFile);
-
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { Equal, Like, Repository } from 'typeorm';
@@ -21,8 +17,8 @@ import { UserAddress } from '../userEntity/address.entity';
 import { UserContact } from '../userEntity/contact.entity';
 import { UserDocuments } from '../userEntity/document.entity';
 import { UserProfile } from '../userEntity/profile.entity';
-import { Express } from 'express'; // Ensure this is imported if needed
-// Removed incorrect import for Multer file type
+
+
 import {
   generateRandomPassword,
   generateUsername,
