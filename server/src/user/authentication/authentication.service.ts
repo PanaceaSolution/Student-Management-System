@@ -4,6 +4,7 @@ import {
   Req,
   Res,
   InternalServerErrorException,
+  HttpException,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
@@ -17,6 +18,7 @@ import { UserAddress } from '../userEntity/address.entity';
 import { UserContact } from '../userEntity/contact.entity';
 import { UserDocuments } from '../userEntity/document.entity';
 import { UserProfile } from '../userEntity/profile.entity';
+import { CloudinaryError, DatabaseError } from '../../utils/custom-errors';
 
 
 import {
@@ -44,99 +46,22 @@ export class AuthenticationService {
     private readonly documentRepository: Repository<UserDocuments>,
     private jwtService: JwtService,
   ) {}
-  // async updateProfilePicture(file: Express.Multer.File, oldPublicId?: string): Promise<string> {
-  //   try {
-  //     // Delete the old image if a public ID is provided
-  //     if (oldPublicId) {
-  //       await deleteFileFromCloudinary(oldPublicId);
-  //       console.log("Old profile picture deleted:", oldPublicId);
-  //     }
-
-  //     // Upload the new profile picture
-  //     const uploadedPicture = await uploadSingleFileToCloudinary(file, 'user_profile_pictures');
-  //     console.log("New profile picture uploaded:", uploadedPicture.secure_url);
-
-  //     // Return the secure URL of the new profile picture
-  //     return uploadedPicture.secure_url;
-  //   } catch (error) {
-  //     console.error("Failed to update profile picture:", error);
-  //     throw new InternalServerErrorException("Failed to update profile picture");
-  //   }
-  // }
-  // async updateMultipleFiles(files: Express.Multer.File[], oldPublicIds?: string[]): Promise<string[]> {
-  //   try {
-  //     // Delete old images if public IDs are provided
-  //     if (oldPublicIds && oldPublicIds.length > 0) {
-  //       await Promise.all(oldPublicIds.map(publicId => deleteFileFromCloudinary(publicId)));
-  //       console.log("Old documents deleted:", oldPublicIds);
-  //     }
-
-  //     // Upload new files
-  //     const uploadedUrls = await uploadFilesToCloudinary(files, 'user_documents');
-  //     console.log("New documents uploaded:", uploadedUrls);
-
-  //     // Return secure URLs of the new documents
-  //     return uploadedUrls;
-  //   } catch (error) {
-  //     console.error("Failed to update documents:", error);
-  //     throw new InternalServerErrorException("Failed to update documents");
-  //   }
-  // }
-  // async uploadProfilePicture(file: Express.Multer.File): Promise<any> {
-  //   if (!file) {
-  //     throw new BadRequestException('No file provided');
-  //   }
-
-  //   console.log("Uploading profile picture to Cloudinary");
-
-  //   try {
-  //     const uploadedPicture = await uploadSingleFileToCloudinary(file, 'user_profile_pictures');
-  //     console.log("Profile picture uploaded successfully:", uploadedPicture.secure_url);
-  //     return {
-  //       message: 'Profile picture uploaded successfully',
-  //       secureUrl: uploadedPicture.secure_url,
-  //     };
-  //   } catch (error) {
-  //     console.error("Failed to upload profile picture:", error);
-  //     throw new InternalServerErrorException("Failed to upload profile picture to Cloudinary");
-  //   }
-  // }
-  // async uploadMultipleFiles(files: Express.Multer.File[]): Promise<any> {
-  //   console.log("Uploading multiple files to Cloudinary");
-
-  //   try {
-  //     const uploadedFiles = await uploadFilesToCloudinary(files, 'user_documents');
-  //     console.log("Files uploaded successfully:", uploadedFiles);
-  //     return {
-  //       message: 'Files uploaded successfully',
-  //       uploadedFiles,
-  //     };
-  //   } catch (error) {
-  //     console.error("Failed to upload files:", error);
-  //     throw new InternalServerErrorException("Failed to upload files to Cloudinary");
-  //   }
-  // }
-
   async register(
     RegisterDto: RegisterUserDto,
-    files: { profilePicture?: Express.Multer.File[], documents?: Express.Multer.File[] } = {  }
+    files: { profilePicture?: Express.Multer.File[], documents?: Express.Multer.File[] } = {}
   ) {
     try {
-      console.log('Parsed Register DTO:', RegisterDto);
-      console.log('Received files:', files);
-  
       const { email, role, profile, contact, document, address } = RegisterDto;
-  
+
       const existingUser = await this.userRepository.findOne({ where: { email } });
       if (existingUser) {
         throw new BadRequestException('User with this email already exists');
       }
-  
+
       const password = generateRandomPassword();
       const encryptedPassword = encryptdPassword(password);
       const username = generateUsername(profile.fname, profile.lname, role);
-  
- 
+
       const newUser = this.userRepository.create({
         email,
         isActivated: true,
@@ -145,14 +70,23 @@ export class AuthenticationService {
         role,
         createdAt: new Date(),
       });
-      await this.userRepository.save(newUser);
+
+      try {
+        await this.userRepository.save(newUser);
+      } catch (error) {
+        throw new DatabaseError('Failed to save new user to the database', error.message);
+      }
 
       let profilePictureUrl: string | null = null;
       if (files.profilePicture && files.profilePicture.length > 0) {
-        const profilePictureUrls = await uploadFilesToCloudinary([files.profilePicture[0].path], 'profile_pictures');
-        profilePictureUrl = profilePictureUrls[0];
+        try {
+          const profilePictureUrls = await uploadFilesToCloudinary([files.profilePicture[0].path], 'profile_pictures');
+          profilePictureUrl = profilePictureUrls[0];
+        } catch (error) {
+          throw new CloudinaryError('Failed to upload profile picture', error.message);
+        }
       }
-  
+
       const userProfile = this.profileRepository.create({
         profilePicture: profilePictureUrl,
         fname: profile.fname,
@@ -161,8 +95,13 @@ export class AuthenticationService {
         dob: new Date(profile.dob),
         user: newUser,
       });
-      await this.profileRepository.save(userProfile);
- 
+
+      try {
+        await this.profileRepository.save(userProfile);
+      } catch (error) {
+        throw new DatabaseError('Failed to save user profile to the database', error.message);
+      }
+
       let savedAddresses = [];
       if (Array.isArray(address)) {
         const userAddresses = address.map(addr => this.addressRepository.create({
@@ -173,33 +112,44 @@ export class AuthenticationService {
           district: addr.district,
           user: newUser,
         }));
-        savedAddresses = await this.addressRepository.save(userAddresses);
+
+        try {
+          savedAddresses = await this.addressRepository.save(userAddresses);
+        } catch (error) {
+          throw new DatabaseError('Failed to save user addresses to the database', error.message);
+        }
       }
-  
 
       const userContact = this.contactRepository.create({
         ...contact,
         user: newUser,
       });
-      await this.contactRepository.save(userContact);
-  
+
+      try {
+        await this.contactRepository.save(userContact);
+      } catch (error) {
+        throw new DatabaseError('Failed to save user contact to the database', error.message);
+      }
+
       let savedDocuments = [];
       if (files.documents && files.documents.length > 0) {
-        const uploadedDocuments = await Promise.all(files.documents.map(async (documentFile, index) => {
-          const documentUrls = await uploadFilesToCloudinary([documentFile.path], 'documents');
-          const documentUrl = documentUrls[0]; 
-  
-          return this.documentRepository.create({
-            documentName: document[index]?.documentName || `Document ${index + 1}`,
-            documentFile: documentUrl, 
-            user: newUser,
-          });
-        }));
-        savedDocuments = await this.documentRepository.save(uploadedDocuments);
+        try {
+          const uploadedDocuments = await Promise.all(files.documents.map(async (documentFile, index) => {
+            const documentUrls = await uploadFilesToCloudinary([documentFile.path], 'documents');
+            const documentUrl = documentUrls[0];
+
+            return this.documentRepository.create({
+              documentName: document[index]?.documentName || `Document ${index + 1}`,
+              documentFile: documentUrl,
+              user: newUser,
+            });
+          }));
+          savedDocuments = await this.documentRepository.save(uploadedDocuments);
+        } catch (error) {
+          throw new CloudinaryError('Failed to upload and save documents', error.message);
+        }
       }
-  
-      console.log('User created successfully with profile picture and documents:', profilePictureUrl);
-  
+
       return {
         message: 'User created successfully',
         status: 200,
@@ -237,10 +187,13 @@ export class AuthenticationService {
         plainPassword: password,
       };
     } catch (error) {
-      console.error('Error in register function:', error);
-      throw new InternalServerErrorException('An unexpected error occurred during registration');
+      if (!(error instanceof HttpException)) {
+        throw new InternalServerErrorException('An unexpected error occurred during registration');
+      }
+      throw error;
     }
   }
+
   
     async login(loginDto: LoginDto, @Res() res: Response) {
     try {
@@ -546,7 +499,7 @@ export class AuthenticationService {
   async searchUser(searchTerm: string, searchBy: 'name' | 'role' | 'email' | 'username') {
     try {
       let whereClause;
-
+  
       switch (searchBy) {
         case 'name':
           whereClause = [
@@ -554,44 +507,75 @@ export class AuthenticationService {
             { profile: { lname: Like(`${searchTerm}%`) } },
           ];
           break;
-
+  
         case 'role':
           whereClause = { role: searchTerm as ROLE };
           break;
-
+  
         case 'email':
           whereClause = { email: Like(`%${searchTerm}%`) };
           break;
-
+  
         case 'username':
           whereClause = { username: Like(`${searchTerm}%`) };
           break;
-
+  
         default:
-          return {
-            message: 'Invalid search criteria',
-            status: 400,
-            success: false,
-          };
+          throw new BadRequestException('Invalid search criteria');
       }
-
+  
       const users = await this.userRepository.find({
         where: whereClause,
-        relations: searchBy === 'name' ? ['profile'] : [],
+        relations: ['profile', 'contact', 'address', 'document'],
       });
-
+  
+      const formattedUsers = users.map(user => ({
+        id: user.userId,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        isActivated: user.isActivated,
+        createdAt: user.createdAt,
+        profile: user.profile ? {
+          fname: user.profile.fname,
+          lname: user.profile.lname,
+          gender: user.profile.gender,
+          dob: user.profile.dob,
+          profilePicture: user.profile.profilePicture,
+        } : null,
+        contact: user.contact ? {
+          phoneNumber: user.contact.phoneNumber,
+          alternatePhoneNumber: user.contact.alternatePhoneNumber,
+          telephoneNumber: user.contact.telephoneNumber,
+        } : null,
+        address: user.address ? user.address.map(addr => ({
+          addressType: addr.addressType,
+          wardNumber: addr.wardNumber,
+          municipality: addr.municipality,
+          district: addr.district,
+          province: addr.province,
+        })) : [],
+        documents: user.document ? user.document.map(doc => ({
+          documentName: doc.documentName,
+          documentFile: doc.documentFile,
+        })) : [],
+      }));
+  
       return {
-        users,
+        users: formattedUsers,
         status: 200,
         success: true,
       };
     } catch (error) {
-      console.error('Error during search:', error);
-      return {
-        message: 'Error during search',
-        status: 500,
-        success: false,
-      };
+      if (error instanceof BadRequestException) {
+        throw error;
+      } else if (error instanceof CloudinaryError || error instanceof DatabaseError) {
+        console.error('Database or Cloudinary error:', error);
+        throw new InternalServerErrorException('A service error occurred during search');
+      } else {
+        console.error('Unexpected error during search:', error);
+        throw new InternalServerErrorException('An unexpected error occurred during search');
+      }
     }
   }
 

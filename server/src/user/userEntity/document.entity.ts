@@ -10,6 +10,9 @@ import { User } from '../authentication/entities/authentication.entity';
 
 @Entity({ name: 'userDocuments' })
 export class UserDocuments {
+  map(arg0: (doc: any) => { documentName: any; documentFile: any; }): any {
+    throw new Error('Method not implemented.');
+  }
   @PrimaryGeneratedColumn('uuid')
   documentId: UUID;
 
