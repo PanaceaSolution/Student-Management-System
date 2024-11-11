@@ -138,7 +138,7 @@ const Sidebar = () => {
 
    return (
       <aside className="sticky top-0 md:border-r bg-primary text-white lg:rounded-tr-lg lg:rounded-br-lg h-screen overflow-y-auto scrollbar-none">
-         <div className="flex flex-col h-screen justify-between">
+         <div className="flex flex-col h-screen justify-between pb-2">
 
             <div className="flex flex-col">
                {/* Logo Section */}
@@ -155,9 +155,9 @@ const Sidebar = () => {
                            to={link.href}
                            aria-current={isActive(link.href) ? 'page' : undefined}
                            aria-label={link.name}
-                           className={`flex items-center gap-8 rounded-lg p-[14px] transition-all hover:bg-background hover:text-primary 
+                           className={`flex items-center gap-8 rounded-lg p-[12px] 2xl:p-4 transition-all hover:bg-background hover:text-primary 
                                  ${isActive(link.href)
-                                 ? 'bg-background text-primary border-l-4 border-primary'
+                                 ? 'bg-background text-primary'
                                  : 'text-white'
                               }
                               `}
@@ -183,7 +183,7 @@ const Sidebar = () => {
             <Button
                variant="destructive"
                onClick={logoutHandle}
-               className="flex items-center justify-center gap-5 py-7 md:mx-1 lg:mx-4 mb-10 md:mb-4"
+               className="flex items-center justify-center gap-5 py-7 md:mx-2 lg:mx-4 mb-6 md:mb-0"
             >
                <LuLogOut className="w-6 h-6" />
                <span className="md:hidden lg:block font-semibold text-lg">Logout</span>

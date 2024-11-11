@@ -1,9 +1,9 @@
 import { IsNotEmpty } from 'class-validator';
 
 export class LoginDto {
-  @IsNotEmpty()
+  @IsNotEmpty({message: 'Username is required'})
   username: string;
 
-  @IsNotEmpty()
+  @IsNotEmpty({message: 'Password is required'})
   password: string;
 }

@@ -13,7 +13,8 @@ import useDeleteStudent from "@/hooks/useDeleteStudnet"; // Custom hook to delet
 import { DateSelect } from "@/components/DateSelect";
 import useStudent from "@/Zustand/useStudent";
 import AddStudentFormModal from "./StudentForm/AddStudentFormModal";
-import Button from "@/components/button";
+import { Button } from "@/components/ui/button";
+import useExport from "@/hooks/useExport";
 // Custom hook for debouncing input value
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -32,7 +33,7 @@ const useDebounce = (value, delay) => {
 };
 
 // Options for export formats
-const Experts = [
+const Exports = [
   { value: "", label: "EXPORT" },
   { value: "CSV", label: "CSV" },
   { value: "PDF", label: "PDF" },
@@ -56,7 +57,7 @@ const Department = [
 
 const Students = () => {
   // State management
-  const [selectedExpert, setSelectedExpert] = useState("");
+  const [selectedExport, setSelectedExport] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [activeTab, setActiveTab] = useState("all");
@@ -94,14 +95,23 @@ const Students = () => {
     }
   }, [success]);
 
+  // Export students data
+  const { exportToCSV, exportToPDF } = useExport();
+
   // Handle format selection and trigger export
-  const handleExpertChange = (event) => {
+  const handleExportChange = (event) => {
     const value = event.target.value;
-    setSelectedExpert(value);
-    if (value === "CSV") {
-      exportToCSV();
-    } else if (value === "PDF") {
-      exportToPDF();
+    setSelectedExport(value);
+    if (value === 'CSV') {
+      exportToCSV(students, "students.csv");
+    } else if (value === 'PDF') {
+      const headers = [
+        { header: "First Name", dataKey: "firstName" },
+        { header: "Last Name", dataKey: "lastName" },
+        { header: "Gender", dataKey: "gender" },
+        { header: "Class", dataKey: "class" },
+      ];
+      exportToPDF(students, headers, "Students List", "students.pdf");
     }
   };
 
@@ -157,46 +167,6 @@ const Students = () => {
     return Math.ceil((students?.length || 0) / itemsPerPage);
   }, [students, itemsPerPage]);
 
-  // Export students data to CSV
-  const exportToCSV = useCallback(() => {
-    const csv = Papa.unparse(students);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", "students.csv");
-    link.click(); // Trigger download
-  }, [students]);
-
-  // Export students data to PDF
-  const exportToPDF = useCallback(() => {
-    const doc = new jsPDF();
-    const columns = [
-      { header: "First Name", dataKey: "firstName" },
-      { header: "Last Name", dataKey: "lastName" },
-      { header: "Gender", dataKey: "gender" },
-      { header: "Class", dataKey: "class" },
-    ];
-
-    // Map students to PDF format
-    const pdfStudents = students?.map((student) => ({
-      firstName: student?.firstName,
-      lastName: student?.lastName,
-      gender: student?.gender,
-      Class: student?.Class,
-    }));
-
-    doc.setFontSize(18);
-    doc.text("Student List", 14, 22);
-    doc.autoTable({
-      columns: columns,
-      body: pdfStudents,
-      startY: 30,
-      margin: { horizontal: 10 },
-    });
-
-    doc.save("students.pdf"); // Save PDF
-  }, [students]);
 
   return (
     <section>
@@ -205,13 +175,10 @@ const Students = () => {
           <div className="rounded-sm bg-[#F8F8F8] lg:col-span-3 p-2">
             <div className="flex justify-evenly sm:justify-end border-b-2 p-1">
               <div className="flex gap-3 md:gap-4">
-                <Button type="print" onClick={exportToPDF}>
-                  PRINT
-                </Button>
                 <Select
-                  options={Experts}
-                  selectedValue={selectedExpert}
-                  onChange={handleExpertChange}
+                  options={Exports}
+                  selectedValue={selectedExport}
+                  onChange={handleExportChange}
                   className="w-32 bg-white"
                 />
                 <Button

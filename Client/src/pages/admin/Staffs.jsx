@@ -7,6 +7,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import StaffTable from '@/components/admin/staffTable';
 import DetailsCard from '@/components/admin/DetailsCard';
 import AddStaffForm from '@/components/admin/StaffForm/AddStaffForm';
+import useExport from '@/hooks/useExport';
+import ActiveTab from '@/components/common/activeTab';
 
 const Exports = [
   { value: "", label: "EXPORT" },
@@ -31,7 +33,7 @@ const Role = [
 const staffTableHead = ["", "First Name", "Last Name", "Phone Number", "Gender", "Role"];
 const staffTableFields = ["fname", "lname", "phoneNumber", "gender", "role"];
 
-const staffContent = [
+const staffDetails = [
   { label: "First Name", key: "fname" },
   { label: "Last Name", key: "lname" },
   { label: "Gender", key: "gender" },
@@ -63,35 +65,32 @@ const Staffs = () => {
   const [selectedId, setSelectedId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { staff, getAllStaff, staffById, getStaffById, deleteStaff } = useStaffStore();
+  const { staff, getAllStaff, staffById, getStaffById, deleteStaff, error } = useStaffStore();
 
   useEffect(() => {
     getAllStaff();
   }, [getAllStaff]);
 
-  const filteredUser = staff.filter((staffMember) => staffMember.role !== "Teacher")
+  const filteredStaff = useMemo(() =>
+    staff.filter((staffMember) => staffMember.role !== "Teacher")
+  )
 
   // Handle format selection and trigger export
+  const { exportToCSV, exportToPDF } = useExport()
   const handleExportChange = (event) => {
     const value = event.target.value;
     setSelectedExport(value);
     if (value === "CSV") {
-      exportToCSV();
+      exportToCSV(filteredStaff, "staffs.csv");
     } else if (value === "PDF") {
-      exportToPDF();
+      const headers = [
+        { header: "First Name", dataKey: "fname" },
+        { header: "Last Name", dataKey: "lname" },
+        { header: "Gender", dataKey: "gender" },
+        { header: "Role", dataKey: "role" },
+      ]
+      exportToPDF(filteredStaff, headers, "Staff List", "staffs.pdf");
     }
-  };
-
-  const handleGenderChange = (event) => {
-    setSelectedGender(event.target.value);
-  };
-
-  const handleRoleChange = (event) => {
-    setSelectedRole(event.target.value);
-  };
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
   };
 
   const handleDateChange = (selectedDate) => {
@@ -125,9 +124,6 @@ const Staffs = () => {
           <div className='rounded-sm bg-card lg:col-span-5 2xl:col-span-3 p-3'>
             <div className="flex justify-evenly sm:justify-end border-b-2 p-3">
               <div className="flex gap-3 md:gap-4">
-                <Button variant="print">
-                  PRINT
-                </Button>
                 <Select
                   options={Exports}
                   selectedValue={selectedExport}
@@ -142,7 +138,7 @@ const Staffs = () => {
                 <div className="col-span-1">
                   <SearchBox
                     placeholder="Search for something..."
-                    onChange={handleSearchChange}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className="mb-4"
                   />
                 </div>
@@ -150,49 +146,37 @@ const Staffs = () => {
                   <Select
                     options={Gender}
                     selectedValue={selectedGender}
-                    onChange={handleGenderChange}
+                    onChange={(e) => setSelectedGender(e.target.value)}
                     className="w-full bg-white"
                   />
                   <Select
                     options={Role}
                     selectedValue={selectedRole}
-                    onChange={handleRoleChange}
+                    onChange={(e) => setSelectedRole(e.target.value)}
                     className="w-full bg-white"
                   />
                   <div className="col-span-1">
-                    <DateSelect onChange={handleDateChange} />
+                    <DateSelect onChange={(date) => handleDateChange(date)} />
                   </div>
                 </div>
               </div>
             </div>
-            <div className="bg-[#F8F8F8] flex gap-6 justify-start items-center p-4 border-b-2">
-              {["all", "present", "alumni"].map((tab) => (
-                <div key={tab}>
-                  <a
-                    href="#"
-                    className={`font-semibold cursor-pointer ${activeTab === tab ? "border-b-2 border-blue-600" : "text-gray-500"
-                      }`}
-                    onClick={() => handleTabClick(tab)}
-                  >
-                    {tab.toUpperCase()}{" "}
-                    <span
-                      className={`text-primary bg-gray-200 px-1 rounded ${activeTab === tab ? "" : ""}`}
-                    >
-                      {filteredUser.length}
-                    </span>
-                  </a>
-                </div>
-              ))}
-            </div>
+            <ActiveTab
+              activeTab={activeTab}
+              filteredStaff={filteredStaff}
+              handleTabClick={handleTabClick}
+            />
             <div className="relative w-full overflow-x-auto shadow-md">
-              {filteredUser?.length === 0 ? (
-                <p className="text-center">No data available</p>
+              {filteredStaff?.length === 0 ? (
+                <p className="text-center text-destructive">
+                  No staff found
+                </p>
               ) : (
                 <StaffTable
                   title="Staff"
                   tableHead={staffTableHead}
                   tableFields={staffTableFields}
-                  user={filteredUser}
+                  user={filteredStaff}
                   handleUserId={handleUserId}
                 />
               )}
@@ -206,7 +190,7 @@ const Staffs = () => {
                 title="Staff"
                 selectedId={selectedId}
                 userDetails={staffById}
-                content={staffContent}
+                content={staffDetails}
                 handleDelete={handleDelete}
               />
             </div>

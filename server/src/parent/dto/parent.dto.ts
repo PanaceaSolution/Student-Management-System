@@ -1,73 +1,38 @@
 import {
-  IsString,
-  IsOptional,
-  IsEmail,
-  IsEnum,
-  IsInt,
-  IsDate,
-  IsNumber,
-  IsNotEmpty,
-  isNotEmpty,
-} from 'class-validator';
+  UserProfileDto,
+  UserAddressDto,
+  UserContactDto,
+  UserDocumentsDto,
+} from '../../user/userEntity/dto/common.dto';
 import { Type } from 'class-transformer';
-import { GENDER } from '../../utils/role.helper';
+import { IsNotEmpty, ValidateNested, IsString } from 'class-validator';
 
 export class ParentDto {
   @IsString()
   @IsNotEmpty()
-  fname: string;
-
-  @IsString()
-  @IsNotEmpty()
-  lname: string;
-
-  @IsEmail()
-  @IsNotEmpty()
   email: string;
 
-  @IsEnum(GENDER)
+  @IsString()
   @IsNotEmpty()
-  gender: GENDER;
-
-  // @IsString()
-  // @IsNotEmpty()
-  // @IsOptional()
-  // username: string;
+  username: string;
 
   @IsString()
-  @IsOptional()
-  profilePicture: string;
+  @IsNotEmpty({ message: 'Password is required' })
+  password: string;
 
-  // @IsString()
-  // @IsNotEmpty()
-  // password: string;
+  @ValidateNested()
+  @Type(() => UserProfileDto)
+  profile: UserProfileDto;
 
-  // @IsNotEmpty()
-  // students: string
+  @ValidateNested({ each: true })
+  @Type(() => UserAddressDto)
+  addresses: UserAddressDto[];
+
+  @ValidateNested()
+  @Type(() => UserContactDto)
+  contact: UserContactDto;
+
+  @ValidateNested({ each: true })
+  @Type(() => UserDocumentsDto)
+  documents: UserDocumentsDto[];
 }
-
-// export class UpdateParentDto {
-//   @IsOptional()
-//   @IsString()
-//   fname?: string;
-
-//   @IsOptional()
-//   @IsString()
-//   lname?: string;
-
-//   @IsOptional()
-//   @IsEmail()
-//   email?: string;
-
-//   @IsOptional()
-//   @IsString()
-//   phoneNumber?: string;
-
-//   @IsOptional()
-//   @IsString()
-//   address?: string;
-
-//   // @IsNotEmpty()
-//   // @IsOptional()
-//   // students: string
-// }

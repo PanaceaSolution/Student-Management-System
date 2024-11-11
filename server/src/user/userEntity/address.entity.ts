@@ -6,9 +6,13 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
-import { User } from '../user/authentication/entities/authentication.entity';
+import { User } from '../authentication/entities/authentication.entity';
+
 @Entity({ name: 'userAddress' })
 export class UserAddress {
+  map(arg0: (addr: any) => { addressType: any; wardNumber: any; municipality: any; district: any; province: any; }): any {
+    throw new Error('Method not implemented.');
+  }
   @PrimaryGeneratedColumn('uuid')
   addressId: UUID;
 

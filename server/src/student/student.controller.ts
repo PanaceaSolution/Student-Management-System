@@ -1,27 +1,58 @@
-import { Controller, Post,Get, Body, Param, Put, Delete, Query } from '@nestjs/common';
+import { Controller, Post,Get, Body, Param, Put, Delete, Query, BadRequestException, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { StudentDto} from './dto/student.dto';
+import { RegisterUserDto } from '../user/authentication/dto/register.dto';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @Controller('student')
 export class StudentController {
   constructor(private readonly studentService: StudentService) {}
 
-  @Get('all-students')
-  async getStudents() {
-    return this.studentService.GetAllStudents();
-  }
+  // @Get('all-students')
+  // async getStudents() {
+  //   return this.studentService.GetAllStudents();
+  // }
   @Post('create')
-  async createStudent(@Body() createStudentDto: StudentDto) {
-    return this.studentService.createStudent(createStudentDto);
+@UseInterceptors(
+  FileFieldsInterceptor([
+    { name: 'profilePicture', maxCount: 1 },
+    { name: 'documents', maxCount: 10 },
+  ])
+)
+async createStudent(
+  @Body() createStudentDto: any,
+  @UploadedFiles() files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
+) {
+  console.log('Received files:', files);
+  console.log('Received body:', createStudentDto);
+
+  try {
+    // Parse JSON fields if they are in string format
+    if (typeof createStudentDto.profile === 'string') {
+      createStudentDto.profile = JSON.parse(createStudentDto.profile);
+    }
+    if (typeof createStudentDto.address === 'string') {
+      createStudentDto.address = JSON.parse(createStudentDto.address);
+    }
+    if (typeof createStudentDto.contact === 'string') {
+      createStudentDto.contact = JSON.parse(createStudentDto.contact);
+    }
+  } catch (error) {
+    throw new BadRequestException('Invalid JSON format for address, contact, or profile');
   }
 
-  @Get('/:studentId')
-  async findStudent(
-    @Param('studentId') studentId: number,
-  ): Promise<{ status: number; message?: string; student?: any }> {
-    const uuid = studentId;
-    return this.studentService.findStudent(uuid);
-  }
+  // Call the student service to create a student record
+  return this.studentService.createStudent(createStudentDto, files);
+}
+
+
+  // @Get('/:studentId')
+  // async findStudent(
+  //   @Param('studentId') studentId: number,
+  // ): Promise<{ status: number; message?: string; student?: any }> {
+  //   const uuid = studentId;
+  //   return this.studentService.findStudent(uuid);
+  // }
 
   // @Put('/link-parent')
   // async linkParent(
@@ -30,18 +61,18 @@ export class StudentController {
   //   return this.studentService.linkParent(linkParentDto);
   // }
 
-  @Put('/update/:studentId')
-  async updateStudent(
-    @Param('studentId') studentId: number,
-    @Body() updateStudentDto: StudentDto,
-  ): Promise<{ status: number; message?: string; student?: any }> {
-    return this.studentService.updateStudent(studentId, updateStudentDto);
-  }
+  // @Put('/update/:studentId')
+  // async updateStudent(
+  //   @Param('studentId') studentId: number,
+  //   @Body() updateStudentDto: StudentDto,
+  // ): Promise<{ status: number; message?: string; student?: any }> {
+  //   return this.studentService.updateStudent(studentId, updateStudentDto);
+  // }
 
-  @Delete('/delete/:studentId')
-  async deleteStudent(
-    @Param('studentId') studentId: number,
-  ): Promise<{ status: number; message?: string }> {
-    return this.studentService.deleteStudent(studentId);
-  }
+  // @Delete('/delete/:studentId')
+  // async deleteStudent(
+  //   @Param('studentId') studentId: number,
+  // ): Promise<{ status: number; message?: string }> {
+  //   return this.studentService.deleteStudent(studentId);
+  // }
 }

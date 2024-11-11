@@ -5,9 +5,10 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
+import { GENDER } from '../../utils/role.helper';
+import { User } from '../authentication/entities/authentication.entity';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
-import { GENDER } from '../utils/role.helper';
-import { User } from '../user/authentication/entities/authentication.entity';
+
 @Entity({ name: 'userProfile' })
 export class UserProfile {
   @PrimaryGeneratedColumn('uuid')
@@ -25,10 +26,10 @@ export class UserProfile {
   @Column({ type: 'enum', enum: GENDER, nullable: false })
   gender: GENDER;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ type: 'date', nullable: false })
   dob: Date;
 
-  @OneToOne(() => User, (user) => user.profile, { nullable: true })
+  @OneToOne(() => User, (user) => user.profile, { nullable: true }) // Set nullable: true here
   @JoinColumn({ name: 'userId' })
   user: User;
 }

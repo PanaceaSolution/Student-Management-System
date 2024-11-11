@@ -3,11 +3,17 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AuthenticationModule } from './user/authentication/authentication.module';
+import { FinanceModule } from './finance/finance.module';
+import { TerminusModule } from '@nestjs/terminus';
+import { HealthController } from './health.controller';
+import { BillModule } from './bill/bill.module';
+import { UploadService } from './uploads/upload.service';
+import { CloudinaryProvider } from './uploads/cloudinary.provider';
+import { UploadController } from './uploads/upload.controller';
 import { StudentModule } from './student/student.module';
 import { ParentModule } from './parent/parent.module';
+// import { ParentModule } from './parent/parent.module';
+import { StaffModule } from './staff/staff.module';
 
 @Module({
   imports: [
@@ -29,11 +35,14 @@ import { ParentModule } from './parent/parent.module';
         },
       }),
     }),
-    AuthenticationModule,
+    TerminusModule,
+    FinanceModule,
+    BillModule,
     StudentModule,
-    ParentModule
+    StaffModule,
+    ParentModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [HealthController, UploadController],
+  providers: [UploadService, CloudinaryProvider],
 })
 export class AppModule {}
