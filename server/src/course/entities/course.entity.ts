@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { Staff } from '../../staff/entities/staff.entity'; 
+import { Class } from 'src/classes/entities/class.entity';
 
 @Entity('course')
 export class Course {
@@ -23,4 +24,7 @@ export class Course {
 
   @Column({ default: true })
   isCurrent: boolean;
+
+  @OneToMany(() => Class, (class_) => class_.classTeacher)
+  classes: Class[];
 }

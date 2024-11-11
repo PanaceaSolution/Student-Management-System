@@ -39,13 +39,8 @@
     "express-fileupload": "^1.5.1",
     "file": "^0.2.2",
     "moment": "^2.30.1",
-<<<<<<< HEAD
-    "nest": "^0.1.6",
-    "pg": "^8.13.1",
-=======
     "mysql2": "^3.11.3",
     "pg": "^8.13.0",
->>>>>>> 048cc5c3153f761d4aa35afe1718202593fcab82
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.20"
