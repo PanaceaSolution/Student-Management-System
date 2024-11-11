@@ -8,7 +8,10 @@ export function generateRandomPassword(): string {
     return Math.random().toString(36).slice(-8);
   }
   catch(error){
-    throw new BadRequestException("Error while creating password")
+    throw new BadRequestException("Error while creating password",{
+    cause:new Error(),
+    description:"Error while creating password",
+    });
   }
 }
 
