@@ -1,9 +1,15 @@
+import { BadRequestException } from '@nestjs/common';
 import { ROLE } from './role.helper';
 import { STAFFROLE } from './role.helper';
 import * as crypto from 'crypto';
 
 export function generateRandomPassword(): string {
-  return Math.random().toString(36).slice(-8);
+  try{
+    return Math.random().toString(36).slice(-8);
+  }
+  catch(error){
+    throw new BadRequestException("Error while creating password")
+  }
 }
 
 export function generateUsername(
