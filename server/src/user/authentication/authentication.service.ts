@@ -496,6 +496,7 @@ export class AuthenticationService {
       };
     }
   }
+  
   async searchUser(searchTerm: string, searchBy: 'name' | 'role' | 'email' | 'username') {
     try {
       let whereClause;
