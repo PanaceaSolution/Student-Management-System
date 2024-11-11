@@ -22,7 +22,7 @@ export async function deleteFileFromCloudinary(
         console.error('Error deleting file from Cloudinary:', error);
         return reject(new Error('Failed to delete file from Cloudinary'));
       }
-      console.log('File deleted from Cloudinary:', result);
+      // console.log('File deleted from Cloudinary:', result);
       resolve();
     });
   });
