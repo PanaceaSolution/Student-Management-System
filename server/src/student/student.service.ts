@@ -162,6 +162,7 @@ export class StudentService {
     };
   }
 
+
   // Adjust the register function in the AuthenticationService
 
   // async GetAllStudents(): Promise<{
