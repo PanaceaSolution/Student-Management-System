@@ -250,7 +250,7 @@ export class AuthenticationService {
       });
 
       await this.userRepository.update(
-        { username: user.username }, // Use the correct syntax for the 'where' argument
+        { username: user.username }, 
         { refreshToken: RefreshToken },
       );
 
@@ -267,7 +267,7 @@ export class AuthenticationService {
   async logout(@Res() res: Response, userId: UUID) {
     try {
       await this.userRepository.update(
-        { userId: userId }, // Use the correct syntax for the 'where' argument
+        { userId: userId },
         { refreshToken: null },
       );
       res.clearCookie('accessToken');
@@ -324,16 +324,14 @@ export class AuthenticationService {
   async updateUser(id: UUID, updateData: Partial<RegisterUserDto>, files: { profilePicture?: Express.Multer.File[], documents?: Express.Multer.File[] } = {}) {
     try {
       const { email, role, profile, contact, document, address } = updateData;
-  
-      // Retrieve the user
+
       const user = await this.userRepository.findOne({ where: { userId: Equal(id.toString()) } });
       if (!user) {
         throw new NotFoundException('User not found');
       }
   
       const updatedFields = {};
-  
-      // Update base fields if provided
+
       if (email !== undefined) {
         user.email = email;
         updatedFields['email'] = email;
@@ -347,8 +345,7 @@ export class AuthenticationService {
       console.log('User base data updated:', { email: user.email, role: user.role });
   
       let profilePictureUrl: string | null = null;
-  
-      // Update profile details if provided
+
       if (profile) {
         const profileData = typeof profile === 'string' ? JSON.parse(profile) : profile;
         const userProfile = await this.profileRepository.findOne({ where: { user: Equal(user.userId.toString()) } });
@@ -382,8 +379,7 @@ export class AuthenticationService {
         updatedFields['profile'] = profileUpdateData;
         console.log('User profile updated:', profileUpdateData);
       }
-  
-      // Update contact details if provided
+
       if (contact) {
         const contactData = typeof contact === 'string' ? JSON.parse(contact) : contact;
         let userContact = await this.contactRepository.findOne({ where: { user: Equal(user.userId.toString()) } });
@@ -398,7 +394,6 @@ export class AuthenticationService {
         console.log('User contact updated:', contactUpdateData);
       }
   
-      // Update address if provided
       if (address) {
         const addressData = typeof address === 'string' ? JSON.parse(address) : address;
         if (Array.isArray(addressData) && addressData.length > 0) {
@@ -422,7 +417,6 @@ export class AuthenticationService {
         }
       }
   
-      // Update documents if provided
       if (document) {
         const documentData = typeof document === 'string' ? JSON.parse(document) : document;
         if (Array.isArray(documentData) && documentData.length > 0) {
@@ -450,13 +444,11 @@ export class AuthenticationService {
         }
       }
   
-      // Retrieve full user data to structure the response
       const updatedUser = await this.userRepository.findOne({
         where: { userId: Equal(id.toString()) },
         relations: ['profile', 'address', 'contact', 'document'],
       });
   
-      // Structure the response in the desired format
       return {
         message: 'User updated successfully',
         status: 200,
