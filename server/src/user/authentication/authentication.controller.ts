@@ -51,13 +51,19 @@ export class AuthenticationController {
   // }
 
   @Post('register')
-  @UseInterceptors(FileFieldsInterceptor([
-    { name: 'profilePicture', maxCount: 1 },
-    { name: 'documents', maxCount: 10 },
-  ]))
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'profilePicture', maxCount: 1 },
+      { name: 'documents', maxCount: 10 },
+    ]),
+  )
   async register(
-    @Body() body: any, 
-    @UploadedFiles() files: { profilePicture?: Express.Multer.File[], documents?: Express.Multer.File[] }
+    @Body() body: any,
+    @UploadedFiles()
+    files: {
+      profilePicture?: Express.Multer.File[];
+      documents?: Express.Multer.File[];
+    },
   ) {
     try {
       const registerDto: RegisterUserDto = {
@@ -68,13 +74,10 @@ export class AuthenticationController {
         contact: JSON.parse(body.contact),
         address: JSON.parse(body.address),
         document: JSON.parse(body.document),
-        username: body.username || '',  
-        refreshToken: body.refreshToken || null,  
-        createdAt: body.createdAt || new Date().toISOString().split('T')[0],  
+        username: body.username || '',
+        refreshToken: body.refreshToken || null,
+        createdAt: body.createdAt || new Date().toISOString().split('T')[0],
       };
-
-      console.log('Parsed Register DTO:', registerDto);
-      console.log('Received files:', files);
 
       return this.authenticationService.register(registerDto, files);
     } catch (error) {
@@ -83,16 +86,18 @@ export class AuthenticationController {
     }
   }
 
-
-
   @Post('login')
   async login(@Body() loginDto: LoginDto, @Res() res: Response) {
     return this.authenticationService.login(loginDto, res);
   }
 
   @Post('logout')
-  async logout(@Req() request: Request, userId:UUID, @Res() res: Response) {
+  async logout(@Req() request: Request, userId: UUID, @Res() res: Response) {
     return this.authenticationService.logout(res, userId);
+  }
+  @Patch('deactivate/:id')
+  async deactivateUser(@Param('id') id: UUID) {
+    return this.authenticationService.deactivateUser(id);
   }
 
   @Post('refresh-token')
@@ -121,15 +126,10 @@ export class AuthenticationController {
   @Get('search')
   async searchUser(
     @Query('search') searchTerm: string,
-    @Query('searchBy') searchBy: 'name' | 'role' | 'email' | 'username'
+    @Query('searchBy') searchBy: 'name' | 'role' | 'email' | 'username',
   ) {
     return this.authenticationService.searchUser(searchTerm, searchBy);
   }
-
-  // @Patch('deactivate/:id')
-  // async deactivateUser(@Param('id') id: UUID) {
-  //   return this.authenticationService.deactivateUser(id);
-  // }
 }
 // function UseInterceptors(interceptor: any) {
 //   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
