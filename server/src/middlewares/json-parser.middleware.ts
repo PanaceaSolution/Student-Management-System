@@ -5,13 +5,11 @@ import { Request, Response, NextFunction } from 'express';
 @Injectable()
 export class JsonParserMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    // Fields that are expected to be JSON strings
     const jsonFields = ['profile', 'contact', 'address', 'document'];
 
     try {
       jsonFields.forEach(field => {
         if (req.body[field] && typeof req.body[field] === 'string') {
-          // Attempt to parse the JSON string
           req.body[field] = JSON.parse(req.body[field]);
         }
       });
