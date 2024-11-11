@@ -1,70 +1,70 @@
 import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
-import { GENDER } from '../../../utils/role.helper'; 
+import { GENDER } from '../../../utils/role.helper';
+import { Type, Transform } from 'class-transformer';
+import { Express } from 'express';
 
 export class UserProfileDto {
-  @IsString()
   @IsOptional()
-  profilePicture: string;
+  profilePicture: string ; // Allows file or URL as a string
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'First name is required' })
   fname: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Last name is required' })
   lname: string;
 
   @IsEnum(GENDER)
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Gender is required' })
   gender: GENDER;
 
-  @IsString()
-  @IsNotEmpty()
-  dob: string;
+  @IsNotEmpty({ message: 'Date of birth is required' })
+  @Transform(({ value }) => (typeof value === 'string' ? new Date(value) : value))
+  dob: Date;
 }
 
 export class UserAddressDto {
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Address type is required' })
   addressType: string;
 
   @IsString()
-  @IsOptional()
+  @IsNotEmpty({ message: 'Ward number is required' })
   wardNumber: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Municipality is required' })
   municipality: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'District is required' })
   district: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Province is required' })
   province: string;
 }
 
 export class UserContactDto {
   @IsString()
-  @IsOptional()
+  @IsNotEmpty({ message: 'Phone number is required' })
   phoneNumber: string;
 
   @IsString()
   @IsOptional()
-  alternatePhoneNumber: string;
+  alternatePhoneNumber?: string;
 
   @IsString()
   @IsOptional()
-  telephoneNumber: string;
+  telephoneNumber?: string;
 }
 
 export class UserDocumentsDto {
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Document name is required' })
   documentName: string;
 
-  @IsString()
-  @IsNotEmpty()
-  documentFile: string;
+  @IsNotEmpty({ message: 'Document file is required' })
+  documentFile: string ; // Allows file or URL as a string
 }

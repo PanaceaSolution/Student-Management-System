@@ -11,6 +11,10 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
 
   await app.listen(3000);
   console.log(`Application is running on: ${await app.getUrl()}`);

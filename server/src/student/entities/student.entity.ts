@@ -15,26 +15,12 @@ import { GENDER } from '../../utils/role.helper';
 // import { Parent } from '../../parent/entities/parent.entity';
 
 import { TRANSPORTATION_MODE } from '../../utils/role.helper';
-import { StudentContact } from './studentContact.entity';
-import { StudentAddress } from './studentAddress.entity';
 import { User } from '../../user/authentication/entities/authentication.entity';
 
 @Entity({ name: 'Student' })
 export class Student {
   @PrimaryGeneratedColumn('uuid')
   studentId: UUID;
-
-  @Column({ type: 'text', nullable: false })
-  fname: string;
-
-  @Column({ type: 'text', nullable: false })
-  lname: string;
-
-  @Column({ type: 'text', nullable: false })
-  gender: GENDER;
-
-  @Column({ type: 'date', nullable: false })
-  dob: Date;
 
   @Column({ type: 'date', nullable: true })
   admissionDate: Date;
@@ -45,45 +31,38 @@ export class Student {
   @Column({ type: 'text', default: 'defaultSection', nullable: false })
   section: string;
 
-  @Column({ type: 'text', nullable: false, unique: true })
-  email: string;
-
   @Column({ type: 'text', nullable: true })
   bloodType: string;
 
-  @Column({
-    type: 'text',
-    default: 'defaultRollNumber',
-    nullable: false,
-    unique: true,
-  })
-  rollNumber: string;
-
-  @Column({ type: 'text', nullable: true, unique: true })
-  registrationNumber: string;
+  @Column({ type: 'text', nullable: true })
+  fatherName: string;
 
   @Column({ type: 'text', nullable: true })
-  transportationMode: TRANSPORTATION_MODE;
+  motherName: string;
+
+  @Column({ type: 'text', nullable: true })
+  guardianName: string;
+
+  @Column({ type: 'text', nullable: true })
+  religion: string;
 
   @Column({ type: 'text', nullable: true })
   previousSchool: string;
 
-  @OneToMany(() => StudentContact, (contact) => contact.student, {
-    cascade: true,
-    onDelete: 'CASCADE',
-  })
-  contacts: StudentContact[];
+  @Column({ type: 'text', nullable: false })
+  rollNumber: string;
 
-  @OneToMany(() => StudentAddress, (address) => address.student, {
-    cascade: true,
-    onDelete: 'CASCADE',
-  })
-  addresses: StudentAddress[];
+  @Column({ type: 'text', nullable: false })
+  registrationNumber: string;
 
-  @OneToOne(() => User, (user) => user.student, {
-    cascade: true,
-    onDelete: 'CASCADE',
-  })
+  @Column({ type: 'text', nullable: true })
+  transportationMode: TRANSPORTATION_MODE;
+  
+  @Column({ type: 'text', nullable: true })
+  profilePicture: string; 
+  
+  @OneToOne(() => User, (user) => user.student)
+  @JoinColumn({ name: 'userId' })
   user: User;
   parent: any;
 

@@ -36,7 +36,7 @@ export function generateUsername(
 
 
 export function encryptdPassword(password: string): string {
-  const buffer = Buffer.from(password, 'utf8');
+  const buffer = Buffer.from(password, 'utf-8');
   const encrypted = crypto.publicEncrypt(
     {
       key: process.env.PUBLIC_KEY,
@@ -45,7 +45,7 @@ export function encryptdPassword(password: string): string {
     },
     buffer,
   );
-  return encrypted.toString('base64');
+  return encrypted.toString('base64'); 
 }
 export function decryptdPassword(encryptedPassword: string): string {
   const buffer = Buffer.from(encryptedPassword, 'base64');
@@ -57,5 +57,5 @@ export function decryptdPassword(encryptedPassword: string): string {
     },
     buffer,
   );
-  return decrypted.toString('utf8');
+  return decrypted.toString('utf-8');
 }

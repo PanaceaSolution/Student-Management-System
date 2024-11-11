@@ -27,11 +27,12 @@ export class StaffService {
       profile,
       address,
       contact,
-      document,
+      // document: [document],
       hireDate,
       salary,
       staffRole,
     } = createStaffDto;
+
     const registerDto = {
       email,
       role,
@@ -44,26 +45,37 @@ export class StaffService {
       createdAt,
       refreshToken,
     };
-    const createUser = await this.userService.register(registerDto);
 
-    if (!createUser) {
-      throw new Error('User creation failed.');
-    }
+    // Register user
+    // const createUser = await this.userService.register(registerDto);
 
-    //create staff-specific details
-    const newStaff = await this.staffRepository.create({
-      user: createUser.user,
-      hireDate,
-      salary,
-      staffRole,
-    });
-    await this.staffRepository.save(newStaff);
+    // if (!createUser) {
+    //   throw new Error('User creation failed.');
+    // }
 
-    return {
-      message: 'Staff member created successfully',
-      status: 200,
-      staff: newStaff,
-    };
+    // // Only reference the userId or the full User entity directly
+    // const userReference = await this.userRepository.findOne({
+    //   where: {  userId: createUser.user.id },
+    // });
+    // if (!userReference) {
+    //   throw new Error('User not found after creation.');
+    // }
+
+    // // Create staff-specific details with the User reference
+    // const newStaff = this.staffRepository.create({
+    //   user: userReference, // Pass only the user reference here
+    //   hireDate,
+    //   salary,
+    //   staffRole,
+    // });
+    
+    // await this.staffRepository.save(newStaff);
+
+    // return {
+    //   message: 'Staff member created successfully',
+    //   status: 200,
+    //   staff: newStaff,
+    // };
   }
 
   findAll() {

@@ -8,108 +8,101 @@ import {
   IsNotEmpty,
   ValidateNested,
   IsUUID,
+  
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { GENDER } from '../../utils/role.helper';
 import { TRANSPORTATION_MODE } from '../../utils/role.helper';
+import { User } from '../../user/authentication/entities/authentication.entity';
+import { RegisterUserDto } from '../../user/authentication/dto/register.dto';
 
-export class StudentAddressDto {
+// export class StudentAddressDto {
+//   @IsString()
+//   wardNumber: string;
+
+//   @IsString()
+//   municipality: string;
+
+//   @IsString()
+//   province: string;
+
+//   @IsString()
+//   district: string;
+// }
+
+// export class StudentContactDto {
+//   @IsString()
+//   phoneNumber: string;
+
+//   @IsOptional()
+//   @IsString()
+//   alternatePhoneNumber?: string;
+
+//   @IsOptional()
+//   @IsString()
+//   telephoneNumber?: string;
+// }
+
+export class StudentDto extends RegisterUserDto {
   @IsString()
-  wardNumber: string;
-
-  @IsString()
-  municipality: string;
-
-  @IsString()
-  province: string;
-
-  @IsString()
-  district: string;
-}
-
-export class StudentContactDto {
-  @IsString()
-  phoneNumber: string;
-
-  @IsOptional()
-  @IsString()
-  alternatePhoneNumber?: string;
-
-  @IsOptional()
-  @IsString()
-  telephoneNumber?: string;
-}
-
-export class StudentDto {
-  @IsOptional()
-  @IsString()
-  username?: string;
-
-  @IsString()
-  fname: string;
-
-  @IsString()
-  lname: string;
-
-  @IsEmail()
-  email: string;
-
-  @IsString()
+  @IsNotEmpty()
   studentClass: string;
 
   @IsString()
+  @IsNotEmpty()
   section: string;
 
   @IsString()
   @IsOptional()
-  bloodType: string;
+  fatherName?: string;
 
-  @ValidateNested()
-  @Type(() => StudentAddressDto)
-  address: StudentAddressDto;
+  @IsString()
+  @IsOptional()
+  motherName?: string;
 
-  @ValidateNested()
-  @Type(() => StudentContactDto)
-  contact: StudentContactDto;
+  @IsString()
+  @IsOptional()
+  guardianName?: string;
 
-  @IsEnum(GENDER)
-  gender: GENDER;
+  @IsString()
+  @IsOptional()
+  religion?: string;
+
+  @IsString()
+  @IsOptional()
+  bloodType?: string;
 
   @IsEnum(TRANSPORTATION_MODE)
   @IsOptional()
-  transportationMode:TRANSPORTATION_MODE;
+  transportationMode?: TRANSPORTATION_MODE;
 
   @IsString()
+  @IsNotEmpty()
   rollNumber: string;
 
   @IsString()
   @IsOptional()
-  registrationNumber: string;
+  registrationNumber?: string;
 
   @IsString()
   @IsOptional()
-  previousSchool: string;
+  previousSchool?: string;
 
-  // @IsUUID()
-  // parentId: number;
-
-  // @IsUUID()
-  // loginId: number;
-
-  @IsDate()
-  @Type(() => Date)
-  dob: Date;
+  @IsUUID()
+  @IsOptional()
+  parentId?: string; // Change to string if it's a UUID
 
   @IsOptional()
   @IsDate()
   @Type(() => Date)
   admissionDate?: Date;
 
-  constructor() {
-    if (!this.admissionDate) {
-      this.admissionDate = new Date();
-    }
-  }
+  @Transform(({ value }) => {
+    return value ? new Date(value).toISOString().split('T')[0] : undefined;
+  })
+  @IsOptional()
+  @IsString()
+  formattedAdmissionDate?: string;
 }
 
 // export class UpdateStudentDto {
