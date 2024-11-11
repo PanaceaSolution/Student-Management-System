@@ -6,13 +6,13 @@ const useAuthStore = create(
    devtools(
       persist((set) => ({
          loading: false,
+         isAuthenticated: true,
+         loggedInUser: {
+            username: "Aayush",
+            role: "ADMIN",
+         },
          // isAuthenticated: true,
-         // loggedInUser: {
-         //    username: "Aayush",
-         //    role: "ADMIN",
-         // },
-         isAuthenticated: false,
-         loggedInUser: null,
+         // loggedInUser: true,
 
          // Login action
          login: async (userData) => {

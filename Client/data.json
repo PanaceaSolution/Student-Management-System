@@ -121,30 +121,6 @@
       "profilePic": "jpg.png"
     },
     {
-      "id": "128",
-      "firstName": "Pratiksha",
-      "lastName": "Shahi",
-      "fatherName": "Ram Shahi",
-      "motherName": "Durga Shahi",
-      "gender": "Female",
-      "bloodType": "A+",
-      "class": "Grade IV",
-      "dob": "2011-08-23",
-      "admissionDate": "2024-01-15",
-      "permanentAddress": "Dailekh",
-      "temporaryAddress": "Surkhet",
-      "villageName": "Narayan",
-      "religion": "Hindu",
-      "nationality": "Nepalese",
-      "province": "KARNALI PROVINCE",
-      "district": "DAILEKH",
-      "municipality": "Narayan Municipality",
-      "birthCertificate": "[object FileList]",
-      "citizenship": "[object FileList]",
-      "marksheet": "[object FileList]",
-      "profilePic": "jpg.png"
-    },
-    {
       "id": "129",
       "firstName": "Krishna",
       "lastName": "Yadav",
@@ -358,11 +334,6 @@
       "class": "4"
     },
     {
-      "id": "9",
-      "subjectName": "English",
-      "class": "5"
-    },
-    {
       "id": "10",
       "subjectName": "Maths",
       "class": "6"
@@ -413,19 +384,9 @@
       "class": "2"
     },
     {
-      "id": "f0cc",
-      "subjectName": "English",
-      "class": "1"
-    },
-    {
       "id": "453c",
       "subjectName": "Science",
       "class": "2"
-    },
-    {
-      "id": "c83a",
-      "subjectName": "Social",
-      "class": "1"
     },
     {
       "id": "eefc",

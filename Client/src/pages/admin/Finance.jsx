@@ -1,8 +1,11 @@
 import React from 'react'
-
+import ViewAssignment from '../Assignment/ViewAssignment'
 const Finance = () => {
    return (
-      <div>Finance</div>
+      <div>
+
+         <ViewAssignment/>
+      </div>
    )
 }
 

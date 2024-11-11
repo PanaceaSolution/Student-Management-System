@@ -13,7 +13,7 @@ import useDeleteStudent from "@/hooks/useDeleteStudnet"; // Custom hook to delet
 import { DateSelect } from "@/components/DateSelect";
 import useStudent from "@/Zustand/useStudent";
 import AddStudentFormModal from "./StudentForm/AddStudentFormModal";
-import { Button } from "@/components/ui/button";
+import Button from "@/components/button";
 // Custom hook for debouncing input value
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -66,7 +66,7 @@ const Students = () => {
   const [date, setDate] = useState(null);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
 
-  const { } = useStudent();
+  const {} = useStudent();
   const itemsPerPage = 10; // Items to show per page
   const debouncedSearchTerm = useDebounce(searchTerm, 300); // Debounced search term for efficiency
 
@@ -200,12 +200,12 @@ const Students = () => {
 
   return (
     <section>
-      <div className="max-w-full mx-auto">
+      <div className="max-w-full mx-auto p-2">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-5">
           <div className="rounded-sm bg-[#F8F8F8] lg:col-span-3 p-2">
             <div className="flex justify-evenly sm:justify-end border-b-2 p-1">
               <div className="flex gap-3 md:gap-4">
-                <Button variant="print" onClick={exportToPDF}>
+                <Button type="print" onClick={exportToPDF}>
                   PRINT
                 </Button>
                 <Select
@@ -214,7 +214,6 @@ const Students = () => {
                   onChange={handleExpertChange}
                   className="w-32 bg-white"
                 />
-                {/* <StudentForm /> */}
                 <Button
                   type="create"
                   onClick={() => setShowAddStudentModal(true)}
@@ -257,8 +256,9 @@ const Students = () => {
                 <div key={tab}>
                   <a
                     href="#"
-                    className={`font-semibold cursor-pointer ${activeTab === tab ? "border-b-2 border-blue-600" : ""
-                      }`}
+                    className={`font-semibold cursor-pointer ${
+                      activeTab === tab ? "border-b-2 border-blue-600" : ""
+                    }`}
                     onClick={() => handleTabClick(tab)}
                   >
                     {tab.toUpperCase()}{" "}
@@ -296,7 +296,7 @@ const Students = () => {
               onPageChange={setCurrentPage} // Handle page change
             />
           </div>
-          <div className="w-auto">
+          <div className=" w-auto ">
             <ProfileCard
               loading={deleteLoading}
               studentInfo={studentInfo} // Show selected student info
