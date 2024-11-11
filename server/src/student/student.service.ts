@@ -15,6 +15,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
+
 @Injectable()
 export class StudentService {
   constructor(
@@ -69,10 +70,8 @@ export class StudentService {
       where: [{ registrationNumber }, { rollNumber }],
     });
     if (studentExist) {
-      return {
-        status: 400,
-        message: 'Student already exists in the student database',
-      };
+     
+      throw new BadRequestException("Student already exists in the student database")
     }
 
     const tempDir = './temp_uploads';
@@ -115,8 +114,6 @@ export class StudentService {
       refreshToken: null,
     };
 
-    console.log('Profile Picture Path:', profilePicturePath);
-    console.log('Document Paths:', documentPaths);
 
     const createUserResponse = await this.userService.register(
       registerDto,
