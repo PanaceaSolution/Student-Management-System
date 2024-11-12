@@ -52,7 +52,7 @@ export class StudentService {
       profile,
       address,
       contact,
-      document, // includes original document names
+      document, 
     } = createStudentDto;
   
     if (!profile || !profile.fname || !profile.lname) {
@@ -72,7 +72,7 @@ export class StudentService {
       throw new BadRequestException('Student already exists in the database');
     }
   
-    // Upload profile picture
+
     let profilePictureUrl: string | null = null;
     if (files.profilePicture && files.profilePicture.length > 0) {
       const profilePictureBuffer = files.profilePicture[0].buffer;
@@ -83,7 +83,7 @@ export class StudentService {
       profilePictureUrl = uploadedProfilePictureUrl;
     }
   
-    // Upload document files with preserved names
+
     const documentUrls = [];
     if (files.documents && files.documents.length > 0) {
       const documentBuffers = files.documents.map((doc) => doc.buffer);
@@ -92,7 +92,7 @@ export class StudentService {
         'documents'
       );
   
-      // Combine each document with its original name from `createStudentDto.document`
+
       documentUrls.push(
         ...uploadedDocumentUrls.map((url, index) => ({
           documentName: document?.[index]?.documentName || `Document ${index + 1}`,
@@ -107,7 +107,7 @@ export class StudentService {
       profile,
       address,
       contact,
-      document: documentUrls, // use the URLs with original names
+      document: documentUrls, 
       username: generateUsername(profile.fname, profile.lname, role),
       password: generateRandomPassword(),
       createdAt: new Date().toISOString(),
