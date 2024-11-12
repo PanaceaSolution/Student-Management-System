@@ -44,15 +44,16 @@ export class ParentService {
       password,
       role: ROLE.PARENT,
       isActivated: true,
+      createdAt: new Date(),
     });
     await this.userRepository.save(user);
 
 
-    const userProfile = this.userProfileRepository.create({
-      ...profile,
-      user,
-    });
-    await this.userProfileRepository.save(userProfile);
+    // const userProfile = this.userProfileRepository.create({
+    //   ...profile,
+    //   user,
+    // });
+    // await this.userProfileRepository.save(userProfile);
 
 
     const userAddresses = addresses.map((address) => this.userAddressRepository.create({
@@ -67,11 +68,11 @@ export class ParentService {
     });
     await this.userContactRepository.save(userContact);
 
-    const userDocuments = documents.map((doc) => this.userDocumentsRepository.create({
-      ...doc,
-      user,
-    }));
-    await this.userDocumentsRepository.save(userDocuments);
+    // const userDocuments = documents.map((doc) => this.userDocumentsRepository.create({
+    //   ...doc,
+    //   user,
+    // }));
+    // await this.userDocumentsRepository.save(userDocuments);
 
     const parent = this.parentRepository.create({
       fname: profile.fname, 

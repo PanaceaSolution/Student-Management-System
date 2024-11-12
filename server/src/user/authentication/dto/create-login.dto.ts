@@ -4,10 +4,14 @@ import { IsString, IsNotEmpty } from 'class-validator';
 // DTO for creating a new login
 export class CreateLoginDto {
 
-  @IsNotEmpty()
+  @IsNotEmpty(
+    { message: 'Username is required' }
+  )
   username: string;
 
-  @IsString()
+  @IsString({
+    message: 'Password must be a string'
+  })
   @IsNotEmpty()
   password: string;
 

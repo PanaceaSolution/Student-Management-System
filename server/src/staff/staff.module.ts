@@ -7,9 +7,9 @@ import { Staff } from './entities/staff.entity';
 import { AuthenticationModule } from '../user/authentication/authentication.module';
 import { User } from '../user/authentication/entities/authentication.entity';
 import { UserProfile } from '../user/userEntity/profile.entity';
-import { UserAddress } from 'src/entities/address.entity';
-import { UserContact } from 'src/entities/contact.entity';
-import { UserDocuments } from 'src/entities/document.entity';
+import { UserAddress } from '../user/userEntity/address.entity';
+import { UserContact } from '../user/userEntity/contact.entity';
+import { UserDocuments } from '../user/userEntity/document.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Staff, User,UserProfile,UserAddress,UserContact,UserDocuments]),
