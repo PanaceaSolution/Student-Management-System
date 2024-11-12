@@ -13,7 +13,6 @@ import { generateRandomPassword, generateUsername } from 'src/utils/utils';
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import * as moment from 'moment';
 
 import { STAFFROLE } from 'src/utils/role.helper';
 
@@ -26,68 +25,6 @@ export class StaffService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
-  // async create(createStaffDto: CreateStaffDto) {
-  //   const username = 'hi';
-  //   const password = 'hi';
-  //   const createdAt = '2024-01-21';
-  //   const refreshToken = null;
-
-  //   const {
-  //     email,
-  //     role,
-  //     profile,
-  //     address,
-  //     contact,
-  //     // document: [document],
-  //     hireDate,
-  //     salary,
-  //     staffRole,
-  //   } = createStaffDto;
-
-  //   const registerDto = {
-  //     email,
-  //     role,
-  //     profile,
-  //     address,
-  //     contact,
-  //     document,
-  //     username,
-  //     password,
-  //     createdAt,
-  //     refreshToken,
-  //   };
-
-  //   // Register user
-  //   // const createUser = await this.userService.register(registerDto);
-
-  //   // if (!createUser) {
-  //   //   throw new Error('User creation failed.');
-  //   // }
-
-  //   // // Only reference the userId or the full User entity directly
-  //   // const userReference = await this.userRepository.findOne({
-  //   //   where: {  userId: createUser.user.id },
-  //   // });
-  //   // if (!userReference) {
-  //   //   throw new Error('User not found after creation.');
-  //   // }
-
-  //   // // Create staff-specific details with the User reference
-  //   // const newStaff = this.staffRepository.create({
-  //   //   user: userReference, // Pass only the user reference here
-  //   //   hireDate,
-  //   //   salary,
-  //   //   staffRole,
-  //   // });
-
-  //   // await this.staffRepository.save(newStaff);
-
-  //   // return {
-  //   //   message: 'Staff member created successfully',
-  //   //   status: 200,
-  //   //   staff: newStaff,
-  //   // };
-  // }
 
   async createStaff(
     createStaffDto: StaffDto,
@@ -102,11 +39,11 @@ export class StaffService {
       throw new BadRequestException('Profile information (fname and lname) is required.');
     }
 
-    const HD = moment(hireDate, 'YYYY-MM-DD');
-    if (!HD.isValid()) {
-      throw new BadRequestException('Invalid date format for Hire Date');
-    }
-    const HireDateIsoString = HD.toISOString();
+    // const HD = moment(hireDate, 'YYYY-MM-DD');
+    // if (!HD.isValid()) {
+    //   throw new BadRequestException('Invalid date format for Hire Date');
+    // }
+    // const HireDateIsoString = HD.toISOString();
 
     const staffExist = await this.userRepository.findOne({
       where: { email },
@@ -159,9 +96,9 @@ export class StaffService {
     }
 
     const newStaff = this.staffRepository.create({
-      hireDate: HireDateIsoString,
+      hireDate,
       salary,
-      staffRole: STAFFROLE[staffRole as keyof typeof STAFFROLE], // Convert string to enum
+      staffRole: staffRole.trim() as STAFFROLE, // Convert string to enum
     });
 
     await this.staffRepository.save(newStaff);

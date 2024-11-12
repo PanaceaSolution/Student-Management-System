@@ -31,6 +31,7 @@ import {
 } from '../../utils/utils';
 import {  deleteFileFromCloudinary, extractPublicIdFromUrl, uploadFilesToCloudinary} from '../../utils/file-upload.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
+import * as moment from 'moment';
 
 @Injectable()
 export class AuthenticationService {
@@ -75,9 +76,14 @@ export class AuthenticationService {
         isActivated: true,
         username,
         password: encryptedPassword,
-        role,
-        createdAt: new Date(),
+        role: role as ROLE,
+        createdAt:new Date(),
       });
+
+      if(newUser.role === 'ADMIN' || newUser.role === 'STUDENT' || newUser.role === 'STAFF' || newUser.role === 'PARENT'){
+        throw new ForbiddenException('role not allowed');
+      }
+
   
       try {
         await this.userRepository.save(newUser);
@@ -104,12 +110,13 @@ export class AuthenticationService {
         }
       }
 
+       // Provide an initializer for the 'dob' variable
       const userProfile = this.profileRepository.create({
         profilePicture: profilePictureUrl,
         fname: profile.fname,
         lname: profile.lname,
         gender: profile.gender,
-        dob: new Date(profile.dob),
+        dob:new Date(profile.dob),
         user: newUser,
       });
   
