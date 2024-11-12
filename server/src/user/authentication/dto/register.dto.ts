@@ -17,9 +17,7 @@ import {
   UserProfileDto,
 } from '../../userEntity/dto/common.dto';
 export class RegisterUserDto {
-  @IsString()
-  @IsOptional()
-  username: string;
+
 
   @IsString()
   @IsNotEmpty({ message: 'Password is required' })
