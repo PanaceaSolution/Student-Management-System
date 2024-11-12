@@ -19,8 +19,8 @@ const useStaffStore = create(
                try {
                   const data = await getAllStaffService();
                   set({
-                     staff: data.users?.filter((staffMember) => staffMember?.role !== "TEACHER"),
-                     teacher: data.users?.filter((staffMember) => staffMember?.role === "TEACHER"),
+                     staff: data.users?.filter((staffMember) => staffMember?.staffRole !== "TEACHER"),
+                     teacher: data.users?.filter((staffMember) => staffMember?.staffRole === "TEACHER"),
                      loading: false
                   })
                } catch (error) {
@@ -43,7 +43,18 @@ const useStaffStore = create(
             addStaff: async (staffData) => {
                set({ loading: true, error: null });
                try {
-                  const data = await createStaffService(staffData);
+                  const URL = import.meta.env.VITE_API_URL;
+                  const response = await fetch(`${URL}/staff/create`, {
+                     method: "POST",
+                     credentials: "include",
+                     body: staffData,
+                  });
+                  const data = await response.json();
+                  if (response.statusCode === 200) {
+                     toast.success("Staff added successfully");
+                  }
+                  console.log(data);
+
                   set((state) => ({
                      staff: [...state.staff, data],
                      loading: false,

@@ -31,10 +31,10 @@ const Role = [
 ];
 
 const staffTableHead = ["", "First Name", "Last Name", "Phone Number", "Gender", "Role"];
-const staffTableFields = ["fname", "lname", "phoneNumber", "gender", "role"];
+const staffTableFields = ["profile.fname", "profile.lname", "contact.phoneNumber", "profile.gender", "staffRole"];
 
 const staffDetails = [
-  { label: "First Name", key: "fname" },
+  { label: "First Name", key: "profile.fname" },
   { label: "Last Name", key: "lname" },
   { label: "Gender", key: "gender" },
   { label: "Blood Type", key: "bloodType" },
@@ -70,6 +70,9 @@ const Staffs = () => {
   useEffect(() => {
     getAllStaff();
   }, [getAllStaff]);
+
+  console.log(staff);
+
 
 
   // Handle format selection and trigger export

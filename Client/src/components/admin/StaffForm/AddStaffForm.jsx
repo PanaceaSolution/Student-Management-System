@@ -17,16 +17,20 @@ import AddressInfo from '@/pages/admin/StudentForm/AddressInfo';
 import DocumentUpload from '@/pages/admin/StudentForm/DocumentUpload';
 import ProfilePicUpload from '@/components/common/profilePicUpload';
 
+const documentFields = [
+   { name: "birthCertificate", label: "Birth Certificate (optional)" },
+   { name: "citizenship", label: "Citizenship Document (optional)" },
+]
+
 const AddStaffForm = ({ user }) => {
    const { addStaff, loading, error } = useStaffStore();
    const steps = ["Personal Info", "Address Info", "Document Upload"];
    const [isOpen, setIsOpen] = useState(false);
    const [currentStep, setCurrentStep] = useState(0);
-   const [profilePic, setProfilePic] = useState(null);
+   const [profilePic, setProfilePic] = useState('');
    const [documents, setDocuments] = useState({
       birthCertificate: null,
       citizenship: null,
-      marksheet: null,
    });
 
    const {
@@ -39,19 +43,60 @@ const AddStaffForm = ({ user }) => {
    } = useForm({});
 
    const onSubmit = async (data) => {
-      console.log(data);
+      const formattedData = new FormData();
 
-      const formattedData = {
-         ...data,
-         profilePic: profilePic,
-         role: "STAFF",
-         staffRole: user === 'TEACHER' ? 'TEACHER' : data.role || 'DefaultRole',
-         documents: {
-            birthCertificate: documents.birthCertificate,
-            citizenship: documents.citizenship,
-            marksheet: documents.marksheet,
+      // Append the fields to FormData
+      formattedData.append("email", data.email);
+      formattedData.append("password", data.password || 'ijijisj');
+      formattedData.append("role", "STAFF");
+      formattedData.append("staffRole", "ACCOUNTANT");
+      formattedData.append("salary", data.salary);
+      formattedData.append("hireDate", data.hireDate);
+
+      // Address info
+      formattedData.append("address", JSON.stringify([
+         {
+            wardNumber: data.wardNumber || '6',
+            municipality: data.municipality || "KTM",
+            province: data.province || "Province 3",
+            district: data.district || "Kathmandu",
          }
-      };
+      ]));
+
+      // Profile info
+      formattedData.append("profile", JSON.stringify({
+         fname: data.fname,
+         lname: data.lname,
+         gender: data.gender,
+         dob: data.dob,
+      }));
+
+      // Contact info
+      formattedData.append("contact", JSON.stringify({
+         phoneNumber: data.phoneNumber,
+         alternatePhoneNumber: data.alternatePhoneNumber,
+         telephoneNumber: data.telephoneNumber || '2187387821',
+      }));
+
+      // Document info
+      formattedData.append("document", JSON.stringify([
+         { documentName: "Birth Certificate" },
+         { documentName: "Citizenship" }
+      ]));
+
+      // Append the profile picture (if any)
+      if (profilePic) {
+         formattedData.append("profilePicture", profilePic);
+      }
+
+      // Append documents (if any)
+      if (documents.birthCertificate) {
+         formattedData.append("documents", documents.birthCertificate);
+      }
+      if (documents.citizenship) {
+         formattedData.append("documents", documents.citizenship);
+      }
+
       try {
          const res = await addStaff(formattedData);
          if (res) {
@@ -102,6 +147,7 @@ const AddStaffForm = ({ user }) => {
             </DialogHeader>
             <hr />
             <form
+               encType='multipart/form-data'
                onSubmit={
                   currentStep === steps.length - 1
                      ? handleSubmit(onSubmit)
@@ -139,6 +185,7 @@ const AddStaffForm = ({ user }) => {
                      documents={documents}
                      errors={errors}
                      clearErrors={clearErrors}
+                     documentFields={documentFields}
                   />
                )}
                <div className="mt-6 flex justify-between">
@@ -160,9 +207,11 @@ const AddStaffForm = ({ user }) => {
                   ) : (
                      <button
                         type="submit"
-                        className="bg-blue-600 text-white py-2 px-4 rounded"
+                        className="bg-blue-600 text-white py-2 px-4 rounded disabled:cursor-not-allowed disabled:bg-blue-300"
+                        disabled={loading}
+                        aria-label="Submit Form"
                      >
-                        Submit
+                        {loading ? "Submitting..." : "Submit"}
                      </button>
                   )}
                </div>

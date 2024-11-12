@@ -82,7 +82,7 @@ const StaffInfo = ({
          required: "Staff Role is required",
          placeholder: "Select a Role",
          type: "select",
-         options: ["Accountant", "Librarian", "Janitor"],
+         options: ["ACCOUNTANT", "LIBRARIAN"],
          condition: user !== "Teacher",
       },
       {
