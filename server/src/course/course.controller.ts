@@ -4,6 +4,7 @@ import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { Course } from './entities/course.entity';
 import { Student } from 'src/student/entities/student.entity';
+import { CourseEnrollment } from './course-enrollment/entities/course-enrollment.entity';
 
 @Controller('courses')
 export class CourseController {
@@ -42,7 +43,7 @@ export class CourseController {
   enrollStudent(
     @Param('courseId') courseId: string,
     @Param('studentId') studentId: string,
-  ): Promise<void> {
+  ): Promise<CourseEnrollment> {
     return this.courseService.enrollStudent(courseId, studentId);
   }
 

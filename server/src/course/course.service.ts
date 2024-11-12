@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Equal, Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { Student } from '../student/entities/student.entity'; 
-import { CourseEnrollment } from '../course-enrollment/entities/course-enrollment.entity';
+import { CourseEnrollment } from '../course/course-enrollment/entities/course-enrollment.entity';
 
 @Injectable()
 export class CourseService {
@@ -19,6 +19,7 @@ export class CourseService {
     @InjectRepository(CourseEnrollment)
     private readonly courseEnrollmentRepository: Repository<CourseEnrollment>,
   ) {}
+
 
   async create(createCourseDto: CreateCourseDto): Promise<Course> {
     const course = this.courseRepository.create(createCourseDto);
@@ -49,11 +50,14 @@ export class CourseService {
       throw new NotFoundException(`Course with ID ${courseId} not found`);
     }
   }
+  
 
   // Enroll a student in a course
   async enrollStudent(courseId: string, studentId: string): Promise<CourseEnrollment> {
     const course = await this.findOne(courseId);
-    const student = await this.studentRepository.findOne({ where: { studentId } });
+    const student = await this.studentRepository.findOne({ 
+        where: { studentId: Equal(studentId) } 
+    });
 
     if (!student) {
       throw new NotFoundException(`Student with ID ${studentId} not found`);
@@ -70,7 +74,10 @@ export class CourseService {
   // Unenroll a student from a course
   async unenrollStudent(courseId: string, studentId: string): Promise<void> {
     const enrollment = await this.courseEnrollmentRepository.findOne({
-      where: { course: { courseId }, student: { studentId } },
+      where: { 
+        course: { courseId: Equal(courseId) }, 
+        student: { studentId: Equal(studentId) } 
+      },
     });
 
     if (!enrollment) {

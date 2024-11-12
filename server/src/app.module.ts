@@ -18,7 +18,7 @@ import { StudentModule } from './student/student.module';
 import { ParentModule } from './parent/parent.module';
 // import { ParentModule } from './parent/parent.module';
 import { StaffModule } from './staff/staff.module';
-import { ClassesModule } from './classes/classes.module';
+import { ClassModule } from './classes/classes.module';
 
 @Module({
   imports: [
@@ -41,14 +41,14 @@ import { ClassesModule } from './classes/classes.module';
       }),
     }),
     AssignmentModule,
-    CourseModule
+    CourseModule,
     TerminusModule,
     FinanceModule,
     BillModule,
     StudentModule,
     StaffModule,
     ParentModule,
-    ClassesModule,
+    ClassModule,
   ],
   controllers: [HealthController, UploadController],
   providers: [UploadService, CloudinaryProvider],

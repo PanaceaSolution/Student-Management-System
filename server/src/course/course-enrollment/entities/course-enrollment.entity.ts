@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from 'typeorm';
-import { Course } from '../../course/entities/course.entity';
-import { Student } from '../../student/entities/student.entity'; // Assume student entity exists
+import { Course } from '../../entities/course.entity';
+import { Student } from '../../../student/entities/student.entity'; 
 
 @Entity('course_enrollment')
 export class CourseEnrollment {
