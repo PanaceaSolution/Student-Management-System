@@ -7,7 +7,6 @@ import { STAFFROLE } from '../../utils/role.helper';
 import { Transform, Type } from 'class-transformer';
 
 export class CreateStaffDto extends RegisterUserDto {
-  
   // Staff-specific fields
   @IsString()
   hireDate: string;

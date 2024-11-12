@@ -10,7 +10,9 @@ import { Request, Response, NextFunction } from 'express';
 export class JsonParserMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     // Fields that are expected to be JSON strings
-    const jsonFields = ['profile', 'contact', 'address', 'document'];
+    const jsonFields = ['profile', 'contact', 'address', 'document', 'salary',];
+
+    console.log('Before parsing' ,req.body)
 
     try {
       jsonFields.forEach((field) => {
@@ -24,9 +26,7 @@ export class JsonParserMiddleware implements NestMiddleware {
         `Invalid JSON format in one of the fields: ${error.message}`,
       );
     }
-
+   console.log('After parsing:', req.body);
     next();
   }
 }
-
-
