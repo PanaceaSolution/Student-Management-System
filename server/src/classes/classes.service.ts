@@ -35,14 +35,21 @@ export class ClassService {
 
   async create(createClassDto: CreateClassDto): Promise<Class> {
     const subjects = await this.courseRepository.findByIds(createClassDto.subjects);
-    const classTeacher = createClassDto.classTeacherId ? 
-      await this.staffRepository.findOneBy({ staffId: createClassDto.classTeacherId }) : 
-      null;
+    const classTeacher = await this.staffRepository.findOneBy({ 
+      staffId: createClassDto.classTeacherId 
+    });
+
+    if (!classTeacher) {
+      throw new NotFoundException(`Staff with ID ${createClassDto.classTeacherId} not found`);
+    }
 
     const newClass = this.classRepository.create({
-      ...createClassDto,
+      className: createClassDto.className,
+      section: createClassDto.section,
+      routineFile: createClassDto.routineFile,
       subjects,
-      classTeacher
+      classTeacher,
+      classTeacherStaffId: createClassDto.classTeacherId  
     });
     return this.classRepository.save(newClass);
   }
@@ -55,9 +62,16 @@ export class ClassService {
     }
     
     if (updateClassDto.classTeacherId) {
-      updateData.classTeacher = await this.staffRepository.findOneBy({ 
+      const classTeacher = await this.staffRepository.findOneBy({ 
         staffId: updateClassDto.classTeacherId 
       });
+      
+      if (!classTeacher) {
+        throw new NotFoundException(`Staff with ID ${updateClassDto.classTeacherId} not found`);
+      }
+
+      updateData.classTeacher = classTeacher;
+      updateData.classTeacherStaffId = updateClassDto.classTeacherId;  // Add this line
     }
 
     await this.classRepository.save({ classId: id, ...updateData });

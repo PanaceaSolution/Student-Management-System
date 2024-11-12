@@ -1,24 +1,24 @@
-import { IsString, IsOptional, IsUUID, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsUUID, IsArray, IsEnum } from 'class-validator';
+import { STAFFROLE } from '../../utils/role.helper';
 
 export class UpdateClassDto {
-  @IsOptional()
   @IsString()
-  className?: string;
+  className: string;
 
-  @IsOptional()
   @IsString()
-  section?: string;
+  section: string;
 
   @IsOptional()
   @IsString()
   routineFile?: string;
 
-  @IsOptional()
   @IsUUID()
-  classTeacherId?: string;
+  classTeacherId: string;
 
-  
+  @IsEnum(STAFFROLE)
+  staffRole: STAFFROLE = STAFFROLE.TEACHER; 
+
   @IsArray()
   @IsUUID("all", { each: true })
-  subjects?: string[];
+  subjects: string[];
 }

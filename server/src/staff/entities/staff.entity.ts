@@ -26,7 +26,7 @@ export class Staff {
   @Column({
     type: 'enum',
     enum: STAFFROLE,
-    nullable: false,
+    nullable: true,
   })
   staffRole: STAFFROLE;
 
