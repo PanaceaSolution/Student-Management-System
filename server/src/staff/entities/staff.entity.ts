@@ -23,10 +23,11 @@ export class Staff {
   @Column({
     type: 'enum',
     enum: STAFFROLE,
+    nullable: false,
   })
   staffRole: STAFFROLE;
 
-  @OneToOne(() => User, (user) => user.userId)
+  @OneToOne(() => User, (user) => user.staff, { cascade: true })
   @JoinColumn({ name: 'userId' })
   user: User;
 }

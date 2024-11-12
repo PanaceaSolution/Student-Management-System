@@ -1,0 +1,454 @@
+{
+  "student": [
+    {
+      "id": "124",
+      "firstName": "Ramesh",
+      "lastName": "Thapa",
+      "fatherName": "Bhakta Thapa",
+      "motherName": "Kali Thapa",
+      "gender": "Male",
+      "bloodType": "O+",
+      "class": "Grade VI",
+      "dob": "2012-10-30",
+      "admissionDate": "2024-03-15",
+      "permanentAddress": "Butwal",
+      "temporaryAddress": "Nawalparasi",
+      "villageName": "Tilottama",
+      "religion": "Hindu",
+      "nationality": "Nepalese",
+      "province": "LUMBINI PROVINCE",
+      "district": "RUPANDEHI",
+      "municipality": "Butwal Sub-Metropolitan City",
+      "birthCertificate": "[object FileList]",
+      "citizenship": "[object FileList]",
+      "marksheet": "[object FileList]",
+      "profilePic": "jpg.png"
+    },
+    {
+      "id": "125",
+      "firstName": "Manisha",
+      "lastName": "Rai",
+      "fatherName": "Dharma Rai",
+      "motherName": "Maya Rai",
+      "gender": "Female",
+      "bloodType": "AB+",
+      "class": "Grade III",
+      "dob": "2015-03-14",
+      "admissionDate": "2024-04-05",
+      "permanentAddress": "Dharan",
+      "temporaryAddress": "Itahari",
+      "villageName": "Duhabi",
+      "religion": "Hindu",
+      "nationality": "Nepalese",
+      "province": "KOSHI PROVINCE",
+      "district": "SUNSARI",
+      "municipality": "Dharan Sub-Metropolitan City",
+      "birthCertificate": "[object FileList]",
+      "citizenship": "[object FileList]",
+      "marksheet": "[object FileList]",
+      "profilePic": "jpg.png"
+    },
+    {
+      "id": "126",
+      "firstName": "Bishal",
+      "lastName": "Gurung",
+      "fatherName": "Himal Gurung",
+      "motherName": "Saraswati Gurung",
+      "gender": "Male",
+      "bloodType": "B-",
+      "class": "Grade II",
+      "dob": "2016-09-21",
+      "admissionDate": "2024-02-20",
+      "permanentAddress": "Lamjung",
+      "temporaryAddress": "Pokhara",
+      "villageName": "Besishahar",
+      "religion": "Hindu",
+      "nationality": "Nepalese",
+      "province": "GANDAKI PROVINCE",
+      "district": "LAMJUNG",
+      "municipality": "Besisahar Municipality",
+      "birthCertificate": "[object FileList]",
+      "citizenship": "[object FileList]",
+      "marksheet": "[object FileList]",
+      "profilePic": "jpg.png"
+    },
+    {
+      "id": "127",
+      "firstName": "Sita",
+      "lastName": "Magar",
+      "fatherName": "Bir Magar",
+      "motherName": "Laxmi Magar",
+      "gender": "Female",
+      "bloodType": "O-",
+      "class": "Grade I",
+      "dob": "2017-01-01",
+      "admissionDate": "2024-03-02",
+      "permanentAddress": "Gulmi",
+      "temporaryAddress": "Palpa",
+      "villageName": "Resunga",
+      "religion": "Buddhist",
+      "nationality": "Nepalese",
+      "province": "LUMBINI PROVINCE",
+      "district": "GULMI",
+      "municipality": "Resunga Municipality",
+      "birthCertificate": "[object FileList]",
+      "citizenship": "[object FileList]",
+      "marksheet": "[object FileList]",
+      "profilePic": "jpg.png"
+    },
+    {
+      "id": "128",
+      "firstName": "Pratiksha",
+      "lastName": "Shahi",
+      "fatherName": "Ram Shahi",
+      "motherName": "Durga Shahi",
+      "gender": "Female",
+      "bloodType": "A+",
+      "class": "Grade IV",
+      "dob": "2011-08-23",
+      "admissionDate": "2024-01-15",
+      "permanentAddress": "Dailekh",
+      "temporaryAddress": "Surkhet",
+      "villageName": "Narayan",
+      "religion": "Hindu",
+      "nationality": "Nepalese",
+      "province": "KARNALI PROVINCE",
+      "district": "DAILEKH",
+      "municipality": "Narayan Municipality",
+      "birthCertificate": "[object FileList]",
+      "citizenship": "[object FileList]",
+      "marksheet": "[object FileList]",
+      "profilePic": "jpg.png"
+    },
+    {
+      "id": "129",
+      "firstName": "Krishna",
+      "lastName": "Yadav",
+      "fatherName": "Shiva Yadav",
+      "motherName": "Radha Yadav",
+      "gender": "Male",
+      "bloodType": "B+",
+      "class": "Grade IV",
+      "dob": "2010-02-10",
+      "admissionDate": "2024-04-10",
+      "permanentAddress": "Janakpur",
+      "temporaryAddress": "Siraha",
+      "villageName": "Dhanusha",
+      "religion": "Hindu",
+      "nationality": "Nepalese",
+      "province": "MADHESH PROVINCE",
+      "district": "DHANUSA",
+      "municipality": "Janakpur Sub-Metropolitan City",
+      "birthCertificate": "[object FileList]",
+      "citizenship": "[object FileList]",
+      "marksheet": "[object FileList]",
+      "profilePic": "jpg.png"
+    },
+    {
+      "id": "1210",
+      "firstName": "Niraj",
+      "lastName": "Bhatta",
+      "fatherName": "Ganga Bhatta",
+      "motherName": "Saraswati Bhatta",
+      "gender": "Male",
+      "bloodType": "O+",
+      "class": "Grade IV",
+      "dob": "2009-11-20",
+      "admissionDate": "2024-02-18",
+      "permanentAddress": "Dhangadhi",
+      "temporaryAddress": "Kailali",
+      "villageName": "Hasuliya",
+      "religion": "Hindu",
+      "nationality": "Nepalese",
+      "province": "SUDURPASCHIM PROVINCE",
+      "district": "KAILALI",
+      "municipality": "Dhangadhi Sub-Metropolitan City",
+      "birthCertificate": "[object FileList]",
+      "citizenship": "[object FileList]",
+      "marksheet": "[object FileList]",
+      "profilePic": "jpg.png"
+    },
+    {
+      "id": "1211",
+      "firstName": "Asmita",
+      "lastName": "Tamang",
+      "fatherName": "Pasang Tamang",
+      "motherName": "Doma Tamang",
+      "gender": "Female",
+      "bloodType": "AB+",
+      "class": "Grade IV",
+      "dob": "2008-06-15",
+      "admissionDate": "2024-03-01",
+      "permanentAddress": "Bhaktapur",
+      "temporaryAddress": "Kathmandu",
+      "villageName": "Suryabinayak",
+      "religion": "Buddhist",
+      "nationality": "Nepalese",
+      "province": "BAGMATI PROVINCE",
+      "district": "BHAKTAPUR",
+      "municipality": "Bhaktapur Municipality",
+      "birthCertificate": "[object FileList]",
+      "citizenship": "[object FileList]",
+      "marksheet": "[object FileList]",
+      "profilePic": "jpg.png"
+    },
+    {
+      "id": "12345",
+      "firstName": "Sukraj",
+      "lastName": "Chaudhary",
+      "fatherName": "Sunil Chaudhary",
+      "motherName": "Nariyani Chaudhary",
+      "gender": "Male",
+      "bloodType": "O+",
+      "class": "Grade IV",
+      "dob": "2024-10-16",
+      "admissionDate": "2024-10-24",
+      "permanentAddress": "KMT",
+      "temporaryAddress": "KTM",
+      "villageName": "Bela",
+      "religion": "Hindu",
+      "nationality": "Nepali",
+      "province": "LUMBINI PROVINCE",
+      "district": "DANG",
+      "municipality": "Rajpur Rural Municipality",
+      "birthCertificate": "[object FileList]",
+      "citizenship": "[object FileList]",
+      "marksheet": "[object FileList]"
+    }
+  ],
+  "staff": [
+    {
+      "id": "0d2d",
+      "fname": "Aayush",
+      "lname": "Ghimire",
+      "email": "aausgh@gmail.com",
+      "phoneNumber": "9846863817",
+      "gender": "Male",
+      "bloodType": "A-",
+      "dob": "2024-10-09",
+      "salary": "99999",
+      "role": "Accountant",
+      "permanentAddress": "Kamalnagar",
+      "temporaryAddress": "test",
+      "city": "Narayangarh / Chitwan",
+      "province": "Province No. 2",
+      "state": "test",
+      "villageName": "test",
+      "postalCode": "44200",
+      "birthCertificate": {
+        "0": {}
+      },
+      "citizenship": {
+        "0": {}
+      },
+      "marksheet": {
+        "0": {}
+      },
+      "profilePic": {}
+    },
+    {
+      "id": "7b51",
+      "fname": "Aayush",
+      "lname": "Ghimire",
+      "email": "aausgh@gmail.com",
+      "phoneNumber": "9846863817",
+      "gender": "Male",
+      "bloodType": "A+",
+      "salary": "77777",
+      "role": "Teacher",
+      "dob": "2024-10-01",
+      "enrollDate": "2024-10-02",
+      "permanentAddress": "Kamalnagar",
+      "temporaryAddress": "test",
+      "city": "Narayangarh / Chitwan",
+      "province": "Province No. 1",
+      "state": "test",
+      "villageName": "test",
+      "postalCode": "44200",
+      "birthCertificate": {
+        "0": {}
+      },
+      "citizenship": {
+        "0": {}
+      },
+      "marksheet": {
+        "0": {}
+      },
+      "profilePic": {}
+    },
+    {
+      "id": "d947",
+      "fname": "Nira",
+      "lname": "Lamichanne",
+      "email": "niraj@gmail.com",
+      "phoneNumber": "567567",
+      "gender": "Male",
+      "bloodType": "B-",
+      "salary": "777676",
+      "dob": "2024-10-08",
+      "enrollDate": "2024-10-02",
+      "permanentAddress": "test",
+      "temporaryAddress": "sdfsd",
+      "city": "sdfsd",
+      "province": "Province No. 2",
+      "state": "test",
+      "villageName": "sdfsd",
+      "postalCode": "34534",
+      "birthCertificate": {
+        "0": {}
+      },
+      "citizenship": {
+        "0": {}
+      },
+      "marksheet": {
+        "0": {}
+      },
+      "profilePic": {},
+      "role": "Teacher",
+      "documents": {
+        "birthCertificate": null,
+        "citizenship": null,
+        "marksheet": null
+      }
+    }
+  ],
+  "subjects": [
+    {
+      "id": "5",
+      "subjectName": "English",
+      "class": "3",
+      "section": "A"
+    },
+    {
+      "id": "6",
+      "subjectName": "Maths",
+      "class": "4",
+      "section": "B"
+    },
+    {
+      "id": "7",
+      "subjectName": "Science",
+      "class": "4",
+      "section": "B"
+    },
+    {
+      "id": "8",
+      "subjectName": "Social Studies",
+      "class": "4"
+    },
+    {
+      "id": "9",
+      "subjectName": "English",
+      "class": "5"
+    },
+    {
+      "id": "10",
+      "subjectName": "Maths",
+      "class": "6"
+    },
+    {
+      "id": "11",
+      "subjectName": "Science",
+      "class": "6"
+    },
+    {
+      "id": "12",
+      "subjectName": "Social Studies",
+      "class": "6"
+    },
+    {
+      "id": "13",
+      "subjectName": "English",
+      "class": "7"
+    },
+    {
+      "id": "14",
+      "subjectName": "Maths",
+      "class": "8"
+    },
+    {
+      "id": "15",
+      "subjectName": "Science",
+      "class": "9"
+    },
+    {
+      "id": "16",
+      "subjectName": "Social Studies",
+      "class": "10"
+    },
+    {
+      "id": "17",
+      "subjectName": "English",
+      "class": "10"
+    },
+    {
+      "id": "93fd",
+      "subjectName": "Maths",
+      "class": "3",
+      "section": "B"
+    },
+    {
+      "id": "74bf",
+      "subjectName": "English",
+      "class": "2",
+      "section": "A"
+    },
+    {
+      "id": "f0cc",
+      "subjectName": "English",
+      "class": "1",
+      "section": "B"
+    },
+    {
+      "id": "453c",
+      "subjectName": "Science",
+      "class": "2",
+      "section": "B"
+    },
+    {
+      "id": "c83a",
+      "subjectName": "Social",
+      "class": "1",
+      "section": "A"
+    },
+    {
+      "id": "eefc",
+      "subjectName": "Social",
+      "class": "3",
+      "section": "A"
+    },
+    {
+      "id": "c7cf",
+      "name": "",
+      "subjectName": "Maths",
+      "class": "1",
+      "section": "A"
+    }
+  ],
+  "parents": [
+    {
+      "id": "1",
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "johndoe@gmail",
+      "phoneNumber": "1231231234",
+      "studentId": [
+        "1",
+        "2"
+      ],
+      "profilePic": {}
+    },
+    {
+      "id": "5e37",
+      "firstName": "Aayush",
+      "lastName": "Ghimire",
+      "email": "add@gmail.com",
+      "phoneNumber": "987654321",
+      "studentId": [
+        "1",
+        "2"
+      ],
+      "profilePic": {}
+    }
+  ]
+}

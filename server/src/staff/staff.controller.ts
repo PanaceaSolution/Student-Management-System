@@ -11,7 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { StaffService } from './staff.service';
-import { CreateStaffDto, UpdateStaffDto } from './dto/staff.dto';
+import { StaffDto } from './dto/staff.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @Controller('staff')
@@ -25,8 +25,8 @@ export class StaffController {
       { name: 'documents', maxCount: 10 },
     ]),
   )
-  async create(
-    @Body() createStaffDto: CreateStaffDto,
+  async createStaff(
+    @Body() createStaffDto: any,
     @UploadedFiles()
     files: {
       profilePicture?: Express.Multer.File[];
@@ -34,7 +34,6 @@ export class StaffController {
     },
   ) {
     try {
-      // Parse JSON fields if they are in string format
       if (typeof createStaffDto.profile === 'string') {
         createStaffDto.profile = JSON.parse(createStaffDto.profile);
       }
@@ -44,14 +43,17 @@ export class StaffController {
       if (typeof createStaffDto.contact === 'string') {
         createStaffDto.contact = JSON.parse(createStaffDto.contact);
       }
+      if (typeof createStaffDto.document === 'string') {
+        createStaffDto.document = JSON.parse(createStaffDto.document);
+      }
     } catch (error) {
-      throw new BadRequestException(
-        'Invalid JSON format for address, contact, or profile',
-      );
+      throw new BadRequestException('Invalid JSON format for address, contact, profile, or document');
     }
-
     return this.staffService.createStaff(createStaffDto, files);
   }
+
+
+
 
   @Get()
   findAll() {
@@ -64,7 +66,7 @@ export class StaffController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStaffDto: UpdateStaffDto) {
+  update(@Param('id') id: string, @Body() updateStaffDto: StaffDto) {
     return this.staffService.update(+id, updateStaffDto);
   }
 

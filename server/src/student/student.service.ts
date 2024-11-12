@@ -70,8 +70,7 @@ export class StudentService {
       where: [{ registrationNumber }, { rollNumber }],
     });
     if (studentExist) {
-     
-      throw new BadRequestException("Student already exists in the student database")
+      throw new BadRequestException('Student already exists in the database');
     }
 
     const tempDir = './temp_uploads';

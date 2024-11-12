@@ -1,54 +1,33 @@
-import { Body, Controller, Post, Get, Put, Query, Param, Req, Res, Patch, BadRequestException, UploadedFiles } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  Put,
+  Query,
+  Param,
+  Req,
+  Res,
+  Patch,
+  BadRequestException,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterUserDto } from './dto/register.dto';
 import { Response, Request } from 'express';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
-import { FileInterceptor, FilesInterceptor, AnyFilesInterceptor, FileFieldsInterceptor } from '@nestjs/platform-express';
-import { UploadedFile } from '@nestjs/common';
-import { UseInterceptors } from '@nestjs/common';
+import {
+  FileFieldsInterceptor,
+  FilesInterceptor,
+  AnyFilesInterceptor,
+} from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 
 @Controller('auth')
 export class AuthenticationController {
   constructor(private authenticationService: AuthenticationService) {}
-  // @Post('upload-multiple-files')
-  // @UseInterceptors(FilesInterceptor('files', 10, { storage: memoryStorage() })) // Limit to 10 files
-  // async uploadMultipleFiles(@UploadedFiles() files: Express.Multer.File[]) {
-  //   if (!files || files.length === 0) {
-  //     console.log("No files received in controller");
-  //     throw new BadRequestException('No files provided');
-  //   }
-  //   console.log("Files received in controller:", files);
-  //   return this.authenticationService.uploadMultipleFiles(files);
-  // }
-  // @Patch('update-profile-picture')
-  // @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
-  // async updateProfilePicture(
-  //   @UploadedFile() file: Express.Multer.File,
-  //   @Body('oldPublicId') oldPublicId?: string,
-  // ) {
-  //   if (!file) {
-  //     throw new BadRequestException('No file provided');
-  //   }
-  //   return this.authenticationService.updateProfilePicture(file, oldPublicId);
-  // }
-
-  // @Patch('update-multiple-files')
-  // @UseInterceptors(FilesInterceptor('files', 10, { storage: memoryStorage() }))
-  // async updateMultipleFiles(
-  //   @UploadedFiles() files: Express.Multer.File[],
-  //   @Body('oldPublicIds') oldPublicIds: string, // Receive as a single string
-  // ) {
-  //   if (!files || files.length === 0) {
-  //     throw new BadRequestException('No files provided');
-  //   }
-
-  //   // Split the oldPublicIds string into an array
-  //   const publicIdsArray = oldPublicIds ? oldPublicIds.split(',') : [];
-
-  //   return this.authenticationService.updateMultipleFiles(files, publicIdsArray);
-  // }
 
   @Post('register')
   @UseInterceptors(
@@ -60,10 +39,7 @@ export class AuthenticationController {
   async register(
     @Body() body: any,
     @UploadedFiles()
-    files: {
-      profilePicture?: Express.Multer.File[];
-      documents?: Express.Multer.File[];
-    },
+    files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
   ) {
     try {
       const registerDto: RegisterUserDto = {
@@ -79,6 +55,9 @@ export class AuthenticationController {
         createdAt: body.createdAt || new Date().toISOString().split('T')[0],
       };
 
+      console.log('Parsed Register DTO:', registerDto);
+      console.log('Received files:', files);
+
       return this.authenticationService.register(registerDto, files);
     } catch (error) {
       console.error('Error parsing JSON strings in form-data:', error);
@@ -92,12 +71,8 @@ export class AuthenticationController {
   }
 
   @Post('logout')
-  async logout(@Req() request: Request, userId: UUID, @Res() res: Response) {
+  async logout(@Req() request: Request, @Body('userId') userId: UUID, @Res() res: Response) {
     return this.authenticationService.logout(res, userId);
-  }
-  @Patch('deactivate/:id')
-  async deactivateUser(@Param('id') id: UUID) {
-    return this.authenticationService.deactivateUser(id);
   }
 
   @Post('refresh-token')
@@ -105,13 +80,29 @@ export class AuthenticationController {
     return this.authenticationService.refreshToken(req, res);
   }
 
-  // @Patch('update/:id')
-  // async updateUser(
-  //   @Param('id') id: UUID,
-  //   @Body() updateUserDto: Partial<RegisterUserDto>
-  // ) {
-  //   return this.authenticationService.updateUser(id, updateUserDto);
-  // }
+  @Patch('update/:id')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'profilePicture', maxCount: 1 },
+      { name: 'documents', maxCount: 10 },
+    ]),
+  )
+  async updateUser(
+    @Param('id') id: UUID,
+    @Body() updateUserDto: Partial<RegisterUserDto>,
+    @UploadedFiles()
+    files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] } = {},
+  ) {
+    try {
+      console.log('UpdateUser DTO:', updateUserDto);
+      console.log('Received files for update:', files);
+      return this.authenticationService.updateUser(id, updateUserDto, files);
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw new BadRequestException('Invalid data for user update');
+    }
+  }
+
   @Get('all')
   async getAllUsers(
     @Query('page') page: number = 1,
@@ -130,6 +121,13 @@ export class AuthenticationController {
   ) {
     return this.authenticationService.searchUser(searchTerm, searchBy);
   }
+
+
+
+  // @Patch('deactivate/:id')
+  // async deactivateUser(@Param('id') id: UUID) {
+  //   return this.authenticationService.deactivateUser(id);
+  // }
 }
 // function UseInterceptors(interceptor: any) {
 //   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
@@ -139,4 +137,3 @@ export class AuthenticationController {
 // function UseInterceptors(arg0: any): (target: AuthenticationController, propertyKey: "uploadProfilePicture", descriptor: TypedPropertyDescriptor<(file: Express.Multer.File) => Promise<any>>) => void | TypedPropertyDescriptor<...> {
 //   throw new Error('Function not implemented.');
 // }
-

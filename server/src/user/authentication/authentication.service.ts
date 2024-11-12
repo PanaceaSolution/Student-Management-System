@@ -5,6 +5,8 @@ import {
   Res,
   InternalServerErrorException,
   HttpException,
+  NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
@@ -27,7 +29,7 @@ import {
   encryptdPassword,
   decryptdPassword,
 } from '../../utils/utils';
-import { uploadSingleFileToCloudinary, uploadFilesToCloudinary} from '../../utils/file-upload.helper';
+import { uploadSingleFileToCloudinary, uploadFilesToCloudinary, deleteFileFromCloudinary, extractPublicIdFromUrl} from '../../utils/file-upload.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Injectable()
@@ -285,7 +287,7 @@ export class AuthenticationService {
       });
 
       await this.userRepository.update(
-        { username: user.username }, // Use the correct syntax for the 'where' argument
+        { username: user.username }, 
         { refreshToken: RefreshToken },
       );
 
@@ -302,7 +304,7 @@ export class AuthenticationService {
   async logout(@Res() res: Response, userId: UUID) {
     try {
       await this.userRepository.update(
-        { userId: userId }, // Use the correct syntax for the 'where' argument
+        { userId: userId },
         { refreshToken: null },
       );
       res.clearCookie('accessToken');
@@ -356,174 +358,177 @@ export class AuthenticationService {
       });
     }
   }
-  async updateUser(id: UUID, updateData: Partial<RegisterUserDto>) {
+  async updateUser(id: UUID, updateData: Partial<RegisterUserDto>, files: { profilePicture?: Express.Multer.File[], documents?: Express.Multer.File[] } = {}) {
     try {
       const { email, role, profile, contact, document, address } = updateData;
 
-      const user = await this.userRepository.findOne({
-        where: { userId: Equal(id) },
-      });
+      const user = await this.userRepository.findOne({ where: { userId: Equal(id.toString()) } });
       if (!user) {
-        return {
-          message: 'User not found',
-          status: 404,
-          success: false,
-        };
+        throw new NotFoundException('User not found');
       }
+  
+      const updatedFields = {};
 
-      if (updateData.username) {
-        return {
-          message: 'Username cannot be updated',
-          status: 403,
-          success: false,
-        };
+      if (email !== undefined) {
+        user.email = email;
+        updatedFields['email'] = email;
       }
-
-      if (email !== undefined) user.email = email;
-      if (role !== undefined) user.role = role;
-      if (updateData.password) {
-        return {
-          message: 'Password cannot be updated',
-          status: 403,
-          success: false,
-        };
+      if (role !== undefined) {
+        user.role = role;
+        updatedFields['role'] = role;
       }
 
       await this.userRepository.save(user);
+      console.log('User base data updated:', { email: user.email, role: user.role });
+  
+      let profilePictureUrl: string | null = null;
 
-      // Update Profile
       if (profile) {
-        const userProfile = await this.profileRepository.findOne({
-          where: { user: Equal(user.userId) },
-        });
-        let profilePictureUrl = profile.profilePicture;
-
-        // Upload new profile picture if provided as a file
-        if (
-          profile.profilePicture &&
-          typeof profile.profilePicture !== 'string'
-        ) {
-          const uploadedPicture = await uploadSingleFileToCloudinary(
-            profile.profilePicture as Express.Multer.File,
-            'user_profile_pictures',
-          );
-          profilePictureUrl = uploadedPicture.secure_url;
-        }
-
-        if (userProfile) {
-          await this.profileRepository.update(
-            userProfile.profileId.toString(),
-            {
-              profilePicture:
-                typeof profilePictureUrl === 'string'
-                  ? profilePictureUrl
-                  : userProfile.profilePicture,
-              fname: profile.fname ?? userProfile.fname,
-              lname: profile.lname ?? userProfile.lname,
-              gender: profile.gender ?? userProfile.gender,
-              dob: profile.dob ? new Date(profile.dob) : userProfile.dob,
-            },
-          );
-        } else {
-          const newUserProfile = this.profileRepository.create({
-            profilePicture:
-              typeof profilePictureUrl === 'string' ? profilePictureUrl : '',
-            fname: profile.fname,
-            lname: profile.lname,
-            gender: profile.gender,
-            dob: profile.dob ? new Date(profile.dob) : undefined,
-            user,
-          });
-          await this.profileRepository.save(newUserProfile);
-        }
-      }
-
-      // Update Address
-      if (Array.isArray(address) && address.length > 0) {
-        await this.addressRepository.delete({ user: Equal(user.userId) });
-        const newAddresses = address.map((addr) =>
-          this.addressRepository.create({
-            addressType: addr.addressType ?? 'default',
-            wardNumber: addr.wardNumber ?? 'N/A',
-            municipality: addr.municipality ?? 'N/A',
-            province: addr.province ?? 'N/A',
-            district: addr.district ?? 'N/A',
-            user,
-          }),
-        );
-        await this.addressRepository.save(newAddresses);
-      }
-
-      // Update Contact
-      if (contact) {
-        let userContact = await this.contactRepository.findOne({
-          where: { user: Equal(user.userId) },
-        });
-        if (userContact) {
-          await this.contactRepository.update(userContact.contactId, {
-            phoneNumber: contact.phoneNumber ?? userContact.phoneNumber,
-            alternatePhoneNumber:
-              contact.alternatePhoneNumber ?? userContact.alternatePhoneNumber,
-            telephoneNumber:
-              contact.telephoneNumber ?? userContact.telephoneNumber,
-          });
-        } else {
-          userContact = this.contactRepository.create({ ...contact, user });
-          await this.contactRepository.save(userContact);
-        }
-      }
-
-      // Update Documents
-      if (Array.isArray(document) && document.length > 0) {
-        await this.documentRepository.delete({ user: Equal(user.userId) });
-
-        const documentUrls = [];
-        for (const doc of document) {
-          let documentFileUrl = doc.documentFile;
-
-          // Upload document file if provided as a file
-          if (doc.documentFile && typeof doc.documentFile !== 'string') {
-            const uploadedDocument = await uploadSingleFileToCloudinary(
-              doc.documentFile as Express.Multer.File,
-              'user_documents',
-            );
-            documentFileUrl = uploadedDocument.secure_url;
+        const profileData = typeof profile === 'string' ? JSON.parse(profile) : profile;
+        const userProfile = await this.profileRepository.findOne({ where: { user: Equal(user.userId.toString()) } });
+        profilePictureUrl = userProfile?.profilePicture ?? null;
+  
+        if (files.profilePicture && files.profilePicture.length > 0) {
+          const file = files.profilePicture[0];
+          if (!file.mimetype.startsWith('image/')) {
+            throw new BadRequestException('Profile picture must be an image file');
           }
-
-          documentUrls.push({
-            documentName: doc.documentName ?? 'Unnamed Document',
-            documentFile: documentFileUrl,
-            user,
-          });
+  
+          if (profilePictureUrl) {
+            const publicId = extractPublicIdFromUrl(profilePictureUrl);
+            await deleteFileFromCloudinary(publicId);
+            console.log('Old profile picture deleted from Cloudinary');
+          }
+  
+          const [uploadedProfilePicture] = await uploadFilesToCloudinary([file.path], 'profile_pictures');
+          profilePictureUrl = uploadedProfilePicture;
         }
+  
+        const profileUpdateData = {
+          profilePicture: profilePictureUrl,
+          fname: profileData.fname ?? userProfile?.fname,
+          lname: profileData.lname ?? userProfile?.lname,
+          gender: profileData.gender ?? userProfile?.gender,
+          dob: profileData.dob ? new Date(profileData.dob) : userProfile?.dob,
+        };
+  
+        await this.profileRepository.update(userProfile.profileId.toString(), profileUpdateData);
+        updatedFields['profile'] = profileUpdateData;
+        console.log('User profile updated:', profileUpdateData);
+      }
 
-        const newDocuments = documentUrls.map((docData) =>
-          this.documentRepository.create(docData),
-        );
-        await this.documentRepository.save(newDocuments.flat());
+      if (contact) {
+        const contactData = typeof contact === 'string' ? JSON.parse(contact) : contact;
+        let userContact = await this.contactRepository.findOne({ where: { user: Equal(user.userId.toString()) } });
+        const contactUpdateData = {
+          phoneNumber: contactData.phoneNumber ?? userContact?.phoneNumber,
+          alternatePhoneNumber: contactData.alternatePhoneNumber ?? userContact?.alternatePhoneNumber,
+          telephoneNumber: contactData.telephoneNumber ?? userContact?.telephoneNumber,
+        };
+  
+        await this.contactRepository.update(userContact.contactId, contactUpdateData);
+        updatedFields['contact'] = contactUpdateData;
+        console.log('User contact updated:', contactUpdateData);
+      }
+  
+      if (address) {
+        const addressData = typeof address === 'string' ? JSON.parse(address) : address;
+        if (Array.isArray(addressData) && addressData.length > 0) {
+          await this.addressRepository.delete({ user: Equal(user.userId.toString()) });
+          console.log('Old addresses deleted');
+  
+          const newAddresses = addressData.map((addr) => {
+            return this.addressRepository.create({
+              addressType: addr.addressType ?? 'default',
+              wardNumber: addr.wardNumber ?? 'N/A',
+              municipality: addr.municipality ?? 'N/A',
+              province: addr.province ?? 'N/A',
+              district: addr.district ?? 'N/A',
+              user,
+            });
+          });
+  
+          const savedAddresses = await this.addressRepository.save(newAddresses);
+          updatedFields['address'] = savedAddresses;
+          console.log('New addresses saved:', savedAddresses);
+        }
+      }
+  
+      if (document) {
+        const documentData = typeof document === 'string' ? JSON.parse(document) : document;
+        if (Array.isArray(documentData) && documentData.length > 0) {
+          await this.documentRepository.delete({ user: Equal(user.userId.toString()) });
+          console.log('Old documents deleted');
+  
+          const newDocuments = await Promise.all(documentData.map(async (doc, index) => {
+            let documentFileUrl = doc.documentFile;
+  
+            if (files.documents && files.documents[index]) {
+              const [uploadedDocumentUrl] = await uploadFilesToCloudinary([files.documents[index].path], 'documents');
+              documentFileUrl = uploadedDocumentUrl;
+            }
+  
+            return this.documentRepository.create({
+              documentName: doc.documentName ?? `Document ${index + 1}`,
+              documentFile: documentFileUrl,
+              user,
+            });
+          }));
+  
+          const savedDocuments = await this.documentRepository.save(newDocuments);
+          updatedFields['document'] = savedDocuments;
+          console.log('New documents saved:', savedDocuments);
+        }
       }
 
       const updatedUser = await this.userRepository.findOne({
-        where: { userId: Equal(id) },
+        where: { userId: Equal(id.toString()) },
         relations: ['profile', 'address', 'contact', 'document'],
       });
 
       return {
         message: 'User updated successfully',
         status: 200,
-        success: true,
-        user: updatedUser,
+        user: {
+          id: updatedUser.userId,
+          email: updatedUser.email,
+          username: updatedUser.username,
+          role: updatedUser.role,
+          isActivated: updatedUser.isActivated,
+          createdAt: updatedUser.createdAt,
+          profile: {
+            fname: updatedUser.profile?.fname,
+            lname: updatedUser.profile?.lname,
+            gender: updatedUser.profile?.gender,
+            dob: updatedUser.profile?.dob,
+            profilePicture: updatedUser.profile?.profilePicture,
+          },
+          contact: {
+            phoneNumber: updatedUser.contact?.phoneNumber,
+            alternatePhoneNumber: updatedUser.contact?.alternatePhoneNumber,
+            telephoneNumber: updatedUser.contact?.telephoneNumber,
+          },
+          address: updatedUser.address?.map(addr => ({
+            addressType: addr.addressType,
+            wardNumber: addr.wardNumber,
+            municipality: addr.municipality,
+            district: addr.district,
+            province: addr.province,
+          })),
+          documents: updatedUser.document?.map(doc => ({
+            documentName: doc.documentName,
+            documentFile: doc.documentFile,
+          })),
+        },
       };
     } catch (error) {
       console.error('Error updating user:', error);
-      return {
-        message: 'Error updating user',
-        status: 500,
-        success: false,
-      };
+      if (!(error instanceof HttpException)) {
+        throw new InternalServerErrorException('An unexpected error occurred during user update');
+      }
+      throw error;
     }
   }
-
   async getAllUsers(page: number, limit: number) {
     try {
       const skip = (page - 1) * limit;

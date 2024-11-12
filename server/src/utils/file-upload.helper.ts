@@ -112,3 +112,8 @@ export async function uploadFilesToCloudinary(
 
   return Promise.all(uploadPromises);
 }
+export function extractPublicIdFromUrl(url: string): string {
+  const parts = url.split('/');
+  const lastPart = parts[parts.length - 1];
+  return lastPart.split('.')[0];
+}
