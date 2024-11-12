@@ -5,7 +5,7 @@ import { Express } from 'express';
 
 export class UserProfileDto {
   @IsOptional()
-  profilePicture: string ; // Allows file or URL as a string
+  profilePicture: string; // Allows file or URL as a string
 
   @IsString()
   @IsNotEmpty({ message: 'First name is required' })
@@ -20,7 +20,10 @@ export class UserProfileDto {
   gender: GENDER;
 
   @IsNotEmpty({ message: 'Date of birth is required' })
-  @Transform(({ value }) => (typeof value === 'string' ? new Date(value) : value))
+  @Transform(({ value }) => {
+    const date = value ? new Date(value) : new Date();
+    return date.toISOString().split('T')[0];
+  })
   dob: Date;
 }
 
