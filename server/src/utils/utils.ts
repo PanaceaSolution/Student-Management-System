@@ -1,9 +1,17 @@
+import { BadRequestException } from '@nestjs/common';
 import { ROLE } from './role.helper';
 import { STAFFROLE } from './role.helper';
 import * as crypto from 'crypto';
 
 export function generateRandomPassword(): string {
-  return Math.random().toString(36).slice(-8);
+  try {
+    return Math.random().toString(36).slice(-8);
+  } catch (error) {
+    throw new BadRequestException('Error while creating password', {
+      cause: new Error(),
+      description: 'Error while creating password',
+    });
+  }
 }
 
 export function generateUsername(
@@ -27,13 +35,11 @@ export function generateUsername(
     } else if (staffRole === STAFFROLE.LIBRARIAN) {
       prefix = 'LB';
     }
-    prefix = 'STF'
+    prefix = 'STF';
   }
 
   return `${prefix}-${fname.charAt(0)}${lname.charAt(0)}${random_number}`;
 }
-
-
 
 export function encryptdPassword(password: string): string {
   const buffer = Buffer.from(password, 'utf-8');
@@ -45,7 +51,7 @@ export function encryptdPassword(password: string): string {
     },
     buffer,
   );
-  return encrypted.toString('base64'); 
+  return encrypted.toString('base64');
 }
 export function decryptdPassword(encryptedPassword: string): string {
   const buffer = Buffer.from(encryptedPassword, 'base64');

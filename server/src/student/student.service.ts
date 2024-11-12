@@ -15,6 +15,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
+
 @Injectable()
 export class StudentService {
   constructor(
@@ -112,8 +113,6 @@ export class StudentService {
       refreshToken: null,
     };
 
-    console.log('Profile Picture Path:', profilePicturePath);
-    console.log('Document Paths:', documentPaths);
 
     const createUserResponse = await this.userService.register(
       registerDto,
@@ -161,6 +160,7 @@ export class StudentService {
       user: createUserResponse.user,
     };
   }
+
 
   // Adjust the register function in the AuthenticationService
 

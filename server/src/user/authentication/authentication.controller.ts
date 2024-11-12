@@ -137,4 +137,3 @@ export class AuthenticationController {
 // function UseInterceptors(arg0: any): (target: AuthenticationController, propertyKey: "uploadProfilePicture", descriptor: TypedPropertyDescriptor<(file: Express.Multer.File) => Promise<any>>) => void | TypedPropertyDescriptor<...> {
 //   throw new Error('Function not implemented.');
 // }
-
