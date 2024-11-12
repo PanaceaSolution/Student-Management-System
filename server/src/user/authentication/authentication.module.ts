@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { AuthenticationService } from './authentication.service';
 import { AuthenticationController } from './authentication.controller';
@@ -9,24 +9,26 @@ import { UserAddress } from '../userEntity/address.entity';
 import { UserContact } from '../userEntity/contact.entity';
 import { UserProfile } from '../userEntity/profile.entity';
 import { UserDocuments } from '../userEntity/document.entity';
-import { JsonParserMiddleware } from '../../middlewares/json-parser.middleware';
+import * as multer from 'multer';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       User,
       UserAddress,
       UserContact,
-      UserProfile,
+      UserProfile, 
       UserDocuments,
     ]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
+    }), 
+    MulterModule.register({
+      storage: multer.memoryStorage(), 
     }),
-    MulterModule.register({ dest: './uploads' }), // Explicitly configure Multer
   ],
   controllers: [AuthenticationController],
   providers: [AuthenticationService],
   exports: [JwtModule, AuthenticationService, TypeOrmModule],
 })
-export class AuthenticationModule {
-}
+export class AuthenticationModule {}

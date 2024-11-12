@@ -18,16 +18,4 @@ import { User } from '../user/authentication/entities/authentication.entity';
   providers: [StudentService],
 })
 export class StudentModule {
-  // configure(consumer: MiddlewareConsumer) {
-  //   consumer.apply(AuthMiddleware).forRoutes(
-  //     {
-  //       path: 'student/create',
-  //       method: RequestMethod.POST,
-  //     },
-  //     {
-  //       path: 'student/update/:studentId',
-  //       method: RequestMethod.PUT,
-  //     },
-  //   );
-  // }
 }

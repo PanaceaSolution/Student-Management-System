@@ -11,7 +11,7 @@ import {
 import { Response, Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
-import { Equal, Like, Repository } from 'typeorm';
+import { Equal, EqualOperator, Like, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterUserDto } from './dto/register.dto';
 import { User } from './entities/authentication.entity';
@@ -29,12 +29,11 @@ import {
   encryptdPassword,
   decryptdPassword,
 } from '../../utils/utils';
-import { uploadSingleFileToCloudinary, uploadFilesToCloudinary, deleteFileFromCloudinary, extractPublicIdFromUrl} from '../../utils/file-upload.helper';
+import {  deleteFileFromCloudinary, extractPublicIdFromUrl, uploadFilesToCloudinary} from '../../utils/file-upload.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Injectable()
 export class AuthenticationService {
-  // Removed duplicate uploadMultipleFiles method
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -57,18 +56,20 @@ export class AuthenticationService {
   ) {
     try {
       const { email, role, profile, contact, document, address } = RegisterDto;
-
+  
       const existingUser = await this.userRepository.findOne({
         where: { email },
       });
       if (existingUser) {
         throw new BadRequestException('User with this email already exists');
       }
-
+  
+      // Generate user credentials
       const password = generateRandomPassword();
       const encryptedPassword = encryptdPassword(password);
       const username = generateUsername(profile.fname, profile.lname, role);
-
+  
+      // Create new user
       const newUser = this.userRepository.create({
         email,
         isActivated: true,
@@ -77,7 +78,7 @@ export class AuthenticationService {
         role,
         createdAt: new Date(),
       });
-
+  
       try {
         await this.userRepository.save(newUser);
       } catch (error) {
@@ -86,12 +87,12 @@ export class AuthenticationService {
           error.message,
         );
       }
-
+  
       let profilePictureUrl: string | null = null;
       if (files.profilePicture && files.profilePicture.length > 0) {
         try {
           const profilePictureUrls = await uploadFilesToCloudinary(
-            [files.profilePicture[0].path],
+            [files.profilePicture[0].buffer],
             'profile_pictures',
           );
           profilePictureUrl = profilePictureUrls[0];
@@ -111,7 +112,7 @@ export class AuthenticationService {
         dob: new Date(profile.dob),
         user: newUser,
       });
-
+  
       try {
         await this.profileRepository.save(userProfile);
       } catch (error) {
@@ -120,7 +121,6 @@ export class AuthenticationService {
           error.message,
         );
       }
-
       let savedAddresses = [];
       if (Array.isArray(address)) {
         const userAddresses = address.map((addr) =>
@@ -133,7 +133,7 @@ export class AuthenticationService {
             user: newUser,
           }),
         );
-
+  
         try {
           savedAddresses = await this.addressRepository.save(userAddresses);
         } catch (error) {
@@ -143,12 +143,13 @@ export class AuthenticationService {
           );
         }
       }
+  
 
       const userContact = this.contactRepository.create({
         ...contact,
         user: newUser,
       });
-
+  
       try {
         await this.contactRepository.save(userContact);
       } catch (error) {
@@ -164,11 +165,11 @@ export class AuthenticationService {
           const uploadedDocuments = await Promise.all(
             files.documents.map(async (documentFile, index) => {
               const documentUrls = await uploadFilesToCloudinary(
-                [documentFile.path],
+                [documentFile.buffer], 
                 'documents',
               );
               const documentUrl = documentUrls[0];
-
+  
               return this.documentRepository.create({
                 documentName:
                   document[index]?.documentName || `Document ${index + 1}`,
@@ -177,9 +178,7 @@ export class AuthenticationService {
               });
             }),
           );
-          savedDocuments = await this.documentRepository.save(
-            uploadedDocuments,
-          );
+          savedDocuments = await this.documentRepository.save(uploadedDocuments);
         } catch (error) {
           throw new CloudinaryError(
             'Failed to upload and save documents',
@@ -187,7 +186,6 @@ export class AuthenticationService {
           );
         }
       }
-
       return {
         message: 'User created successfully',
         status: 200,
@@ -266,11 +264,10 @@ export class AuthenticationService {
         });
       }
 
-      // Only set the cookie if all validations pass
       const payload = { username: user.username, role: user.role };
       const AccessToken = this.jwtService.sign(payload, {
         expiresIn: '1d',
-        secret: process.env.JWT_SECRET, // short lifespan for access token
+        secret: process.env.JWT_SECRET, 
       });
 
       const RefreshToken = this.jwtService.sign(payload, {
@@ -358,168 +355,72 @@ export class AuthenticationService {
       });
     }
   }
-  async updateUser(id: UUID, updateData: Partial<RegisterUserDto>, files: { profilePicture?: Express.Multer.File[], documents?: Express.Multer.File[] } = {}) {
+  async updateUser(
+    id: UUID,
+    updateData: Partial<RegisterUserDto>,
+    files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] } = {}
+  ) {
     try {
       const { email, role, profile, contact, document, address } = updateData;
-
+  
       const user = await this.userRepository.findOne({ where: { userId: Equal(id.toString()) } });
       if (!user) {
         throw new NotFoundException('User not found');
       }
   
       const updatedFields = {};
-
+  
       if (email !== undefined) {
+        const emailInUse = await this.userRepository.findOne({
+          where: { email, userId: Not(Equal(id.toString())) },
+        });
+        if (emailInUse) {
+          throw new BadRequestException('This email is already in use by another user');
+        }
         user.email = email;
         updatedFields['email'] = email;
       }
+  
       if (role !== undefined) {
         user.role = role;
         updatedFields['role'] = role;
       }
-
       await this.userRepository.save(user);
       console.log('User base data updated:', { email: user.email, role: user.role });
   
+
       let profilePictureUrl: string | null = null;
+      if (profile) {
+        profilePictureUrl = await this.handleProfilePictureUpdate(files.profilePicture, user.userId.toString(), updatedFields);
+      }
+  
 
       if (profile) {
-        const profileData = typeof profile === 'string' ? JSON.parse(profile) : profile;
-        const userProfile = await this.profileRepository.findOne({ where: { user: Equal(user.userId.toString()) } });
-        profilePictureUrl = userProfile?.profilePicture ?? null;
-  
-        if (files.profilePicture && files.profilePicture.length > 0) {
-          const file = files.profilePicture[0];
-          if (!file.mimetype.startsWith('image/')) {
-            throw new BadRequestException('Profile picture must be an image file');
-          }
-  
-          if (profilePictureUrl) {
-            const publicId = extractPublicIdFromUrl(profilePictureUrl);
-            await deleteFileFromCloudinary(publicId);
-            console.log('Old profile picture deleted from Cloudinary');
-          }
-  
-          const [uploadedProfilePicture] = await uploadFilesToCloudinary([file.path], 'profile_pictures');
-          profilePictureUrl = uploadedProfilePicture;
-        }
-  
-        const profileUpdateData = {
-          profilePicture: profilePictureUrl,
-          fname: profileData.fname ?? userProfile?.fname,
-          lname: profileData.lname ?? userProfile?.lname,
-          gender: profileData.gender ?? userProfile?.gender,
-          dob: profileData.dob ? new Date(profileData.dob) : userProfile?.dob,
-        };
-  
-        await this.profileRepository.update(userProfile.profileId.toString(), profileUpdateData);
-        updatedFields['profile'] = profileUpdateData;
-        console.log('User profile updated:', profileUpdateData);
+        await this.updateUserProfile(profile, user.userId.toString(), profilePictureUrl, updatedFields);
       }
+  
 
       if (contact) {
-        const contactData = typeof contact === 'string' ? JSON.parse(contact) : contact;
-        let userContact = await this.contactRepository.findOne({ where: { user: Equal(user.userId.toString()) } });
-        const contactUpdateData = {
-          phoneNumber: contactData.phoneNumber ?? userContact?.phoneNumber,
-          alternatePhoneNumber: contactData.alternatePhoneNumber ?? userContact?.alternatePhoneNumber,
-          telephoneNumber: contactData.telephoneNumber ?? userContact?.telephoneNumber,
-        };
-  
-        await this.contactRepository.update(userContact.contactId, contactUpdateData);
-        updatedFields['contact'] = contactUpdateData;
-        console.log('User contact updated:', contactUpdateData);
-      }
-  
-      if (address) {
-        const addressData = typeof address === 'string' ? JSON.parse(address) : address;
-        if (Array.isArray(addressData) && addressData.length > 0) {
-          await this.addressRepository.delete({ user: Equal(user.userId.toString()) });
-          console.log('Old addresses deleted');
-  
-          const newAddresses = addressData.map((addr) => {
-            return this.addressRepository.create({
-              addressType: addr.addressType ?? 'default',
-              wardNumber: addr.wardNumber ?? 'N/A',
-              municipality: addr.municipality ?? 'N/A',
-              province: addr.province ?? 'N/A',
-              district: addr.district ?? 'N/A',
-              user,
-            });
-          });
-  
-          const savedAddresses = await this.addressRepository.save(newAddresses);
-          updatedFields['address'] = savedAddresses;
-          console.log('New addresses saved:', savedAddresses);
-        }
-      }
-  
-      if (document) {
-        const documentData = typeof document === 'string' ? JSON.parse(document) : document;
-        if (Array.isArray(documentData) && documentData.length > 0) {
-          await this.documentRepository.delete({ user: Equal(user.userId.toString()) });
-          console.log('Old documents deleted');
-  
-          const newDocuments = await Promise.all(documentData.map(async (doc, index) => {
-            let documentFileUrl = doc.documentFile;
-  
-            if (files.documents && files.documents[index]) {
-              const [uploadedDocumentUrl] = await uploadFilesToCloudinary([files.documents[index].path], 'documents');
-              documentFileUrl = uploadedDocumentUrl;
-            }
-  
-            return this.documentRepository.create({
-              documentName: doc.documentName ?? `Document ${index + 1}`,
-              documentFile: documentFileUrl,
-              user,
-            });
-          }));
-  
-          const savedDocuments = await this.documentRepository.save(newDocuments);
-          updatedFields['document'] = savedDocuments;
-          console.log('New documents saved:', savedDocuments);
-        }
+        await this.updateUserContact(contact, user.userId.toString(), updatedFields);
       }
 
+      if (address) {
+        await this.updateUserAddress(address, user.userId.toString(), updatedFields);
+      }
+
+      if (document) {
+        await this.updateUserDocuments(document, files.documents, user.userId.toString(), updatedFields);
+      }
+  
       const updatedUser = await this.userRepository.findOne({
         where: { userId: Equal(id.toString()) },
         relations: ['profile', 'address', 'contact', 'document'],
       });
-
+  
       return {
         message: 'User updated successfully',
         status: 200,
-        user: {
-          id: updatedUser.userId,
-          email: updatedUser.email,
-          username: updatedUser.username,
-          role: updatedUser.role,
-          isActivated: updatedUser.isActivated,
-          createdAt: updatedUser.createdAt,
-          profile: {
-            fname: updatedUser.profile?.fname,
-            lname: updatedUser.profile?.lname,
-            gender: updatedUser.profile?.gender,
-            dob: updatedUser.profile?.dob,
-            profilePicture: updatedUser.profile?.profilePicture,
-          },
-          contact: {
-            phoneNumber: updatedUser.contact?.phoneNumber,
-            alternatePhoneNumber: updatedUser.contact?.alternatePhoneNumber,
-            telephoneNumber: updatedUser.contact?.telephoneNumber,
-          },
-          address: updatedUser.address?.map(addr => ({
-            addressType: addr.addressType,
-            wardNumber: addr.wardNumber,
-            municipality: addr.municipality,
-            district: addr.district,
-            province: addr.province,
-          })),
-          documents: updatedUser.document?.map(doc => ({
-            documentName: doc.documentName,
-            documentFile: doc.documentFile,
-          })),
-        },
+        user: this.formatUserResponse(updatedUser),
       };
     } catch (error) {
       console.error('Error updating user:', error);
@@ -529,12 +430,159 @@ export class AuthenticationService {
       throw error;
     }
   }
+  
+  private async handleProfilePictureUpdate(
+    profilePictureFiles: Express.Multer.File[],
+    userId: string,
+    updatedFields: Record<string, any>
+  ): Promise<string | null> {
+    let profilePictureUrl: string | null = null;
+  
+    if (profilePictureFiles && profilePictureFiles.length > 0) {
+      const file = profilePictureFiles[0];
+      if (!file.mimetype.startsWith('image/')) {
+        throw new BadRequestException('Profile picture must be an image file');
+      }
+  
+      const userProfile = await this.profileRepository.findOne({ where: { user: Equal(userId) } });
+      if (userProfile?.profilePicture) {
+        const publicId = extractPublicIdFromUrl(userProfile.profilePicture);
+        await deleteFileFromCloudinary(publicId);
+        console.log('Old profile picture deleted from Cloudinary');
+      }
+  
+      const [uploadedProfilePicture] = await uploadFilesToCloudinary([file.buffer], 'profile_pictures');
+      profilePictureUrl = uploadedProfilePicture;
+      updatedFields['profilePicture'] = profilePictureUrl;
+    }
+  
+    return profilePictureUrl;
+  }
+  
+  private async updateUserProfile(profileData, userId: string, profilePictureUrl: string | null, updatedFields: Record<string, any>) {
+    const profile = typeof profileData === 'string' ? JSON.parse(profileData) : profileData;
+    const userProfile = await this.profileRepository.findOne({ where: { user: Equal(userId) } });
+  
+    const profileUpdateData = {
+      profilePicture: profilePictureUrl ?? userProfile?.profilePicture,
+      fname: profile.fname ?? userProfile?.fname,
+      lname: profile.lname ?? userProfile?.lname,
+      gender: profile.gender ?? userProfile?.gender,
+      dob: profile.dob ? new Date(profile.dob) : userProfile?.dob,
+    };
+  
+    await this.profileRepository.update(userProfile.profileId.toString(), profileUpdateData);
+    updatedFields['profile'] = profileUpdateData;
+    console.log('User profile updated:', profileUpdateData);
+  }
+  
+  private async updateUserContact(contactData, userId: string, updatedFields: Record<string, any>) {
+    const contact = typeof contactData === 'string' ? JSON.parse(contactData) : contactData;
+    const userContact = await this.contactRepository.findOne({ where: { user: Equal(userId) } });
+  
+    const contactUpdateData = {
+      phoneNumber: contact.phoneNumber ?? userContact?.phoneNumber,
+      alternatePhoneNumber: contact.alternatePhoneNumber ?? userContact?.alternatePhoneNumber,
+      telephoneNumber: contact.telephoneNumber ?? userContact?.telephoneNumber,
+    };
+  
+    await this.contactRepository.update(userContact.contactId, contactUpdateData);
+    updatedFields['contact'] = contactUpdateData;
+    console.log('User contact updated:', contactUpdateData);
+  }
+  
+  private async updateUserAddress(addressData, userId: string, updatedFields: Record<string, any>) {
+    const addressArray = typeof addressData === 'string' ? JSON.parse(addressData) : addressData;
+  
+    if (Array.isArray(addressArray) && addressArray.length > 0) {
+      await this.addressRepository.delete({ user: Equal(userId) });
+      console.log('Old addresses deleted');
+  
+      const newAddresses = addressArray.map((addr) => this.addressRepository.create({
+        addressType: addr.addressType ?? 'default',
+        wardNumber: addr.wardNumber ?? 'N/A',
+        municipality: addr.municipality ?? 'N/A',
+        province: addr.province ?? 'N/A',
+        district: addr.district ?? 'N/A',
+        user: Object.assign(new User(), { userId }),
+      }));
+  
+      const savedAddresses = await this.addressRepository.save(newAddresses);
+      updatedFields['address'] = savedAddresses;
+      console.log('New addresses saved:', savedAddresses);
+    }
+  }
+  
+  private async updateUserDocuments(documentData, documentFiles: Express.Multer.File[], userId: string, updatedFields: Record<string, any>) {
+    const documents = typeof documentData === 'string' ? JSON.parse(documentData) : documentData;
+  
+    if (Array.isArray(documents) && documents.length > 0) {
+      await this.documentRepository.delete({ user: Equal(userId) });
+      console.log('Old documents deleted');
+  
+      const newDocuments = await Promise.all(
+        documents.map(async (doc, index) => {
+          let documentFileUrl = doc.documentFile;
+  
+          if (documentFiles && documentFiles[index]) {
+            const [uploadedDocumentUrl] = await uploadFilesToCloudinary([documentFiles[index].buffer], 'documents');
+            documentFileUrl = uploadedDocumentUrl;
+          }
+  
+          return this.documentRepository.create({
+            documentName: doc.documentName ?? `Document ${index + 1}`,
+            documentFile: documentFileUrl,
+            user: { userId: userId } as unknown as User,
+          });
+        })
+      );
+  
+      const savedDocuments = await this.documentRepository.save(newDocuments);
+      updatedFields['documents'] = savedDocuments;
+      console.log('New documents saved:', savedDocuments);
+    }
+  }
+  
+  private formatUserResponse(user: User) {
+    return {
+      id: user.userId,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+      isActivated: user.isActivated,
+      createdAt: user.createdAt,
+      profile: {
+        fname: user.profile?.fname,
+        lname: user.profile?.lname,
+        gender: user.profile?.gender,
+        dob: user.profile?.dob,
+        profilePicture: user.profile?.profilePicture,
+      },
+      contact: {
+        phoneNumber: user.contact?.phoneNumber,
+        alternatePhoneNumber: user.contact?.alternatePhoneNumber,
+        telephoneNumber: user.contact?.telephoneNumber,
+      },
+      address: user.address?.map(addr => ({
+        addressType: addr.addressType,
+        wardNumber: addr.wardNumber,
+        municipality: addr.municipality,
+        district: addr.district,
+        province: addr.province,
+      })),
+      documents: user.document?.map(doc => ({
+        documentName: doc.documentName,
+        documentFile: doc.documentFile,
+      })),
+    };
+  }
+  
   async getAllUsers(page: number, limit: number) {
     try {
       const skip = (page - 1) * limit;
 
       const [users, total] = await this.userRepository.findAndCount({
-        // order: { createdAt: 'DESC' },
+        order: { createdAt: 'DESC' },
         skip,
         take: limit,
       });

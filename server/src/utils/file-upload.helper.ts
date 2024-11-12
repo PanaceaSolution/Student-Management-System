@@ -3,7 +3,7 @@ import { Readable } from 'stream';
 
 function bufferToStream(buffer: Buffer): Readable {
   const readable = new Readable();
-  readable._read = () => {};
+  // readable._read = () => {};
   readable.push(buffer);
   readable.push(null);
   return readable;
@@ -22,7 +22,6 @@ export async function deleteFileFromCloudinary(
         console.error('Error deleting file from Cloudinary:', error);
         return reject(new Error('Failed to delete file from Cloudinary'));
       }
-      // console.log('File deleted from Cloudinary:', result);
       resolve();
     });
   });
@@ -58,7 +57,7 @@ export async function uploadSingleFileToCloudinary(
 }
 
 export async function uploadFilesToCloudinary(
-  files: (Buffer | string)[],
+  files: Buffer[],
   folder: string,
 ): Promise<string[]> {
   const uploadPromises = files.map(
@@ -66,37 +65,14 @@ export async function uploadFilesToCloudinary(
       new Promise<string>((resolve, reject) => {
         const uploadOptions = { folder };
 
-        if (Buffer.isBuffer(file)) {
-          const stream = bufferToStream(file);
+        const stream = bufferToStream(file);
 
-          stream.pipe(
-            Cloudinary.uploader.upload_stream(
-              uploadOptions,
-              (error, result) => {
-                if (error) {
-                  console.error('Error uploading buffer to Cloudinary:', error);
-                  return reject(
-                    new Error('Failed to upload buffer to Cloudinary'),
-                  );
-                }
-                if (!result) {
-                  return reject(
-                    new Error(
-                      'Upload failed, no result returned from Cloudinary',
-                    ),
-                  );
-                }
-                resolve(result.secure_url);
-              },
-            ),
-          );
-        } else {
-          // If it's a file path (string)
-          Cloudinary.uploader.upload(file, uploadOptions, (error, result) => {
+        stream.pipe(
+          Cloudinary.uploader.upload_stream(uploadOptions, (error, result) => {
             if (error) {
-              console.error('Error uploading path to Cloudinary:', error);
+              console.error('Error uploading buffer to Cloudinary:', error);
               return reject(
-                new Error('Failed to upload file path to Cloudinary'),
+                new Error('Failed to upload buffer to Cloudinary'),
               );
             }
             if (!result) {
@@ -105,8 +81,8 @@ export async function uploadFilesToCloudinary(
               );
             }
             resolve(result.secure_url);
-          });
-        }
+          }),
+        );
       }),
   );
 
