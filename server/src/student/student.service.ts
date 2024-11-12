@@ -11,9 +11,6 @@ import { Repository } from 'typeorm';
 import { User } from '../user/authentication/entities/authentication.entity';
 import { AuthenticationService } from '../user/authentication/authentication.service';
 import { generateRandomPassword, generateUsername } from 'src/utils/utils';
-import * as fs from 'fs';
-import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
 
 
@@ -26,7 +23,6 @@ export class StudentService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
-
   async createStudent(
     createStudentDto: StudentDto,
     files: {
@@ -72,30 +68,18 @@ export class StudentService {
       throw new BadRequestException('Student already exists in the database');
     }
   
-
-    let profilePictureUrl: string | null = null;
-    if (files.profilePicture && files.profilePicture.length > 0) {
-      const profilePictureBuffer = files.profilePicture[0].buffer;
-      const [uploadedProfilePictureUrl] = await uploadFilesToCloudinary(
-        [profilePictureBuffer],
-        'profile_pictures'
-      );
-      profilePictureUrl = uploadedProfilePictureUrl;
-    }
+    const profilePictureUrl: string | null = null;
   
-
+    const documentMetadata = document || [];
     const documentUrls = [];
+  
     if (files.documents && files.documents.length > 0) {
       const documentBuffers = files.documents.map((doc) => doc.buffer);
-      const uploadedDocumentUrls = await uploadFilesToCloudinary(
-        documentBuffers,
-        'documents'
-      );
+      const uploadedDocumentUrls = await uploadFilesToCloudinary(documentBuffers, 'documents');
   
-
       documentUrls.push(
         ...uploadedDocumentUrls.map((url, index) => ({
-          documentName: document?.[index]?.documentName || `Document ${index + 1}`,
+          documentName: documentMetadata[index]?.documentName || `Document ${index + 1}`,
           documentFile: url,
         }))
       );
@@ -112,6 +96,7 @@ export class StudentService {
       password: generateRandomPassword(),
       createdAt: new Date().toISOString(),
       refreshToken: null,
+      profilePicture: profilePictureUrl,
     };
   
     const createUserResponse = await this.userService.register(registerDto, files);
@@ -152,8 +137,6 @@ export class StudentService {
       user: createUserResponse.user,
     };
   }
-  
-
   // Adjust the register function in the AuthenticationService
 
   // async GetAllStudents(): Promise<{

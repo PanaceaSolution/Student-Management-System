@@ -16,6 +16,7 @@ import { User } from '../user/authentication/entities/authentication.entity';
   ],
   controllers: [StudentController],
   providers: [StudentService],
+  exports: [TypeOrmModule.forFeature([Student])] 
 })
 export class StudentModule {
 }
