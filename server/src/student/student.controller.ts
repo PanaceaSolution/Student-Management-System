@@ -41,7 +41,7 @@ async createStudent(
     throw new BadRequestException('Invalid JSON format for address, contact, or profile');
   }
 
-  // Call the student service to create a student record
+
   return this.studentService.createStudent(createStudentDto, files);
 }
 

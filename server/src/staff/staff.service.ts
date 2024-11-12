@@ -1,10 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Staff } from './entities/staff.entity';
-import { CreateStaffDto, UpdateStaffDto } from './dto/staff.dto';
+import { StaffDto } from './dto/staff.dto';
 import { AuthenticationService } from '../user/authentication/authentication.service';
 import { User } from '../user/authentication/entities/authentication.entity';
+import { generateRandomPassword, generateUsername } from 'src/utils/utils';
+import * as fs from 'fs';
+import * as path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+
+import { STAFFROLE } from 'src/utils/role.helper';
 
 @Injectable()
 export class StaffService {
@@ -15,23 +25,56 @@ export class StaffService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
-  async create(createStaffDto: CreateStaffDto) {
-    const username = 'hi';
-    const password = 'hi';
-    const createdAt = '2024-01-21';
-    const refreshToken = null;
 
-    const {
-      email,
-      role,
-      profile,
-      address,
-      contact,
-      // document: [document],
-      hireDate,
-      salary,
-      staffRole,
-    } = createStaffDto;
+  async createStaff(
+    createStaffDto: StaffDto,
+    files: {
+      profilePicture?: Express.Multer.File[];
+      documents?: Express.Multer.File[];
+    },
+  ): Promise<{ status: number; message: string; staff?: any; user?: any }> {
+    const { hireDate, salary, staffRole, email, role, profile, address, contact } = createStaffDto;
+
+    if (!profile || !profile.fname || !profile.lname) {
+      throw new BadRequestException('Profile information (fname and lname) is required.');
+    }
+
+    // const HD = moment(hireDate, 'YYYY-MM-DD');
+    // if (!HD.isValid()) {
+    //   throw new BadRequestException('Invalid date format for Hire Date');
+    // }
+    // const HireDateIsoString = HD.toISOString();
+
+    const staffExist = await this.userRepository.findOne({
+      where: { email },
+    });
+    if (staffExist) {
+      throw new BadRequestException('Staff already exists in the database');
+    }
+
+    const tempDir = './temp_uploads';
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir);
+    }
+
+    let profilePicturePath: string | null = null;
+    if (files.profilePicture && files.profilePicture.length > 0) {
+      const uniqueName = `${uuidv4()}${path.extname(files.profilePicture[0].originalname)}`;
+      profilePicturePath = path.join(tempDir, uniqueName);
+      fs.writeFileSync(profilePicturePath, files.profilePicture[0].buffer);
+      files.profilePicture[0].path = profilePicturePath;
+    }
+
+    const documentPaths = [];
+    if (files.documents && files.documents.length > 0) {
+      files.documents.forEach((documentFile) => {
+        const uniqueName = `${uuidv4()}${path.extname(documentFile.originalname)}`;
+        const documentPath = path.join(tempDir, uniqueName);
+        fs.writeFileSync(documentPath, documentFile.buffer);
+        documentFile.path = documentPath;
+        documentPaths.push(documentPath);
+      });
+    }
 
     const registerDto = {
       email,
@@ -39,43 +82,36 @@ export class StaffService {
       profile,
       address,
       contact,
-      document,
-      username,
-      password,
-      createdAt,
-      refreshToken,
+      document: [],
+      username: generateUsername(profile.fname, profile.lname, role),
+      password: generateRandomPassword(),
+      createdAt: new Date().toISOString(),
+      refreshToken: null,
     };
 
-    // Register user
-    // const createUser = await this.userService.register(registerDto);
+    const createUserResponse = await this.userService.register(registerDto, files);
 
-    // if (!createUser) {
-    //   throw new Error('User creation failed.');
-    // }
+    if (!createUserResponse || !createUserResponse.user) {
+      throw new InternalServerErrorException('Error occurs while creating user');
+    }
 
-    // // Only reference the userId or the full User entity directly
-    // const userReference = await this.userRepository.findOne({
-    //   where: {  userId: createUser.user.id },
-    // });
-    // if (!userReference) {
-    //   throw new Error('User not found after creation.');
-    // }
+    const newStaff = this.staffRepository.create({
+      hireDate,
+      salary,
+      staffRole: staffRole.trim() as STAFFROLE, // Convert string to enum
+    });
 
-    // // Create staff-specific details with the User reference
-    // const newStaff = this.staffRepository.create({
-    //   user: userReference, // Pass only the user reference here
-    //   hireDate,
-    //   salary,
-    //   staffRole,
-    // });
-    
-    // await this.staffRepository.save(newStaff);
+    await this.staffRepository.save(newStaff);
 
-    // return {
-    //   message: 'Staff member created successfully',
-    //   status: 200,
-    //   staff: newStaff,
-    // };
+    if (profilePicturePath) fs.unlinkSync(profilePicturePath);
+    documentPaths.forEach((docPath) => fs.unlinkSync(docPath));
+
+    return {
+      status: 201,
+      message: 'Staff created successfully',
+      staff: newStaff,
+      user: createUserResponse.user,
+    };
   }
 
   findAll() {
@@ -86,7 +122,7 @@ export class StaffService {
     return `This action returns a #${id} staff`;
   }
 
-  update(id: number, updateStaffDto: UpdateStaffDto) {
+  update(id: number, updateStaffDto: StaffDto) {
     return `This action updates a #${id} staff`;
   }
 

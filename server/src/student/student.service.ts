@@ -14,6 +14,8 @@ import { generateRandomPassword, generateUsername } from 'src/utils/utils';
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
+
 
 @Injectable()
 export class StudentService {
@@ -50,90 +52,82 @@ export class StudentService {
       profile,
       address,
       contact,
+      document, 
     } = createStudentDto;
-
+  
     if (!profile || !profile.fname || !profile.lname) {
-      throw new BadRequestException(
-        'Profile information (fname and lname) is required.',
-      );
+      throw new BadRequestException('Profile information (fname and lname) is required.');
     }
-
+  
     const AD = moment(admissionDate, 'YYYY-MM-DD');
     if (!AD.isValid()) {
       throw new BadRequestException('Invalid date format for Admission Date');
     }
     const AdmissionIsoString = AD.toISOString();
-
- 
+  
     const studentExist = await this.studentRepository.findOne({
       where: [{ registrationNumber }, { rollNumber }],
     });
     if (studentExist) {
       throw new BadRequestException('Student already exists in the database');
     }
+  
 
-    const tempDir = './temp_uploads';
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir);
-    }
-
-    let profilePicturePath: string | null = null;
+    let profilePictureUrl: string | null = null;
     if (files.profilePicture && files.profilePicture.length > 0) {
-      const uniqueName = `${uuidv4()}${path.extname(
-        files.profilePicture[0].originalname,
-      )}`;
-      profilePicturePath = path.join(tempDir, uniqueName);
-      fs.writeFileSync(profilePicturePath, files.profilePicture[0].buffer);
-      files.profilePicture[0].path = profilePicturePath;
+      const profilePictureBuffer = files.profilePicture[0].buffer;
+      const [uploadedProfilePictureUrl] = await uploadFilesToCloudinary(
+        [profilePictureBuffer],
+        'profile_pictures'
+      );
+      profilePictureUrl = uploadedProfilePictureUrl;
     }
+  
 
-    const documentPaths = [];
+    const documentUrls = [];
     if (files.documents && files.documents.length > 0) {
-      files.documents.forEach((documentFile, index) => {
-        const uniqueName = `${uuidv4()}${path.extname(
-          documentFile.originalname,
-        )}`;
-        const documentPath = path.join(tempDir, uniqueName);
-        fs.writeFileSync(documentPath, documentFile.buffer);
-        documentFile.path = documentPath;
-        documentPaths.push(documentPath);
-      });
+      const documentBuffers = files.documents.map((doc) => doc.buffer);
+      const uploadedDocumentUrls = await uploadFilesToCloudinary(
+        documentBuffers,
+        'documents'
+      );
+  
+
+      documentUrls.push(
+        ...uploadedDocumentUrls.map((url, index) => ({
+          documentName: document?.[index]?.documentName || `Document ${index + 1}`,
+          documentFile: url,
+        }))
+      );
     }
+  
     const registerDto = {
       email,
       role,
       profile,
       address,
       contact,
-      document: [],
+      document: documentUrls, 
       username: generateUsername(profile.fname, profile.lname, role),
       password: generateRandomPassword(),
       createdAt: new Date().toISOString(),
       refreshToken: null,
     };
-
-    console.log('Profile Picture Path:', profilePicturePath);
-    console.log('Document Paths:', documentPaths);
-
-    const createUserResponse = await this.userService.register(
-      registerDto,
-      files,
-    );
-
+  
+    const createUserResponse = await this.userService.register(registerDto, files);
+  
     if (!createUserResponse || !createUserResponse.user) {
-      throw new InternalServerErrorException(
-        'Error occurs while creating user',
-      );
+      throw new InternalServerErrorException('Error occurs while creating user');
     }
-
+  
     const userReference = await this.userRepository.findOne({
       where: { userId: createUserResponse.user.id },
     });
-
+  
     if (!userReference) {
       return { status: 500, message: 'Error finding user after creation' };
     }
-
+  
     const newStudent = this.studentRepository.create({
       fatherName,
       motherName,
@@ -148,12 +142,9 @@ export class StudentService {
       studentClass,
       transportationMode,
     });
-
+  
     await this.studentRepository.save(newStudent);
-
-    if (profilePicturePath) fs.unlinkSync(profilePicturePath);
-    documentPaths.forEach((docPath) => fs.unlinkSync(docPath));
-
+  
     return {
       status: 201,
       message: 'Student created successfully',
@@ -161,6 +152,7 @@ export class StudentService {
       user: createUserResponse.user,
     };
   }
+  
 
   // Adjust the register function in the AuthenticationService
 
