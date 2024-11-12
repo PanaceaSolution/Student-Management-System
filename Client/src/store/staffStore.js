@@ -10,6 +10,7 @@ const useStaffStore = create(
             loading: false,
             error: null,
             staff: [],
+            teacher: [],
             staffById: {},
 
             // Get all staff
@@ -17,7 +18,11 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await getAllStaffService();
-                  set({ staff: data, loading: false })
+                  set({
+                     staff: data.users?.filter((staffMember) => staffMember?.role !== "TEACHER"),
+                     teacher: data.users?.filter((staffMember) => staffMember?.role === "TEACHER"),
+                     loading: false
+                  })
                } catch (error) {
                   set({ error: error.message, loading: false })
                }

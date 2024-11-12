@@ -71,9 +71,6 @@ const Staffs = () => {
     getAllStaff();
   }, [getAllStaff]);
 
-  const filteredStaff = useMemo(() =>
-    staff.filter((staffMember) => staffMember.role !== "Teacher")
-  )
 
   // Handle format selection and trigger export
   const { exportToCSV, exportToPDF } = useExport()
@@ -81,7 +78,7 @@ const Staffs = () => {
     const value = event.target.value;
     setSelectedExport(value);
     if (value === "CSV") {
-      exportToCSV(filteredStaff, "staffs.csv");
+      exportToCSV(staff, "staffs.csv");
     } else if (value === "PDF") {
       const headers = [
         { header: "First Name", dataKey: "fname" },
@@ -89,7 +86,7 @@ const Staffs = () => {
         { header: "Gender", dataKey: "gender" },
         { header: "Role", dataKey: "role" },
       ]
-      exportToPDF(filteredStaff, headers, "Staff List", "staffs.pdf");
+      exportToPDF(staff, headers, "Staff List", "staffs.pdf");
     }
   };
 
@@ -163,11 +160,11 @@ const Staffs = () => {
             </div>
             <ActiveTab
               activeTab={activeTab}
-              filteredStaff={filteredStaff}
+              staff={staff}
               handleTabClick={handleTabClick}
             />
             <div className="relative w-full overflow-x-auto shadow-md">
-              {filteredStaff?.length === 0 ? (
+              {staff?.length === 0 ? (
                 <p className="text-center text-destructive">
                   No staff found
                 </p>
@@ -176,7 +173,7 @@ const Staffs = () => {
                   title="Staff"
                   tableHead={staffTableHead}
                   tableFields={staffTableFields}
-                  user={filteredStaff}
+                  user={staff}
                   handleUserId={handleUserId}
                 />
               )}

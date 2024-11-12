@@ -13,7 +13,7 @@ const StaffInfo = ({
    const formFields = [
       {
          name: "fname",
-         label: "First Name",
+         label: "First Name*",
          required: "First Name is required",
          placeholder: "Enter First Name",
          type: "text",
@@ -21,7 +21,7 @@ const StaffInfo = ({
       },
       {
          name: "lname",
-         label: "Last Name",
+         label: "Last Name*",
          required: "Last Name is required",
          placeholder: "Enter Last Name",
          type: "text",
@@ -29,23 +29,15 @@ const StaffInfo = ({
       },
       {
          name: "email",
-         label: "Email",
+         label: "Email*",
          required: "Email is required",
          placeholder: "Enter Email",
          type: "email",
          condition: true,
       },
       {
-         name: "phoneNumber",
-         label: "Phone",
-         required: "Phone is required",
-         placeholder: "Enter Phone",
-         type: "number",
-         condition: true,
-      },
-      {
          name: "gender",
-         label: "Gender",
+         label: "Gender*",
          required: "Gender is required",
          placeholder: "Select Gender",
          type: "select",
@@ -53,8 +45,23 @@ const StaffInfo = ({
          condition: true,
       },
       {
+         name: "phoneNumber",
+         label: "Phone*",
+         required: "Phone is required",
+         placeholder: "Enter Phone",
+         type: "number",
+         condition: true,
+      },
+      {
+         name: "alternatePhoneNumber",
+         label: "Alternate Phone Number",
+         placeholder: "Enter Alternate Phone Number",
+         type: "number",
+         condition: true,
+      },
+      {
          name: "bloodType",
-         label: "Blood Type",
+         label: "Blood Type*",
          required: "Blood Type is required",
          placeholder: "Select Blood Type",
          type: "select",
@@ -63,31 +70,31 @@ const StaffInfo = ({
       },
       {
          name: "salary",
-         label: "Salary",
+         label: "Salary*",
          required: "Salary is required",
          placeholder: "Enter Salary",
          type: "number",
          condition: true,
       },
       {
-         name: "role",
-         label: "Role",
-         required: "Role is required",
-         placeholder: "Select Role",
+         name: "staffRole",
+         label: "Staff Role*",
+         required: "Staff Role is required",
+         placeholder: "Select a Role",
          type: "select",
          options: ["Accountant", "Librarian", "Janitor"],
          condition: user !== "Teacher",
       },
       {
          name: "dob",
-         label: "Date of Birth",
+         label: "Date of Birth*",
          required: "Date of Birth is required",
          type: "date",
          condition: true,
       },
       {
-         name: "enrollDate",
-         label: "Enrollment Date",
+         name: "hireDate",
+         label: "Enrollment Date*",
          required: "Enrollment Date is required",
          type: "date",
          condition: true,
@@ -140,14 +147,6 @@ const StaffInfo = ({
                )
             )}
          </div>
-
-         {/* Profile Picture Upload */}
-         <ProfilePicUpload
-            profilePic={profilePic}
-            setProfilePic={setProfilePic}
-            clearErrors={clearErrors}
-            errors={errors}
-         />
       </div>
    )
 }

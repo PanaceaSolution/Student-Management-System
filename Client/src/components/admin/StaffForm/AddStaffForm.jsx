@@ -11,7 +11,11 @@ import {
 import { Button } from '../../ui/button';
 import useStaffStore from '@/store/staffStore';
 import StepIndicator from '@/pages/admin/StudentForm/StepIndicator';
-import StaffForm from './StaffForm';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import StaffInfo from './StaffInfo';
+import AddressInfo from '@/pages/admin/StudentForm/AddressInfo';
+import DocumentUpload from '@/pages/admin/StudentForm/DocumentUpload';
+import ProfilePicUpload from '@/components/common/profilePicUpload';
 
 const AddStaffForm = ({ user }) => {
    const { addStaff, loading, error } = useStaffStore();
@@ -35,10 +39,13 @@ const AddStaffForm = ({ user }) => {
    } = useForm({});
 
    const onSubmit = async (data) => {
+      console.log(data);
+
       const formattedData = {
          ...data,
          profilePic: profilePic,
-         role: user === 'Teacher' ? 'Teacher' : data.role || 'DefaultRole',
+         role: "STAFF",
+         staffRole: user === 'TEACHER' ? 'TEACHER' : data.role || 'DefaultRole',
          documents: {
             birthCertificate: documents.birthCertificate,
             citizenship: documents.citizenship,
@@ -81,7 +88,7 @@ const AddStaffForm = ({ user }) => {
                variant="create"
                className="uppercase"
             >
-               Create {user}
+               Add {user}
             </Button>
          </DialogTrigger>
          <DialogContent className="bg-white overflow-y-auto">
@@ -94,24 +101,73 @@ const AddStaffForm = ({ user }) => {
                </DialogDescription>
             </DialogHeader>
             <hr />
-            <StaffForm
-               handleSubmit={handleSubmit}
-               onSubmit={onSubmit}
-               register={register}
-               errors={errors}
-               loading={loading}
-               user={user}
-               profilePic={profilePic}
-               setProfilePic={setProfilePic}
-               clearErrors={clearErrors}
-               currentStep={currentStep}
-               setCurrentStep={setCurrentStep}
-               handleNext={handleNext}
-               handlePrevious={handlePrevious}
-               documents={documents}
-               setDocuments={setDocuments}
-               steps={steps}
-            />
+            <form
+               onSubmit={
+                  currentStep === steps.length - 1
+                     ? handleSubmit(onSubmit)
+                     : (e) => e.preventDefault()
+               }>
+               {currentStep === 0 && (
+                  <div>
+                     <StaffInfo
+                        register={register}
+                        errors={errors}
+                        user={user}
+                        profilePic={profilePic}
+                        setProfilePic={setProfilePic}
+                        clearErrors={clearErrors}
+                     />
+                     <ProfilePicUpload
+                        profilePic={profilePic}
+                        setProfilePic={setProfilePic}
+                        clearErrors={clearErrors}
+                        errors={errors}
+                     />
+                  </div>
+               )}
+               {currentStep === 1 && (
+                  <AddressInfo
+                     register={register}
+                     errors={errors}
+                     clearErrors={clearErrors}
+                  />
+               )}
+               {currentStep === 2 && (
+                  <DocumentUpload
+                     register={register}
+                     setDocuments={setDocuments}
+                     documents={documents}
+                     errors={errors}
+                     clearErrors={clearErrors}
+                  />
+               )}
+               <div className="mt-6 flex justify-between">
+                  {currentStep > 0 && (
+                     <div
+                        onClick={handlePrevious}
+                        className="bg-gray-300 cursor-pointer text-black py-2 px-4 rounded flex gap-1 justify-center items-center"
+                     >
+                        <ChevronLeft /> Back
+                     </div>
+                  )}
+                  {currentStep < steps.length - 1 ? (
+                     <div
+                        onClick={handleNext}
+                        className="bg-blue-600 cursor-pointer text-white py-2 px-4 rounded flex gap-1 justify-center items-center"
+                     >
+                        Next <ChevronRight />
+                     </div>
+                  ) : (
+                     <button
+                        type="submit"
+                        className="bg-blue-600 text-white py-2 px-4 rounded"
+                     >
+                        Submit
+                     </button>
+                  )}
+               </div>
+
+            </form>
          </DialogContent>
       </Dialog>
    );

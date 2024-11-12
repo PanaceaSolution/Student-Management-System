@@ -8,6 +8,7 @@ import StaffTable from '@/components/admin/staffTable';
 import DetailsCard from '@/components/admin/DetailsCard';
 import AddStaffForm from '@/components/admin/StaffForm/AddStaffForm';
 import useExport from '@/hooks/useExport';
+import ActiveTab from '@/components/common/activeTab';
 
 const Exports = [
   { value: "", label: "EXPORT" },
@@ -55,14 +56,11 @@ const Teachers = () => {
   const [selectedId, setSelectedId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { staff, getAllStaff, staffById, getStaffById, deleteStaff } = useStaffStore();
+  const { teacher, getAllStaff, staffById, getStaffById, deleteStaff } = useStaffStore();
 
   useEffect(() => {
     getAllStaff();
   }, [getAllStaff]);
-
-  // Memoized filtered staff data
-  const filteredUser = staff.filter((staffMember) => staffMember.role === "Teacher")
 
   const { exportToCSV, exportToPDF } = useExport();
   // Handle format selection and trigger export
@@ -70,14 +68,14 @@ const Teachers = () => {
     const value = event.target.value;
     setSelectedExport(value);
     if (value === "CSV") {
-      exportToCSV(filteredUser, "teachers.csv");
+      exportToCSV(teacher, "teachers.csv");
     } else if (value === "PDF") {
       const headers = [
         { header: "First Name", dataKey: "fname" },
         { header: "Last Name", dataKey: "lname" },
         { header: "Gender", dataKey: "gender" },
       ];
-      exportToPDF(filteredUser, headers, "Teachers List", "teachers.pdf");
+      exportToPDF(teacher, headers, "Teachers List", "teachers.pdf");
     }
   };
 
@@ -117,7 +115,7 @@ const Teachers = () => {
     <section>
       <div className='max-w-full mx-auto'>
         <div className={`grid grid-cols-1 gap-4 ${selectedId ? 'lg:grid-cols-7 2xl:grid-cols-4 lg:gap-1' : 'lg:pr-4'}  transition-all duration-300`}>
-          <div className='rounded-sm bg-card lg:col-span-5 2xl:col-span-3 p-3'>
+          <div className='rounded-sm bg-card lg:col-span-5 2xl:col-span-3 p-3 min-h-[90vh]'>
             <div className="flex justify-evenly sm:justify-end border-b-2 p-3">
               <div className="flex gap-3 md:gap-4">
                 <Select
@@ -146,41 +144,28 @@ const Teachers = () => {
                     onChange={handleGenderChange}
                     className="w-full bg-white"
                   />
-
                   <div className="col-span-1">
                     <DateSelect onChange={handleDateChange} />
                   </div>
                 </div>
               </div>
             </div>
-            <div className="bg-[#F8F8F8] flex gap-6 justify-start items-center p-4 border-b-2">
-              {["all", "present", "alumni"].map((tab) => (
-                <div key={tab}>
-                  <a
-                    href="#"
-                    className={`font-semibold cursor-pointer ${activeTab === tab ? "border-b-2 border-blue-600" : "text-gray-500"
-                      }`}
-                    onClick={() => handleTabClick(tab)}
-                  >
-                    {tab.toUpperCase()}{" "}
-                    <span
-                      className={`text-primary bg-gray-200 px-1 rounded ${activeTab === tab ? "" : ""}`}
-                    >
-                      {filteredUser.length}
-                    </span>
-                  </a>
-                </div>
-              ))}
-            </div>
+            <ActiveTab
+              activeTab={activeTab}
+              staff={teacher}
+              handleTabClick={handleTabClick}
+            />
             <div className="relative w-full overflow-x-auto shadow-md">
-              {filteredUser?.length === 0 ? (
-                <p className="text-center">No data available</p>
+              {teacher?.length === 0 ? (
+                <p className="text-center text-destructive">
+                  No teacher found
+                </p>
               ) : (
                 <StaffTable
                   title="Teacher"
                   tableHead={teacherTableHead}
                   tableFields={teacherTableFields}
-                  user={filteredUser}
+                  user={teacher}
                   handleUserId={handleUserId}
                 />
               )}
