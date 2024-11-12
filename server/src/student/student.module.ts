@@ -19,16 +19,4 @@ import { User } from '../user/authentication/entities/authentication.entity';
   exports: [TypeOrmModule.forFeature([Student])] 
 })
 export class StudentModule {
-  // configure(consumer: MiddlewareConsumer) {
-  //   consumer.apply(AuthMiddleware).forRoutes(
-  //     {
-  //       path: 'student/create',
-  //       method: RequestMethod.POST,
-  //     },
-  //     {
-  //       path: 'student/update/:studentId',
-  //       method: RequestMethod.PUT,
-  //     },
-  //   );
-  // }
 }
