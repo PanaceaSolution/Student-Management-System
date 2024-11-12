@@ -33,22 +33,22 @@ export class StaffController {
       documents?: Express.Multer.File[];
     },
   ) {
-    // try {
-    //   // Parse JSON fields if they are in string format
-    //   if (typeof createStaffDto.profile === 'string') {
-    //     createStaffDto.profile = JSON.parse(createStaffDto.profile);
-    //   }
-    //   if (typeof createStaffDto.address === 'string') {
-    //     createStaffDto.address = JSON.parse(createStaffDto.address);
-    //   }
-    //   if (typeof createStaffDto.contact === 'string') {
-    //     createStaffDto.contact = JSON.parse(createStaffDto.contact);
-    //   }
-    // } catch (error) {
-    //   throw new BadRequestException(
-    //     'Invalid JSON format for address, contact, or profile',
-    //   );
-    // }
+    try {
+      // Parse JSON fields if they are in string format
+      if (typeof createStaffDto.profile === 'string') {
+        createStaffDto.profile = JSON.parse(createStaffDto.profile);
+      }
+      if (typeof createStaffDto.address === 'string') {
+        createStaffDto.address = JSON.parse(createStaffDto.address);
+      }
+      if (typeof createStaffDto.contact === 'string') {
+        createStaffDto.contact = JSON.parse(createStaffDto.contact);
+      }
+    } catch (error) {
+      throw new BadRequestException(
+        'Invalid JSON format for address, contact, or profile',
+      );
+    }
 
     return this.staffService.createStaff(createStaffDto, files);
   }

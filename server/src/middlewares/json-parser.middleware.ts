@@ -10,7 +10,7 @@ import { Request, Response, NextFunction } from 'express';
 export class JsonParserMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     // Fields that are expected to be JSON strings
-    const jsonFields = ['profile', 'contact', 'address', 'document', 'salary',];
+    const jsonFields = ['profile', 'contact', 'address', 'document'];
 
     console.log('Before parsing' ,req.body)
 

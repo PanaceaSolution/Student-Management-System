@@ -13,6 +13,8 @@ import { generateRandomPassword, generateUsername } from 'src/utils/utils';
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import moment from 'moment';
+import { STAFFROLE } from 'src/utils/role.helper';
 
 @Injectable()
 export class StaffService {
@@ -110,6 +112,12 @@ export class StaffService {
       );
     }
 
+     const HD = moment(hireDate, 'YYYY-MM-DD');
+    if (!HD.isValid()) {
+      throw new BadRequestException('Invalid date format for Hire Date');
+    }
+    const HireDateIsoString = HD.toISOString();
+
     const existedStaff = await this.userRepository.findOne({
       where: { email },
     });
@@ -169,20 +177,21 @@ export class StaffService {
       );
     }
 
-    const userReference = await this.userRepository.findOne({
-      where: { userId: createUserResponse.user.id },
-    });
-    if (!userReference) {
-      return {
-        status: 500,
-        message: 'Error finding user after creation',
-      };
-    }
+    // const userReference = await this.userRepository.findOne({
+    //   where: { userId: createUserResponse.user.id },
+    // });
+    // if (!userReference) {
+    //   return {
+    //     status: 500,
+    //     message: 'Error finding user after creation',
+    //   };
+    // }
+
 
     const newStaff = this.staffRepository.create({
       salary,
-      hireDate,
-      staffRole,
+      hireDate: HireDateIsoString,
+      staffRole:STAFFROLE[staffRole as keyof typeof STAFFROLE],
     });
 
     await this.staffRepository.save(newStaff);
@@ -193,7 +202,7 @@ export class StaffService {
     return {
       status: 201,
       message: 'Student created successfully',
-      student: newStaff,
+      staff: newStaff,
       user: createUserResponse.user,
     };
   }
