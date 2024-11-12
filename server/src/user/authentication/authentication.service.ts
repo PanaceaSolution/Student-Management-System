@@ -31,6 +31,7 @@ import {
 } from '../../utils/utils';
 import { uploadSingleFileToCloudinary, uploadFilesToCloudinary, deleteFileFromCloudinary, extractPublicIdFromUrl} from '../../utils/file-upload.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
+import * as moment from 'moment';
 
 @Injectable()
 export class AuthenticationService {
@@ -65,6 +66,9 @@ export class AuthenticationService {
         throw new BadRequestException('User with this email already exists');
       }
 
+    const DOBIO = moment(profile.dob,'YY-MM-DD')
+    const dobIsoString = DOBIO.toISOString();
+
       const password = generateRandomPassword();
       const encryptedPassword = encryptdPassword(password);
       const username = generateUsername(profile.fname, profile.lname, role);
@@ -75,7 +79,7 @@ export class AuthenticationService {
         username,
         password: encryptedPassword,
         role,
-        createdAt: new Date(),
+        createdAt:new Date(),
       });
 
       try {
@@ -103,12 +107,13 @@ export class AuthenticationService {
         }
       }
 
+       // Provide an initializer for the 'dob' variable
       const userProfile = this.profileRepository.create({
         profilePicture: profilePictureUrl,
         fname: profile.fname,
         lname: profile.lname,
         gender: profile.gender,
-        dob: new Date(profile.dob),
+        dob: dobIsoString,
         user: newUser,
       });
 
