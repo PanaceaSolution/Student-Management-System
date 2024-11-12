@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UploadedFile, UseInterceptors, Patch } from '@nestjs/common';
 import { ClassService } from './classes.service';
 import { CreateClassDto} from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('classes')
 export class ClassController {
@@ -18,13 +19,38 @@ export class ClassController {
   }
 
   @Post()
-  async create(@Body() createClassDto: CreateClassDto) {
-    return this.classService.create(createClassDto);
+  @UseInterceptors(FileInterceptor('routineFile'))
+  async create(
+    @Body() createClassDto: CreateClassDto,
+    @UploadedFile() routineFile: Express.Multer.File,
+  ) {
+    
+    if (typeof createClassDto.subjects === 'string') {
+      createClassDto.subjects = JSON.parse(createClassDto.subjects);
+    }
+    
+    return this.classService.create({
+      ...createClassDto,
+      routineFile,
+    });
   }
 
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() updateClassDto: UpdateClassDto) {
-    return this.classService.update(id, updateClassDto);
+  @Patch(':id')
+  @UseInterceptors(FileInterceptor('routineFile'))
+  async update(
+    @Param('id') id: string,
+    @Body() updateClassDto: UpdateClassDto,
+    @UploadedFile() routineFile: Express.Multer.File,
+  ) {
+    
+    if (typeof updateClassDto.subjects === 'string') {
+      updateClassDto.subjects = JSON.parse(updateClassDto.subjects);
+    }
+
+    return this.classService.update(id, {
+      ...updateClassDto,
+      routineFile,
+    });
   }
 
   @Delete(':id')

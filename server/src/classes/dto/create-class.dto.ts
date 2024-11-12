@@ -10,7 +10,7 @@ export class CreateClassDto {
 
   @IsOptional()
   @IsString()
-  routineFile?: string;
+  routineFile?: Express.Multer.File;
 
   @IsUUID()
   classTeacherId: string;
