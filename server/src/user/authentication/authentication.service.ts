@@ -689,37 +689,4 @@ export class AuthenticationService {
       };
     }
   }
-<<<<<<< HEAD
-  async deactivateUser(userId: UUID) {
-    try {
-      const user = await this.userRepository.findOne({ where: { userId } });
-  
-      if (!user) {
-        return {
-          message: 'User not found',
-          status: 404,
-          success: false,
-        };
-      }
-  
-      user.isActivated = false;
-      await this.userRepository.save(user);
-  
-      return {
-        message: 'User deactivated successfully',
-        status: 200,
-        success: true,
-      };
-    } catch (error) {
-      console.error('Error deactivating user:', error);
-      return {
-        message: 'Error deactivating user',
-        status: 500,
-        success: false,
-      };
-    }
-  }
-
-=======
->>>>>>> 88f56d24f572c5831df4dc32cd43190c614a52d3
 }

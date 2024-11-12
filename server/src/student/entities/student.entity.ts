@@ -16,8 +16,10 @@ import { GENDER } from '../../utils/role.helper';
 
 import { TRANSPORTATION_MODE } from '../../utils/role.helper';
 import { User } from '../../user/authentication/entities/authentication.entity';
+import { Assignment } from 'src/assignment/entities/assignment.entity';
 
 @Entity({ name: 'Student' })
+
 export class Student {
   @PrimaryGeneratedColumn('uuid')
   studentId: UUID;
@@ -65,6 +67,9 @@ export class Student {
   @JoinColumn({ name: 'userId' })
   user: User;
   parent: any;
+
+  @OneToMany(() => Assignment, (assignment) => assignment.studentId)
+  assignments: Assignment[];
 
   // @ManyToOne(() => Parent, (parent) => parent.students, { nullable: true })
   // @JoinColumn({ name: 'parentId' })

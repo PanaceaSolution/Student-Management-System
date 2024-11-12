@@ -122,19 +122,12 @@ export class AuthenticationController {
     return this.authenticationService.searchUser(searchTerm, searchBy);
   }
 
-<<<<<<< HEAD
-  @Patch('deactivate/:id')
-  async deactivateUser(@Param('id') id: UUID) {
-    return this.authenticationService.deactivateUser(id);
-  }
-=======
 
 
   // @Patch('deactivate/:id')
   // async deactivateUser(@Param('id') id: UUID) {
   //   return this.authenticationService.deactivateUser(id);
   // }
->>>>>>> 88f56d24f572c5831df4dc32cd43190c614a52d3
 }
 // function UseInterceptors(interceptor: any) {
 //   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {

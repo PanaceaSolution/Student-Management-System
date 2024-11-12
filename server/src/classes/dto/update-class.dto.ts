@@ -1,7 +1,24 @@
+import { IsString, IsOptional, IsUUID, IsArray } from 'class-validator';
+
 export class UpdateClassDto {
-    className?: string;
-    section?: string;
-    routineFile?: string;
-    classTeacherId?: string;
-    subjects?: string[];
-  }
+  @IsOptional()
+  @IsString()
+  className?: string;
+
+  @IsOptional()
+  @IsString()
+  section?: string;
+
+  @IsOptional()
+  @IsString()
+  routineFile?: string;
+
+  @IsOptional()
+  @IsUUID()
+  classTeacherId?: string;
+
+  
+  @IsArray()
+  @IsUUID("all", { each: true })
+  subjects?: string[];
+}
