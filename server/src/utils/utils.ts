@@ -21,9 +21,11 @@ export function generateUsername(
   staffRole?: STAFFROLE,
 ): string {
   const random_number = Math.floor(1000 + Math.random() * 9000); // Generates a 4-digit random number
-  let prefix = 'ST';
+  let prefix = 'UN';
 
-  if (role === ROLE.PARENT) {
+  if (role === ROLE.STUDENT) {
+    prefix = 'ST';
+  } else if (role === ROLE.PARENT) {
     prefix = 'PR';
   } else if (role === ROLE.ADMIN) {
     prefix = 'AD';
@@ -34,8 +36,9 @@ export function generateUsername(
       prefix = 'AC';
     } else if (staffRole === STAFFROLE.LIBRARIAN) {
       prefix = 'LB';
+    } else {
+      prefix = 'STF'; // Default prefix for other staff roles
     }
-    prefix = 'STF';
   }
 
   return `${prefix}-${fname.charAt(0)}${lname.charAt(0)}${random_number}`;
@@ -53,6 +56,7 @@ export function encryptdPassword(password: string): string {
   );
   return encrypted.toString('base64');
 }
+
 export function decryptdPassword(encryptedPassword: string): string {
   const buffer = Buffer.from(encryptedPassword, 'base64');
   const decrypted = crypto.privateDecrypt(
