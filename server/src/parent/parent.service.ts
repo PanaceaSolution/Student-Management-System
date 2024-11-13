@@ -1,106 +1,122 @@
-import { UserProfile } from '../user/userEntity/profile.entity';
-import { UserAddress } from '../user/userEntity/address.entity';
-import { UserContact } from '../user/userEntity/contact.entity';
-import { UserDocuments } from '../user/userEntity/document.entity';
 import { User } from '../user/authentication/entities/authentication.entity';
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Parent } from './entities/parent.entity';
 import { ParentDto } from './dto/parent.dto';
-import { ROLE } from '../utils/role.helper';
-
+import { AuthenticationService } from 'src/user/authentication/authentication.service';
+import { generateRandomPassword, generateUsername } from 'src/utils/utils';
+import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
 
 @Injectable()
 export class ParentService {
   constructor(
     @InjectRepository(Parent)
     private readonly parentRepository: Repository<Parent>,
+    private readonly userService: AuthenticationService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(UserProfile)
-    private readonly userProfileRepository: Repository<UserProfile>,
-    @InjectRepository(UserAddress)
-    private readonly userAddressRepository: Repository<UserAddress>,
-    @InjectRepository(UserContact)
-    private readonly userContactRepository: Repository<UserContact>,
-    @InjectRepository(UserDocuments)
-    private readonly userDocumentsRepository: Repository<UserDocuments>,
   ) {}
 
+  async createParent(
+    createdParentDto: ParentDto,
+    files: {
+      profilePicture?: Express.Multer.File[];
+      documents?: Express.Multer.File[];
+    },
+  ): Promise<{ status: number; message: string; parent?: any; user?: any }> {
+    const { childNames, email, role, profile, contact, address, document } = createdParentDto;
+    console.log("Before Parsing:", createdParentDto);
 
-  async createParent(createParentDto: ParentDto): Promise<{ status: number; message: string; parent: Parent }> {
-    const { email, username, password, profile, addresses, contact, documents } = createParentDto;
-
-
-    const existingUser = await this.userRepository.findOne({ where: { email } });
-    if (existingUser) {
-      throw new BadRequestException('A user with this email already exists');
+    if (!profile || !profile.fname || !profile.lname) {
+      throw new BadRequestException('Profile information (fname and lname) is required.');
     }
 
-    const user = this.userRepository.create({
+    const existedParent = await this.userRepository.findOne({ where: { email } });
+    if (existedParent) {
+      throw new BadRequestException('Parent already exists');
+    }
+
+    const username = generateUsername(profile.fname, profile.lname, role);
+    console.log('Generated Username:', username);
+
+    let profilePictureUrl: string | null = null;
+
+    if (files.profilePicture && files.profilePicture.length > 0) {
+      const profilePictureBuffer = files.profilePicture[0].buffer;
+      const profilePictureUrls = await uploadFilesToCloudinary([profilePictureBuffer], 'profile_pictures');
+      profilePictureUrl = profilePictureUrls[0];
+    }
+
+    const documentMetadata = document || [];
+    const documentUrls = [];
+
+    if (files.documents && files.documents.length > 0) {
+      const documentBuffers = files.documents.map((doc) => doc.buffer);
+      const uploadedDocumentUrls = await uploadFilesToCloudinary(documentBuffers, 'documents');
+
+      documentUrls.push(
+        ...uploadedDocumentUrls.map((url, index) => ({
+          documentName: documentMetadata[index]?.documentName || `Document ${index + 1}`,
+          documentFile: url,
+        }))
+      );
+    }
+
+    const registerDto = {
       email,
+      role,
+      profile,
+      address,
+      contact,
+      document: documentUrls,
       username,
-      password,
-      role: ROLE.PARENT,
-      isActivated: true,
-      createdAt: new Date(),
-    });
-    await this.userRepository.save(user);
+      password: generateRandomPassword(),
+      createdAt: new Date().toISOString(),
+      refreshToken: null,
+      profilePicture: profilePictureUrl,
+    };
 
+    const createUserResponse = await this.userService.register(registerDto, files);
 
-    // const userProfile = this.userProfileRepository.create({
-    //   ...profile,
-    //   user,
-    // });
-    // await this.userProfileRepository.save(userProfile);
+    if (!createUserResponse || !createUserResponse.user) {
+      throw new InternalServerErrorException('Error occurred while creating user');
+    }
 
-
-    const userAddresses = addresses.map((address) => this.userAddressRepository.create({
-      ...address,
-      user,
-    }));
-    await this.userAddressRepository.save(userAddresses);
-
-    const userContact = this.userContactRepository.create({
-      ...contact,
-      user,
-    });
-    await this.userContactRepository.save(userContact);
-
-    // const userDocuments = documents.map((doc) => this.userDocumentsRepository.create({
-    //   ...doc,
-    //   user,
-    // }));
-    // await this.userDocumentsRepository.save(userDocuments);
-
-    const parent = this.parentRepository.create({
-      fname: profile.fname, 
-      lname: profile.lname, 
-      email,
-      gender: profile.gender,
-      user,
-    });
-    await this.parentRepository.save(parent);
+    const newParent = this.parentRepository.create({ childNames });
+    await this.parentRepository.save(newParent);
 
     return {
       status: 201,
       message: 'Parent created successfully',
-      parent,
+      parent: createdParentDto, 
+      user: { email: createdParentDto.email }
     };
   }
 
-  async findOne(parentId: string): Promise<Parent> {
-    const parent = await this.parentRepository.findOne({
-      where: { id: parentId }, 
-      relations: ['user', 'user.profile', 'user.address', 'user.contact', 'user.document'],
-    });
   
-    if (!parent) {
-      throw new NotFoundException('Parent not found');
-    }
-  
-    return parent;
-  }
-  
+
+  // async findOne(parentId: string): Promise<Parent> {
+  //   const parent = await this.parentRepository.findOne({
+  //     where: { id: parentId },
+  //     relations: [
+  //       'user',
+  //       'user.profile',
+  //       'user.address',
+  //       'user.contact',
+  //       'user.document',
+  //     ],
+  //   });
+
+  //   if (!parent) {
+  //     throw new NotFoundException('Parent not found');
+  //   }
+
+  //   return parent;
+  // }
 }
