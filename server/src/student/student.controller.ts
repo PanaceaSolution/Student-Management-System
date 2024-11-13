@@ -1,8 +1,22 @@
-import { Controller, Post,Get, Body, Param, Put, Delete, Query, BadRequestException, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Param,
+  Put,
+  Delete,
+  Query,
+  BadRequestException,
+  UploadedFiles,
+  UseInterceptors,
+  Patch,
+} from '@nestjs/common';
 import { StudentService } from './student.service';
-import { StudentDto} from './dto/student.dto';
+import { StudentDto } from './dto/student.dto';
 import { RegisterUserDto } from '../user/authentication/dto/register.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Controller('student')
 export class StudentController {
@@ -13,39 +27,69 @@ export class StudentController {
   //   return this.studentService.GetAllStudents();
   // }
   @Post('create')
-@UseInterceptors(
-  FileFieldsInterceptor([
-    { name: 'profilePicture', maxCount: 1 },
-    { name: 'documents', maxCount: 10 },
-  ])
-)
-async createStudent(
-  @Body() createStudentDto: any,
-  @UploadedFiles() files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
-) {
-  console.log('Received files:', files);
-  console.log('Received body:', createStudentDto);
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'profilePicture', maxCount: 1 },
+      { name: 'documents', maxCount: 10 },
+    ]),
+  )
+  async createStudent(
+    @Body() createStudentDto: any,
+    @UploadedFiles()
+    files: {
+      profilePicture?: Express.Multer.File[];
+      documents?: Express.Multer.File[];
+    },
+  ) {
+    console.log('Received files:', files);
+    console.log('Received body:', createStudentDto);
 
-  try {
-    if (typeof createStudentDto.profile === 'string') {
-      createStudentDto.profile = JSON.parse(createStudentDto.profile);
+    try {
+      if (typeof createStudentDto.profile === 'string') {
+        createStudentDto.profile = JSON.parse(createStudentDto.profile);
+      }
+      if (typeof createStudentDto.address === 'string') {
+        createStudentDto.address = JSON.parse(createStudentDto.address);
+      }
+      if (typeof createStudentDto.contact === 'string') {
+        createStudentDto.contact = JSON.parse(createStudentDto.contact);
+      }
+      if (typeof createStudentDto.document === 'string') {
+        createStudentDto.document = JSON.parse(createStudentDto.document);
+      }
+    } catch (error) {
+      throw new BadRequestException(
+        'Invalid JSON format for address, contact, profile, or document',
+      );
     }
-    if (typeof createStudentDto.address === 'string') {
-      createStudentDto.address = JSON.parse(createStudentDto.address);
-    }
-    if (typeof createStudentDto.contact === 'string') {
-      createStudentDto.contact = JSON.parse(createStudentDto.contact);
-    }
-    if (typeof createStudentDto.document === 'string') {
-      createStudentDto.document = JSON.parse(createStudentDto.document);
-    }
-  } catch (error) {
-    throw new BadRequestException('Invalid JSON format for address, contact, profile, or document');
+
+    return this.studentService.createStudent(createStudentDto, files);
   }
 
-  return this.studentService.createStudent(createStudentDto, files);
-}
-
+  @Patch('update/:id')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'profilePicture', maxCount: 1 },
+      { name: 'documents', maxCount: 10 },
+    ]),
+  )
+  async updateStudent(
+    @Param('id') id: UUID,
+    @Body() updateStudentDto: Partial<StudentDto>,
+    @UploadedFiles()
+    files: {
+      profilePicture?: Express.Multer.File[];
+      documents?: Express.Multer.File[];
+    } = {},
+  ) {
+    try {
+      return this.studentService.updateStudent(id, updateStudentDto, files);
+    } catch (error) {
+      throw new BadRequestException(
+        'Invalid data for updating students. Enter valid data',
+      );
+    }
+  }
 
   // @Get('/:studentId')
   // async findStudent(
@@ -60,14 +104,6 @@ async createStudent(
   //   @Body() linkParentDto: LinkParentDto,
   // ): Promise<{ status: number; message: string; result?: any }> {
   //   return this.studentService.linkParent(linkParentDto);
-  // }
-
-  // @Put('/update/:studentId')
-  // async updateStudent(
-  //   @Param('studentId') studentId: number,
-  //   @Body() updateStudentDto: StudentDto,
-  // ): Promise<{ status: number; message?: string; student?: any }> {
-  //   return this.studentService.updateStudent(studentId, updateStudentDto);
   // }
 
   // @Delete('/delete/:studentId')
