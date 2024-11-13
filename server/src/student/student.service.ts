@@ -139,6 +139,30 @@ export class StudentService {
       user: createUserResponse.user,
     };
   }
+
+  async getAllStudents(page: number, limit: number) {
+    const [students, total] = await this.studentRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      data: students,
+      totalItems: total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };  
+  }
+
+  async findStudentById(id: string) {
+    const student = await this.studentRepository.findOne({ where: { studentId: id as unknown as UUID } });
+    if (!student) {
+      throw new NotFoundException(`Student with ID ${id} not found`);
+    }
+    return student;
+  }
+  
+
   // Adjust the register function in the AuthenticationService
 
   // async GetAllStudents(): Promise<{
