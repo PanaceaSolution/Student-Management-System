@@ -18,7 +18,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 export class StaffController {
   constructor(private readonly staffService: StaffService) {}
 
-  @Post('create')
+  @Post('/create')
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'profilePicture', maxCount: 1 },
@@ -26,31 +26,16 @@ export class StaffController {
     ])
   )
   async createStaff(
-    @Body() createStaffDto: any,
-    @UploadedFiles() files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
+    @Body() createStaffDto: StaffDto,
+    @UploadedFiles()
+    files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] }
   ) {
     console.log('Received files:', files);
-    console.log('Received body:', createStaffDto);
-  
-    try {
-      if (typeof createStaffDto.profile === 'string') {
-        createStaffDto.profile = JSON.parse(createStaffDto.profile);
-      }
-      if (typeof createStaffDto.address === 'string') {
-        createStaffDto.address = JSON.parse(createStaffDto.address);
-      }
-      if (typeof createStaffDto.contact === 'string') {
-        createStaffDto.contact = JSON.parse(createStaffDto.contact);
-      }
-      if (typeof createStaffDto.document === 'string') {
-        createStaffDto.document = JSON.parse(createStaffDto.document);
-      }
-    } catch (error) {
-      throw new BadRequestException('Invalid JSON format for address, contact, profile, or document');
-    }
-  
+    console.log('Received DTO:', createStaffDto);
+
     return this.staffService.createStaff(createStaffDto, files);
   }
+
 
 
 

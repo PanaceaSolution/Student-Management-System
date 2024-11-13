@@ -13,6 +13,7 @@ import { generateRandomPassword, generateUsername } from 'src/utils/utils';
 import { ROLE } from 'src/utils/role.helper'; 
 import { STAFFROLE } from 'src/utils/role.helper';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
+import * as moment from 'moment';
 
 @Injectable()
 export class StaffService {
@@ -32,25 +33,25 @@ export class StaffService {
     },
   ): Promise<{ status: number; message: string; staff?: any; user?: any }> {
     const { hireDate, salary, staffRole, email, profile, address, contact, document } = createStaffDto;
-  
+
     if (!profile || !profile.fname || !profile.lname) {
       throw new BadRequestException('Profile information (fname and lname) is required.');
     }
-  
+
     if (!Object.values(STAFFROLE).includes(staffRole as STAFFROLE)) {
       throw new BadRequestException('Invalid staff role');
     }
-  
-  
+
+
     const profilePictureUrl: string | null = null;
-  
+
     const documentMetadata = document || [];
     const documentUrls = [];
-  
+
     if (files.documents && files.documents.length > 0) {
       const documentBuffers = files.documents.map((doc) => doc.buffer);
       const uploadedDocumentUrls = await uploadFilesToCloudinary(documentBuffers, 'documents');
-  
+
       documentUrls.push(
         ...uploadedDocumentUrls.map((url, index) => ({
           documentName: documentMetadata[index]?.documentName || `Document ${index + 1}`,
@@ -58,34 +59,34 @@ export class StaffService {
         }))
       );
     }
-  
+
     const registerDto = {
       email,
       role: ROLE.STAFF,
       profile,
       address,
       contact,
-      document: documentUrls, 
+      document: documentUrls,
       password: generateRandomPassword(),
       createdAt: new Date().toISOString(),
       refreshToken: null,
       profilePicture: profilePictureUrl,
     };
-  
+
     const createUserResponse = await this.userService.register(registerDto, files, staffRole);
-  
+
     if (!createUserResponse || !createUserResponse.user) {
       throw new InternalServerErrorException('Error occurs while creating user');
     }
-  
+
     const newStaff = this.staffRepository.create({
       hireDate,
       salary,
       staffRole: staffRole.trim() as STAFFROLE,
     });
-  
+
     await this.staffRepository.save(newStaff);
-  
+
     return {
       status: 201,
       message: 'Staff created successfully',

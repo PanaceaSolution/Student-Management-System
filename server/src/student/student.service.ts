@@ -117,6 +117,7 @@ export class StudentService {
       fatherName,
       motherName,
       guardianName,
+      user: userReference,
       religion,
       bloodType,
       admissionDate: AdmissionIsoString,

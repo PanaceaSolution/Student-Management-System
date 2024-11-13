@@ -35,33 +35,18 @@ export class AuthenticationController {
     ]),
   )
   async register(
-    @Body() body: any,
+    @Body() body: RegisterUserDto,  // Using RegisterUserDto here
     @UploadedFiles()
     files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
   ) {
     try {
-      const registerDto: RegisterUserDto = {
-        email: body.email,
-        password: body.password,
-        role: body.role,
-        profile: JSON.parse(body.profile),
-        contact: JSON.parse(body.contact),
-        address: JSON.parse(body.address),
-        document: JSON.parse(body.document),
-        refreshToken: body.refreshToken || null,
-        createdAt: body.createdAt || new Date().toISOString().split('T')[0],
-      };
-
-      console.log('Parsed Register DTO:', registerDto);
-      console.log('Received files:', files);
-
-      return this.authenticationService.register(registerDto, files);
+      console.log('Parsed and Validated Register DTO:', body);
+      return this.authenticationService.register(body, files);
     } catch (error) {
       console.error('Error parsing JSON strings in form-data:', error);
       throw new BadRequestException('Invalid JSON format for nested objects');
     }
   }
-
   @Post('login')
   async login(@Body() loginDto: LoginDto, @Res() res: Response) {
     return this.authenticationService.login(loginDto, res);

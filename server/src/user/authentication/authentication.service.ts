@@ -21,8 +21,6 @@ import { UserContact } from '../userEntity/contact.entity';
 import { UserDocuments } from '../userEntity/document.entity';
 import { UserProfile } from '../userEntity/profile.entity';
 import { CloudinaryError, DatabaseError } from '../../utils/custom-errors';
-
-
 import {
   generateRandomPassword,
   generateUsername,
