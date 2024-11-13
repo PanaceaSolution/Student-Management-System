@@ -41,8 +41,6 @@ export class StaffService {
       throw new BadRequestException('Invalid staff role');
     }
   
-    const username = generateUsername(profile.fname, profile.lname, ROLE.STAFF, staffRole as STAFFROLE);
-    console.log('Generated Username:', username);
   
     const profilePictureUrl: string | null = null;
   
@@ -68,7 +66,6 @@ export class StaffService {
       address,
       contact,
       document: documentUrls, 
-      username,
       password: generateRandomPassword(),
       createdAt: new Date().toISOString(),
       refreshToken: null,
