@@ -47,26 +47,26 @@ export class ParentService {
 
     let profilePictureUrl: string | null = null;
 
-    if (files.profilePicture && files.profilePicture.length > 0) {
-      const profilePictureBuffer = files.profilePicture[0].buffer;
-      const profilePictureUrls = await uploadFilesToCloudinary([profilePictureBuffer], 'profile_pictures');
-      profilePictureUrl = profilePictureUrls[0];
-    }
+    // if (files.profilePicture && files.profilePicture.length > 0) {
+    //   const profilePictureBuffer = files.profilePicture[0].buffer;
+    //   const profilePictureUrls = await uploadFilesToCloudinary([profilePictureBuffer], 'profile_pictures');
+    //   profilePictureUrl = profilePictureUrls[0];
+    // }
 
     const documentMetadata = document || [];
     const documentUrls = [];
 
-    if (files.documents && files.documents.length > 0) {
-      const documentBuffers = files.documents.map((doc) => doc.buffer);
-      const uploadedDocumentUrls = await uploadFilesToCloudinary(documentBuffers, 'documents');
+    // if (files.documents && files.documents.length > 0) {
+    //   const documentBuffers = files.documents.map((doc) => doc.buffer);
+    //   const uploadedDocumentUrls = await uploadFilesToCloudinary(documentBuffers, 'documents');
 
-      documentUrls.push(
-        ...uploadedDocumentUrls.map((url, index) => ({
-          documentName: documentMetadata[index]?.documentName || `Document ${index + 1}`,
-          documentFile: url,
-        }))
-      );
-    }
+    //   documentUrls.push(
+    //     ...uploadedDocumentUrls.map((url, index) => ({
+    //       documentName: documentMetadata[index]?.documentName || `Document ${index + 1}`,
+    //       documentFile: url,
+    //     }))
+    //   );
+    // }
 
     const registerDto = {
       email,

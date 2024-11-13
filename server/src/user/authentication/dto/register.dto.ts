@@ -49,6 +49,7 @@ export class RegisterUserDto {
   @ValidateNested({ each: true })
   @IsArray()
   @Type(() => UserDocumentsDto)
+  @IsOptional()
   document: UserDocumentsDto[];
 
   @Transform(({ value }) => {
