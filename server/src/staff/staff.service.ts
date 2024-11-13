@@ -2,8 +2,9 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Equal, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Staff } from './entities/staff.entity';
 import { StaffDto } from './dto/staff.dto';
@@ -16,6 +17,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { STAFFROLE, ROLE } from 'src/utils/role.helper';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Injectable()
 export class StaffService {
@@ -83,7 +85,7 @@ export class StaffService {
         })),
       );
     }
-  
+
     const registerDto = {
       email,
       role: ROLE.STAFF,
@@ -103,40 +105,88 @@ export class StaffService {
       files,
       staffRole,
     );
+    console.log('createuserResponse', createUserResponse);
 
     if (!createUserResponse || !createUserResponse.user) {
       throw new InternalServerErrorException(
         'Error occurs while creating user',
       );
     }
-  
+    const userReference = await this.userRepository.findOne({
+      where: { userId: createUserResponse.user.id },
+    });
+
+    console.log('UserReference for staff', userReference);
+
+    if (!userReference) {
+      return { status: 500, message: 'Error finding user after creation' };
+    }
+
     const newStaff = this.staffRepository.create({
       hireDate,
       salary,
       staffRole: staffRole.trim() as STAFFROLE,
+      user: userReference,
     });
-  
+
     await this.staffRepository.save(newStaff);
 
     return {
       status: 201,
       message: 'Staff created successfully',
       staff: newStaff,
-      user: createUserResponse.user,
+      user: createUserResponse,
     };
   }
-  
-  
+
+  async updateStaff(id: UUID, updateStaffDto: Partial<StaffDto>, files) {
+    try {
+      const { hireDate, salary, staffRole } = updateStaffDto;
+
+      const staff = await this.staffRepository.findOne({
+        where: { staffId: Equal(id.toString()) },
+        relations: ['user'],
+      });
+      if (!staff) {
+        throw new NotFoundException('Staff not found');
+      }
+      console.log(staff);
+
+      const updateUser = await this.userService.updateUser(
+        staff.user.userId, // userid unable to send
+        updateStaffDto,
+        files,
+      );
+      if (updateUser.status !== 200) {
+        throw new Error('error while updating user details');
+      }
+      if (hireDate) staff.hireDate = hireDate;
+      if (salary) staff.salary = salary;
+      if (staffRole) staff.staffRole = staffRole.trim() as STAFFROLE;
+
+      const updatedStaff = this.staffRepository.save(staff);
+      console.log(updatedStaff);
+
+      return {
+        msg: 'staff updated successfully',
+        updateUser,
+        updatedStaff,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        message: 'error occured',
+        error,
+      };
+    }
+  }
+
   findAll() {
     return `This action returns all staff`;
   }
 
   findOne(id: number) {
     return `This action returns a #${id} staff`;
-  }
-
-  update(id: number, updateStaffDto: StaffDto) {
-    return `This action updates a #${id} staff`;
   }
 
   remove(id: number) {
