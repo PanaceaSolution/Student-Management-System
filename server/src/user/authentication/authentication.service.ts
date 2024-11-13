@@ -169,7 +169,6 @@ export class AuthenticationService {
   
         savedDocuments = await this.documentRepository.save(uploadedDocuments);
       }
-  
       return {
         message: 'User created successfully',
         status: 200,
