@@ -43,25 +43,20 @@ const useStaffStore = create(
             addStaff: async (staffData) => {
                set({ loading: true, error: null });
                try {
-                  const URL = import.meta.env.VITE_API_URL;
-                  const response = await fetch(`${URL}/staff/create`, {
-                     method: "POST",
-                     credentials: "include",
-                     body: staffData,
-                  });
-                  const data = await response.json();
-                  if (response.statusCode === 200) {
-                     toast.success("Staff added successfully");
+                  const data = await createStaffService(staffData);
+                  if (data.statusCode === 200) {
+                     set((state) => ({
+                        staff: [...state.staff, data],
+                        loading: false,
+                     }));
+                     toast.success(data.message);
+                  } else {
+                     toast.error(data.message);
+                     set({ loading: false });
                   }
-                  console.log(data);
-
-                  set((state) => ({
-                     staff: [...state.staff, data],
-                     loading: false,
-                  }))
                } catch (error) {
-                  set({ error: error.message, loading: false });
-                  toast.error(error.message || "Failed to add staff");
+                  set({ error: errorMessage, loading: false });
+                  toast.error("Failed to add staff");
                }
             },
 

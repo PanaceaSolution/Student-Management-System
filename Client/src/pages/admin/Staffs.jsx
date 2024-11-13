@@ -71,8 +71,6 @@ const Staffs = () => {
     getAllStaff();
   }, [getAllStaff]);
 
-  console.log(staff);
-
 
 
   // Handle format selection and trigger export

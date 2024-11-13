@@ -31,7 +31,6 @@ export const createStaffService = async (staffData) => {
       credentials: "include",
       body: staffData,
    });
-   if (!response.ok) throw new Error("Failed to create staff");
    return await response.json();
 }
 
