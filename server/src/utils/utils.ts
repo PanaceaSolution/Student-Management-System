@@ -22,7 +22,6 @@ export function generateUsername(
 ): string {
   const random_number = Math.floor(1000 + Math.random() * 9000);
   let prefix = 'UN';
-
   if (role === ROLE.STUDENT) {
     prefix = 'ST';
   } else if (role === ROLE.PARENT) {

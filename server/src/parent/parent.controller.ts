@@ -1,6 +1,7 @@
-import { Controller, Post, Body, UseInterceptors, BadRequestException, UploadedFiles } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, UseInterceptors, BadRequestException } from '@nestjs/common';
 import { ParentService } from './parent.service';
 import { ParentDto } from './dto/parent.dto';
+import { Parent } from './entities/parent.entity';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @Controller('parent')
@@ -16,17 +17,12 @@ export class ParentController {
   )
   async createParent(
     @Body() createParentDto: ParentDto,
-    @UploadedFiles()
     files: {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
   ) {
-    console.log("Request received at /parent/create");
-  
     try {
-      console.log("Before Parsing:", createParentDto);
-  
       if (typeof createParentDto.profile === 'string') {
         createParentDto.profile = JSON.parse(createParentDto.profile);
       }
@@ -36,26 +32,19 @@ export class ParentController {
       if (typeof createParentDto.contact === 'string') {
         createParentDto.contact = JSON.parse(createParentDto.contact);
       }
-      if (typeof createParentDto.document === 'string') {
-        createParentDto.document = JSON.parse(createParentDto.document);
-      }
-      if (typeof createParentDto.childNames === 'string') {
-        createParentDto.childNames = JSON.parse(createParentDto.childNames);
-      }
-  
-      console.log("After Parsing:", createParentDto);
+        if (typeof createParentDto.document === 'string') {
+          createParentDto.document = JSON.parse(createParentDto.document);
+        }
     } catch (error) {
-      console.error("Parsing Error:", error);
       throw new BadRequestException(
-        'Invalid JSON format for address, contact, profile, document, or childNames',
+        'Invalid JSON format for address, contact, profile, or document',
       );
     }
-  
     return this.parentService.createParent(createParentDto, files);
   }
-}
 
-// @Get(':id')
-// async getParentDetails(@Param('id') id: string): Promise<Parent> {
-//   return this.parentService.findOne(id);
-// }
+  // @Get(':id')
+  // async getParentDetails(@Param('id') id: string): Promise<Parent> {
+  //   return this.parentService.findOne(id);
+  // }
+}

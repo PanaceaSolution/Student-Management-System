@@ -1,10 +1,11 @@
+
 import { Transform, Type } from 'class-transformer';
-import { IsNotEmpty, ValidateNested, IsString, IsArray, IsOptional } from 'class-validator';
+import { IsNotEmpty, ValidateNested, IsString, IsArray, IsObject, IsOptional } from 'class-validator';
 import { RegisterUserDto } from 'src/user/authentication/dto/register.dto';
 
 export class ParentDto extends RegisterUserDto {
   @IsArray()
-  @IsString({ each: true }) 
+  @IsString({each:true})
   @IsOptional()
   childNames: string[];
 

@@ -97,6 +97,8 @@ export class StudentDto extends RegisterUserDto {
   @Type(() => Date)
   admissionDate?: Date;
 
+  userId?: string;
+
   @Transform(({ value }) => {
     return value ? new Date(value).toISOString().split('T')[0] : undefined;
   })

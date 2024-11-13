@@ -37,7 +37,8 @@ export class AuthenticationController {
   async register(
     @Body() body: any,
     @UploadedFiles()
-    files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
+    files: { profilePicture?: Express.Multer.File[];
+       documents?: Express.Multer.File[] },
   ) {
     try {
       const registerDto: RegisterUserDto = {

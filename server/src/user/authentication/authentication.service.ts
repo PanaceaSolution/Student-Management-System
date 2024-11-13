@@ -15,7 +15,7 @@ import { Equal, EqualOperator, Like, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterUserDto } from './dto/register.dto';
 import { User } from './entities/authentication.entity';
-import { ROLE, STAFFROLE } from '../../utils/role.helper';
+import { ROLE } from '../../utils/role.helper';
 import { UserAddress } from '../userEntity/address.entity';
 import { UserContact } from '../userEntity/contact.entity';
 import { UserDocuments } from '../userEntity/document.entity';
@@ -32,6 +32,7 @@ import {
 import {  deleteFileFromCloudinary, extractPublicIdFromUrl, uploadFilesToCloudinary} from '../../utils/file-upload.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import * as moment from 'moment';
+import { STAFFROLE } from '../../utils/role.helper';
 
 @Injectable()
 export class AuthenticationService {
@@ -53,7 +54,8 @@ export class AuthenticationService {
     @InjectRepository(UserDocuments)
     private readonly documentRepository: Repository<UserDocuments>,
     private jwtService: JwtService,
-  ) {}async register(
+  ) {}
+  async register(
     RegisterDto: RegisterUserDto,
     files: {
       profilePicture?: Express.Multer.File[];
@@ -167,7 +169,6 @@ export class AuthenticationService {
   
         savedDocuments = await this.documentRepository.save(uploadedDocuments);
       }
-  
       return {
         message: 'User created successfully',
         status: 200,
