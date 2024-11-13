@@ -54,7 +54,8 @@ export class AuthenticationService {
     @InjectRepository(UserDocuments)
     private readonly documentRepository: Repository<UserDocuments>,
     private jwtService: JwtService,
-  ) {}async register(
+  ) {}
+  async register(
     RegisterDto: RegisterUserDto,
     files: {
       profilePicture?: Express.Multer.File[];
