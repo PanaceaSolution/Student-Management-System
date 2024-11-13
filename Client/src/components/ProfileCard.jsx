@@ -39,7 +39,7 @@ const ProfileCard = ({ onDelete, studentInfo, loading }) => {
 
   return (
     <>
-      <div className="border rounded-sm p-2 md:p-4 shadow-md flex flex-col bg-white">
+      <div className="border rounded-sm p-4 md:p-4 shadow-md flex flex-col bg-white">
         <div className="border-b-2">
           <h2 className="font-bold text-xl text-[#233255CC] text-center">
             Student Details

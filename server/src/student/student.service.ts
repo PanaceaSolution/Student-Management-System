@@ -22,7 +22,7 @@ export class StudentService {
     private readonly userService: AuthenticationService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
   async createStudent(
     createStudentDto: StudentDto,
     files: {
@@ -48,35 +48,35 @@ export class StudentService {
       profile,
       address,
       contact,
-      document, 
+      document,
     } = createStudentDto;
-  
+
     if (!profile || !profile.fname || !profile.lname) {
       throw new BadRequestException('Profile information (fname and lname) is required.');
     }
-  
+
     const AD = moment(admissionDate, 'YYYY-MM-DD');
     if (!AD.isValid()) {
       throw new BadRequestException('Invalid date format for Admission Date');
     }
     const AdmissionIsoString = AD.toISOString();
-  
+
     const studentExist = await this.studentRepository.findOne({
       where: [{ registrationNumber }, { rollNumber }],
     });
     if (studentExist) {
       throw new BadRequestException('Student already exists in the database');
     }
-  
+
     const profilePictureUrl: string | null = null;
-  
+
     const documentMetadata = document || [];
     const documentUrls = [];
-  
+
     if (files.documents && files.documents.length > 0) {
       const documentBuffers = files.documents.map((doc) => doc.buffer);
       const uploadedDocumentUrls = await uploadFilesToCloudinary(documentBuffers, 'documents');
-  
+
       documentUrls.push(
         ...uploadedDocumentUrls.map((url, index) => ({
           documentName: documentMetadata[index]?.documentName || `Document ${index + 1}`,
@@ -84,35 +84,35 @@ export class StudentService {
         }))
       );
     }
-  
+
     const registerDto = {
       email,
       role,
       profile,
       address,
       contact,
-      document: documentUrls, 
+      document: documentUrls,
       username: generateUsername(profile.fname, profile.lname, role),
       password: generateRandomPassword(),
       createdAt: new Date().toISOString(),
       refreshToken: null,
       profilePicture: profilePictureUrl,
     };
-  
+
     const createUserResponse = await this.userService.register(registerDto, files);
-  
+
     if (!createUserResponse || !createUserResponse.user) {
       throw new InternalServerErrorException('Error occurs while creating user');
     }
-  
+
     const userReference = await this.userRepository.findOne({
       where: { userId: createUserResponse.user.id },
     });
-  
+
     if (!userReference) {
       return { status: 500, message: 'Error finding user after creation' };
     }
-  
+
     const newStudent = this.studentRepository.create({
       fatherName,
       motherName,
@@ -127,9 +127,9 @@ export class StudentService {
       studentClass,
       transportationMode,
     });
-  
+
     await this.studentRepository.save(newStudent);
-  
+
     return {
       status: 201,
       message: 'Student created successfully',
