@@ -2,6 +2,7 @@ import {
   Injectable,
   BadRequestException,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { StudentDto } from './dto/student.dto';
 import * as moment from 'moment';
@@ -15,6 +16,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 
 @Injectable()
@@ -151,6 +153,28 @@ export class StudentService {
       student: newStudent,
       user: createUserResponse.user,
     };
+  }
+
+  async getAllStudents(page: number, limit: number) {
+    const [students, total] = await this.studentRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      data: students,
+      totalItems: total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };  
+  }
+
+  async findStudentById(id: string) {
+    const student = await this.studentRepository.findOne({ where: { studentId: id as unknown as UUID } });
+    if (!student) {
+      throw new NotFoundException(`Student with ID ${id} not found`);
+    }
+    return student;
   }
   
 
