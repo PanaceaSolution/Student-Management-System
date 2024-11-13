@@ -1,38 +1,17 @@
-import {
-  UserProfileDto,
-  UserAddressDto,
-  UserContactDto,
-  UserDocumentsDto,
-} from '../../user/userEntity/dto/common.dto';
-import { Type } from 'class-transformer';
-import { IsNotEmpty, ValidateNested, IsString } from 'class-validator';
 
-export class ParentDto {
-  @IsString()
-  @IsNotEmpty()
-  email: string;
+import { Transform, Type } from 'class-transformer';
+import { IsNotEmpty, ValidateNested, IsString, IsArray, IsObject, IsOptional } from 'class-validator';
+import { RegisterUserDto } from 'src/user/authentication/dto/register.dto';
 
-  @IsString()
-  @IsNotEmpty()
-  username: string;
+export class ParentDto extends RegisterUserDto {
+  @IsArray()
+  @IsString({each:true})
+  @IsOptional()
+  childNames: string[];
 
-  @IsString()
-  @IsNotEmpty({ message: 'Password is required' })
-  password: string;
-
-  @ValidateNested()
-  @Type(() => UserProfileDto)
-  profile: UserProfileDto;
-
-  @ValidateNested({ each: true })
-  @Type(() => UserAddressDto)
-  addresses: UserAddressDto[];
-
-  @ValidateNested()
-  @Type(() => UserContactDto)
-  contact: UserContactDto;
-
-  @ValidateNested({ each: true })
-  @Type(() => UserDocumentsDto)
-  documents: UserDocumentsDto[];
+  @Transform(({ value }) => {
+    const date = value ? new Date(value) : new Date();
+    return date.toISOString().split('T')[0];
+  })
+  createdAt: string;
 }

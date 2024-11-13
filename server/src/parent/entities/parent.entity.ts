@@ -2,23 +2,14 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 't
 import { User } from '../../user/authentication/entities/authentication.entity';
 import { Student } from '../../student/entities/student.entity';
 
-@Entity({ name: 'parents' })
+@Entity({ name: 'Parent' })
 export class Parent {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  parentId: string;
 
-  @Column({ type: 'text', nullable: false })
-  fname: string;
-
-  @Column({ type: 'text', nullable: false })
-  lname: string;
-
-  @Column({ type: 'text', nullable: false })
-  email: string;
-
-  @Column({ type: 'text', nullable: false })
-  gender: string;
-
+ @Column({type:'simple-array' , nullable:true})
+ childNames: string[];
+ 
   @ManyToOne(() => User, (user) => user.parent)
   @JoinColumn({ name: 'userId' })
   user: User;
