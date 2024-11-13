@@ -23,8 +23,10 @@ export class Staff {
   @Column({
     type: 'enum',
     enum: STAFFROLE,
+    nullable:true,
   })
   staffRole: STAFFROLE;
+  
 
   @OneToOne(() => User, (user) => user.userId)
   @JoinColumn({ name: 'userId' })

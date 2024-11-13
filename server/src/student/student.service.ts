@@ -51,8 +51,8 @@ export class StudentService {
       address,
       contact,
     } = createStudentDto;
-
-    if (!profile || !profile.fname || !profile.lname) {
+   console.log("Form body send By Front-end----",createStudentDto)
+      if (!profile || !profile.fname || !profile.lname) {
       throw new BadRequestException(
         'Profile information (fname and lname) is required.',
       );
@@ -148,6 +148,7 @@ export class StudentService {
       studentClass,
       transportationMode,
     });
+    console.log("student info berofe saving in Db",newStudent)
 
     await this.studentRepository.save(newStudent);
 

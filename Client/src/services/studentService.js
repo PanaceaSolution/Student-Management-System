@@ -1,3 +1,5 @@
+import toast from "react-hot-toast";
+
 // const URL = import.meta.env.VITE_API_URL;
 const URL = "http://localhost:8080";
 
@@ -35,20 +37,35 @@ export const getStudentByIdService = async (id) => {
 }
 
 
-export const createStudentService = async (studentData) => {
+export const createStudentService = async (studentData) => {   
    try {
-      const response = await fetch(`${URL}/student`, {
+      const response = await fetch(`http://localhost:3000/student/create`, {
          method: "POST",
          headers: {
-            "Content-Type": "application/json",
+            // "Content-Type": "multipart/form-data",
          },
-         body: JSON.stringify(studentData),
+         body:studentData
       });
+
+      if (!response.ok) {
+         let errorMessage = "An unknown error occurred.";
+         try {
+            const error = await response.json();
+            errorMessage = error.message || "Something went wrong.";
+         } catch (err) {
+            errorMessage = response.statusText || "Failed to create student.";
+         }
+         toast.error(errorMessage);
+         return null; 
+      }
+
       const data = await response.json();
       return data;
+
    } catch (error) {
       console.error("Error while creating student:", error);
-      throw error;
+      toast.error("An error occurred while creating the student.");
+      throw error; 
    }
 }
 

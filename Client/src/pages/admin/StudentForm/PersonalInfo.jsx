@@ -2,22 +2,38 @@
 import React from "react";
 import { Upload, X } from "lucide-react";
 
-const PersonalInfo = ({ register, errors, handleFileChange, profilePic, removeFile, clearErrors }) => {
+const PersonalInfo = ({
+  register,
+  errors,
+  handleFileChange,
+  profilePicture,
+  removeFile,
+  clearErrors,
+}) => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-gray-800">Personal Info</h2>
 
       <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
         {[
-          { name: "firstName", label: "First Name" },
-          { name: "lastName", label: "Last Name" },
+          { name: "fname", label: "First Name" },
+          { name: "lname", label: "Last Name" },
           { name: "fatherName", label: "Father Name" },
           { name: "motherName", label: "Mother Name" },
+          { name: "guardianName", label: "GuardianName" },
+          { name: "registrationNumber", label: "Registration-Number" },
+          { name: "previousSchool", label: "Previous-School" },
+          { name: "transportationMode", label: "Transportation-Mode" },
+          { name: "email", label: "Email" },
+          { name: "phoneNumber", label: "Phone Number" },
+          { name: "alternatePhoneNumber", label: "Alternate-PhoneNumber" },
+          { name: "telephoneNumber", label: "Tele-phoneNumber" },
+          { name: "rollNumber", label: "Roll-Number" },
           {
             name: "gender",
             label: "Gender",
             type: "select",
-            options: ["Male", "Female", "Other"],
+            options: ["MALE", "FEMALE", "OTHERS"],
           },
           {
             name: "bloodType",
@@ -26,7 +42,7 @@ const PersonalInfo = ({ register, errors, handleFileChange, profilePic, removeFi
             options: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
           },
           {
-            name: "class",
+            name: "studentClass",
             label: "Class",
             type: "select",
             options: [
@@ -65,7 +81,7 @@ const PersonalInfo = ({ register, errors, handleFileChange, profilePic, removeFi
                 id={field.name}
                 {...register(field.name, {
                   required: `${field.label} is required`,
-                  onChange: () => clearErrors(field.name), 
+                  onChange: () => clearErrors(field.name),
                 })}
                 className={`mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-600 ${
                   errors[field.name] ? "border-red-500" : ""
@@ -84,7 +100,7 @@ const PersonalInfo = ({ register, errors, handleFileChange, profilePic, removeFi
                 type={field.type === "date" ? "date" : "text"}
                 {...register(field.name, {
                   required: `${field.label} is required`,
-                  onChange: () => clearErrors(field.name), 
+                  onChange: () => clearErrors(field.name),
                 })}
                 className={`mt-1 block w-full rounded-sm border border-gray-300 py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-600 ${
                   errors[field.name] ? "border-red-500" : ""
@@ -103,8 +119,8 @@ const PersonalInfo = ({ register, errors, handleFileChange, profilePic, removeFi
         ))}
       </div>
 
-      {/* Profile Picture Upload */}
-      <div>
+       {/* Profile Picture Upload */}
+       <div>
         <label className="block text-sm font-medium text-gray-900">
           Profile Picture
         </label>
@@ -116,30 +132,27 @@ const PersonalInfo = ({ register, errors, handleFileChange, profilePic, removeFi
             />
             <div className="mt-4 flex text-sm leading-6 text-gray-600">
               <label
-                htmlFor="profilePic"
+                htmlFor="profilePicture"
                 className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 hover:text-indigo-500"
               >
                 <span>Upload a file</span>
                 <input
-                  id="profilePic"
+                  id="profilePicture"
                   type="file"
                   accept="image/*"
-                  onChange={(e) => {
-                    handleFileChange(e);
-                    clearErrors("profilePic"); // Clear profilePic error on change
-                  }}
+                  onChange={handleFileChange}
                   className="sr-only"
                 />
               </label>
             </div>
-            {profilePic && (
+            {profilePicture && (
               <div className="relative mt-2">
                 <img
-                  src={URL.createObjectURL(profilePic)}
+                  src={URL.createObjectURL(profilePicture)}
                   alt="Profile Preview"
                   className="mt-2 w-24 h-24 rounded-full object-cover"
                 />
-                <span className="block mt-2">{profilePic.name}</span>
+                <span className="block mt-2">{profilePicture.name}</span>
                 <button
                   type="button"
                   onClick={removeFile}
@@ -149,9 +162,9 @@ const PersonalInfo = ({ register, errors, handleFileChange, profilePic, removeFi
                 </button>
               </div>
             )}
-            {errors.profilePic && (
+            {errors.profilePicture && (
               <p className="text-red-500 text-sm">
-                {errors.profilePic.message}
+                {errors.profilePicture.message}
               </p>
             )}
           </div>
@@ -162,50 +175,3 @@ const PersonalInfo = ({ register, errors, handleFileChange, profilePic, removeFi
 };
 
 export default PersonalInfo;
-// import React from "react";
-
-// const PersonalInfo = ({ register, errors, handleFileChange, profilePic, removeFile, clearErrors }) => {
-//   return (
-//     <div>
-//       <div>
-//         <label>First Name</label>
-//         <input {...register("firstName", { required: "First name is required" })} />
-//         {errors.firstName && <span>{errors.firstName.message}</span>}
-//       </div>
-//       <div>
-//         <label>Last Name</label>
-//         <input {...register("lastName", { required: "Last name is required" })} />
-//         {errors.lastName && <span>{errors.lastName.message}</span>}
-//       </div>
-//       <div>
-//         <label>Father's Name</label>
-//         <input {...register("fatherName", { required: "Father's name is required" })} />
-//         {errors.fatherName && <span>{errors.fatherName.message}</span>}
-//       </div>
-//       <div>
-//         <label>Mother's Name</label>
-//         <input {...register("motherName", { required: "Mother's name is required" })} />
-//         {errors.motherName && <span>{errors.motherName.message}</span>}
-//       </div>
-//       <div>
-//         <label>Profile Picture</label>
-//         <input
-//           type="file"
-//           accept="image/*"
-//           onChange={handleFileChange}
-//           {...register("profilePic", { required: "Profile picture is required" })}
-//         />
-//         {errors.profilePic && <span>{errors.profilePic.message}</span>}
-//         {profilePic && (
-//           <div>
-//             <img src={URL.createObjectURL(profilePic)} alt="Profile Preview" />
-//             <button type="button" onClick={removeFile}>Remove</button>
-//           </div>
-//         )}
-//       </div>
-//       {/* Add more fields as needed */}
-//     </div>
-//   );
-// };
-
-// export default PersonalInfo;
