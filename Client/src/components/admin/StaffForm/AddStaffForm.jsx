@@ -16,6 +16,7 @@ import StaffInfo from './StaffInfo';
 import AddressInfo from '@/pages/admin/StudentForm/AddressInfo';
 import DocumentUpload from '@/pages/admin/StudentForm/DocumentUpload';
 import ProfilePicUpload from '@/components/common/profilePicUpload';
+import StaffDocumentUpload from './StaffDocumentUpload';
 
 const documentFields = [
    { name: "birthCertificate", label: "Birth Certificate (optional)" },
@@ -136,7 +137,7 @@ const AddStaffForm = () => {
                Add Staff
             </Button>
          </DialogTrigger>
-         <DialogContent className="bg-white overflow-y-auto">
+         <DialogContent className="bg-white overflow-y-auto sm:max-w-4xl">
             <DialogHeader>
                <DialogTitle className="text-xl font-bold text-center uppercase">
                   Staff Registration
@@ -178,7 +179,7 @@ const AddStaffForm = () => {
                   />
                )}
                {currentStep === 2 && (
-                  <DocumentUpload
+                  <StaffDocumentUpload
                      register={register}
                      setDocuments={setDocuments}
                      documents={documents}
