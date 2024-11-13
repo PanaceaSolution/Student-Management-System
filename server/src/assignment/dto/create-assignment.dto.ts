@@ -16,7 +16,7 @@ export class CreateAssignmentDto {
   courseId: string;
 
   @IsUUID()
-  studentId: string;
+  teacherId: string;
 
   @IsOptional()
   @IsDate()
@@ -30,4 +30,13 @@ export class CreateAssignmentDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsString()
+  teacherFile?: Express.Multer.File;
+
+  @IsOptional()
+  @IsString()
+  studentId?: string;
+  
 }
