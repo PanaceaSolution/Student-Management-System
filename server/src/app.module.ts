@@ -3,6 +3,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
+
+
+import { AssignmentModule } from './assignment/assignment.module';
+import { CourseModule } from './course/course.module';
 import { FinanceModule } from './finance/finance.module';
 import { TerminusModule } from '@nestjs/terminus';
 import { HealthController } from './health.controller';
@@ -14,6 +18,7 @@ import { StudentModule } from './student/student.module';
 import { ParentModule } from './parent/parent.module';
 // import { ParentModule } from './parent/parent.module';
 import { StaffModule } from './staff/staff.module';
+import { ClassModule } from './classes/classes.module';
 
 @Module({
   imports: [
@@ -35,12 +40,15 @@ import { StaffModule } from './staff/staff.module';
         },
       }),
     }),
+    AssignmentModule,
+    CourseModule,
     TerminusModule,
     FinanceModule,
     BillModule,
     StudentModule,
     StaffModule,
     ParentModule,
+    ClassModule,
   ],
   controllers: [HealthController, UploadController],
   providers: [UploadService, CloudinaryProvider],

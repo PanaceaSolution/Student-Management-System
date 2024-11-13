@@ -90,7 +90,7 @@ export class StudentDto extends RegisterUserDto {
 
   @IsUUID()
   @IsOptional()
-  parentId?: string; // Change to string if it's a UUID
+  parentId?: string; 
 
   @IsOptional()
   @IsDate()
