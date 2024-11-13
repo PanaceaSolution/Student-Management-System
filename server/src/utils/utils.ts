@@ -29,9 +29,7 @@ export function generateUsername(
   } else if (role === ROLE.ADMIN) {
     prefix = 'AD';
   } else if (role === ROLE.STAFF) {
-    console.log(
-      `Generating username - Role: ${role}, Staff Role: ${staffRole}`,
-    );
+    console.log(`Generating username - Role: ${role}, Staff Role: ${staffRole}`);
     switch (staffRole) {
       case STAFFROLE.TEACHER:
         prefix = 'TR';
@@ -47,9 +45,7 @@ export function generateUsername(
     }
   }
 
-  return `${prefix}-${fname.charAt(0).toUpperCase()}${lname
-    .charAt(0)
-    .toUpperCase()}${random_number}`;
+  return `${prefix}-${fname.charAt(0).toUpperCase()}${lname.charAt(0).toUpperCase()}${random_number}`;
 }
 
 export function encryptdPassword(password: string): string {

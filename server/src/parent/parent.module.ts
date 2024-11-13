@@ -19,6 +19,6 @@ import { AuthenticationModule } from 'src/user/authentication/authentication.mod
   ],
   controllers: [ParentController],
   providers: [ParentService],
-  exports: [ParentService], // Export ParentService if needed elsewhere
+  exports: [ParentService], 
 })
 export class ParentModule {}

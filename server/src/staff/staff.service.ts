@@ -83,7 +83,7 @@ export class StaffService {
         })),
       );
     }
-
+  
     const registerDto = {
       email,
       role: ROLE.STAFF,
@@ -109,13 +109,13 @@ export class StaffService {
         'Error occurs while creating user',
       );
     }
-
+  
     const newStaff = this.staffRepository.create({
       hireDate,
       salary,
       staffRole: staffRole.trim() as STAFFROLE,
     });
-
+  
     await this.staffRepository.save(newStaff);
 
     return {
@@ -125,7 +125,8 @@ export class StaffService {
       user: createUserResponse.user,
     };
   }
-
+  
+  
   findAll() {
     return `This action returns all staff`;
   }

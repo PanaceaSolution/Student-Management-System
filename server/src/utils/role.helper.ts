@@ -1,16 +1,14 @@
+export enum STAFFROLE {
+    TEACHER = 'TEACHER',
+    ACCOUNTANT = 'ACCOUNTANT',
+    LIBRARIAN = 'LIBRARIAN',
+}
 export enum ROLE {
   ADMIN = 'ADMIN',
   STAFF = 'STAFF',
   STUDENT = 'STUDENT',
   PARENT = 'PARENT',
 }
-
-export enum STAFFROLE {
-    TEACHER = 'TEACHER',
-    ACCOUNTANT = 'ACCOUNTANT',
-    LIBRARIAN = 'LIBRARIAN',
-}
-
 export enum GENDER {
   MALE = 'MALE',
   FEMALE = 'FEMALE',
