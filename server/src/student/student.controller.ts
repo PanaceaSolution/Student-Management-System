@@ -27,7 +27,6 @@ async createStudent(
   console.log('Received body:', createStudentDto);
 
   try {
-    // Parse JSON fields if they are in string format
     if (typeof createStudentDto.profile === 'string') {
       createStudentDto.profile = JSON.parse(createStudentDto.profile);
     }
@@ -37,10 +36,12 @@ async createStudent(
     if (typeof createStudentDto.contact === 'string') {
       createStudentDto.contact = JSON.parse(createStudentDto.contact);
     }
+    if (typeof createStudentDto.document === 'string') {
+      createStudentDto.document = JSON.parse(createStudentDto.document);
+    }
   } catch (error) {
-    throw new BadRequestException('Invalid JSON format for address, contact, or profile');
+    throw new BadRequestException('Invalid JSON format for address, contact, profile, or document');
   }
-
 
   return this.studentService.createStudent(createStudentDto, files);
 }

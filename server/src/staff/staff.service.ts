@@ -11,12 +11,10 @@ import { StaffDto } from './dto/staff.dto';
 import { AuthenticationService } from '../user/authentication/authentication.service';
 import { User } from '../user/authentication/entities/authentication.entity';
 import { generateRandomPassword, generateUsername } from 'src/utils/utils';
-import * as fs from 'fs';
-import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
-
+import { ROLE } from 'src/utils/role.helper'; 
 import { STAFFROLE } from 'src/utils/role.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
+import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
 
 @Injectable()
 export class StaffService {
@@ -35,79 +33,61 @@ export class StaffService {
       documents?: Express.Multer.File[];
     },
   ): Promise<{ status: number; message: string; staff?: any; user?: any }> {
-    const { hireDate, salary, staffRole, email, role, profile, address, contact } = createStaffDto;
-
+    const { hireDate, salary, staffRole, email, profile, address, contact, document } = createStaffDto;
+  
     if (!profile || !profile.fname || !profile.lname) {
       throw new BadRequestException('Profile information (fname and lname) is required.');
     }
-
-    // const HD = moment(hireDate, 'YYYY-MM-DD');
-    // if (!HD.isValid()) {
-    //   throw new BadRequestException('Invalid date format for Hire Date');
-    // }
-    // const HireDateIsoString = HD.toISOString();
-
-    const staffExist = await this.userRepository.findOne({
-      where: { email },
-    });
-    if (staffExist) {
-      throw new BadRequestException('Staff already exists in the database');
+  
+    if (!Object.values(STAFFROLE).includes(staffRole as STAFFROLE)) {
+      throw new BadRequestException('Invalid staff role');
     }
-
-    const tempDir = './temp_uploads';
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir);
-    }
-
-    let profilePicturePath: string | null = null;
-    if (files.profilePicture && files.profilePicture.length > 0) {
-      const uniqueName = `${uuidv4()}${path.extname(files.profilePicture[0].originalname)}`;
-      profilePicturePath = path.join(tempDir, uniqueName);
-      fs.writeFileSync(profilePicturePath, files.profilePicture[0].buffer);
-      files.profilePicture[0].path = profilePicturePath;
-    }
-
-    const documentPaths = [];
+  
+  
+    const profilePictureUrl: string | null = null;
+  
+    const documentMetadata = document || [];
+    const documentUrls = [];
+  
     if (files.documents && files.documents.length > 0) {
-      files.documents.forEach((documentFile) => {
-        const uniqueName = `${uuidv4()}${path.extname(documentFile.originalname)}`;
-        const documentPath = path.join(tempDir, uniqueName);
-        fs.writeFileSync(documentPath, documentFile.buffer);
-        documentFile.path = documentPath;
-        documentPaths.push(documentPath);
-      });
+      const documentBuffers = files.documents.map((doc) => doc.buffer);
+      const uploadedDocumentUrls = await uploadFilesToCloudinary(documentBuffers, 'documents');
+  
+      documentUrls.push(
+        ...uploadedDocumentUrls.map((url, index) => ({
+          documentName: documentMetadata[index]?.documentName || `Document ${index + 1}`,
+          documentFile: url,
+        }))
+      );
     }
-
+  
     const registerDto = {
       email,
-      role,
+      role: ROLE.STAFF,
       profile,
       address,
       contact,
-      document: [],
-      username: generateUsername(profile.fname, profile.lname, role),
+      document: documentUrls, 
       password: generateRandomPassword(),
       createdAt: new Date().toISOString(),
       refreshToken: null,
+      profilePicture: profilePictureUrl,
     };
-
-    const createUserResponse = await this.userService.register(registerDto, files);
-
+  
+    const createUserResponse = await this.userService.register(registerDto, files, staffRole);
+  
     if (!createUserResponse || !createUserResponse.user) {
       throw new InternalServerErrorException('Error occurs while creating user');
     }
-
+  
     const newStaff = this.staffRepository.create({
       hireDate,
       salary,
-      staffRole: staffRole.trim() as STAFFROLE, // Convert string to enum
+      staffRole: staffRole.trim() as STAFFROLE,
     });
-
+  
     await this.staffRepository.save(newStaff);
-
-    if (profilePicturePath) fs.unlinkSync(profilePicturePath);
-    documentPaths.forEach((docPath) => fs.unlinkSync(docPath));
-
+  
     return {
       status: 201,
       message: 'Staff created successfully',
