@@ -11,7 +11,7 @@ import { Student } from './entities/student.entity';
 import { Equal, Not, Repository } from 'typeorm';
 import { User } from '../user/authentication/entities/authentication.entity';
 import { AuthenticationService } from '../user/authentication/authentication.service';
-import { generateRandomPassword, generateUsername } from 'src/utils/utils';
+import { decryptdPassword, generateRandomPassword, generateUsername } from 'src/utils/utils';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
@@ -30,7 +30,7 @@ export class StudentService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ): Promise<{ status: number; message: string; student?: any; user?: any }> {
+  ): Promise<{ status: number; message: string; student?: any; user?: any ; plainPassword?:any }> {
     const {
       fatherName,
       motherName,
@@ -146,12 +146,13 @@ export class StudentService {
     });
     
     await this.studentRepository.save(newStudent);
-
+  let plainPassword = decryptdPassword(newStudent.user.password)
     return {
       status: 201,
       message: 'Student created successfully',
       student: newStudent,
       user: createUserResponse.user,
+      plainPassword:plainPassword,
     };
   }
 
