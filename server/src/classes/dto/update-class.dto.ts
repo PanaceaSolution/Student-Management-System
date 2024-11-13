@@ -10,7 +10,7 @@ export class UpdateClassDto {
 
   @IsOptional()
   @IsString()
-  routineFile?: string;
+  routineFile?: Express.Multer.File;
 
   @IsUUID()
   classTeacherId: string;

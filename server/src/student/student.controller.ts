@@ -46,6 +46,18 @@ async createStudent(
   return this.studentService.createStudent(createStudentDto, files);
 }
 
+@Get('all-students')
+  async getStudents(@Query('page') page: string, @Query('limit') limit: string) {
+    const pageNumber = parseInt(page) || 1; 
+    const pageSize = parseInt(limit) || 8; 
+    return this.studentService.getAllStudents(pageNumber, pageSize);
+  }
+
+  @Get(':id')
+  async getStudentById(@Param('id') id: string) {
+    return this.studentService.findStudentById(id);
+  }
+
 
   // @Get('/:studentId')
   // async findStudent(

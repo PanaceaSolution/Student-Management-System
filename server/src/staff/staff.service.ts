@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,9 +11,9 @@ import { StaffDto } from './dto/staff.dto';
 import { AuthenticationService } from '../user/authentication/authentication.service';
 import { User } from '../user/authentication/entities/authentication.entity';
 import { generateRandomPassword, generateUsername } from 'src/utils/utils';
-import { ROLE } from 'src/utils/role.helper'; 
+import { ROLE } from 'src/utils/role.helper';
 import { STAFFROLE } from 'src/utils/role.helper';
-import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Injectable()
 export class StaffService {
@@ -22,7 +23,7 @@ export class StaffService {
     private readonly userService: AuthenticationService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async createStaff(
     createStaffDto: StaffDto,
@@ -32,27 +33,27 @@ export class StaffService {
     },
   ): Promise<{ status: number; message: string; staff?: any; user?: any }> {
     const { hireDate, salary, staffRole, email, profile, address, contact, document } = createStaffDto;
-  
+
     if (!profile || !profile.fname || !profile.lname) {
       throw new BadRequestException('Profile information (fname and lname) is required.');
     }
-  
+
     if (!Object.values(STAFFROLE).includes(staffRole as STAFFROLE)) {
       throw new BadRequestException('Invalid staff role');
     }
-  
+
     const username = generateUsername(profile.fname, profile.lname, ROLE.STAFF, staffRole as STAFFROLE);
     console.log('Generated Username:', username);
-  
+
     const profilePictureUrl: string | null = null;
-  
+
     const documentMetadata = document || [];
     const documentUrls = [];
-  
+
     if (files.documents && files.documents.length > 0) {
       const documentBuffers = files.documents.map((doc) => doc.buffer);
       const uploadedDocumentUrls = await uploadFilesToCloudinary(documentBuffers, 'documents');
-  
+
       documentUrls.push(
         ...uploadedDocumentUrls.map((url, index) => ({
           documentName: documentMetadata[index]?.documentName || `Document ${index + 1}`,
@@ -60,35 +61,35 @@ export class StaffService {
         }))
       );
     }
-  
+
     const registerDto = {
       email,
       role: ROLE.STAFF,
       profile,
       address,
       contact,
-      document: documentUrls, 
+      document: documentUrls,
       username,
       password: generateRandomPassword(),
       createdAt: new Date().toISOString(),
       refreshToken: null,
       profilePicture: profilePictureUrl,
     };
-  
+
     const createUserResponse = await this.userService.register(registerDto, files, staffRole);
-  
+
     if (!createUserResponse || !createUserResponse.user) {
       throw new InternalServerErrorException('Error occurs while creating user');
     }
-  
+
     const newStaff = this.staffRepository.create({
       hireDate,
       salary,
       staffRole: staffRole.trim() as STAFFROLE,
     });
-  
+
     await this.staffRepository.save(newStaff);
-  
+
     return {
       status: 201,
       message: 'Staff created successfully',
@@ -96,14 +97,27 @@ export class StaffService {
       user: createUserResponse.user,
     };
   }
-  
-  
-  findAll() {
-    return `This action returns all staff`;
+
+  async getAllStaff(page: number, limit: number) {
+    const [staffs, total] = await this.staffRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      data: staffs,
+      totalItems: total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} staff`;
+  async findStaffById(id: string) {
+    const student = await this.staffRepository.findOne({ where: { staffId: id } });
+    if (!student) {
+      throw new NotFoundException(`Student with ID ${id} not found`);
+    }
+    return student;
   }
 
   update(id: number, updateStaffDto: StaffDto) {

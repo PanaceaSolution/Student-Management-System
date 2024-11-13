@@ -9,6 +9,7 @@ import {
   UploadedFiles,
   BadRequestException,
   UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { StaffService } from './staff.service';
 import { StaffDto } from './dto/staff.dto';
@@ -55,14 +56,16 @@ export class StaffController {
 
 
 
-  @Get()
-  findAll() {
-    return this.staffService.findAll();
+  @Get('all-staff')
+  async getStaffs(@Query('page') page: string, @Query('limit') limit: string) {
+    const pageNumber = parseInt(page) || 1; 
+    const pageSize = parseInt(limit) || 8; 
+    return this.staffService.getAllStaff(pageNumber, pageSize);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.staffService.findOne(+id);
+  async getStaffById(@Param('id') id: string) {
+    return this.staffService.findStaffById(id);
   }
 
   @Patch(':id')

@@ -6,6 +6,7 @@ import { CreateClassDto } from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { Course } from 'src/course/entities/course.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
+import { deleteFileFromCloudinary, extractPublicIdFromUrl, uploadSingleFileToCloudinary } from 'src/utils/file-upload.helper';
 
 @Injectable()
 export class ClassService {
@@ -43,10 +44,16 @@ export class ClassService {
       throw new NotFoundException(`Staff with ID ${createClassDto.classTeacherId} not found`);
     }
 
+    let routineFileUrl = null;
+    if (createClassDto.routineFile) {
+      const uploadResult = await uploadSingleFileToCloudinary(createClassDto.routineFile, 'routines');
+      routineFileUrl = uploadResult.secure_url;
+    }
+
     const newClass = this.classRepository.create({
       className: createClassDto.className,
       section: createClassDto.section,
-      routineFile: createClassDto.routineFile,
+      routineFile: routineFileUrl,
       subjects,
       classTeacher,
       classTeacherStaffId: createClassDto.classTeacherId  
@@ -55,8 +62,21 @@ export class ClassService {
   }
 
   async update(id: string, updateClassDto: UpdateClassDto): Promise<Class> {
+    const existingClass = await this.findOne(id);
     const updateData: any = { ...updateClassDto };
 
+    
+    if (updateClassDto.routineFile) {
+      
+      if (existingClass.routineFile) {
+        const publicId = extractPublicIdFromUrl(existingClass.routineFile);
+        await deleteFileFromCloudinary(publicId);
+      }
+      
+      
+      const uploadResult = await uploadSingleFileToCloudinary(updateClassDto.routineFile, 'routines');
+      updateData.routineFile = uploadResult.secure_url;
+    }
     if (updateClassDto.subjects) {
       updateData.subjects = await this.courseRepository.findByIds(updateClassDto.subjects);
     }
@@ -79,6 +99,14 @@ export class ClassService {
   }
 
   async remove(id: string): Promise<void> {
+    const existingClass = await this.findOne(id);
+    
+    
+    if (existingClass.routineFile) {
+      const publicId = extractPublicIdFromUrl(existingClass.routineFile);
+      await deleteFileFromCloudinary(publicId);
+    }
+    
     const result = await this.classRepository.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Class with ID ${id} not found`);
