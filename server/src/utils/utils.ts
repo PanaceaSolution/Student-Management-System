@@ -20,9 +20,8 @@ export function generateUsername(
   role?: ROLE,
   staffRole?: STAFFROLE,
 ): string {
-  const random_number = Math.floor(1000 + Math.random() * 9000); // Generates a 4-digit random number
+  const random_number = Math.floor(1000 + Math.random() * 9000);
   let prefix = 'UN';
-
   if (role === ROLE.STUDENT) {
     prefix = 'ST';
   } else if (role === ROLE.PARENT) {
@@ -30,18 +29,27 @@ export function generateUsername(
   } else if (role === ROLE.ADMIN) {
     prefix = 'AD';
   } else if (role === ROLE.STAFF) {
-    if (staffRole === STAFFROLE.TEACHER) {
-      prefix = 'TR';
-    } else if (staffRole === STAFFROLE.ACCOUNTANT) {
-      prefix = 'AC';
-    } else if (staffRole === STAFFROLE.LIBRARIAN) {
-      prefix = 'LB';
-    } else {
-      prefix = 'STF'; // Default prefix for other staff roles
+    console.log(
+      `Generating username - Role: ${role}, Staff Role: ${staffRole}`,
+    );
+    switch (staffRole) {
+      case STAFFROLE.TEACHER:
+        prefix = 'TR';
+        break;
+      case STAFFROLE.ACCOUNTANT:
+        prefix = 'AC';
+        break;
+      case STAFFROLE.LIBRARIAN:
+        prefix = 'LB';
+        break;
+      default:
+        prefix = 'STF';
     }
   }
 
-  return `${prefix}-${fname.charAt(0)}${lname.charAt(0)}${random_number}`;
+  return `${prefix}-${fname.charAt(0).toUpperCase()}${lname
+    .charAt(0)
+    .toUpperCase()}${random_number}`;
 }
 
 export function encryptdPassword(password: string): string {
