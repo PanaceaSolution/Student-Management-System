@@ -24,16 +24,15 @@ export class StaffController {
     FileFieldsInterceptor([
       { name: 'profilePicture', maxCount: 1 },
       { name: 'documents', maxCount: 10 },
-    ]),
+    ])
   )
   async createStaff(
     @Body() createStaffDto: any,
-    @UploadedFiles()
-    files: {
-      profilePicture?: Express.Multer.File[];
-      documents?: Express.Multer.File[];
-    },
+    @UploadedFiles() files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
   ) {
+    console.log('Received files:', files);
+    console.log('Received body:', createStaffDto);
+  
     try {
       if (typeof createStaffDto.profile === 'string') {
         createStaffDto.profile = JSON.parse(createStaffDto.profile);
@@ -50,6 +49,7 @@ export class StaffController {
     } catch (error) {
       throw new BadRequestException('Invalid JSON format for address, contact, profile, or document');
     }
+  
     return this.staffService.createStaff(createStaffDto, files);
   }
 

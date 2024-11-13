@@ -1,6 +1,6 @@
 import React from 'react'
 
-const ActiveTab = ({ activeTab, handleTabClick, filteredStaff }) => {
+const ActiveTab = ({ activeTab, handleTabClick, staff }) => {
    return (
       <div className="bg-[#F8F8F8] flex gap-6 justify-start items-center p-4 border-b-2">
          {["all", "present", "alumni"].map((tab) => (
@@ -15,7 +15,7 @@ const ActiveTab = ({ activeTab, handleTabClick, filteredStaff }) => {
                   <span
                      className={`text-primary bg-gray-200 px-1 rounded ${activeTab === tab ? "" : ""}`}
                   >
-                     {filteredStaff.length}
+                     {staff.length}
                   </span>
                </a>
             </div>

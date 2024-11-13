@@ -11,18 +11,27 @@ import {
 import { Button } from '../../ui/button';
 import useStaffStore from '@/store/staffStore';
 import StepIndicator from '@/pages/admin/StudentForm/StepIndicator';
-import StaffForm from './StaffForm';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import StaffInfo from './StaffInfo';
+import AddressInfo from '@/pages/admin/StudentForm/AddressInfo';
+import DocumentUpload from '@/pages/admin/StudentForm/DocumentUpload';
+import ProfilePicUpload from '@/components/common/profilePicUpload';
+import StaffDocumentUpload from './StaffDocumentUpload';
 
-const AddStaffForm = ({ user }) => {
+const documentFields = [
+   { name: "birthCertificate", label: "Birth Certificate (optional)" },
+   { name: "citizenship", label: "Citizenship Document (optional)" },
+]
+
+const AddStaffForm = () => {
    const { addStaff, loading, error } = useStaffStore();
    const steps = ["Personal Info", "Address Info", "Document Upload"];
    const [isOpen, setIsOpen] = useState(false);
    const [currentStep, setCurrentStep] = useState(0);
-   const [profilePic, setProfilePic] = useState(null);
+   const [profilePic, setProfilePic] = useState('');
    const [documents, setDocuments] = useState({
       birthCertificate: null,
       citizenship: null,
-      marksheet: null,
    });
 
    const {
@@ -35,16 +44,60 @@ const AddStaffForm = ({ user }) => {
    } = useForm({});
 
    const onSubmit = async (data) => {
-      const formattedData = {
-         ...data,
-         profilePic: profilePic,
-         role: user === 'Teacher' ? 'Teacher' : data.role || 'DefaultRole',
-         documents: {
-            birthCertificate: documents.birthCertificate,
-            citizenship: documents.citizenship,
-            marksheet: documents.marksheet,
+      const formattedData = new FormData();
+
+      // Append the fields to FormData
+      formattedData.append("email", data.email);
+      formattedData.append("password", data.password || 'ijijisj');
+      formattedData.append("role", "STAFF");
+      formattedData.append("staffRole", "ACCOUNTANT");
+      formattedData.append("salary", data.salary);
+      formattedData.append("hireDate", data.hireDate);
+
+      // Address info
+      formattedData.append("address", JSON.stringify([
+         {
+            wardNumber: data.wardNumber || '6',
+            municipality: data.municipality || "KTM",
+            province: data.province || "Province 3",
+            district: data.district || "Kathmandu",
          }
-      };
+      ]));
+
+      // Profile info
+      formattedData.append("profile", JSON.stringify({
+         fname: data.fname,
+         lname: data.lname,
+         gender: data.gender,
+         dob: data.dob,
+      }));
+
+      // Contact info
+      formattedData.append("contact", JSON.stringify({
+         phoneNumber: data.phoneNumber,
+         alternatePhoneNumber: data.alternatePhoneNumber,
+         telephoneNumber: data.telephoneNumber || '2187387821',
+      }));
+
+      // Document info
+      formattedData.append("document", JSON.stringify([
+         { documentName: "Birth Certificate" },
+         { documentName: "Citizenship" }
+      ]));
+
+      // Append the profile picture (if any)
+      if (profilePic) {
+         formattedData.append("profilePicture", profilePic);
+      }
+
+      // Append documents (if any)
+      if (documents.birthCertificate) {
+         formattedData.append("documents", documents.birthCertificate);
+      }
+      if (documents.citizenship) {
+         formattedData.append("documents", documents.citizenship);
+      }
+
       try {
          const res = await addStaff(formattedData);
          if (res) {
@@ -81,37 +134,89 @@ const AddStaffForm = ({ user }) => {
                variant="create"
                className="uppercase"
             >
-               Create {user}
+               Add Staff
             </Button>
          </DialogTrigger>
-         <DialogContent className="bg-white overflow-y-auto">
+         <DialogContent className="bg-white overflow-y-auto sm:max-w-4xl">
             <DialogHeader>
                <DialogTitle className="text-xl font-bold text-center uppercase">
-                  {user} Registration
+                  Staff Registration
                </DialogTitle>
                <DialogDescription>
                   <StepIndicator steps={steps} currentStep={currentStep} />
                </DialogDescription>
             </DialogHeader>
             <hr />
-            <StaffForm
-               handleSubmit={handleSubmit}
-               onSubmit={onSubmit}
-               register={register}
-               errors={errors}
-               loading={loading}
-               user={user}
-               profilePic={profilePic}
-               setProfilePic={setProfilePic}
-               clearErrors={clearErrors}
-               currentStep={currentStep}
-               setCurrentStep={setCurrentStep}
-               handleNext={handleNext}
-               handlePrevious={handlePrevious}
-               documents={documents}
-               setDocuments={setDocuments}
-               steps={steps}
-            />
+            <form
+               encType='multipart/form-data'
+               onSubmit={
+                  currentStep === steps.length - 1
+                     ? handleSubmit(onSubmit)
+                     : (e) => e.preventDefault()
+               }>
+               {currentStep === 0 && (
+                  <div>
+                     <StaffInfo
+                        register={register}
+                        errors={errors}
+                        profilePic={profilePic}
+                        setProfilePic={setProfilePic}
+                        clearErrors={clearErrors}
+                     />
+                     <ProfilePicUpload
+                        profilePic={profilePic}
+                        setProfilePic={setProfilePic}
+                        clearErrors={clearErrors}
+                        errors={errors}
+                     />
+                  </div>
+               )}
+               {currentStep === 1 && (
+                  <AddressInfo
+                     register={register}
+                     errors={errors}
+                     clearErrors={clearErrors}
+                  />
+               )}
+               {currentStep === 2 && (
+                  <StaffDocumentUpload
+                     register={register}
+                     setDocuments={setDocuments}
+                     documents={documents}
+                     errors={errors}
+                     clearErrors={clearErrors}
+                     documentFields={documentFields}
+                  />
+               )}
+               <div className="mt-6 flex justify-between">
+                  {currentStep > 0 && (
+                     <div
+                        onClick={handlePrevious}
+                        className="bg-gray-300 cursor-pointer text-black py-2 px-4 rounded flex gap-1 justify-center items-center"
+                     >
+                        <ChevronLeft /> Back
+                     </div>
+                  )}
+                  {currentStep < steps.length - 1 ? (
+                     <div
+                        onClick={handleNext}
+                        className="bg-blue-600 cursor-pointer text-white py-2 px-4 rounded flex gap-1 justify-center items-center"
+                     >
+                        Next <ChevronRight />
+                     </div>
+                  ) : (
+                     <button
+                        type="submit"
+                        className="bg-blue-600 text-white py-2 px-4 rounded disabled:cursor-not-allowed disabled:bg-blue-300"
+                        disabled={loading}
+                        aria-label="Submit Form"
+                     >
+                        {loading ? "Submitting..." : "Submit"}
+                     </button>
+                  )}
+               </div>
+
+            </form>
          </DialogContent>
       </Dialog>
    );

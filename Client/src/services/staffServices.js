@@ -28,12 +28,9 @@ export const getStaffByIdService = async (id) => {
 export const createStaffService = async (staffData) => {
    const response = await fetch(`${URL}/staff/create`, {
       method: "POST",
-      headers: {
-         "Content-Type": "application/json",
-      },
-      body: JSON.stringify(staffData),
+      credentials: "include",
+      body: staffData,
    });
-   if (!response.ok) throw new Error("Failed to create staff");
    return await response.json();
 }
 

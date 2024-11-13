@@ -20,10 +20,8 @@ import { Response, Request } from 'express';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import {
   FileFieldsInterceptor,
-  FilesInterceptor,
-  AnyFilesInterceptor,
 } from '@nestjs/platform-express';
-import { memoryStorage } from 'multer';
+
 
 @Controller('auth')
 export class AuthenticationController {
@@ -50,7 +48,6 @@ export class AuthenticationController {
         contact: JSON.parse(body.contact),
         address: JSON.parse(body.address),
         document: JSON.parse(body.document),
-        username: body.username || '',
         refreshToken: body.refreshToken || null,
         createdAt: body.createdAt || new Date().toISOString().split('T')[0],
       };

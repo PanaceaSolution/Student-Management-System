@@ -10,6 +10,7 @@ const useStaffStore = create(
             loading: false,
             error: null,
             staff: [],
+            teacher: [],
             staffById: {},
 
             // Get all staff
@@ -17,7 +18,11 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await getAllStaffService();
-                  set({ staff: data, loading: false })
+                  set({
+                     staff: data.users?.filter((staffMember) => staffMember?.staffRole !== "TEACHER"),
+                     teacher: data.users?.filter((staffMember) => staffMember?.staffRole === "TEACHER"),
+                     loading: false
+                  })
                } catch (error) {
                   set({ error: error.message, loading: false })
                }
@@ -39,13 +44,19 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await createStaffService(staffData);
-                  set((state) => ({
-                     staff: [...state.staff, data],
-                     loading: false,
-                  }))
+                  if (data.statusCode === 200) {
+                     set((state) => ({
+                        staff: [...state.staff, data],
+                        loading: false,
+                     }));
+                     toast.success(data.message);
+                  } else {
+                     toast.error(data.message);
+                     set({ loading: false });
+                  }
                } catch (error) {
-                  set({ error: error.message, loading: false });
-                  toast.error(error.message || "Failed to add staff");
+                  set({ error: errorMessage, loading: false });
+                  toast.error("Failed to add staff");
                }
             },
 

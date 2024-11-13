@@ -23,63 +23,11 @@ const AddressInfo = ({ clearErrors, register, errors }) => {
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-gray-800">Address Info</h2>
       <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-        
-        {/* Permanent Address */}
-        <div className="sm:col-span-3">
-          <label htmlFor="permanentAddress" className="block text-sm font-medium text-gray-900">
-            Permanent Address
-          </label>
-          <input
-            id="permanentAddress"
-            type="text"
-            {...register("permanentAddress", {
-              required: "Permanent Address is required",
-              onChange: () => clearErrors("permanentAddress"),
-            })}
-            className={`mt-1 block w-full rounded-md border ${errors.permanentAddress ? 'border-red-500' : 'border-gray-300'} py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-600 sm:text-sm`}
-            placeholder="Enter Permanent Address"
-          />
-          {errors.permanentAddress && <p className="text-red-500 text-sm">{errors.permanentAddress.message}</p>}
-        </div>
 
-        {/* Temporary Address */}
-        <div className="sm:col-span-3">
-          <label htmlFor="temporaryAddress" className="block text-sm font-medium text-gray-900">
-            Temporary Address
-          </label>
-          <input
-            id="temporaryAddress"
-            type="text"
-            {...register("temporaryAddress", {
-              required: "Temporary Address is required",
-              onChange: () => clearErrors("temporaryAddress"),
-            })}
-            className={`mt-1 block w-full rounded-md border ${errors.temporaryAddress ? 'border-red-500' : 'border-gray-300'} py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-600 sm:text-sm`}
-            placeholder="Enter Temporary Address"
-          />
-          {errors.temporaryAddress && <p className="text-red-500 text-sm">{errors.temporaryAddress.message}</p>}
-        </div>
-
-        {/* Village Name */}
+        {/* Ward Number */}
         <div className="sm:col-span-3">
           <label htmlFor="villageName" className="block text-sm font-medium text-gray-900">
-            Village Name
-          </label>
-          <input
-            id="villageName"
-            type="text"
-            {...register("villageName", {
-              required: "Village Name is required",
-              onChange: () => clearErrors("villageName"),
-            })}
-            className={`mt-1 block w-full rounded-md border ${errors.villageName ? 'border-red-500' : 'border-gray-300'} py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-600 sm:text-sm`}
-            placeholder="Enter Village Name"
-          />
-          {errors.villageName && <p className="text-red-500 text-sm">{errors.villageName.message}</p>}
-        </div>
-        <div className="sm:col-span-3">
-          <label htmlFor="villageName" className="block text-sm font-medium text-gray-900">
-          wardNumber
+            wardNumber
           </label>
           <input
             id="wardNumber"
@@ -94,42 +42,6 @@ const AddressInfo = ({ clearErrors, register, errors }) => {
           {errors.wardNumber && <p className="text-red-500 text-sm">{errors.wardNumber.message}</p>}
         </div>
 
-        {/* Religion */}
-        <div className="sm:col-span-3">
-          <label htmlFor="religion" className="block text-sm font-medium text-gray-900">
-            Religion
-          </label>
-          <input
-            id="religion"
-            type="text"
-            {...register("religion", {
-              required: "Religion is required",
-              onChange: () => clearErrors("religion"),
-            })}
-            className={`mt-1 block w-full rounded-md border ${errors.religion ? 'border-red-500' : 'border-gray-300'} py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-600 sm:text-sm`}
-            placeholder="Enter Religion"
-          />
-          {errors.religion && <p className="text-red-500 text-sm">{errors.religion.message}</p>}
-        </div>
-
-        {/* Nationality */}
-        <div className="sm:col-span-3">
-          <label htmlFor="nationality" className="block text-sm font-medium text-gray-900">
-            Nationality
-          </label>
-          <input
-            id="nationality"
-            type="text"
-            {...register("nationality", {
-              required: "Nationality is required",
-              onChange: () => clearErrors("nationality"),
-            })}
-            className={`mt-1 block w-full rounded-md border ${errors.nationality ? 'border-red-500' : 'border-gray-300'} py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-600 sm:text-sm`}
-            placeholder="Enter Nationality"
-          />
-          {errors.nationality && <p className="text-red-500 text-sm">{errors.nationality.message}</p>}
-        </div>
-
         {/* Province Selection */}
         <div className="sm:col-span-3">
           <label htmlFor="province" className="block text-sm font-medium text-gray-900">
@@ -142,7 +54,7 @@ const AddressInfo = ({ clearErrors, register, errors }) => {
               onChange: (e) => {
                 clearErrors("province");
                 setSelectedProvince(e.target.value);
-                setSelectedDistrict(""); 
+                setSelectedDistrict("");
               },
             })}
             className={`mt-1 block w-full rounded-md border ${errors.province ? 'border-red-500' : 'border-gray-300'} py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-600 sm:text-sm`}

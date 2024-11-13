@@ -27,14 +27,13 @@ const Role = [
   { value: "", label: "Role" },
   { value: "Accountant", label: "Accountant" },
   { value: "Librarian", label: "Librarian" },
-  { value: "Janitor", label: "Janitor" },
 ];
 
 const staffTableHead = ["", "First Name", "Last Name", "Phone Number", "Gender", "Role"];
-const staffTableFields = ["fname", "lname", "phoneNumber", "gender", "role"];
+const staffTableFields = ["profile.fname", "profile.lname", "contact.phoneNumber", "profile.gender", "staffRole"];
 
 const staffDetails = [
-  { label: "First Name", key: "fname" },
+  { label: "First Name", key: "profile.fname" },
   { label: "Last Name", key: "lname" },
   { label: "Gender", key: "gender" },
   { label: "Blood Type", key: "bloodType" },
@@ -71,9 +70,7 @@ const Staffs = () => {
     getAllStaff();
   }, [getAllStaff]);
 
-  const filteredStaff = useMemo(() =>
-    staff.filter((staffMember) => staffMember.role !== "Teacher")
-  )
+
 
   // Handle format selection and trigger export
   const { exportToCSV, exportToPDF } = useExport()
@@ -81,7 +78,7 @@ const Staffs = () => {
     const value = event.target.value;
     setSelectedExport(value);
     if (value === "CSV") {
-      exportToCSV(filteredStaff, "staffs.csv");
+      exportToCSV(staff, "staffs.csv");
     } else if (value === "PDF") {
       const headers = [
         { header: "First Name", dataKey: "fname" },
@@ -89,7 +86,7 @@ const Staffs = () => {
         { header: "Gender", dataKey: "gender" },
         { header: "Role", dataKey: "role" },
       ]
-      exportToPDF(filteredStaff, headers, "Staff List", "staffs.pdf");
+      exportToPDF(staff, headers, "Staff List", "staffs.pdf");
     }
   };
 
@@ -130,7 +127,7 @@ const Staffs = () => {
                   onChange={handleExportChange}
                   className="w-32 bg-white"
                 />
-                <AddStaffForm title="Create" user="Staff" />
+                <AddStaffForm />
               </div>
             </div>
             <div className="border-b-2 p-2">
@@ -163,11 +160,11 @@ const Staffs = () => {
             </div>
             <ActiveTab
               activeTab={activeTab}
-              filteredStaff={filteredStaff}
+              staff={staff}
               handleTabClick={handleTabClick}
             />
             <div className="relative w-full overflow-x-auto shadow-md">
-              {filteredStaff?.length === 0 ? (
+              {staff?.length === 0 ? (
                 <p className="text-center text-destructive">
                   No staff found
                 </p>
@@ -176,7 +173,7 @@ const Staffs = () => {
                   title="Staff"
                   tableHead={staffTableHead}
                   tableFields={staffTableFields}
-                  user={filteredStaff}
+                  user={staff}
                   handleUserId={handleUserId}
                 />
               )}

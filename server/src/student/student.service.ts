@@ -12,9 +12,6 @@ import { Repository } from 'typeorm';
 import { User } from '../user/authentication/entities/authentication.entity';
 import { AuthenticationService } from '../user/authentication/authentication.service';
 import { generateRandomPassword, generateUsername } from 'src/utils/utils';
-import * as fs from 'fs';
-import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
@@ -27,8 +24,7 @@ export class StudentService {
     private readonly userService: AuthenticationService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
-
+  ) { }
   async createStudent(
     createStudentDto: StudentDto,
     files: {
@@ -54,82 +50,71 @@ export class StudentService {
       profile,
       address,
       contact,
-      document, 
+      document,
     } = createStudentDto;
-  
+
     if (!profile || !profile.fname || !profile.lname) {
       throw new BadRequestException('Profile information (fname and lname) is required.');
     }
-  
+
     const AD = moment(admissionDate, 'YYYY-MM-DD');
     if (!AD.isValid()) {
       throw new BadRequestException('Invalid date format for Admission Date');
     }
     const AdmissionIsoString = AD.toISOString();
-  
+
     const studentExist = await this.studentRepository.findOne({
       where: [{ registrationNumber }, { rollNumber }],
     });
     if (studentExist) {
       throw new BadRequestException('Student already exists in the database');
     }
-  
 
-    let profilePictureUrl: string | null = null;
-    if (files.profilePicture && files.profilePicture.length > 0) {
-      const profilePictureBuffer = files.profilePicture[0].buffer;
-      const [uploadedProfilePictureUrl] = await uploadFilesToCloudinary(
-        [profilePictureBuffer],
-        'profile_pictures'
-      );
-      profilePictureUrl = uploadedProfilePictureUrl;
-    }
-  
+    const profilePictureUrl: string | null = null;
 
+    const documentMetadata = document || [];
     const documentUrls = [];
+
     if (files.documents && files.documents.length > 0) {
       const documentBuffers = files.documents.map((doc) => doc.buffer);
-      const uploadedDocumentUrls = await uploadFilesToCloudinary(
-        documentBuffers,
-        'documents'
-      );
-  
+      const uploadedDocumentUrls = await uploadFilesToCloudinary(documentBuffers, 'documents');
 
       documentUrls.push(
         ...uploadedDocumentUrls.map((url, index) => ({
-          documentName: document?.[index]?.documentName || `Document ${index + 1}`,
+          documentName: documentMetadata[index]?.documentName || `Document ${index + 1}`,
           documentFile: url,
         }))
       );
     }
-  
+
     const registerDto = {
       email,
       role,
       profile,
       address,
       contact,
-      document: documentUrls, 
+      document: documentUrls,
       username: generateUsername(profile.fname, profile.lname, role),
       password: generateRandomPassword(),
       createdAt: new Date().toISOString(),
       refreshToken: null,
+      profilePicture: profilePictureUrl,
     };
-  
+
     const createUserResponse = await this.userService.register(registerDto, files);
-  
+
     if (!createUserResponse || !createUserResponse.user) {
       throw new InternalServerErrorException('Error occurs while creating user');
     }
-  
+
     const userReference = await this.userRepository.findOne({
       where: { userId: createUserResponse.user.id },
     });
-  
+
     if (!userReference) {
       return { status: 500, message: 'Error finding user after creation' };
     }
-  
+
     const newStudent = this.studentRepository.create({
       fatherName,
       motherName,
@@ -144,9 +129,9 @@ export class StudentService {
       studentClass,
       transportationMode,
     });
-  
+
     await this.studentRepository.save(newStudent);
-  
+
     return {
       status: 201,
       message: 'Student created successfully',
@@ -154,30 +139,6 @@ export class StudentService {
       user: createUserResponse.user,
     };
   }
-
-  async getAllStudents(page: number, limit: number) {
-    const [students, total] = await this.studentRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-    });
-
-    return {
-      data: students,
-      totalItems: total,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
-    };  
-  }
-
-  async findStudentById(id: string) {
-    const student = await this.studentRepository.findOne({ where: { studentId: id as unknown as UUID } });
-    if (!student) {
-      throw new NotFoundException(`Student with ID ${id} not found`);
-    }
-    return student;
-  }
-  
-
   // Adjust the register function in the AuthenticationService
 
   // async GetAllStudents(): Promise<{

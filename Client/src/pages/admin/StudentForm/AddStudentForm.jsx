@@ -7,6 +7,7 @@ import DocumentUpload from "./DocumentUpload";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import useStudentStore from "@/store/studentStore";
 import Loader from "@/components/common/Loader";
+import ProfilePicUpload from "@/components/common/profilePicUpload";
 
 const AddStudentForm = ({ studentId, initialData }) => {
   const steps = ["Personal Info", "Address Info", "Document Upload"];
@@ -57,7 +58,7 @@ const AddStudentForm = ({ studentId, initialData }) => {
         setValue("registrationNumber", initialData.registrationNumber);
       if (initialData.previousSchool)
         setValue("previousSchool", initialData.previousSchool);
-      if(initialData.profilePicture) setValue("profilePicture",initialData.profilePicture);
+      if (initialData.profilePicture) setValue("profilePicture", initialData.profilePicture);
 
       // Handle nested objects (e.g., address, contact, documents)
       if (initialData.address) {
@@ -119,7 +120,7 @@ const AddStudentForm = ({ studentId, initialData }) => {
 
   // Handle Next Step
   const handleNext = async () => {
-    const isValid = await trigger(); 
+    const isValid = await trigger();
     if (isValid) {
       setCurrentStep((prevStep) => Math.min(prevStep + 1, steps.length - 1));
     }
@@ -204,8 +205,8 @@ const AddStudentForm = ({ studentId, initialData }) => {
     for (let key in newData) {
       formData.append(key, newData[key]);
     }
-    formData.append("password","Password@123")
-    formData.append("role","STUDENT")
+    formData.append("password", "Password@123")
+    formData.append("role", "STUDENT")
     try {
       if (studentId) {
         console.log("Edit student logic");
@@ -237,14 +238,22 @@ const AddStudentForm = ({ studentId, initialData }) => {
 
         {/* Step 1 - Personal Info */}
         {currentStep === 0 && (
-          <PersonalInfo
-            register={register}
-            errors={errors}
-            handleFileChange={handleFileChange}
-            profilePicture={profilePic}
-            removeFile={removeFile}
-            clearErrors={clearErrors}
-          />
+          <div>
+            <PersonalInfo
+              register={register}
+              errors={errors}
+              handleFileChange={handleFileChange}
+              profilePicture={profilePic}
+              removeFile={removeFile}
+              clearErrors={clearErrors}
+            />
+            <ProfilePicUpload
+              profilePic={profilePic}
+              setProfilePic={setProfilePic}
+              clearErrors={clearErrors}
+              errors={errors}
+            />
+          </div>
         )}
 
         {/* Step 2 - Address Info */}
