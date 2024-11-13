@@ -1,4 +1,3 @@
-// src/auth/dto/register.dto.ts
 import {
   IsString,
   IsOptional,
@@ -16,9 +15,8 @@ import {
   UserDocumentsDto,
   UserProfileDto,
 } from '../../userEntity/dto/common.dto';
+
 export class RegisterUserDto {
-
-
   @IsString()
   @IsNotEmpty({ message: 'Password is required' })
   password: string;
@@ -32,9 +30,8 @@ export class RegisterUserDto {
   role: ROLE;
 
   @IsString()
-  @IsOptional({ message: 'Refresh token is required' })
+  @IsOptional()
   refreshToken: string;
-
 
   @ValidateNested()
   @Type(() => UserProfileDto)
@@ -50,12 +47,13 @@ export class RegisterUserDto {
   contact: UserContactDto;
 
   @ValidateNested({ each: true })
+  @IsArray()
   @Type(() => UserDocumentsDto)
-  document: UserDocumentsDto[] = [];
+  document: UserDocumentsDto[];
 
   @Transform(({ value }) => {
     const date = value ? new Date(value) : new Date();
-    return date.toISOString().split('T')[0]; // Format as 'yyyy-mm-dd'
+    return date.toISOString().split('T')[0];
   })
   createdAt: string;
 }
