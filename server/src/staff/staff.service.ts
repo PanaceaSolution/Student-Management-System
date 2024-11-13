@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,6 +16,7 @@ import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
 import { STAFFROLE } from 'src/utils/role.helper';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Injectable()
 export class StaffService {
@@ -114,12 +116,26 @@ export class StaffService {
     };
   }
 
-  findAll() {
-    return `This action returns all staff`;
+  async getAllStaff(page : number , limit : number){
+    const [staffs, total] = await this.staffRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      data: staffs,
+      totalItems: total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} staff`;
+  async findStaffById(id: string) {
+    const student = await this.staffRepository.findOne({ where: { staffId: id } });
+    if (!student) {
+      throw new NotFoundException(`Student with ID ${id} not found`);
+    }
+    return student;
   }
 
   update(id: number, updateStaffDto: StaffDto) {
