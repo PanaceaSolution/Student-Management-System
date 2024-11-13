@@ -60,8 +60,6 @@ export class Student {
   @Column({ type: 'text', nullable: true })
   transportationMode: TRANSPORTATION_MODE;
   
-  @Column({ type: 'text', nullable: true })
-  profilePicture: string; 
   
   @OneToOne(() => User, (user) => user.student)
   @JoinColumn({ name: 'userId' })
