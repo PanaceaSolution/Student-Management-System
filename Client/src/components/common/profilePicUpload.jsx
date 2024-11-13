@@ -32,7 +32,6 @@ const ProfilePicUpload = ({
                         alt="Profile Preview"
                         className="mt-2 w-24 h-24 rounded-full object-cover"
                      />
-                     <span className="block mt-2">{profilePic.name}</span>
                      <button
                         type="button"
                         onClick={removeFile}
@@ -40,6 +39,7 @@ const ProfilePicUpload = ({
                      >
                         <X className="h-4 w-4" />
                      </button>
+                     <span className="block mt-2">{profilePic.name}</span>
                   </div>
                ) : (
                   <>

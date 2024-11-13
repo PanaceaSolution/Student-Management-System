@@ -5,9 +5,6 @@ import ProfilePicUpload from '@/components/common/profilePicUpload';
 const StaffInfo = ({
    register,
    errors,
-   user,
-   profilePic,
-   setProfilePic,
    clearErrors
 }) => {
    const formFields = [
@@ -41,7 +38,7 @@ const StaffInfo = ({
          required: "Gender is required",
          placeholder: "Select Gender",
          type: "select",
-         options: ["Male", "Female", "Other"],
+         options: ["MALE", "FEMALE", "OTHER"],
          condition: true,
       },
       {
@@ -60,15 +57,6 @@ const StaffInfo = ({
          condition: true,
       },
       {
-         name: "bloodType",
-         label: "Blood Type*",
-         required: "Blood Type is required",
-         placeholder: "Select Blood Type",
-         type: "select",
-         options: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
-         condition: true,
-      },
-      {
          name: "salary",
          label: "Salary*",
          required: "Salary is required",
@@ -82,8 +70,7 @@ const StaffInfo = ({
          required: "Staff Role is required",
          placeholder: "Select a Role",
          type: "select",
-         options: ["ACCOUNTANT", "LIBRARIAN"],
-         condition: user !== "Teacher",
+         options: ["ACCOUNTANT", "LIBRARIAN", "TEACHER"],
       },
       {
          name: "dob",

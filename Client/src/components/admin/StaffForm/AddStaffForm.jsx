@@ -22,7 +22,7 @@ const documentFields = [
    { name: "citizenship", label: "Citizenship Document (optional)" },
 ]
 
-const AddStaffForm = ({ user }) => {
+const AddStaffForm = () => {
    const { addStaff, loading, error } = useStaffStore();
    const steps = ["Personal Info", "Address Info", "Document Upload"];
    const [isOpen, setIsOpen] = useState(false);
@@ -133,13 +133,13 @@ const AddStaffForm = ({ user }) => {
                variant="create"
                className="uppercase"
             >
-               Add {user}
+               Add Staff
             </Button>
          </DialogTrigger>
          <DialogContent className="bg-white overflow-y-auto">
             <DialogHeader>
                <DialogTitle className="text-xl font-bold text-center uppercase">
-                  {user} Registration
+                  Staff Registration
                </DialogTitle>
                <DialogDescription>
                   <StepIndicator steps={steps} currentStep={currentStep} />
@@ -158,7 +158,6 @@ const AddStaffForm = ({ user }) => {
                      <StaffInfo
                         register={register}
                         errors={errors}
-                        user={user}
                         profilePic={profilePic}
                         setProfilePic={setProfilePic}
                         clearErrors={clearErrors}

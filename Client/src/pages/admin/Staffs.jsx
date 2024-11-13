@@ -27,7 +27,6 @@ const Role = [
   { value: "", label: "Role" },
   { value: "Accountant", label: "Accountant" },
   { value: "Librarian", label: "Librarian" },
-  { value: "Janitor", label: "Janitor" },
 ];
 
 const staffTableHead = ["", "First Name", "Last Name", "Phone Number", "Gender", "Role"];
@@ -128,7 +127,7 @@ const Staffs = () => {
                   onChange={handleExportChange}
                   className="w-32 bg-white"
                 />
-                <AddStaffForm title="Create" user="Staff" />
+                <AddStaffForm />
               </div>
             </div>
             <div className="border-b-2 p-2">

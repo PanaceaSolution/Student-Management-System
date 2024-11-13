@@ -125,7 +125,7 @@ const Teachers = () => {
                   className="w-32 bg-white"
                 />
 
-                <AddStaffForm title="Create" user="Teacher" />
+                <AddStaffForm />
               </div>
             </div>
             <div className="border-b-2 p-2">
