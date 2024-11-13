@@ -32,6 +32,7 @@ import {
 import { uploadSingleFileToCloudinary, uploadFilesToCloudinary, deleteFileFromCloudinary, extractPublicIdFromUrl} from '../../utils/file-upload.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import * as moment from 'moment';
+import { STAFFROLE } from '../../utils/role.helper';
 
 @Injectable()
 export class AuthenticationService {
@@ -55,77 +56,66 @@ export class AuthenticationService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     } = {},
+    staffRole?: STAFFROLE
   ) {
     try {
       const { email, role, profile, contact, document, address } = RegisterDto;
-
+  
+      if (!email || !role || !profile || !contact || !document || !address) {
+        throw new BadRequestException('All fields are required');
+      }
+  
+      if (![ROLE.ADMIN, ROLE.STUDENT, ROLE.STAFF, ROLE.PARENT].includes(role)) {
+        throw new ForbiddenException('Role not allowed');
+      }
+  
       const existingUser = await this.userRepository.findOne({
         where: { email },
       });
       if (existingUser) {
         throw new BadRequestException('User with this email already exists');
       }
-
-    const DOBIO = moment(profile.dob,'YY-MM-DD')
-    const dobIsoString = DOBIO.toISOString();
-
+  
       const password = generateRandomPassword();
       const encryptedPassword = encryptdPassword(password);
-      const username = generateUsername(profile.fname, profile.lname, role);
-
+      const username = generateUsername(profile.fname, profile.lname, role, staffRole);
+      console.log('Generating username:', username);
+  
       const newUser = this.userRepository.create({
         email,
         isActivated: true,
         username,
         password: encryptedPassword,
         role,
-        createdAt:new Date(),
+        createdAt: new Date(),
       });
-
-      try {
-        await this.userRepository.save(newUser);
-      } catch (error) {
-        throw new DatabaseError(
-          'Failed to save new user to the database',
-          error.message,
-        );
-      }
-
+  
+      await this.userRepository.save(newUser);
+  
       let profilePictureUrl: string | null = null;
       if (files.profilePicture && files.profilePicture.length > 0) {
         try {
           const profilePictureUrls = await uploadFilesToCloudinary(
-            [files.profilePicture[0].path],
-            'profile_pictures',
+            [files.profilePicture[0].buffer],
+            'profile_pictures'
           );
           profilePictureUrl = profilePictureUrls[0];
         } catch (error) {
-          throw new CloudinaryError(
-            'Failed to upload profile picture',
-            error.message,
-          );
+          throw new CloudinaryError('Failed to upload profile picture', error.message);
         }
       }
-
-       // Provide an initializer for the 'dob' variable
+  
       const userProfile = this.profileRepository.create({
         profilePicture: profilePictureUrl,
         fname: profile.fname,
         lname: profile.lname,
         gender: profile.gender,
-        dob: dobIsoString,
+        dob: new Date(profile.dob),
         user: newUser,
       });
-
-      try {
-        await this.profileRepository.save(userProfile);
-      } catch (error) {
-        throw new DatabaseError(
-          'Failed to save user profile to the database',
-          error.message,
-        );
-      }
-
+  
+      await this.profileRepository.save(userProfile);
+  
       let savedAddresses = [];
       if (Array.isArray(address)) {
         const userAddresses = address.map((addr) =>
@@ -136,63 +126,45 @@ export class AuthenticationService {
             province: addr.province,
             district: addr.district,
             user: newUser,
-          }),
+          })
         );
-
-        try {
-          savedAddresses = await this.addressRepository.save(userAddresses);
-        } catch (error) {
-          throw new DatabaseError(
-            'Failed to save user addresses to the database',
-            error.message,
-          );
-        }
+  
+        savedAddresses = await this.addressRepository.save(userAddresses);
       }
-
+  
       const userContact = this.contactRepository.create({
         ...contact,
         user: newUser,
       });
-
-      try {
-        await this.contactRepository.save(userContact);
-      } catch (error) {
-        throw new DatabaseError(
-          'Failed to save user contact to the database',
-          error.message,
-        );
-      }
-
+  
+      await this.contactRepository.save(userContact);
+  
       let savedDocuments = [];
       if (files.documents && files.documents.length > 0) {
-        try {
-          const uploadedDocuments = await Promise.all(
-            files.documents.map(async (documentFile, index) => {
-              const documentUrls = await uploadFilesToCloudinary(
-                [documentFile.path],
-                'documents',
-              );
-              const documentUrl = documentUrls[0];
+        const documentMetadata = document; 
+  
+        const uploadedDocuments = await Promise.all(
+          files.documents.map(async (documentFile, index) => {
+            const documentUrls = await uploadFilesToCloudinary(
+              [documentFile.buffer],
+              'documents'
+            );
+            const documentUrl = documentUrls[0];
 
-              return this.documentRepository.create({
-                documentName:
-                  document[index]?.documentName || `Document ${index + 1}`,
-                documentFile: documentUrl,
-                user: newUser,
-              });
-            }),
-          );
-          savedDocuments = await this.documentRepository.save(
-            uploadedDocuments,
-          );
-        } catch (error) {
-          throw new CloudinaryError(
-            'Failed to upload and save documents',
-            error.message,
-          );
-        }
+            const documentName =
+              documentMetadata[index]?.documentName || `Document ${index + 1}`;
+  
+            return this.documentRepository.create({
+              documentName,
+              documentFile: documentUrl,
+              user: newUser,
+            });
+          })
+        );
+  
+        savedDocuments = await this.documentRepository.save(uploadedDocuments);
       }
-
+  
       return {
         message: 'User created successfully',
         status: 200,
@@ -231,9 +203,7 @@ export class AuthenticationService {
       };
     } catch (error) {
       if (!(error instanceof HttpException)) {
-        throw new InternalServerErrorException(
-          'An unexpected error occurred during registration',
-        );
+        throw new InternalServerErrorException('An unexpected error occurred during registration');
       }
       throw error;
     }
