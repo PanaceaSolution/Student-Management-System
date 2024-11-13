@@ -1,4 +1,3 @@
-// src/middlewares/json-parser.middleware.ts
 import {
   Injectable,
   NestMiddleware,
@@ -9,7 +8,7 @@ import { Request, Response, NextFunction } from 'express';
 @Injectable()
 export class JsonParserMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    const jsonFields = ['profile', 'contact', 'address', 'document'];
+    const jsonFields = ['profile', 'contact', 'address', 'document','childNames'];
 
     try {
       jsonFields.forEach((field) => {
@@ -22,7 +21,15 @@ export class JsonParserMiddleware implements NestMiddleware {
         `Invalid JSON format in one of the fields: ${error.message}`,
       );
     }
-   console.log('After parsing:', req.body);
+
+    // Additional logging to verify the types of the parsed fields
+    jsonFields.forEach((field) => {
+      if (req.body[field]) {
+        console.log(`Field: ${field}, Type: ${typeof req.body[field]}`);
+      }
+    });
+
+    console.log('After parsing:', req.body);
     next();
   }
 }

@@ -68,7 +68,7 @@ export class User {
   @OneToMany(() => UserDocuments, (document) => document.user, {
     cascade: true,
     onDelete: 'CASCADE',
-    nullable: false,
+    nullable: true,
   })
   document: UserDocuments;
 

@@ -9,9 +9,12 @@ import { Staff } from './entities/staff.entity';
 import { StaffDto } from './dto/staff.dto';
 import { AuthenticationService } from '../user/authentication/authentication.service';
 import { User } from '../user/authentication/entities/authentication.entity';
-import { generateRandomPassword, generateUsername } from 'src/utils/utils';
-import { ROLE } from 'src/utils/role.helper'; 
-import { STAFFROLE } from 'src/utils/role.helper';
+import { decryptdPassword, generateRandomPassword, generateUsername } from 'src/utils/utils';
+import * as fs from 'fs';
+import * as path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+
+import { STAFFROLE, ROLE } from 'src/utils/role.helper';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
 import * as moment from 'moment';
 
@@ -31,12 +34,15 @@ export class StaffService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ): Promise<{ status: number; message: string; staff?: any; user?: any }> {
+  ): Promise<{ status: number; message: string; staff?: any; user?: any ;plainPassword?: any}> {
     const { hireDate, salary, staffRole, email, profile, address, contact, document } = createStaffDto;
 
     if (!profile || !profile.fname || !profile.lname) {
-      throw new BadRequestException('Profile information (fname and lname) is required.');
+      throw new BadRequestException(
+        'Profile information (fname and lname) is required.',
+      );
     }
+
 
     if (!Object.values(STAFFROLE).includes(staffRole as STAFFROLE)) {
       throw new BadRequestException('Invalid staff role');
@@ -45,8 +51,10 @@ export class StaffService {
 
     const profilePictureUrl: string | null = null;
 
+
     const documentMetadata = document || [];
     const documentUrls = [];
+
 
     if (files.documents && files.documents.length > 0) {
       const documentBuffers = files.documents.map((doc) => doc.buffer);
@@ -54,9 +62,10 @@ export class StaffService {
 
       documentUrls.push(
         ...uploadedDocumentUrls.map((url, index) => ({
-          documentName: documentMetadata[index]?.documentName || `Document ${index + 1}`,
+          documentName:
+            documentMetadata[index]?.documentName || `Document ${index + 1}`,
           documentFile: url,
-        }))
+        })),
       );
     }
 
@@ -76,7 +85,9 @@ export class StaffService {
     const createUserResponse = await this.userService.register(registerDto, files, staffRole);
 
     if (!createUserResponse || !createUserResponse.user) {
-      throw new InternalServerErrorException('Error occurs while creating user');
+      throw new InternalServerErrorException(
+        'Error occurs while creating user',
+      );
     }
 
     const newStaff = this.staffRepository.create({
@@ -85,7 +96,8 @@ export class StaffService {
       staffRole: staffRole.trim() as STAFFROLE,
     });
 
-    await this.staffRepository.save(newStaff);
+    // await this.staffRepository.save(newStaff);
+    // const plainPassword = decryptdPassword(registerDto.password);
 
     return {
       status: 201,

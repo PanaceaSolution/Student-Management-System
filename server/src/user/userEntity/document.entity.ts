@@ -16,10 +16,10 @@ export class UserDocuments {
   @PrimaryGeneratedColumn('uuid')
   documentId: UUID;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: false })
   documentName: string;
 
-  @Column({type: 'text', nullable: true })
+  @Column({type: 'text', nullable: false })
   documentFile: string;
 
   @ManyToOne(() => User, (user) => user.document, { nullable: true })

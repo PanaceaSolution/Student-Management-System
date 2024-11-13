@@ -35,7 +35,7 @@ export class AuthenticationController {
     ]),
   )
   async register(
-    @Body() body: RegisterUserDto,  // Using RegisterUserDto here
+    @Body() body: RegisterUserDto,  
     @UploadedFiles()
     files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
   ) {

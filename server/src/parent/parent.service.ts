@@ -6,11 +6,15 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { Parent } from './entities/parent.entity';
 import { ParentDto } from './dto/parent.dto';
+import { ROLE } from '../utils/role.helper';
 import { AuthenticationService } from 'src/user/authentication/authentication.service';
 import { generateRandomPassword, generateUsername } from 'src/utils/utils';
+import * as fs from 'fs';
+import * as path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
 
 @Injectable()
@@ -41,7 +45,9 @@ export class ParentService {
     } = createdParentDto;
   
     if (!profile || !profile.fname || !profile.lname) {
-      throw new BadRequestException('Profile information (fname and lname) is required.');
+      throw new BadRequestException(
+        'Profile information (fname and lname) is required.',
+      );
     }
   
     const existingUser = await this.userRepository.findOne({ where: { email } });
@@ -88,7 +94,6 @@ export class ParentService {
       password: generateRandomPassword(),
       createdAt: new Date().toISOString(),
       refreshToken: null,
-      profilePicture: profilePictureUrl,
     };
   
     const createUserResponse = await this.userService.register(registerDto, files);

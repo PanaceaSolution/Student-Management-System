@@ -1,6 +1,7 @@
-import { Controller, Post, Body, UseInterceptors, BadRequestException, UploadedFiles } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, UseInterceptors, BadRequestException } from '@nestjs/common';
 import { ParentService } from './parent.service';
 import { ParentDto } from './dto/parent.dto';
+import { Parent } from './entities/parent.entity';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @Controller('parent')
@@ -16,7 +17,6 @@ export class ParentController {
   )
   async createParent(
     @Body() createParentDto: ParentDto,
-    @UploadedFiles()
     files: {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
@@ -29,9 +29,9 @@ export class ParentController {
 
     return this.parentService.createParent(createParentDto, files);
   }
-}
 
-// @Get(':id')
-// async getParentDetails(@Param('id') id: string): Promise<Parent> {
-//   return this.parentService.findOne(id);
-// }
+  // @Get(':id')
+  // async getParentDetails(@Param('id') id: string): Promise<Parent> {
+  //   return this.parentService.findOne(id);
+  // }
+}
