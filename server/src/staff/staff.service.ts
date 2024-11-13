@@ -14,6 +14,7 @@ import { generateRandomPassword, generateUsername } from 'src/utils/utils';
 import { ROLE } from 'src/utils/role.helper';
 import { STAFFROLE } from 'src/utils/role.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
+import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
 
 @Injectable()
 export class StaffService {
@@ -42,8 +43,6 @@ export class StaffService {
       throw new BadRequestException('Invalid staff role');
     }
 
-    const username = generateUsername(profile.fname, profile.lname, ROLE.STAFF, staffRole as STAFFROLE);
-    console.log('Generated Username:', username);
 
     const profilePictureUrl: string | null = null;
 
@@ -69,7 +68,6 @@ export class StaffService {
       address,
       contact,
       document: documentUrls,
-      username,
       password: generateRandomPassword(),
       createdAt: new Date().toISOString(),
       refreshToken: null,
