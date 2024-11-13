@@ -13,6 +13,7 @@ import {
 import { StaffService } from './staff.service';
 import { StaffDto } from './dto/staff.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Controller('staff')
 export class StaffController {
@@ -65,9 +66,25 @@ export class StaffController {
     return this.staffService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStaffDto: StaffDto) {
-    return this.staffService.update(+id, updateStaffDto);
+  @Patch('update/:id')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'profilePicture', maxCount: 1 },
+      { name: 'documents', maxCount: 10 },
+    ]),
+  )
+
+  
+  update(
+    @Param('id') id: UUID,
+    @Body() updateStaffDto: Partial<StaffDto>,
+    @UploadedFiles()
+    files: {
+      profilePicture?: Express.Multer.File[];
+      documents?: Express.Multer.File[];
+    },
+  ) {
+    return this.staffService.updateStaff(id, updateStaffDto, files);
   }
 
   @Delete(':id')

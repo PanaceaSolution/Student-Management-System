@@ -7,7 +7,7 @@ import { STAFFROLE } from '../../utils/role.helper';
 export class StaffDto extends RegisterUserDto {
   @IsString()
   @IsNotEmpty({ message: 'Hire date is required' })
-  hireDate: string;
+  hireDate: Date;
 
   @IsString()
   @IsNotEmpty({ message: 'Salary is required' })

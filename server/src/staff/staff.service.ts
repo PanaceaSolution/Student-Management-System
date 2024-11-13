@@ -2,8 +2,9 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Equal, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Staff } from './entities/staff.entity';
 import { StaffDto } from './dto/staff.dto';
@@ -13,6 +14,7 @@ import { generateRandomPassword, generateUsername } from 'src/utils/utils';
 import { ROLE } from 'src/utils/role.helper'; 
 import { STAFFROLE } from 'src/utils/role.helper';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Injectable()
 export class StaffService {
@@ -82,6 +84,7 @@ export class StaffService {
       hireDate,
       salary,
       staffRole: staffRole.trim() as STAFFROLE,
+      user: createUserResponse.user // this isnt working
     });
   
     await this.staffRepository.save(newStaff);
@@ -103,8 +106,50 @@ export class StaffService {
     return `This action returns a #${id} staff`;
   }
 
-  update(id: number, updateStaffDto: StaffDto) {
-    return `This action updates a #${id} staff`;
+  async updateStaff(id: UUID, updateStaffDto: Partial<StaffDto>, files) {
+    try {
+      const {
+        hireDate,
+        salary,
+        staffRole
+      } = updateStaffDto;
+
+      const staff = await this.staffRepository.findOne({
+        where: { staffId: Equal(id.toString()) },
+        relations:[
+          'user'
+        ]
+      });
+      if (!staff) {
+        throw new NotFoundException('Staff not found');
+      }
+      console.log(staff)
+      
+      const updateUser = await this.userService.updateUser(
+        staff.user.userId, // userid unable to send
+        updateStaffDto,
+        files,
+      );
+      if (updateUser.status !== 200) {
+        throw new Error('error while updating user details');
+      }
+      if(hireDate) staff.hireDate = hireDate;
+      if(salary) staff.salary = salary;
+      if(staffRole) staff.staffRole = staffRole.trim() as STAFFROLE;
+
+      const updatedStaff = this.staffRepository.save(staff);
+      return {
+        msg: 'staff updated successfully',
+        updateUser,
+        updatedStaff,
+      };
+    } catch (err) {
+      console.log(err);
+      return {
+        msg: "error occured",
+        err
+      };
+    }
   }
 
   remove(id: number) {

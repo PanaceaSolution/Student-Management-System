@@ -30,7 +30,7 @@ export class Staff {
   })
   staffRole: STAFFROLE;
   
-  @OneToOne(() => User, (user) => user.staff, { cascade: true })
+  @OneToOne(() => User, (user) => user.staff)
   @JoinColumn({ name: 'userId' })
   user: User;
 
