@@ -11,7 +11,7 @@ import { Parent } from './entities/parent.entity';
 import { ParentDto } from './dto/parent.dto';
 import { ROLE } from '../utils/role.helper';
 import { AuthenticationService } from 'src/user/authentication/authentication.service';
-import { generateRandomPassword, generateUsername } from 'src/utils/utils';
+import { decryptdPassword, generateRandomPassword, generateUsername } from 'src/utils/utils';
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
@@ -33,7 +33,7 @@ export class ParentService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ): Promise<{ status: number; message: string; parent?: any; user?: any }> {
+  ): Promise<{ status: number; message: string; parent?: any; user?: any ; plainPassword?:any }> {
     const {
       childNames,
       email,
@@ -115,7 +115,7 @@ export class ParentService {
     });
   
     await this.parentRepository.save(newParent);
-  
+   let plainPassword = decryptdPassword(userReference.password)
     return {
       status: 201,
       message: 'Parent created successfully',
@@ -124,6 +124,7 @@ export class ParentService {
         documents: documentUrls,
       },
       user: createUserResponse.user,
+      plainPassword:plainPassword,
     };
   }
   
