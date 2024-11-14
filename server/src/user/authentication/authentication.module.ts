@@ -11,6 +11,8 @@ import { UserProfile } from '../userEntity/profile.entity';
 import { UserDocuments } from '../userEntity/document.entity';
 import * as multer from 'multer';
 import { Student } from 'src/student/entities/student.entity';
+import { Staff } from 'src/staff/entities/staff.entity';
+import { Parent } from 'src/parent/entities/parent.entity';
 
 @Module({
   imports: [
@@ -20,7 +22,9 @@ import { Student } from 'src/student/entities/student.entity';
       UserContact,
       UserProfile, 
       UserDocuments,
-      Student
+      Student,
+      Staff,
+      Parent
     ]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
