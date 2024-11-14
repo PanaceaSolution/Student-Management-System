@@ -5,7 +5,6 @@ import { RegisterUserDto } from '../../user/authentication/dto/register.dto'; //
 import { STAFFROLE } from '../../utils/role.helper';
 
 export class StaffDto extends RegisterUserDto {
-  @IsDate()
   @IsNotEmpty({ message: 'Hire date is required' })
   hireDate: Date;
 
