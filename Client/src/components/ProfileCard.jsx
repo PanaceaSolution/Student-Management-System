@@ -50,7 +50,7 @@ const ProfileCard = ({ onDelete, studentInfo, loading }) => {
           <div className="bg-red-300 mx-auto h-24 w-24 rounded-full flex items-center justify-center mt-1">
             <img
               src={suk}
-              alt={`${studentInfo?.firstName}'s profile`}
+              alt={`${studentInfo?.fname}'s profile`}
               className="w-full h-full rounded-full border-2 object-cover"
             />
           </div>
@@ -59,31 +59,41 @@ const ProfileCard = ({ onDelete, studentInfo, loading }) => {
             {limitedKeys.length === 0 ? (
               <p className="text-center">Please Select ID To view Details</p>
             ) : (
-              limitedKeys.map((key) => (
-                <div key={key} className="mb-2 pt-1">
-                  <p className="font-thin capitalize">{key}</p>
-                  <p className="font-semibold text-[#233255CC]">
-                    {studentInfo[key] !== undefined
-                      ? studentInfo[key].toString()
-                      : "N/A"}
-                  </p>
-                </div>
-              ))
+              limitedKeys.map((key) => {
+                const value = studentInfo[key];
+                if (value || value === 0 || value === false) {
+                  return (
+                    <div key={key} className="mb-2 pt-1">
+                      <p className="font-thin capitalize">{key}</p>
+                      <p className="font-semibold text-[#233255CC]">
+                        {value !== undefined ? value.toString() : "N/A"}
+                      </p>
+                    </div>
+                  );
+                } else {
+                  return null; // Skip rendering for undefined or empty fields
+                }
+              })
             )}
 
             {/* Additional content area for "View All" */}
             {showAllDetails && (
               <div ref={additionalContentRef}>
-                {keys.slice(6).map((key) => (
-                  <div key={key} className="mb-2 pt-1">
-                    <p className="font-thin capitalize">{key}</p>
-                    <p className="font-semibold text-[#233255CC]">
-                      {studentInfo[key] !== undefined
-                        ? studentInfo[key].toString()
-                        : "N/A"}
-                    </p>
-                  </div>
-                ))}
+                {keys.slice(6).map((key) => {
+                  const value = studentInfo[key];
+                  if (value || value === 0 || value === false) {
+                    return (
+                      <div key={key} className="mb-2 pt-1">
+                        <p className="font-thin capitalize">{key}</p>
+                        <p className="font-semibold text-[#233255CC]">
+                          {value !== undefined ? value.toString() : "N/A"}
+                        </p>
+                      </div>
+                    );
+                  } else {
+                    return null;
+                  }
+                })}
               </div>
             )}
           </div>
@@ -96,18 +106,18 @@ const ProfileCard = ({ onDelete, studentInfo, loading }) => {
           </button>
 
           <Modal
-            title={`Delete ${studentInfo?.firstName}`}
+            title={`Delete ${studentInfo?.fatherName}`}
             desc="Are You Sure?"
             actionName="Delete"
-            dangerAction={() => handleDelete(studentInfo?.id)}
-            showModal={openModal === studentInfo?.id}
+            dangerAction={() => handleDelete(studentInfo?.studentId)}
+            showModal={openModal === studentInfo?.studentId}
             cancelOption={() => setOpenModal(-1)}
           />
 
           <AddStudentFormModal
             cancelOption={() => setShowAddStudentModal(false)}
-            showModal={showAddStudentModal === studentInfo?.id}
-            studentId={studentInfo?.id}
+            showModal={showAddStudentModal === studentInfo?.studentId}
+            studentId={studentInfo?.studentId}
             initialData={studentInfo}
           />
         </div>
@@ -116,7 +126,7 @@ const ProfileCard = ({ onDelete, studentInfo, loading }) => {
           <Button
             type="edit"
             className="flex-shrink-0"
-            onClick={() => setShowAddStudentModal(studentInfo.id)}
+            onClick={() => setShowAddStudentModal(studentInfo.studentId)}
           >
             Edit
           </Button>
@@ -124,7 +134,7 @@ const ProfileCard = ({ onDelete, studentInfo, loading }) => {
             isDisable={loading}
             type="delete"
             className="flex-shrink-0"
-            onClick={() => setOpenModal(studentInfo.id)}
+            onClick={() => setOpenModal(studentInfo.studentId)}
           >
             Delete
             {loading && <Loadding />}

@@ -6,8 +6,8 @@ import RecentActivity from "./RecentActivity";
 import EventCalender from "./EventCalender";
 import ExpenseChart from "./ExpenseChart";
 import InfoChart from "./InfoChart";
-
 const Dashboard = () => {
+  
   return (
     <section className="max-w-full flex flex-col p-2 md:p-2 h-screen overflow-y-auto scrollbar-none space-y-4">
       <div>

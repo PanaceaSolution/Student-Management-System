@@ -1,19 +1,9 @@
-// components/PersonalInfo.js
 import React from "react";
-import { Upload, X } from "lucide-react";
-
-const PersonalInfo = ({
-  register,
-  errors,
-  handleFileChange,
-  profilePicture,
-  removeFile,
-  clearErrors,
-}) => {
+import ImageUploader from "@/components/common/ImageUploader";
+const PersonalInfo = ({ register, errors, clearErrors }) => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-gray-800">Personal Info</h2>
-
       <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6">
         {[
           { name: "fname", label: "First Name*" },
@@ -84,8 +74,9 @@ const PersonalInfo = ({
                   required: `${field.label} is required`,
                   onChange: () => clearErrors(field.name),
                 })}
-                className={`mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-600 ${errors[field.name] ? "border-red-500" : ""
-                  }`}
+                className={`mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-600 ${
+                  errors[field.name] ? "border-red-500" : ""
+                }`}
               >
                 <option value="">Select {field.label}</option>
                 {field.options.map((option) => (
@@ -102,8 +93,9 @@ const PersonalInfo = ({
                   required: `${field.label} is required`,
                   onChange: () => clearErrors(field.name),
                 })}
-                className={`mt-1 block w-full rounded-sm border border-gray-300 py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-600 ${errors[field.name] ? "border-red-500" : ""
-                  }`}
+                className={`mt-1 block w-full rounded-sm border border-gray-300 py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-600 ${
+                  errors[field.name] ? "border-red-500" : ""
+                }`}
                 placeholder={
                   field.type !== "date" ? `Enter ${field.label}` : ""
                 }
@@ -117,6 +109,12 @@ const PersonalInfo = ({
           </div>
         ))}
       </div>
+      <ImageUploader
+        name="profilePicture"
+        register={register}
+        errors={errors}
+        clearErrors={clearErrors}
+      />
     </div>
   );
 };
