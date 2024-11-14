@@ -14,7 +14,6 @@ import StepIndicator from '@/pages/admin/StudentForm/StepIndicator';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import StaffInfo from './StaffInfo';
 import AddressInfo from '@/pages/admin/StudentForm/AddressInfo';
-import DocumentUpload from '@/pages/admin/StudentForm/DocumentUpload';
 import ProfilePicUpload from '@/components/common/profilePicUpload';
 import StaffDocumentUpload from './StaffDocumentUpload';
 
@@ -24,7 +23,7 @@ const documentFields = [
 ]
 
 const AddStaffForm = () => {
-   const { addStaff, loading, error } = useStaffStore();
+   const { addStaff, loading } = useStaffStore();
    const steps = ["Personal Info", "Address Info", "Document Upload"];
    const [isOpen, setIsOpen] = useState(false);
    const [currentStep, setCurrentStep] = useState(0);

@@ -24,6 +24,7 @@ const Portfolio = lazy(() => import("./pages/users/Portfolio"));
 const Routine = lazy(() => import("./pages/users/Routine"));
 const Resources = lazy(() => import("./pages/users/Resources"));
 const Tasks = lazy(() => import("./pages/users/Tasks"));
+const TaskDetails = lazy(() => import("./pages/users/TaskDetails"));
 const Message = lazy(() => import("./pages/users/Message"));
 const Report = lazy(() => import("./pages/users/Report"));
 const Fees = lazy(() => import("./pages/users/Fees"));
@@ -103,6 +104,11 @@ const routeConfig = [
   {
     path: "/tasks",
     element: <Tasks />,
+    allowedRoles: ['STUDENT', 'TEACHER']
+  },
+  {
+    path: "/task/:taskId",
+    element: <TaskDetails />,
     allowedRoles: ['STUDENT', 'TEACHER']
   },
   {

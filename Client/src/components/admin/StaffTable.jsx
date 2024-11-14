@@ -10,12 +10,15 @@ import { useState } from "react";
 import { Pagination } from "./Pagination";
 import ResultShowing from "../common/ResultShowing";
 
-
 const ITEMS_PER_PAGE = 10;
 
-const StaffTable = ({ user, handleUserId, tableHead, tableFields }) => {
+const StaffTable = ({ user, handleUserId, tableHead, tableFields, loading }) => {
    const [selectedUserId, setSelectedUserId] = useState(null);
    const [currentPage, setCurrentPage] = useState(1);
+
+   const getNestedValue = (obj, path) => {
+      return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+   };
 
    const handleCheckboxChange = (id) => {
       const newSelectedId = selectedUserId === id ? null : id;
@@ -52,22 +55,30 @@ const StaffTable = ({ user, handleUserId, tableHead, tableFields }) => {
                </TableRow>
             </TableHeader>
             <TableBody>
-               {currentPageData.map((user) => (
-                  <TableRow key={user.id} className="cursor-pointer">
-                     <TableCell>
-                        <input
-                           type="checkbox"
-                           onChange={() => handleCheckboxChange(user.id)}
-                           checked={selectedUserId === user.id}
-                        />
+               {user.length === 0 ? (
+                  <TableRow>
+                     <TableCell colSpan={tableHead.length}>
+                        <div className="text-center py-4">No Staff Found</div>
                      </TableCell>
-                     {tableFields.map((field, index) => (
-                        <TableCell key={index}>
-                           {user[field]}
-                        </TableCell>
-                     ))}
                   </TableRow>
-               ))}
+               ) : (
+                  currentPageData.map((user) => (
+                     <TableRow key={user.id} className="cursor-pointer" onClick={() => handleCheckboxChange(user)}>
+                        <TableCell>
+                           <input
+                              type="checkbox"
+                              onChange={() => handleCheckboxChange(user)}
+                              checked={selectedUserId === user}
+                           />
+                        </TableCell>
+                        {tableFields.map((field, index) => (
+                           <TableCell key={index}>
+                              {getNestedValue(user, field)}
+                           </TableCell>
+                        ))}
+                     </TableRow>
+                  ))
+               )}
             </TableBody>
          </Table>
 

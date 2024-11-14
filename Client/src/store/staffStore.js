@@ -1,41 +1,38 @@
-import { createStaffService, deleteStaffService, getAllStaffService, getStaffByIdService, updateStaffService } from "@/services/staffServices";
+import { createStaffService, updateStaffService } from "@/services/staffServices";
 import toast from "react-hot-toast";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
+import useUserStore from "./userStore";
+import { deleteUserService, getAllUserService } from "@/services/userService";
 
 const useStaffStore = create(
    devtools(
       persist(
-         (set, get) => ({
+         (set) => ({
             loading: false,
             error: null,
             staff: [],
             teacher: [],
-            staffById: {},
+            totalUsers: 0,
+            pages: 0,
 
             // Get all staff
-            getAllStaff: async () => {
+            getStaff: async (role) => {
                set({ loading: true, error: null });
                try {
-                  const data = await getAllStaffService();
-                  set({
-                     staff: data.users?.filter((staffMember) => staffMember?.staffRole !== "TEACHER"),
-                     teacher: data.users?.filter((staffMember) => staffMember?.staffRole === "TEACHER"),
-                     loading: false
-                  })
+                  const data = await getAllUserService(role);
+                  if (data.status === 200) {
+                     set({
+                        staff: data.data,
+                        totalUsers: data.total,
+                        pages: data.totalPages,
+                        loading: false
+                     })
+                  } else {
+                     set({ loading: false })
+                  }
                } catch (error) {
                   set({ error: error.message, loading: false })
-               }
-            },
-
-            // Get staff by ID
-            getStaffById: async (staffId) => {
-               set({ loading: true, error: null });
-               try {
-                  const data = await getStaffByIdService(staffId);
-                  set({ staffById: data, loading: false });
-               } catch (error) {
-                  set({ error: error.message, loading: false });
                }
             },
 
@@ -44,7 +41,7 @@ const useStaffStore = create(
                set({ loading: true, error: null });
                try {
                   const data = await createStaffService(staffData);
-                  if (data.statusCode === 200) {
+                  if (data.status === 201) {
                      set((state) => ({
                         staff: [...state.staff, data],
                         loading: false,
@@ -55,7 +52,7 @@ const useStaffStore = create(
                      set({ loading: false });
                   }
                } catch (error) {
-                  set({ error: errorMessage, loading: false });
+                  set({ error: error.message, loading: false });
                   toast.error("Failed to add staff");
                }
             },
@@ -70,7 +67,7 @@ const useStaffStore = create(
                         staff.id === staffId ? { ...staff, ...updatedStaffData } : staff
                      ),
                      loading: false,
-                  }))
+                  }));
                } catch (error) {
                   set({ error: error.message, loading: false });
                   toast.error(error.message || "Failed to update staff");
@@ -78,17 +75,23 @@ const useStaffStore = create(
             },
 
             // Delete an existing staff member
-            deleteStaff: async (staffId) => {
+            deleteStaff: async (id) => {
                set({ loading: true, error: null });
                try {
-                  const data = await deleteStaffService(staffId);
-                  set({
-                     staff: state.staff.filter((staff) => staff.id !== staffId),
-                     loading: false,
-                  })
+                  const data = await deleteUserService(id);
+                  if (data.status === 200) {
+                     set((state) => ({
+                        staff: state.staff.filter((user) => user.id !== id),
+                        loading: false
+                     }));
+                     toast.success('User deleted successfully');
+                  } else {
+                     toast.error('Failed to delete user');
+                     set({ loading: false });
+                  }
                } catch (error) {
                   set({ error: error.message, loading: false });
-                  toast.error(error.message || "Failed to delete staff");
+                  toast.error("Failed to delete user");
                }
             },
          }),

@@ -1,6 +1,6 @@
 import { Label } from '../../ui/label';
 import { Input } from '../../ui/input';
-import { AtSign, Calendar, CircleDollarSign, Phone, Smartphone, User } from 'lucide-react';
+import { AtSign, CircleDollarSign, Phone, Smartphone, SquareUser, SquareUserRound, User } from 'lucide-react';
 
 const StaffInfo = ({
    register,
@@ -15,7 +15,7 @@ const StaffInfo = ({
          placeholder: "Enter First Name",
          type: "text",
          condition: true,
-         icon: <User size={18} />
+         icon: <User size={20} />
       },
       {
          name: "lname",
@@ -24,7 +24,7 @@ const StaffInfo = ({
          placeholder: "Enter Last Name",
          type: "text",
          condition: true,
-         icon: <User size={18} />
+         icon: <User size={20} />
       },
       {
          name: "email",
@@ -33,7 +33,7 @@ const StaffInfo = ({
          placeholder: "Enter Email",
          type: "email",
          condition: true,
-         icon: <AtSign size={18} />
+         icon: <AtSign size={20} />
       },
       {
          name: "salary",
@@ -42,7 +42,7 @@ const StaffInfo = ({
          placeholder: "Enter Salary",
          type: "number",
          condition: true,
-         icon: <CircleDollarSign size={18} />
+         icon: <CircleDollarSign size={20} />
       },
       {
          name: "gender",
@@ -93,7 +93,6 @@ const StaffInfo = ({
          required: "Date of Birth is required",
          type: "date",
          condition: true,
-         icon: <Calendar size={20} />
       },
       {
          name: "hireDate",
@@ -101,7 +100,6 @@ const StaffInfo = ({
          required: "Enrollment Date is required",
          type: "date",
          condition: true,
-         icon: <Calendar size={20} />
       }
 
    ];

@@ -1,0 +1,25 @@
+const URL = import.meta.env.VITE_API_URL;
+
+export const getAllUserService = async (role) => {
+   const response = await fetch(`${URL}/auth/users/role?role=${role}&page=1&limit=8`, {
+      method: "GET",
+      headers: {
+         "Content-Type": "application/json",
+      },
+      credentials: "include",
+   });
+   if (!response.ok) throw new Error("Failed to fetch staff data");
+   return await response.json();
+}
+
+export const deleteUserService = async (id) => {
+   const response = await fetch(`${URL}/auth/delete`, {
+      method: "DELETE",
+      headers: {
+         "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userIds: [`${id}`] }),
+   });
+   if (!response.ok) throw new Error("Failed to delete user");
+   return await response.json();
+};
