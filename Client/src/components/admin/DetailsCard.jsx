@@ -14,7 +14,8 @@ const DetailsCard = ({
    selectedId,
    handleDelete,
    content,
-   userDetails
+   userDetails,
+   loading
 }) => {
 
    // Helper function to access nested properties
@@ -52,8 +53,10 @@ const DetailsCard = ({
             <Button
                variant="destructive"
                onClick={() => handleDelete(selectedId)}
+               disabled={loading}
             >
-               Delete</Button>
+               {loading ? "Deleting..." : "Delete"}
+            </Button>
          </CardFooter>
 
       </Card>

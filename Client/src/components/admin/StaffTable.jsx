@@ -63,17 +63,17 @@ const StaffTable = ({ user, handleUserId, tableHead, tableFields, loading }) => 
                   </TableRow>
                ) : (
                   currentPageData.map((user) => (
-                     <TableRow key={user.id} className="cursor-pointer" onClick={() => handleCheckboxChange(user)}>
+                     <TableRow key={user.user.id} className="cursor-pointer" onClick={() => handleCheckboxChange(user.user)}>
                         <TableCell>
                            <input
                               type="checkbox"
-                              onChange={() => handleCheckboxChange(user)}
-                              checked={selectedUserId === user}
+                              onChange={() => handleCheckboxChange(user.user)}
+                              checked={selectedUserId === user.user}
                            />
                         </TableCell>
                         {tableFields.map((field, index) => (
                            <TableCell key={index}>
-                              {getNestedValue(user, field)}
+                              {getNestedValue(user.user, field)}
                            </TableCell>
                         ))}
                      </TableRow>

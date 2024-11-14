@@ -100,8 +100,10 @@ const Staffs = () => {
   };
 
   const handleDelete = () => {
-    deleteStaff(selectedData.id);
-    setSelectedData(null);
+    const res = deleteStaff(selectedData.id);
+    if (res.status === 200) {
+      setSelectedData(null);
+    }
   };
 
   return (
@@ -173,6 +175,7 @@ const Staffs = () => {
                 userDetails={selectedData}
                 content={staffDetails}
                 handleDelete={handleDelete}
+                loading={loading}
               />
             </div>
           )}
