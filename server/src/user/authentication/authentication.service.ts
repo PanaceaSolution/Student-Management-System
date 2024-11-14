@@ -666,6 +666,7 @@ export class AuthenticationService {
 
       return {
         data: users,
+
         total,
         page,
         limit,
@@ -769,19 +770,22 @@ export class AuthenticationService {
       });
 
       const formattedUsers = users.map(this.formatUserResponse);
+      // console.log(formattedUsers);
+      
 
       const finalData = formattedUsers
         .map((item, index) =>
           roleData[index] ? [item, roleData[index]] : null,
         )
         .filter((pair) => pair !== null);
-      console.log(formattedUsers);
+      // console.log(finalData);
 
       return {
         message: 'Users fetched successfully',
         status: 200,
         success: true,
         data: finalData,
+        
         // roleData: roleData,
         total,
         page,
