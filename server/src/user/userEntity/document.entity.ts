@@ -21,8 +21,12 @@ export class UserDocuments {
 
   @Column({type: 'text', nullable: false })
   documentFile: string;
+  
+  @Column({ type: 'boolean', nullable: true, default: true })
+  isActivated: boolean;
+  
 
-  @ManyToOne(() => User, (user) => user.document, { nullable: true })
+  @ManyToOne(() => User, (user) => user.document, { nullable: true,onDelete: 'CASCADE',onUpdate:'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 }

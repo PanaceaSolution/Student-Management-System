@@ -58,7 +58,7 @@ export class Student {
   transportationMode: TRANSPORTATION_MODE;
   
   
-  @OneToOne(() => User, (user) => user.student)
+  @OneToOne(() => User, (user) => user.student, { cascade: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
   parent: any;

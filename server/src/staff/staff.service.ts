@@ -10,10 +10,6 @@ import { StaffDto } from './dto/staff.dto';
 import { AuthenticationService } from '../user/authentication/authentication.service';
 import { User } from '../user/authentication/entities/authentication.entity';
 import { decryptdPassword, generateRandomPassword, generateUsername } from 'src/utils/utils';
-import * as fs from 'fs';
-import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
-
 import { STAFFROLE, ROLE } from 'src/utils/role.helper';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
 import * as moment from 'moment';
@@ -34,8 +30,17 @@ export class StaffService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ): Promise<{ status: number; message: string; staff?: any; user?: any ;plainPassword?: any}> {
-    const { hireDate, salary, staffRole, email, profile, address, contact, document } = createStaffDto;
+  ): Promise<{ status: number; message: string; staff?: any; user?: any }> {
+    const {
+      hireDate,
+      salary,
+      staffRole,
+      email,
+      profile,
+      address,
+      contact,
+      document,
+    } = createStaffDto;
 
     if (!profile || !profile.fname || !profile.lname) {
       throw new BadRequestException(
@@ -43,22 +48,29 @@ export class StaffService {
       );
     }
 
-
     if (!Object.values(STAFFROLE).includes(staffRole as STAFFROLE)) {
       throw new BadRequestException('Invalid staff role');
     }
 
+    const username = generateUsername(
+      profile.fname,
+      profile.lname,
+      ROLE.STAFF,
+      staffRole as STAFFROLE,
+    );
+    console.log('Generated Username:', username);
 
     const profilePictureUrl: string | null = null;
-
 
     const documentMetadata = document || [];
     const documentUrls = [];
 
-
     if (files.documents && files.documents.length > 0) {
       const documentBuffers = files.documents.map((doc) => doc.buffer);
-      const uploadedDocumentUrls = await uploadFilesToCloudinary(documentBuffers, 'documents');
+      const uploadedDocumentUrls = await uploadFilesToCloudinary(
+        documentBuffers,
+        'documents',
+      );
 
       documentUrls.push(
         ...uploadedDocumentUrls.map((url, index) => ({
@@ -76,37 +88,52 @@ export class StaffService {
       address,
       contact,
       document: documentUrls,
+      username,
       password: generateRandomPassword(),
       createdAt: new Date().toISOString(),
       refreshToken: null,
       profilePicture: profilePictureUrl,
     };
 
-    const createUserResponse = await this.userService.register(registerDto, files, staffRole);
+    const createUserResponse = await this.userService.register(
+      registerDto,
+      files,
+      staffRole,
+    );
+    console.log('createuserResponse', createUserResponse);
 
     if (!createUserResponse || !createUserResponse.user) {
       throw new InternalServerErrorException(
         'Error occurs while creating user',
       );
     }
+    const userReference = await this.userRepository.findOne({
+      where: { userId: createUserResponse.user.id },
+    });
+
+    console.log('UserReference for staff', userReference);
+
+    if (!userReference) {
+      return { status: 500, message: 'Error finding user after creation' };
+    }
 
     const newStaff = this.staffRepository.create({
       hireDate,
       salary,
       staffRole: staffRole.trim() as STAFFROLE,
+      user: userReference,
     });
 
-    // await this.staffRepository.save(newStaff);
-    // const plainPassword = decryptdPassword(registerDto.password);
+    await this.staffRepository.save(newStaff);
 
     return {
       status: 201,
       message: 'Staff created successfully',
       staff: newStaff,
-      user: createUserResponse.user,
+      user: createUserResponse,
     };
   }
-  
+
   
   findAll() {
     return `This action returns all staff`;

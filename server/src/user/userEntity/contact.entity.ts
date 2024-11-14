@@ -26,7 +26,11 @@ export class UserContact {
   @Column({ type: 'boolean', nullable: false, default: true })
   isCurrent: boolean;
 
-  @ManyToOne(() => User, (user) => user.contact, { nullable: true })
+  @Column({ type: 'boolean', nullable: true, default: true })
+  isActivated: boolean;
+  
+
+  @ManyToOne(() => User, (user) => user.contact, { nullable: true,onDelete: 'CASCADE',onUpdate:'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 }
