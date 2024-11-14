@@ -16,13 +16,17 @@ export class UserDocuments {
   @PrimaryGeneratedColumn('uuid')
   documentId: UUID;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: false })
   documentName: string;
 
-  @Column({type: 'text', nullable: true })
+  @Column({type: 'text', nullable: false })
   documentFile: string;
+  
+  @Column({ type: 'boolean', nullable: true, default: true })
+  isActivated: boolean;
+  
 
-  @ManyToOne(() => User, (user) => user.document, { nullable: true })
+  @ManyToOne(() => User, (user) => user.document, { nullable: true,onDelete: 'CASCADE',onUpdate:'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 }

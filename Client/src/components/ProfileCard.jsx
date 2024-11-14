@@ -26,7 +26,7 @@ const ProfileCard = ({ onDelete, studentInfo, loading }) => {
     }
   };
 
-  const limitedKeys = keys.slice(0, 6);
+  const limitedKeys = keys.slice(0, 4);
 
   useEffect(() => {
     if (showAllDetails && additionalContentRef.current) {
@@ -39,7 +39,7 @@ const ProfileCard = ({ onDelete, studentInfo, loading }) => {
 
   return (
     <>
-      <div className="border rounded-sm p-4 md:p-4 shadow-md flex flex-col bg-white">
+      <div className="border rounded-sm p-2 md:p-4 shadow-md flex flex-col bg-white">
         <div className="border-b-2">
           <h2 className="font-bold text-xl text-[#233255CC] text-center">
             Student Details
@@ -49,7 +49,11 @@ const ProfileCard = ({ onDelete, studentInfo, loading }) => {
         <div className="flex flex-col max-h-[530px] w-full overflow-y-auto scrollbar-thin">
           <div className="bg-red-300 mx-auto h-24 w-24 rounded-full flex items-center justify-center mt-1">
             <img
-              src={suk}
+              src={
+                studentInfo?.user_profile_profilePicture
+                  ? studentInfo?.user_profile_profilePicture
+                  : suk
+              }
               alt={`${studentInfo?.fname}'s profile`}
               className="w-full h-full rounded-full border-2 object-cover"
             />

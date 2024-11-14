@@ -14,18 +14,20 @@ const PersonalInfo = ({ register, errors, clearErrors }) => {
           { name: "religion", label: "Religion*" },
           { name: "registrationNumber", label: "Registration-Number*" },
           { name: "previousSchool", label: "Previous-School*" },
-          { name: "transportationMode", label: "Transportation-Mode" },
           { name: "email", label: "Email*" },
           { name: "phoneNumber", label: "Phone Number*" },
           { name: "alternatePhoneNumber", label: "Alternate-PhoneNumber" },
           { name: "telephoneNumber", label: "Tele-phoneNumber" },
           { name: "rollNumber", label: "Roll-Number*" },
+          { name: "section", label: "Section*" },
           {
             name: "gender",
             label: "Gender*",
             type: "select",
             options: ["MALE", "FEMALE", "OTHERS"],
           },
+          
+
           {
             name: "bloodType",
             label: "Blood Type*",
@@ -48,6 +50,12 @@ const PersonalInfo = ({ register, errors, clearErrors }) => {
               "Grade VII",
               "Grade VIII",
             ],
+          },
+          {
+            name: "transportationMode",
+            label: "Transportation Mode",
+            type: "select",
+            options: ["BUS", "WALK"],
           },
           {
             name: "dob",

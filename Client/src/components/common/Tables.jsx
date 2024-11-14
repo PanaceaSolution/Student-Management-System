@@ -5,7 +5,7 @@ import useDeleteStudent from "@/hooks/useDeleteStudnet";
 import { IconLeft, IconRight } from "react-day-picker";
 
 const Tables = React.memo(({ items, setStudentInfo, loading }) => {
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
   const [headerValue, setHeaderValue] = useState([]);
   const [openModal, setOpenModal] = useState(-1);
   const { deleteStudent } = useDeleteStudent();
@@ -13,27 +13,32 @@ const Tables = React.memo(({ items, setStudentInfo, loading }) => {
 
   const handleCheckboxChange = useCallback(
     (id) => {
-      const newSelectedId = selectedId === id ? null : id;
-      setSelectedId(newSelectedId);
+      setSelectedIds((prevSelectedIds) => {
+        if (prevSelectedIds.includes(id)) {
+         
+          return prevSelectedIds.filter((selectedId) => selectedId !== id);
+        } else {
+      
+          return [id];
+        }
+      });
     },
-    [selectedId]
+    []
   );
 
   useEffect(() => {
     const studentDetails = items?.find(
-      (item) => item?.studentId === selectedId
+      (item) => item?.studentId === selectedIds[0] // Use the first selected ID to set student info
     );
     setStudentInfo(studentDetails || {});
-  }, [selectedId, items, setStudentInfo]);
+  }, [selectedIds, items, setStudentInfo]);
 
   useEffect(() => {
     if (items?.length > 0) {
-      // Filter out 'profilePicture' from the keys
       const header = Object.keys(items[0]).filter(
         (key) => key !== "profilePicture"
       );
       setHeaderValue(header);
-      setSelectedId(items[0]?.studentId);
     }
   }, [items]);
 
@@ -48,7 +53,7 @@ const Tables = React.memo(({ items, setStudentInfo, loading }) => {
   return (
     <>
       {loading ? (
-        <p className="text-center font-bold text-xl p-5">Loadding....</p>
+        <p className="text-center font-bold text-xl p-5">Loading....</p>
       ) : (
         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -60,9 +65,18 @@ const Tables = React.memo(({ items, setStudentInfo, loading }) => {
                       id="checkbox-all-search"
                       type="checkbox"
                       className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                      // Select all logic (optional, can be customized)
+                      checked={selectedIds.length === items.length}
+                      onChange={() => {
+                        if (selectedIds.length === items.length) {
+                          setSelectedIds([]);
+                        } else {
+                          setSelectedIds(items.map(item => item.studentId));
+                        }
+                      }}
                     />
                     <label htmlFor="checkbox-all-search" className="sr-only">
-                      checkbox
+                      Select All
                     </label>
                   </div>
                 )}
@@ -106,7 +120,7 @@ const Tables = React.memo(({ items, setStudentInfo, loading }) => {
                     <input
                       id={`checkbox-table-search-${data?.studentId}`}
                       type="checkbox"
-                      checked={selectedId === data?.studentId}
+                      checked={selectedIds.includes(data?.studentId)}
                       onChange={() => handleCheckboxChange(data?.studentId)}
                       className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                     />
@@ -119,7 +133,7 @@ const Tables = React.memo(({ items, setStudentInfo, loading }) => {
                   </div>
                 </td>
                 {displayedHeaderValue?.map((key) => (
-                  <td key={key} className="px-6 py-4">
+                  <td key={key} className="px-2 py-1">
                     {data[key]}
                   </td>
                 ))}
@@ -145,7 +159,7 @@ const Tables = React.memo(({ items, setStudentInfo, loading }) => {
         title={`Delete ${
           items.find((item) => item.studentId === openModal)?.fatherName
         }`}
-        desc="Are You Sure?"
+        desc="Are you sure?"
         actionName="Delete"
         dangerAction={(e) => handleDelete(openModal)}
         showModal={openModal !== -1}

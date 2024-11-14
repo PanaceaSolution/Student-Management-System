@@ -8,13 +8,12 @@ import { StudentDto } from './dto/student.dto';
 import * as moment from 'moment';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Student } from './entities/student.entity';
-import { Repository } from 'typeorm';
+import { Equal, Not, Repository } from 'typeorm';
 import { User } from '../user/authentication/entities/authentication.entity';
 import { AuthenticationService } from '../user/authentication/authentication.service';
-import { generateRandomPassword, generateUsername } from 'src/utils/utils';
+import { decryptdPassword, generateRandomPassword, generateUsername } from 'src/utils/utils';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
-
 
 @Injectable()
 export class StudentService {
@@ -31,7 +30,7 @@ export class StudentService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ): Promise<{ status: number; message: string; student?: any; user?: any }> {
+  ): Promise<{ status: number; message: string; student?: any; user?: any ,plainPassword?:any }> {
     const {
       fatherName,
       motherName,
@@ -119,6 +118,7 @@ export class StudentService {
       fatherName,
       motherName,
       guardianName,
+      user: userReference,
       religion,
       bloodType,
       admissionDate: AdmissionIsoString,
@@ -131,237 +131,160 @@ export class StudentService {
     });
 
     await this.studentRepository.save(newStudent);
-
+    let plainPassword = decryptdPassword(newStudent.user.password)
     return {
       status: 201,
       message: 'Student created successfully',
       student: newStudent,
       user: createUserResponse.user,
+      plainPassword:plainPassword,
     };
   }
 
-  async getAllStudents(page: number, limit: number) {
-    const [students, total] = await this.studentRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+  async updateStudent(
+    id: UUID,
+    updateStudentDto: Partial<StudentDto>,
+    files: {
+      profilePicture?: Express.Multer.File[];
+      documents?: Express.Multer.File[];
+    } = {},
+  ) {
+    try {
+    
+      const {
+        admissionDate,
+        rollNumber,
+        registrationNumber,
+        religion,
+        fatherName,
+        motherName,
+        guardianName,
+        transportationMode,
+        previousSchool,
+        section,
+        studentClass,
+      } = updateStudentDto;
 
-    return {
-      data: students,
-      totalItems: total,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
-    };  
-  }
+      // find student
+      const student = await this.studentRepository.findOne({
+        where: {
+          studentId: Equal(id.toString()),
+        },
+        relations:[
+          'user'
+        ]
+      });
+      // console.log('student is', student);
+      
+      if (!student) {
+        throw new NotFoundException('Student not found');
+      }if (!student.user) {
+        throw new NotFoundException('User associated with student not found');
+      }
+  const userUpdateResult = await this.userService.updateUser(
+    student.user.userId,
+    updateStudentDto,
+    files,
+  );
 
-  async findStudentById(id: string) {
-    const student = await this.studentRepository.findOne({ where: { studentId: id as unknown as UUID } });
-    if (!student) {
-      throw new NotFoundException(`Student with ID ${id} not found`);
+      if (fatherName !== undefined) {
+        student.fatherName = fatherName;
+      }
+      if (motherName !== undefined) {
+        student.motherName = motherName;
+      }
+      if (religion !== undefined) {
+        student.religion = religion;
+      }
+      if (student.registrationNumber !== undefined) {
+        student.registrationNumber = registrationNumber;
+      }
+      if (section !== undefined) {
+        student.section = section;
+      }
+      if (guardianName !== undefined) {
+        student.guardianName = guardianName;
+      }
+      if (studentClass !== undefined) {
+        student.studentClass = studentClass;
+      }
+      if (previousSchool !== undefined) {
+        student.previousSchool = previousSchool;
+      }
+      if (admissionDate !== undefined) {
+        student.admissionDate = admissionDate;
+      }
+      if (rollNumber !== undefined) {
+        student.rollNumber = rollNumber;
+      }
+      if (transportationMode !== undefined) {
+        student.transportationMode = transportationMode;
+      }
+
+      await this.studentRepository.save(student);
+      return {
+        ...userUpdateResult.user.address,
+        ...userUpdateResult.user.contact,
+        ...userUpdateResult.user.documents,
+        ...userUpdateResult.user.profile,
+        student,
+        message: 'Student updated successfully',
+      };
+    } catch (error) {
+      throw new Error('Internal server problem');
     }
-    return student;
   }
-  
+  async getAllStudents(page: number, limit: number) {
+    try {
+        const skip = (page - 1) * limit;
 
-  // Adjust the register function in the AuthenticationService
+        const [students, total] = await this.studentRepository.findAndCount({
+            relations: ['user', 'user.profile', 'user.contact', 'user.address', 'user.document'],
+            skip,
+            take: limit,
+        });
 
-  // async GetAllStudents(): Promise<{
-  //   status: number;
-  //   message: string;
-  //   student?: any;
-  // }> {
-  //   const students = await this.studentRepository.find({
-  //     relations: {
-  //       addresses: true,
-  //       contacts: true,
-  //       parent: true,
-  //     },
-  //   });
+        const formattedStudents = students
+            .filter(student => student.user !== null) 
+            .map(student => ({
+                id: student.studentId,
+                admissionDate: student.admissionDate,
+                rollNumber: student.rollNumber,
+                registrationNumber: student.registrationNumber,
+                studentClass: student.studentClass,
+                section: student.section,
+                transportationMode: student.transportationMode,
+                user: student.user && {
+                    id: student.user.userId,
+                    email: student.user.email,
+                    username: student.user.username,
+                    role: student.user.role,
+                    profile: student.user.profile,
+                    contact: student.user.contact,
+                    address: student.user.address,
+                    documents: student.user.document,
+                },
+            }));
 
-  //   return {
-  //     status: 201,
-  //     message: 'All students fetched',
-  //     student: students,
-  //   };
-  // }
-
-  // async findStudent(studentId: number): Promise<{
-  //   status: number;
-  //   message?: string;
-  //   student?: any;
-  //   user?: any;
-  // }> {
-  //   try {
-  //     const findStudent = await this.studentRepository.findOne({
-  //       where: {
-  //         studentId: studentId,
-  //       },
-  //       relations: {
-  //         addresses: true,
-  //         contacts: true,
-  //         parent: true,
-  //       },
-  //     });
-  //     const UserData = await this.userRepository.findOne({
-  //       where: {
-  //         userId: findStudent.studentId,
-  //       },
-  //     });
-  //     if (!findStudent) {
-  //       return {
-  //         status: 400,
-  //         message: 'student does not exist',
-  //       };
-  //     }
-  //     return {
-  //       status: 200,
-  //       message: 'student found',
-  //       student: findStudent,
-  //       user: UserData,
-  //     };
-  //   } catch (error) {
-  //     console.error('Error finding student:', error);
-  //     return {
-  //       status: 500,
-  //       message: 'Internal server error',
-  //     };
-  //   }
-  // }
-
-  // async updateStudent(
-  //   studentId: number,
-  //   updateStudentDto: StudentDto,
-  // ): Promise<{ status: number; message?: string; student?: any }> {
-  //   const findStudent = await this.findStudent(studentId);
-  //   if (findStudent.status === 200) {
-  //     const {
-  //       fname,
-  //       lname,
-  //       email,
-  //       gender,
-  //       bloodType,
-  //       dob,
-  //       admissionDate,
-  //       address,
-  //       contact,
-  //       parentId,
-  //       transportationMode,
-  //       previousSchool,
-  //       rollNumber,
-  //       registrationNumber,
-  //       section,
-  //       studentClass,
-  //     } = updateStudentDto;
-  //     console.log('findStudent:', findStudent);
-  //     if (rollNumber && rollNumber !== findStudent.student.rollNumber) {
-  //       const existingRollNumber = await this.studentRepository.findOne({
-  //         where: { rollNumber },
-  //       });
-  //       if (existingRollNumber) {
-  //         return { status: 400, message: 'Roll number already exists' };
-  //       }
-  //     }
-
-  //     if (
-  //       registrationNumber &&
-  //       registrationNumber !== findStudent.student.registrationNumber
-  //     ) {
-  //       const existingRegistrationNumber = await this.studentRepository.findOne(
-  //         {
-  //           where: { registrationNumber },
-  //         },
-  //       );
-  //       if (existingRegistrationNumber) {
-  //         return {
-  //           status: 400,
-  //           message: 'Registration number already exists',
-  //         };
-  //       }
-  //     }
-
-  //     if (
-  //       Array.isArray(findStudent.student.addresses) &&
-  //       findStudent.student.addresses.length > 0
-  //     ) {
-  //       if (address) {
-  //         for (const addr of findStudent.student.addresses) {
-  //           await this.addressRepository.update(addr.studentAddressId, {
-  //             ...address,
-  //           });
-  //         }
-  //       }
-  //     } else {
-  //       return { status: 400, message: 'Address not found' };
-  //     }
-
-  //     if (
-  //       Array.isArray(findStudent.student.contacts) &&
-  //       findStudent.student.contacts.length > 0
-  //     ) {
-  //       if (contact) {
-  //         for (const cont of findStudent.student.contacts) {
-  //           await this.contactRepository.update(cont.studentContactId, {
-  //             ...contact,
-  //           });
-  //         }
-  //       }
-  //     } else {
-  //       return { status: 400, message: 'Contact not found' };
-  //     }
-
-  //     await this.studentRepository.update(studentId, {
-  //       fname,
-  //       lname,
-  //       email,
-  //       gender,
-  //       bloodType,
-  //       dob,
-  //       admissionDate,
-  //       transportationMode,
-  //       previousSchool,
-  //       rollNumber,
-  //       registrationNumber,
-  //       section,
-  //       studentClass,
-  //     });
-
-  //     const updatedStudent = await this.studentRepository.findOne({
-  //       where: { studentId: studentId },
-  //       relations: {
-  //         addresses: true,
-  //         contacts: true,
-  //         parent: true,
-  //       },
-  //     });
-  //     return {
-  //       status: 200,
-  //       message: 'Student updated successfully',
-  //       student: updatedStudent,
-  //     };
-  //   } else {
-  //     return { status: 404, message: 'Student not found' };
-  //   }
-  // }
-
-  // async deleteStudent(
-  //   studentId: number,
-  // ): Promise<{ status: number; message?: string }> {
-  //   const findStudent = await this.studentRepository.findOne({
-  //     where: { studentId: studentId },
-  //     relations: {
-  //       addresses: true,
-  //       contacts: true,
-  //       parent: true,
-  //       user: true,
-  //     },
-  //   });
-
-  //   if (!findStudent) {
-  //     return { status: 400, message: 'Student not found' };
-  //   }
-  //   await this.studentRepository.delete({ studentId: studentId });
-  //   await this.userRepository.delete({ userId: findStudent.user.userId });
-
-  //   return { status: 200, message: 'Student deleted successfully' };
-  // }
+        return {
+            message: 'Students fetched successfully',
+            status: 200,
+            success: true,
+            data: formattedStudents,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        };
+    } catch (error) {
+        console.error('Error fetching students:', error);
+        throw new InternalServerErrorException({
+            message: 'Failed to fetch students',
+            status: 500,
+            success: false,
+        });
+    }
 }
+
+}
+

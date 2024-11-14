@@ -3,9 +3,9 @@ import toast from "react-hot-toast";
 // const URL = import.meta.env.VITE_API_URL;
 const URL = "http://localhost:3000";
 
-export const getAllStudentsService = async (query) => {
+export const getAllStudentsService = async (query) => { 
    try {
-      const response = await fetch(`${URL}/student/all-students?${query}`, { 
+      const response = await fetch(`${URL}/auth/users/role?${query}`, { 
          method: "GET",
          headers: {
             "Content-Type": "application/json",

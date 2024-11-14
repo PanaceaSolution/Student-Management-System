@@ -7,14 +7,14 @@ export class Parent {
   @PrimaryGeneratedColumn('uuid')
   parentId: string;
 
- @Column({type:'simple-array' , nullable:true})
- childNames: string[];
- 
-  @ManyToOne(() => User, (user) => user.parent)
+  @Column({ type: 'simple-array', nullable: true })
+  childNames: string[];
+
+  @ManyToOne(() => User, (user) => user.parent, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @ManyToOne(() => Student, (student) => student.parent, { nullable: true })
+  @ManyToOne(() => Student, (student) => student.parent, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'studentId' })
   student: Student;
 }

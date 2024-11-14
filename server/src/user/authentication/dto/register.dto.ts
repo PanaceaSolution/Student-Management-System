@@ -1,24 +1,10 @@
-import {
-  IsString,
-  IsOptional,
-  IsNotEmpty,
-  IsEmail,
-  IsEnum,
-  ValidateNested,
-  IsArray,
-} from 'class-validator';
+import { IsString, IsOptional, IsNotEmpty, IsEmail, IsEnum, ValidateNested, IsArray } from 'class-validator';
 import { ROLE } from '../../../utils/role.helper';
-import { Transform, Type } from 'class-transformer';
-import {
-  UserAddressDto,
-  UserContactDto,
-  UserDocumentsDto,
-  UserProfileDto,
-} from '../../userEntity/dto/common.dto';
+import { Type, Transform } from 'class-transformer';
+import { UserAddressDto, UserContactDto, UserDocumentsDto, UserProfileDto } from '../../userEntity/dto/common.dto';
 
 export class RegisterUserDto {
-  @IsString()
-  @IsNotEmpty({ message: 'Password is required' })
+
   password: string;
 
   @IsEmail()
@@ -35,20 +21,25 @@ export class RegisterUserDto {
 
   @ValidateNested()
   @Type(() => UserProfileDto)
+  @Transform(({ value }) => (typeof value === 'string' ? JSON.parse(value) : value), { toClassOnly: true })
   profile: UserProfileDto;
 
   @ValidateNested({ each: true })
   @IsArray()
   @Type(() => UserAddressDto)
+  @Transform(({ value }) => (typeof value === 'string' ? JSON.parse(value) : value), { toClassOnly: true })
   address: UserAddressDto[];
 
   @ValidateNested()
   @Type(() => UserContactDto)
+  @Transform(({ value }) => (typeof value === 'string' ? JSON.parse(value) : value), { toClassOnly: true })
   contact: UserContactDto;
 
   @ValidateNested({ each: true })
   @IsArray()
   @Type(() => UserDocumentsDto)
+  @Transform(({ value }) => (typeof value === 'string' ? JSON.parse(value) : value), { toClassOnly: true })
+  @IsOptional()
   document: UserDocumentsDto[];
 
   @Transform(({ value }) => {
