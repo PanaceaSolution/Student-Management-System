@@ -1,10 +1,9 @@
 import React from 'react'
-import Dashboard from '../Assignment/Dashboard'
 const Logistics = () => {
    return (
-      <>
-      <Dashboard/>
-      </>
+      <div>
+         Logistics
+      </div>
    )
 }
 
