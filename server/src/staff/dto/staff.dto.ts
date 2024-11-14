@@ -1,12 +1,13 @@
-import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
-import { RegisterUserDto } from '../../user/authentication/dto/register.dto';
+
+import { IsString, IsNotEmpty, IsEnum, IsDate } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { RegisterUserDto } from '../../user/authentication/dto/register.dto'; // Adjust path as necessary
 import { STAFFROLE } from '../../utils/role.helper';
 
 export class StaffDto extends RegisterUserDto {
-  @IsString()
+  @IsDate()
   @IsNotEmpty({ message: 'Hire date is required' })
-  hireDate: string;
+  hireDate: Date;
 
   @IsString()
   @IsNotEmpty({ message: 'Salary is required' })

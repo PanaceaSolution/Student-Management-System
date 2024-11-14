@@ -108,7 +108,7 @@ export class AuthenticationController {
     return this.authenticationService.searchUser(searchTerm, searchBy);
   }
 
-  @Delete()
+  @Delete('delete')
   async deleteUsers(@Body('userIds') userIds: UUID[]) {
     if (!Array.isArray(userIds) || userIds.length === 0) {
       throw new BadRequestException('userIds must be a non-empty array');
