@@ -4,7 +4,7 @@ import { Type, Transform } from 'class-transformer';
 import { UserAddressDto, UserContactDto, UserDocumentsDto, UserProfileDto } from '../../userEntity/dto/common.dto';
 
 export class RegisterUserDto {
-  @IsString()
+
   password: string;
 
   @IsEmail()
