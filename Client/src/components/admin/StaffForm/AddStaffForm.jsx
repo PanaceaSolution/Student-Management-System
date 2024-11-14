@@ -137,7 +137,7 @@ const AddStaffForm = () => {
                Add Staff
             </Button>
          </DialogTrigger>
-         <DialogContent className="bg-white overflow-y-auto sm:max-w-4xl">
+         <DialogContent className="bg-white overflow-y-auto sm:w-full sm:max-w-3xl">
             <DialogHeader>
                <DialogTitle className="text-xl font-bold text-center uppercase">
                   Staff Registration
