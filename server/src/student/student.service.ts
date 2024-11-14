@@ -30,7 +30,7 @@ export class StudentService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ): Promise<{ status: number; message: string; student?: any; user?: any }> {
+  ): Promise<{ status: number; message: string; student?: any; user?: any ,plainPassword?:any }> {
     const {
       fatherName,
       motherName,
@@ -131,12 +131,13 @@ export class StudentService {
     });
   
     await this.studentRepository.save(newStudent);
-  
+    let plainPassword = decryptdPassword(newStudent.user.password)
     return {
       status: 201,
       message: 'Student created successfully',
       student: newStudent,
       user: createUserResponse.user,
+      plainPassword:plainPassword,
     };
   }
 
@@ -233,4 +234,57 @@ export class StudentService {
       throw new Error('Internal server problem');
     }
   }
+  async getAllStudents(page: number, limit: number) {
+    try {
+        const skip = (page - 1) * limit;
+
+        const [students, total] = await this.studentRepository.findAndCount({
+            relations: ['user', 'user.profile', 'user.contact', 'user.address', 'user.document'],
+            skip,
+            take: limit,
+        });
+
+        const formattedStudents = students
+            .filter(student => student.user !== null) 
+            .map(student => ({
+                id: student.studentId,
+                admissionDate: student.admissionDate,
+                rollNumber: student.rollNumber,
+                registrationNumber: student.registrationNumber,
+                studentClass: student.studentClass,
+                section: student.section,
+                transportationMode: student.transportationMode,
+                user: student.user && {
+                    id: student.user.userId,
+                    email: student.user.email,
+                    username: student.user.username,
+                    role: student.user.role,
+                    profile: student.user.profile,
+                    contact: student.user.contact,
+                    address: student.user.address,
+                    documents: student.user.document,
+                },
+            }));
+
+        return {
+            message: 'Students fetched successfully',
+            status: 200,
+            success: true,
+            data: formattedStudents,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        };
+    } catch (error) {
+        console.error('Error fetching students:', error);
+        throw new InternalServerErrorException({
+            message: 'Failed to fetch students',
+            status: 500,
+            success: false,
+        });
+    }
 }
+
+}
+

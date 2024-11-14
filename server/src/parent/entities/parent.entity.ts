@@ -10,11 +10,11 @@ export class Parent {
   @Column({ type: 'simple-array', nullable: true })
   childNames: string[];
 
-  @ManyToOne(() => User, (user) => user.parent, { eager: true })
+  @ManyToOne(() => User, (user) => user.parent, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @ManyToOne(() => Student, (student) => student.parent, { nullable: true, eager: true })
+  @ManyToOne(() => Student, (student) => student.parent, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'studentId' })
   student: Student;
 }

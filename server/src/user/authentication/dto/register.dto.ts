@@ -39,6 +39,7 @@ export class RegisterUserDto {
   @IsArray()
   @Type(() => UserDocumentsDto)
   @Transform(({ value }) => (typeof value === 'string' ? JSON.parse(value) : value), { toClassOnly: true })
+  @IsOptional()
   document: UserDocumentsDto[];
 
   @Transform(({ value }) => {

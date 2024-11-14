@@ -15,6 +15,7 @@ import { StaffDto } from './dto/staff.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
+
 @Controller('staff')
 export class StaffController {
   constructor(private readonly staffService: StaffService) {}
@@ -36,8 +37,25 @@ export class StaffController {
 
     return this.staffService.createStaff(createStaffDto, files);
   }
-
-
+  
+  @Patch('update/:id')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'profilePicture', maxCount: 1 },
+      { name: 'documents', maxCount: 10 },
+    ]),
+  )
+  async updateStaff(
+    @Param('id') id:UUID,
+    @Body() updateStaffDto: Partial<StaffDto>,
+    @UploadedFiles()
+    files: {
+      profilePicture?: Express.Multer.File[];
+      documents?: Express.Multer.File[];
+    },
+  ) {
+    return this.staffService.updateStaff(id, updateStaffDto, files);
+  }
 
 
 
