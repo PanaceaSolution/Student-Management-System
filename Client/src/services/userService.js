@@ -1,7 +1,7 @@
 const URL = import.meta.env.VITE_API_URL;
 
 export const getAllUserService = async (role) => {
-   const response = await fetch(`${URL}/auth/users/role?role=${role}&page=1&limit=8`, {
+   const response = await fetch(`${URL}/auth/users/role?role=${role}&page=1&limit=10`, {
       method: "GET",
       headers: {
          "Content-Type": "application/json",

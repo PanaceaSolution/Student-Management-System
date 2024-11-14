@@ -2,7 +2,6 @@ import { createStaffService, updateStaffService } from "@/services/staffServices
 import toast from "react-hot-toast";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import useUserStore from "./userStore";
 import { deleteUserService, getAllUserService } from "@/services/userService";
 
 const useStaffStore = create(
@@ -20,14 +19,13 @@ const useStaffStore = create(
             getStaff: async (role) => {
                set({ loading: true, error: null });
                try {
-                  const data = await getAllUserService(role);
-                  console.log(data);
-
-                  if (data.status === 200) {
+                  const res = await getAllUserService(role);
+                  if (res.status === 200) {
                      set({
-                        staff: data.data,
-                        totalUsers: data.total,
-                        pages: data.totalPages,
+                        staff: res.data.filter(staff => staff.staffRole !== "TEACHER"),
+                        teacher: res.data.filter(teacher => teacher.staffRole === "TEACHER"),
+                        totalUsers: res.total,
+                        pages: res.totalPages,
                         loading: false
                      })
                   } else {
@@ -53,6 +51,7 @@ const useStaffStore = create(
                      toast.error(data.message);
                      set({ loading: false });
                   }
+                  return data;
                } catch (error) {
                   set({ error: error.message, loading: false });
                   toast.error("Failed to add staff");

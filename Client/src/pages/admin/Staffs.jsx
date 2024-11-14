@@ -29,24 +29,24 @@ const Role = [
   { value: "Librarian", label: "Librarian" },
 ];
 
-const staffTableHead = ["", "First Name", "Last Name", "Phone Number", "Gender", "Role"];
-const staffTableFields = ["profile.fname", "profile.lname", "contact.phoneNumber", "profile.gender", "role"];
+const staffTableHead = ["", "First Name", "Last Name", "Phone Number", "Gender", "Role", "Actions"];
+const staffTableFields = ["user.profile.fname", "user.profile.lname", "user.contact.phoneNumber", "user.profile.gender", "staffRole"];
 
-const staffDetails = [
-  { label: "First Name", key: "profile.fname" },
-  { label: "Last Name", key: "profile.lname" },
-  { label: "Gender", key: "profile.gender" },
-  { label: "Date of Birth", key: "profile.dob" },
-  { label: "Email", key: "email" },
-  { label: "Phone Number", key: "contact.phoneNumber" },
-  { label: "Telephone Number", key: "contact.telephoneNumber" },
-  { label: "Role", key: "role" },
-  { label: "Ward Number", key: "address[0].wardNumber" },
-  { label: "Municipality", key: "address[0].municipality" },
-  { label: "District", key: "address[0].district" },
-  { label: "Province", key: "address[0].province" },
-  { label: "Enrollment Date", key: "hireDate" },
+const personalInfo = [
+  { label: "First Name", key: "user.profile.fname" },
+  { label: "Last Name", key: "user.profile.lname" },
+  { label: "Gender", key: "user.profile.gender" },
+  { label: "Email", key: "user.email" },
+  { label: "Role", key: "staffRole" },
   { label: "Salary", key: "salary" },
+  { label: "Date of Birth", key: "user.profile.dob" },
+  { label: "Enrollment Date", key: "hireDate" },
+  { label: "Phone Number", key: "user.contact.phoneNumber" },
+  { label: "Telephone Number", key: "user.contact.telephoneNumber" },
+  { label: "Ward Number", key: "user.address[0].wardNumber" },
+  { label: "Municipality", key: "user.address[0].municipality" },
+  { label: "District", key: "user.address[0].district" },
+  { label: "Province", key: "user.address[0].province" },
 ];
 
 
@@ -59,12 +59,15 @@ const Staffs = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [selectedData, setSelectedData] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [cardOpen, setCardOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
 
   const { staff, getStaff, deleteStaff, loading } = useStaffStore()
 
   useEffect(() => {
     getStaff("STAFF");
   }, []);
+
 
 
   // const staff = useMemo(() => allUsers, [allUsers]);
@@ -87,6 +90,15 @@ const Staffs = () => {
     }
   };
 
+  const handleGenderChange = (event) => {
+    setSelectedGender(event.target.value);
+  };
+
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
   const handleDateChange = (selectedDate) => {
     setDate(selectedDate);
   };
@@ -95,12 +107,17 @@ const Staffs = () => {
     setActiveTab(tab);
   }, []);
 
-  const handleUserId = (data) => {
+  const handleUserData = (data) => {
     setSelectedData(data);
   };
 
-  const handleDelete = () => {
-    const res = deleteStaff(selectedData.id);
+  const handleEdit = (data) => {
+    setFormOpen(true);
+    setSelectedData(data)
+  }
+
+  const handleDelete = (id) => {
+    const res = deleteStaff(id);
     if (res.status === 200) {
       setSelectedData(null);
     }
@@ -109,7 +126,7 @@ const Staffs = () => {
   return (
     <section>
       <div className='max-w-full mx-auto'>
-        <div className={`grid grid-cols-1 gap-4 ${selectedData ? 'lg:grid-cols-7 2xl:grid-cols-4 lg:gap-1' : 'lg:pr-4'} transition-all duration-300`}>
+        <div className={`grid grid-cols-1 gap-4 lg:pr-4 transition-all duration-300`}>
           <div className='rounded-sm bg-card lg:col-span-5 2xl:col-span-3 p-3'>
             <div className="flex justify-evenly sm:justify-end border-b-2 p-3">
               <div className="flex gap-3 md:gap-4">
@@ -119,7 +136,7 @@ const Staffs = () => {
                   onChange={handleExportChange}
                   className="w-32 bg-white"
                 />
-                <AddStaffForm />
+                <AddStaffForm formOpen={formOpen} setFormOpen={setFormOpen} selectedData={selectedData} />
               </div>
             </div>
             <div className="border-b-2 p-2">
@@ -161,8 +178,12 @@ const Staffs = () => {
                 tableHead={staffTableHead}
                 tableFields={staffTableFields}
                 user={staff}
-                handleUserId={handleUserId}
+                handleUserData={handleUserData}
                 loading={loading}
+                setCardOpen={setCardOpen}
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+                setFormOpen={setFormOpen}
               />
             </div>
           </div>
@@ -173,9 +194,10 @@ const Staffs = () => {
               <DetailsCard
                 title="Staff"
                 userDetails={selectedData}
-                content={staffDetails}
-                handleDelete={handleDelete}
                 loading={loading}
+                cardOpen={cardOpen}
+                setCardOpen={setCardOpen}
+                personalInfo={personalInfo}
               />
             </div>
           )}
