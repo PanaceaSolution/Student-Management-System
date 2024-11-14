@@ -16,6 +16,7 @@ import { StaffDto } from './dto/staff.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
+
 @Controller('staff')
 export class StaffController {
   constructor(private readonly staffService: StaffService) { }
@@ -55,5 +56,22 @@ export class StaffController {
     },
   ) {
     return this.staffService.updateStaff(id, updateStaffDto, files);
+  }
+
+
+
+  @Get()
+  findAll() {
+    return this.staffService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.staffService.findOne(+id);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.staffService.remove(+id);
   }
 }
