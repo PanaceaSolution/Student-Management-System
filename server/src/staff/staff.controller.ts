@@ -14,6 +14,7 @@ import { StaffService } from './staff.service';
 import { StaffDto } from './dto/staff.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Controller('staff')
 export class StaffController {

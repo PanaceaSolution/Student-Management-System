@@ -3,7 +3,9 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  NotFoundException,
 } from '@nestjs/common';
+import { Equal, Repository } from 'typeorm';
 import { Equal, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Staff } from './entities/staff.entity';
@@ -17,6 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { STAFFROLE, ROLE } from 'src/utils/role.helper';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Injectable()
