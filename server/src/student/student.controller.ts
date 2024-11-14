@@ -41,7 +41,14 @@ export class StudentController {
     console.log('Received body:', createStudentDto);
     return this.studentService.createStudent(createStudentDto, files);
   }
-
+  @Get('')
+  async getAllStudents(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    return this.studentService.getAllStudents(page, limit);
+  }
+  
   @Patch('update/:id')
   @UseInterceptors(
     FileFieldsInterceptor([

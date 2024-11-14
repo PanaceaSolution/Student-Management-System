@@ -11,7 +11,7 @@ import {
 import { Response, Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
-import { Equal, EqualOperator, Like, Not, Repository } from 'typeorm';
+import { Equal, Like, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterUserDto } from './dto/register.dto';
 import { User } from './entities/authentication.entity';
@@ -31,6 +31,7 @@ import {  deleteFileFromCloudinary, extractPublicIdFromUrl, uploadFilesToCloudin
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import * as moment from 'moment';
 import { STAFFROLE } from '../../utils/role.helper';
+import { Student } from 'src/student/entities/student.entity';
 
 @Injectable()
 export class AuthenticationService {
@@ -43,6 +44,8 @@ export class AuthenticationService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Student)
+    private readonly studentRepository: Repository<Student >,
     @InjectRepository(UserProfile)
     private readonly profileRepository: Repository<UserProfile>,
     @InjectRepository(UserAddress)
@@ -630,12 +633,17 @@ export class AuthenticationService {
           success: false,
         });
       }
+      let student;
+      if(role==ROLE.STUDENT){
+        student=await this.studentRepository.find({});
+      }
+      console.log(student)
   
       const whereClause = { role } as any;
   
-      if (role === ROLE.STAFF && staffRole) {
-        whereClause.staff = { staffRole };
-      }
+      // if (role === ROLE.STAFF && staffRole) {
+      //   whereClause.staff = { staffRole };
+      // }
   
       const [users, total] = await this.userRepository.findAndCount({
         where: whereClause,
@@ -747,12 +755,9 @@ export class AuthenticationService {
             });
             continue;
           }
-  
-          // Deactivate user and related entities
+ 
           user.isActivated = false;
           await this.userRepository.save(user);
-  
-          // Optionally deactivate related entities (example shown below)
           if (user.profile) {
             user.profile.isActivated = false;
             await this.profileRepository.save(user.profile);
