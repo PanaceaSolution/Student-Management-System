@@ -244,7 +244,6 @@ export class AuthenticationService {
           success: false,
         });
       }
-
       const payload = { username: user.username, role: user.role };
       const AccessToken = this.jwtService.sign(payload, {
         expiresIn: '1d',
