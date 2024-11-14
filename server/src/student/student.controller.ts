@@ -31,41 +31,24 @@ export class StudentController {
     FileFieldsInterceptor([
       { name: 'profilePicture', maxCount: 1 },
       { name: 'documents', maxCount: 10 },
-    ]),
+    ])
   )
   async createStudent(
-    @Body() createStudentDto: any,
-    @UploadedFiles()
-    files: {
-      profilePicture?: Express.Multer.File[];
-      documents?: Express.Multer.File[];
-    },
+    @Body() createStudentDto: StudentDto,
+    @UploadedFiles() files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
   ) {
     console.log('Received files:', files);
     console.log('Received body:', createStudentDto);
-
-    try {
-      if (typeof createStudentDto.profile === 'string') {
-        createStudentDto.profile = JSON.parse(createStudentDto.profile);
-      }
-      if (typeof createStudentDto.address === 'string') {
-        createStudentDto.address = JSON.parse(createStudentDto.address);
-      }
-      if (typeof createStudentDto.contact === 'string') {
-        createStudentDto.contact = JSON.parse(createStudentDto.contact);
-      }
-      if (typeof createStudentDto.document === 'string') {
-        createStudentDto.document = JSON.parse(createStudentDto.document);
-      }
-    } catch (error) {
-      throw new BadRequestException(
-        'Invalid JSON format for address, contact, profile, or document',
-      );
-    }
-
     return this.studentService.createStudent(createStudentDto, files);
   }
-
+  @Get('')
+  async getAllStudents(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    return this.studentService.getAllStudents(page, limit);
+  }
+  
   @Patch('update/:id')
   @UseInterceptors(
     FileFieldsInterceptor([

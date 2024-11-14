@@ -78,7 +78,6 @@ export class User {
   })
   @JoinColumn()
   student: Student;
-  // One-to-Many relationship with Parent (User can have multiple Parent entries)
   @OneToMany(() => Parent, (parent) => parent.user, {
     cascade: true,
     onDelete: 'CASCADE',
@@ -90,4 +89,5 @@ export class User {
   })
   @JoinColumn({ name: 'staffId' })
   staff: Staff;
+ 
 }

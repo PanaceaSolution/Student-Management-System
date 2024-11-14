@@ -33,8 +33,12 @@ export class UserAddress {
 
   @Column({ type: 'boolean', nullable: false, default: true })
   isCurrent: boolean;
+  
+  @Column({ type: 'boolean', nullable: true, default: true })
+  isActivated: boolean;
+  
 
-  @ManyToOne(() => User, (user) => user.address, { nullable: true })
+  @ManyToOne(() => User, (user) => user.address, { nullable: true ,onDelete: 'CASCADE',onUpdate:'CASCADE'})
   @JoinColumn({ name: 'userId' })
   user: User;
 }

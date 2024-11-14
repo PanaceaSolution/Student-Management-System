@@ -10,6 +10,9 @@ import { UserContact } from '../userEntity/contact.entity';
 import { UserProfile } from '../userEntity/profile.entity';
 import { UserDocuments } from '../userEntity/document.entity';
 import * as multer from 'multer';
+import { Student } from 'src/student/entities/student.entity';
+import { Staff } from 'src/staff/entities/staff.entity';
+import { Parent } from 'src/parent/entities/parent.entity';
 
 @Module({
   imports: [
@@ -19,6 +22,9 @@ import * as multer from 'multer';
       UserContact,
       UserProfile, 
       UserDocuments,
+      Student,
+      Staff,
+      Parent
     ]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,

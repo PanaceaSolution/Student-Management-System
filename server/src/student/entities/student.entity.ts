@@ -10,9 +10,6 @@ import {
 
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
-import { GENDER } from '../../utils/role.helper';
-
-// import { Parent } from '../../parent/entities/parent.entity';
 
 import { TRANSPORTATION_MODE } from '../../utils/role.helper';
 import { User } from '../../user/authentication/entities/authentication.entity';
@@ -61,7 +58,7 @@ export class Student {
   transportationMode: TRANSPORTATION_MODE;
   
   
-  @OneToOne(() => User, (user) => user.student)
+  @OneToOne(() => User, (user) => user.student, {  onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
   parent: any;

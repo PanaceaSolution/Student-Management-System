@@ -30,7 +30,7 @@ export class StudentService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ): Promise<{ status: number; message: string; student?: any; user?: any ; plainPassword?:any }> {
+  ): Promise<{ status: number; message: string; student?: any; user?: any ,plainPassword?:any }> {
     const {
       fatherName,
       motherName,
@@ -49,90 +49,76 @@ export class StudentService {
       profile,
       address,
       contact,
-      document,
+      document, 
     } = createStudentDto;
-
+  
     if (!profile || !profile.fname || !profile.lname) {
-      throw new BadRequestException(
-        'Profile information (fname and lname) is required.',
-      );
+      throw new BadRequestException('Profile information (fname and lname) is required.');
     }
-
+  
     const AD = moment(admissionDate, 'YYYY-MM-DD');
     if (!AD.isValid()) {
       throw new BadRequestException('Invalid date format for Admission Date');
     }
     const AdmissionIsoString = AD.toISOString();
-
+  
     const studentExist = await this.studentRepository.findOne({
       where: [{ registrationNumber }, { rollNumber }],
     });
     if (studentExist) {
       throw new BadRequestException('Student already exists in the database');
     }
-
+  
     const profilePictureUrl: string | null = null;
-
+  
     const documentMetadata = document || [];
     const documentUrls = [];
-
+  
     if (files.documents && files.documents.length > 0) {
       const documentBuffers = files.documents.map((doc) => doc.buffer);
-      const uploadedDocumentUrls = await uploadFilesToCloudinary(
-        documentBuffers,
-        'documents',
-      );
-
+      const uploadedDocumentUrls = await uploadFilesToCloudinary(documentBuffers, 'documents');
+  
       documentUrls.push(
         ...uploadedDocumentUrls.map((url, index) => ({
-          documentName:
-            documentMetadata[index]?.documentName || `Document ${index + 1}`,
+          documentName: documentMetadata[index]?.documentName || `Document ${index + 1}`,
           documentFile: url,
-        })),
+        }))
       );
     }
-
+  
     const registerDto = {
       email,
       role,
       profile,
       address,
       contact,
-      document: documentUrls,
+      document: documentUrls, 
       username: generateUsername(profile.fname, profile.lname, role),
       password: generateRandomPassword(),
       createdAt: new Date().toISOString(),
       refreshToken: null,
       profilePicture: profilePictureUrl,
     };
-
-    const createUserResponse = await this.userService.register(
-      registerDto,
-      files,
-    );
-    // console.log("User Response", createUserResponse);
-    
-
+  
+    const createUserResponse = await this.userService.register(registerDto, files);
+  
     if (!createUserResponse || !createUserResponse.user) {
-      throw new InternalServerErrorException(
-        'Error occurs while creating user',
-      );
+      throw new InternalServerErrorException('Error occurs while creating user');
     }
-
+  
     const userReference = await this.userRepository.findOne({
       where: { userId: createUserResponse.user.id },
     });
-    // console.log('Userreference', userReference);
-    
-
+  
     if (!userReference) {
       return { status: 500, message: 'Error finding user after creation' };
     }
-
+  
     const newStudent = this.studentRepository.create({
       fatherName,
       motherName,
       guardianName,
+      user: userReference,
       religion,
       bloodType,
       admissionDate: AdmissionIsoString,
@@ -142,11 +128,10 @@ export class StudentService {
       section,
       studentClass,
       transportationMode,
-      user:userReference,
     });
-    
+  
     await this.studentRepository.save(newStudent);
-  let plainPassword = decryptdPassword(newStudent.user.password)
+    let plainPassword = decryptdPassword(newStudent.user.password)
     return {
       status: 201,
       message: 'Student created successfully',
@@ -249,4 +234,57 @@ export class StudentService {
       throw new Error('Internal server problem');
     }
   }
+  async getAllStudents(page: number, limit: number) {
+    try {
+        const skip = (page - 1) * limit;
+
+        const [students, total] = await this.studentRepository.findAndCount({
+            relations: ['user', 'user.profile', 'user.contact', 'user.address', 'user.document'],
+            skip,
+            take: limit,
+        });
+
+        const formattedStudents = students
+            .filter(student => student.user !== null) 
+            .map(student => ({
+                id: student.studentId,
+                admissionDate: student.admissionDate,
+                rollNumber: student.rollNumber,
+                registrationNumber: student.registrationNumber,
+                studentClass: student.studentClass,
+                section: student.section,
+                transportationMode: student.transportationMode,
+                user: student.user && {
+                    id: student.user.userId,
+                    email: student.user.email,
+                    username: student.user.username,
+                    role: student.user.role,
+                    profile: student.user.profile,
+                    contact: student.user.contact,
+                    address: student.user.address,
+                    documents: student.user.document,
+                },
+            }));
+
+        return {
+            message: 'Students fetched successfully',
+            status: 200,
+            success: true,
+            data: formattedStudents,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        };
+    } catch (error) {
+        console.error('Error fetching students:', error);
+        throw new InternalServerErrorException({
+            message: 'Failed to fetch students',
+            status: 500,
+            success: false,
+        });
+    }
 }
+
+}
+
