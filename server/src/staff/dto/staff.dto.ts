@@ -1,4 +1,4 @@
-// src/staff/dto/staff.dto.ts
+
 import { IsString, IsNotEmpty, IsEnum, IsDate } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { RegisterUserDto } from '../../user/authentication/dto/register.dto'; // Adjust path as necessary

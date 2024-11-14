@@ -30,7 +30,7 @@ export class StudentService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ): Promise<{ status: number; message: string; student?: any; user?: any; plainPassword?: any }> {
+  ): Promise<{ status: number; message: string; student?: any; user?: any }> {
     const {
       fatherName,
       motherName,
@@ -53,9 +53,7 @@ export class StudentService {
     } = createStudentDto;
 
     if (!profile || !profile.fname || !profile.lname) {
-      throw new BadRequestException(
-        'Profile information (fname and lname) is required.',
-      );
+      throw new BadRequestException('Profile information (fname and lname) is required.');
     }
 
     const AD = moment(admissionDate, 'YYYY-MM-DD');
@@ -78,17 +76,13 @@ export class StudentService {
 
     if (files.documents && files.documents.length > 0) {
       const documentBuffers = files.documents.map((doc) => doc.buffer);
-      const uploadedDocumentUrls = await uploadFilesToCloudinary(
-        documentBuffers,
-        'documents',
-      );
+      const uploadedDocumentUrls = await uploadFilesToCloudinary(documentBuffers, 'documents');
 
       documentUrls.push(
         ...uploadedDocumentUrls.map((url, index) => ({
-          documentName:
-            documentMetadata[index]?.documentName || `Document ${index + 1}`,
+          documentName: documentMetadata[index]?.documentName || `Document ${index + 1}`,
           documentFile: url,
-        })),
+        }))
       );
     }
 
@@ -106,24 +100,15 @@ export class StudentService {
       profilePicture: profilePictureUrl,
     };
 
-    const createUserResponse = await this.userService.register(
-      registerDto,
-      files,
-    );
-    // console.log("User Response", createUserResponse);
-
+    const createUserResponse = await this.userService.register(registerDto, files);
 
     if (!createUserResponse || !createUserResponse.user) {
-      throw new InternalServerErrorException(
-        'Error occurs while creating user',
-      );
+      throw new InternalServerErrorException('Error occurs while creating user');
     }
 
     const userReference = await this.userRepository.findOne({
       where: { userId: createUserResponse.user.id },
     });
-    // console.log('Userreference', userReference);
-
 
     if (!userReference) {
       return { status: 500, message: 'Error finding user after creation' };
@@ -133,6 +118,7 @@ export class StudentService {
       fatherName,
       motherName,
       guardianName,
+      user: userReference,
       religion,
       bloodType,
       admissionDate: AdmissionIsoString,
@@ -142,17 +128,15 @@ export class StudentService {
       section,
       studentClass,
       transportationMode,
-      user: userReference,
     });
 
     await this.studentRepository.save(newStudent);
-    let plainPassword = decryptdPassword(newStudent.user.password)
+
     return {
       status: 201,
       message: 'Student created successfully',
       student: newStudent,
       user: createUserResponse.user,
-      plainPassword: plainPassword,
     };
   }
 

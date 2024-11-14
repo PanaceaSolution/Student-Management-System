@@ -12,6 +12,9 @@ import {
   BadRequestException,
   UploadedFiles,
   UseInterceptors,
+  Delete,
+  InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { LoginDto } from './dto/login.dto';
@@ -21,6 +24,7 @@ import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import {
   FileFieldsInterceptor,
 } from '@nestjs/platform-express';
+import { ROLE, STAFFROLE } from 'src/utils/role.helper';
 
 
 @Controller('auth')
@@ -35,34 +39,18 @@ export class AuthenticationController {
     ]),
   )
   async register(
-    @Body() body: any,
+    @Body() body: RegisterUserDto,  
     @UploadedFiles()
-    files: { profilePicture?: Express.Multer.File[];
-       documents?: Express.Multer.File[] },
+    files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
   ) {
     try {
-      const registerDto: RegisterUserDto = {
-        email: body.email,
-        password: body.password,
-        role: body.role,
-        profile: JSON.parse(body.profile),
-        contact: JSON.parse(body.contact),
-        address: JSON.parse(body.address),
-        document: JSON.parse(body.document),
-        refreshToken: body.refreshToken || null,
-        createdAt: body.createdAt || new Date().toISOString().split('T')[0],
-      };
-
-      console.log('Parsed Register DTO:', registerDto);
-      console.log('Received files:', files);
-
-      return this.authenticationService.register(registerDto, files);
+      console.log('Parsed and Validated Register DTO:', body);
+      return this.authenticationService.register(body, files);
     } catch (error) {
       console.error('Error parsing JSON strings in form-data:', error);
       throw new BadRequestException('Invalid JSON format for nested objects');
     }
   }
-
   @Post('login')
   async login(@Body() loginDto: LoginDto, @Res() res: Response) {
     return this.authenticationService.login(loginDto, res);
@@ -120,18 +108,56 @@ export class AuthenticationController {
     return this.authenticationService.searchUser(searchTerm, searchBy);
   }
 
-
-
-  // @Patch('deactivate/:id')
-  // async deactivateUser(@Param('id') id: UUID) {
-  //   return this.authenticationService.deactivateUser(id);
-  // }
+  @Delete('delete')
+  async deleteUsers(@Body('userIds') userIds: UUID[]) {
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+      throw new BadRequestException('userIds must be a non-empty array');
+    }
+    return await this.authenticationService.deleteUsers(userIds);
+  }
+  @Get('user/:id')
+  async getSingleUser(@Param('id') id: UUID) {
+    try {
+      return await this.authenticationService.getSingleUser(id);
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof InternalServerErrorException) {
+        throw error;
+      } else {
+        throw new InternalServerErrorException({
+          message: 'An error occurred while fetching the user',
+          status: 500,
+          success: false,
+        });
+      
+      }
+    }
+  }
+    @Get('users/role')
+  async getUsersByRole(
+    @Query('role') role: ROLE,
+    @Query('staffRole') staffRole?: STAFFROLE,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 8
+  ) {
+    try {
+      return await this.authenticationService.getUsersByRole(role, staffRole, page, limit);
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof InternalServerErrorException) {
+        throw error;
+      } else {
+        throw new InternalServerErrorException({
+          message: 'An error occurred while fetching users by role',
+          status: 500,
+          success: false,
+        });
+      }
+    }
+  }
+  @Patch('deactivate')
+  async deactivateUsers(@Body('userIds') userIds: UUID[]) {
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+      throw new BadRequestException('userIds must be a non-empty array');
+    }
+    return await this.authenticationService.deactivateUsers(userIds);
+  }
 }
-// function UseInterceptors(interceptor: any) {
-//   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-//     Reflect.defineMetadata('interceptors', interceptor, target, propertyKey);
-//   };
-// }
-// function UseInterceptors(arg0: any): (target: AuthenticationController, propertyKey: "uploadProfilePicture", descriptor: TypedPropertyDescriptor<(file: Express.Multer.File) => Promise<any>>) => void | TypedPropertyDescriptor<...> {
-//   throw new Error('Function not implemented.');
-// }

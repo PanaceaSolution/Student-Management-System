@@ -13,33 +13,20 @@ export class ParentController {
     FileFieldsInterceptor([
       { name: 'profilePicture', maxCount: 1 },
       { name: 'documents', maxCount: 10 },
-    ]),
+    ])
   )
   async createParent(
     @Body() createParentDto: ParentDto,
     files: {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
-    },
-  ) {
-    try {
-      if (typeof createParentDto.profile === 'string') {
-        createParentDto.profile = JSON.parse(createParentDto.profile);
-      }
-      if (typeof createParentDto.address === 'string') {
-        createParentDto.address = JSON.parse(createParentDto.address);
-      }
-      if (typeof createParentDto.contact === 'string') {
-        createParentDto.contact = JSON.parse(createParentDto.contact);
-      }
-        if (typeof createParentDto.document === 'string') {
-          createParentDto.document = JSON.parse(createParentDto.document);
-        }
-    } catch (error) {
-      throw new BadRequestException(
-        'Invalid JSON format for address, contact, profile, or document',
-      );
     }
+  ) {
+    console.log('Request received at /parent/create');
+    console.log('Received DTO:', createParentDto);
+
+    // No need for manual parsing due to transformations in ParentDto and RegisterUserDto
+
     return this.parentService.createParent(createParentDto, files);
   }
 

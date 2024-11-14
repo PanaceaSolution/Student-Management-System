@@ -16,32 +16,7 @@ import { TRANSPORTATION_MODE } from '../../utils/role.helper';
 import { User } from '../../user/authentication/entities/authentication.entity';
 import { RegisterUserDto } from '../../user/authentication/dto/register.dto';
 
-// export class StudentAddressDto {
-//   @IsString()
-//   wardNumber: string;
 
-//   @IsString()
-//   municipality: string;
-
-//   @IsString()
-//   province: string;
-
-//   @IsString()
-//   district: string;
-// }
-
-// export class StudentContactDto {
-//   @IsString()
-//   phoneNumber: string;
-
-//   @IsOptional()
-//   @IsString()
-//   alternatePhoneNumber?: string;
-
-//   @IsOptional()
-//   @IsString()
-//   telephoneNumber?: string;
-// }
 
 export class StudentDto extends RegisterUserDto {
   @IsString()
@@ -107,84 +82,3 @@ export class StudentDto extends RegisterUserDto {
   formattedAdmissionDate?: string;
 }
 
-// export class UpdateStudentDto {
-//   @IsOptional()
-//   @IsString()
-//   username?: string;
-
-//   @IsOptional()
-//   @IsString()
-//   fname?: string;
-
-//   @IsOptional()
-//   @IsString()
-//   lname?: string;
-
-//   @IsOptional()
-//   @IsEmail()
-//   email?: string;
-
-//   @IsOptional()
-//   @ValidateNested()
-//   @Type(() => AddressDto)
-//   permanentAddress?: AddressDto;
-
-//   @IsOptional()
-//   @ValidateNested()
-//   @Type(() => AddressDto)
-//   temporaryAddress?: AddressDto;
-
-//   @IsOptional()
-//   @IsString()
-//   father_name?: string;
-
-//   @IsOptional()
-//   @IsString()
-//   mother_name?: string;
-
-//   @IsOptional()
-//   @IsEnum(Gender)
-//   sex?: Gender;
-
-//   @IsOptional()
-//   @IsString()
-//   bloodtype?: string;
-
-//   @IsOptional()
-//   @IsDate()
-//   @Type(() => Date)
-//   dob?: Date;
-
-//   @IsOptional()
-//   @IsDate()
-//   @Type(() => Date)
-//   admission_date?: Date;
-// }
-
-// export class FilterStudentDto {
-//   @IsOptional()
-//   @IsString()
-//   name?: string; // This will be used for filtering by `fname` or `lname`
-
-//   @IsOptional()
-//   @IsEnum(Gender)
-//   gender?: Gender; // Filtering by gender
-
-//   @IsOptional()
-//   @Type(() => Date)
-//   createdAfter?: Date; // Start of createdAt range
-
-//   @IsOptional()
-//   @Type(() => Date)
-//   createdBefore?: Date; // End of createdAt range
-// }
-
-// export class LinkParentDto {
-//   @IsNotEmpty()
-//   @IsInt()
-//   parentId: number;
-
-//   @IsNotEmpty()
-//   @IsInt()
-//   studentId: number;
-// }

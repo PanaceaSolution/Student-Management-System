@@ -29,7 +29,8 @@ export class UserProfile {
   @Column({ type: 'date', nullable: false })
   dob: Date;
 
-  @OneToOne(() => User, (user) => user.profile, { nullable: true }) // Set nullable: true here
+  @OneToOne(() => User, (user) => user.profile, { nullable: true ,onDelete: 'CASCADE',onUpdate:'CASCADE'}) // Set nullable: true here
   @JoinColumn({ name: 'userId' })
   user: User;
+  isActivated: boolean;
 }

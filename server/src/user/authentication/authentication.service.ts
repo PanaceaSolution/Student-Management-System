@@ -21,8 +21,6 @@ import { UserContact } from '../userEntity/contact.entity';
 import { UserDocuments } from '../userEntity/document.entity';
 import { UserProfile } from '../userEntity/profile.entity';
 import { CloudinaryError, DatabaseError } from '../../utils/custom-errors';
-
-
 import {
   generateRandomPassword,
   generateUsername,
@@ -561,13 +559,13 @@ export class AuthenticationService {
   async getAllUsers(page: number, limit: number) {
     try {
       const skip = (page - 1) * limit;
-
+  
       const [users, total] = await this.userRepository.findAndCount({
-        order: { createdAt: 'DESC' },
+        order: { createdAt: 'DESC' }, 
         skip,
         take: limit,
       });
-
+  
       return {
         data: users,
         total,
@@ -578,23 +576,107 @@ export class AuthenticationService {
         success: true,
       };
     } catch (error) {
-      console.error('Error fetching users:', error);
-      return {
+      throw new InternalServerErrorException({
         message: 'Error fetching users',
         status: 500,
         success: false,
         error: error.message,
-      };
+      });
     }
   }
-
+  
+  async getSingleUser(userId: UUID) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { userId },
+        relations: ['profile', 'address', 'contact', 'document'],
+      });
+  
+      if (!user) {
+        throw new NotFoundException({
+          message: 'User not found',
+          status: 404,
+          success: false,
+        });
+      }
+  
+      return {
+        message: 'User fetched successfully',
+        status: 200,
+        success: true,
+        user: this.formatUserResponse(user),
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        throw new InternalServerErrorException({
+          message: 'Failed to fetch user data',
+          status: 500,
+          success: false,
+        });
+      }
+    }
+  }
+  
+  async getUsersByRole(role: ROLE, staffRole?: STAFFROLE, page: number = 1, limit: number = 10) {
+    try {
+      const skip = (page - 1) * limit;
+  
+      if (![ROLE.ADMIN, ROLE.STUDENT, ROLE.STAFF, ROLE.PARENT].includes(role)) {
+        throw new BadRequestException({
+          message: 'Invalid role provided',
+          status: 400,
+          success: false,
+        });
+      }
+  
+      const whereClause = { role } as any;
+  
+      if (role === ROLE.STAFF && staffRole) {
+        whereClause.staff = { staffRole };
+      }
+  
+      const [users, total] = await this.userRepository.findAndCount({
+        where: whereClause,
+        relations: ['profile', 'address', 'contact', 'document', 'staff'],
+        order: { createdAt: 'DESC' },  
+        skip,
+        take: limit,
+      });
+  
+      const formattedUsers = users.map(this.formatUserResponse);
+  
+      return {
+        message: 'Users fetched successfully',
+        status: 200,
+        success: true,
+        data: formattedUsers,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      } else {
+        throw new InternalServerErrorException({
+          message: 'Failed to fetch users by role',
+          status: 500,
+          success: false,
+        });
+      }
+    }
+  }
+  
   async searchUser(
     searchTerm: string,
     searchBy: 'name' | 'role' | 'email' | 'username',
   ) {
     try {
       let whereClause;
-
+  
       switch (searchBy) {
         case 'name':
           whereClause = [
@@ -602,68 +684,31 @@ export class AuthenticationService {
             { profile: { lname: Like(`${searchTerm}%`) } },
           ];
           break;
-
+  
         case 'role':
           whereClause = { role: searchTerm as ROLE };
           break;
-
+  
         case 'email':
           whereClause = { email: Like(`%${searchTerm}%`) };
           break;
-
+  
         case 'username':
           whereClause = { username: Like(`${searchTerm}%`) };
           break;
-
+  
         default:
           throw new BadRequestException('Invalid search criteria');
       }
-
+  
       const users = await this.userRepository.find({
         where: whereClause,
         relations: ['profile', 'contact', 'address', 'document'],
+        order: { createdAt: 'DESC' }, 
       });
-
-      const formattedUsers = users.map((user) => ({
-        id: user.userId,
-        email: user.email,
-        username: user.username,
-        role: user.role,
-        isActivated: user.isActivated,
-        createdAt: user.createdAt,
-        profile: user.profile
-          ? {
-              fname: user.profile.fname,
-              lname: user.profile.lname,
-              gender: user.profile.gender,
-              dob: user.profile.dob,
-              profilePicture: user.profile.profilePicture,
-            }
-          : null,
-        contact: user.contact
-          ? {
-              phoneNumber: user.contact.phoneNumber,
-              alternatePhoneNumber: user.contact.alternatePhoneNumber,
-              telephoneNumber: user.contact.telephoneNumber,
-            }
-          : null,
-        address: user.address
-          ? user.address.map((addr) => ({
-              addressType: addr.addressType,
-              wardNumber: addr.wardNumber,
-              municipality: addr.municipality,
-              district: addr.district,
-              province: addr.province,
-            }))
-          : [],
-        documents: user.document
-          ? user.document.map((doc) => ({
-              documentName: doc.documentName,
-              documentFile: doc.documentFile,
-            }))
-          : [],
-      }));
-
+  
+      const formattedUsers = users.map(this.formatUserResponse);
+  
       return {
         users: formattedUsers,
         status: 200,
@@ -672,50 +717,158 @@ export class AuthenticationService {
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;
-      } else if (
-        error instanceof CloudinaryError ||
-        error instanceof DatabaseError
-      ) {
-        console.error('Database or Cloudinary error:', error);
-        throw new InternalServerErrorException(
-          'A service error occurred during search',
-        );
       } else {
-        console.error('Unexpected error during search:', error);
-        throw new InternalServerErrorException(
-          'An unexpected error occurred during search',
-        );
+        throw new InternalServerErrorException({
+          message: 'An unexpected error occurred during search',
+          status: 500,
+          success: false,
+        });
       }
     }
   }
 
-  async deactivateUser(userId: UUID) {
+  async deactivateUsers(userIds: UUID[]) {
+    const results = [];
+  
     try {
-      const user = await this.userRepository.findOne({ where: { userId } });
-
-      if (!user) {
-        return {
-          message: 'User not found',
-          status: 404,
-          success: false,
-        };
+      for (const userId of userIds) {
+        try {
+          const user = await this.userRepository.findOne({
+            where: { userId },
+            relations: ['profile', 'address', 'contact', 'document'],
+          });
+  
+          if (!user) {
+            results.push({
+              userId,
+              message: 'User not found',
+              status: 404,
+              success: false,
+            });
+            continue;
+          }
+  
+          // Deactivate user and related entities
+          user.isActivated = false;
+          await this.userRepository.save(user);
+  
+          // Optionally deactivate related entities (example shown below)
+          if (user.profile) {
+            user.profile.isActivated = false;
+            await this.profileRepository.save(user.profile);
+          }
+  
+          if (user.address && Array.isArray(user.address)) {
+            await Promise.all(
+              user.address.map(async (addr) => {
+                addr.isActivated = false;
+                await this.addressRepository.save(addr);
+              })
+            );
+          }
+  
+          if (user.contact) {
+            user.contact.isActivated = false;
+            await this.contactRepository.save(user.contact);
+          }
+  
+          if (user.document && Array.isArray(user.document)) {
+            await Promise.all(
+              user.document.map(async (doc) => {
+                doc.isActivated = false;
+                await this.documentRepository.save(doc);
+              })
+            );
+          }
+  
+          results.push({
+            userId,
+            message: 'User and related data deactivated successfully',
+            status: 200,
+            success: true,
+          });
+        } catch (error) {
+          results.push({
+            userId,
+            message: 'Failed to deactivate user and related data',
+            status: 500,
+            success: false,
+          });
+        }
       }
-
-      user.isActivated = false;
-      await this.userRepository.save(user);
-
+  
       return {
-        message: 'User deactivated successfully',
+        message: 'Batch deactivation completed',
         status: 200,
         success: true,
+        results,
       };
     } catch (error) {
-      console.error('Error deactivating user:', error);
-      return {
-        message: 'Error deactivating user',
+      throw new InternalServerErrorException({
+        message: 'An unexpected error occurred during batch deactivation',
         status: 500,
         success: false,
-      };
+      });
     }
   }
+  async deleteUsers(userIds: UUID[]) {
+    const results = [];
+  
+    try {
+      for (const userId of userIds) {
+        try {
+          const user = await this.userRepository.findOne({ where: { userId } });
+  
+          if (!user) {
+            results.push({
+              userId,
+              message: 'User not found',
+              status: 404,
+              success: false,
+            });
+            continue;
+          }
+  
+          await this.userRepository.delete(userId.toString());
+  
+          results.push({
+            userId,
+            message: 'User and all related data deleted successfully',
+            status: 200,
+            success: true,
+          });
+        } catch (error) {
+          if (error.code === '23503') {
+            results.push({
+              userId,
+              message: 'Cannot delete user because it is referenced by other records',
+              status: 400,
+              success: false,
+            });
+          } else {
+            results.push({
+              userId,
+              message: 'Failed to delete user and related data',
+              status: 500,
+              success: false,
+            });
+          }
+        }
+      }
+  
+      return {
+        message: 'Batch deletion completed',
+        status: 200,
+        success: true,
+        results,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: 'An unexpected error occurred during batch deletion',
+        status: 500,
+        success: false,
+      });
+    }
+  }
+  
 }
