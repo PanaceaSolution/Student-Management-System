@@ -12,22 +12,29 @@ const useStudentStore = create(
             studentById: {},
 
             // Get all students
-            getAllStudents: async () => {
-               set({ loading: true, error: null })
+            getAllStudents: async (query) => {
+               set({ loading: true, error: null });
                try {
-                  const data = await getAllStudentsService()
-                  if (data?.status) {
-                     set({ students: data, loading: false })
+                  const data = await getAllStudentsService(query);
+                  if (data) {
+                     set({
+                        students: data.data,
+                        totalItems: data.totalItems, 
+                        totalPages: data.totalPages, 
+                        loading: false,
+                     });
                   } else {
-                     set({ students: [], loading: false })
-                     toast.error('Failed to fetch data')
+                     set({ students: [], loading: false });
+                     toast.error('Failed to fetch data');
                   }
-                  return data
+                  return data;
                } catch (error) {
-                  set({ error: error.message, loading: false })
-                  return error
+                  set({ error: error.message, loading: false });
+                  toast.error(error?.message);
+                  return error;
                }
             },
+            
 
             // Get student by ID
             getStudentById: async (studentId) => {

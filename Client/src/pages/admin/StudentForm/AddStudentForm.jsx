@@ -7,7 +7,6 @@ import DocumentUpload from "./DocumentUpload";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import useStudentStore from "@/store/studentStore";
 import Loader from "@/components/common/Loader";
-import ProfilePicUpload from "@/components/common/profilePicUpload";
 
 const AddStudentForm = ({ studentId, initialData }) => {
   const steps = ["Personal Info", "Address Info", "Document Upload"];
@@ -22,13 +21,8 @@ const AddStudentForm = ({ studentId, initialData }) => {
   } = useForm();
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [profilePic, setProfilePic] = useState(null);
+  // const [profilePic, setProfilePic] = useState(null);
   const { addStudent, loading } = useStudentStore();
-  const [documents, setDocuments] = useState({
-    birthCertificate: null,
-    citizenship: null,
-    marksheet: null,
-  });
 
   // Initialize form values with initialData if provided
   useEffect(() => {
@@ -58,7 +52,8 @@ const AddStudentForm = ({ studentId, initialData }) => {
         setValue("registrationNumber", initialData.registrationNumber);
       if (initialData.previousSchool)
         setValue("previousSchool", initialData.previousSchool);
-      if (initialData.profilePicture) setValue("profilePicture", initialData.profilePicture);
+      if (initialData.profilePicture)
+        setValue("profilePicture", initialData.profilePicture);
 
       // Handle nested objects (e.g., address, contact, documents)
       if (initialData.address) {
@@ -103,21 +98,6 @@ const AddStudentForm = ({ studentId, initialData }) => {
       }
     }
   }, [initialData, setValue]);
-
-  // Handle File Change
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setProfilePic(file);
-      clearErrors("profilePicture");
-    }
-  };
-
-  const removeFile = () => {
-    setProfilePic(null);
-    clearErrors("profilePicture");
-  };
-
   // Handle Next Step
   const handleNext = async () => {
     const isValid = await trigger();
@@ -125,13 +105,13 @@ const AddStudentForm = ({ studentId, initialData }) => {
       setCurrentStep((prevStep) => Math.min(prevStep + 1, steps.length - 1));
     }
   };
-
   // Handle Previous Step
   const handlePrevious = () => {
     setCurrentStep((prevStep) => Math.max(prevStep - 1, 0));
   };
 
   const onSubmit = async (data) => {
+    console.log("data", data);
     const formData = new FormData();
     const newData = { ...data };
     // **Profile Information**
@@ -152,9 +132,6 @@ const AddStudentForm = ({ studentId, initialData }) => {
       municipality: newData.municipality,
       province: newData.province,
       district: newData.district,
-      // permanentAddress: newData.permanentAddress,
-      // temporaryAddress: newData.temporaryAddress,
-      // villageName: newData.villageName,
     };
     formData.append("address", JSON.stringify([addressObj]));
     delete newData["wardNumber"];
@@ -186,6 +163,9 @@ const AddStudentForm = ({ studentId, initialData }) => {
     if (newData.marksheet) {
       documentArray.push({ documentName: "Marksheet" });
     }
+    if (newData.profilePicture) {
+      formData.append("profilePicture", newData?.profilePicture[0]);
+    }
     formData.append("document", JSON.stringify(documentArray));
     // Check if there are document files to append
     if (newData.birthCertificate || newData.citizenship || newData.marksheet) {
@@ -197,16 +177,12 @@ const AddStudentForm = ({ studentId, initialData }) => {
     delete newData["birthCertificate"];
     delete newData["citizenship"];
     delete newData["marksheet"];
-
-    if (profilePic) {
-      formData.append("profilePicture", profilePic);
-    }
     // **Remaining Data**
     for (let key in newData) {
       formData.append(key, newData[key]);
     }
-    formData.append("password", "Password@123")
-    formData.append("role", "STUDENT")
+    formData.append("password", "Password@123");
+    formData.append("role", "STUDENT");
     try {
       if (studentId) {
         console.log("Edit student logic");
@@ -242,16 +218,7 @@ const AddStudentForm = ({ studentId, initialData }) => {
             <PersonalInfo
               register={register}
               errors={errors}
-              handleFileChange={handleFileChange}
-              profilePicture={profilePic}
-              removeFile={removeFile}
               clearErrors={clearErrors}
-            />
-            <ProfilePicUpload
-              profilePic={profilePic}
-              setProfilePic={setProfilePic}
-              clearErrors={clearErrors}
-              errors={errors}
             />
           </div>
         )}
@@ -269,8 +236,6 @@ const AddStudentForm = ({ studentId, initialData }) => {
         {currentStep === 2 && (
           <DocumentUpload
             register={register}
-            setDocuments={setDocuments}
-            documents={documents}
             errors={errors}
             clearErrors={clearErrors}
           />
