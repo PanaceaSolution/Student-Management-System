@@ -734,13 +734,14 @@ export class AuthenticationService {
           success: false,
         });
       }
+
       let roleData;
       switch (role) {
         case ROLE.STUDENT:
-          roleData = await this.studentRepository.find({});
+          roleData = await this.studentRepository.find({relations:['user']});
           break;
         case ROLE.PARENT:
-          roleData = await this.parentRepository.find({});
+          roleData = await this.parentRepository.find({ relations: ['user'] });
           break;
         case ROLE.STAFF:
           if (
@@ -750,16 +751,16 @@ export class AuthenticationService {
           ) {
             roleData = await this.staffRepository.find({
               where: { staffRole: staffRole },
+              relations: ['user'],
             });
           } else {
-            roleData = await this.staffRepository.find({});
+            roleData = await this.staffRepository.find({ relations: ['user'] });
           }
           break;
         default:
           break;
       }
 
-      // console.log(data)
       const whereClause = { role } as any;
       const [users, total] = await this.userRepository.findAndCount({
         where: whereClause,
@@ -770,23 +771,31 @@ export class AuthenticationService {
       });
 
       const formattedUsers = users.map(this.formatUserResponse);
-      // console.log(formattedUsers);
+
+
+      //    console.log(
+      //      'Formatted Users:',
+      //      formattedUsers.map((user) => user.id),
+      //    );
+      // console.log('Role Data', roleData);
       
+      // Create a map of roleData by userId for quick lookup
+      const roleDataMap = new Map(
+        roleData.map((item: any) => [item.user.userId, item]),
+      );
 
       const finalData = formattedUsers
-        .map((item, index) =>
-          roleData[index] ? [item, roleData[index]] : null,
-        )
+        .map((user) => {
+          const roleInfo = roleDataMap.get(user.id);
+          return roleInfo ? [user, roleInfo] : null;
+        })
         .filter((pair) => pair !== null);
-      // console.log(finalData);
 
       return {
         message: 'Users fetched successfully',
         status: 200,
         success: true,
         data: finalData,
-        
-        // roleData: roleData,
         total,
         page,
         limit,
