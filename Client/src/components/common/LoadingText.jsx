@@ -20,7 +20,7 @@ const LoadingText = () => {
   }, []);
 
   return (
-    <div className="flex items-center flex-col space-y-2 p-4 ">
+    <div className="flex items-center justify-center flex-col space-y-2 p-4 ">
       <div className="relative z-50 flex flex-col justify-center items-center space-y-5 ">
         <l-line-spinner
           size="50"

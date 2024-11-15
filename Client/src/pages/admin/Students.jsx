@@ -144,8 +144,7 @@ const Students = () => {
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-
-  return (
+   return (
     <section>
       <div className="max-w-full mx-auto p-2">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-5">
@@ -224,7 +223,7 @@ const Students = () => {
               ) : (
                 <Table
                   setStudentInfo={setStudentInfo}
-                  items={flattenedStudents}
+                  items={students}
                   loading={loading}
                 />
               )}

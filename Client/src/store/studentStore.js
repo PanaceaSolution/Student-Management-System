@@ -119,7 +119,7 @@ const useStudentStore = create(
               toast.success(data.message || "Student deleted successfully");
               set((state) => ({
                 students: state.students.filter(
-                  (student) => student.id !== studentId
+                  (student) => student?.user?.id !== studentId
                 ),
                 deleteLoading: false,
               }));
