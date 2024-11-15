@@ -3,15 +3,17 @@ import ImageUploader from "@/components/common/ImageUploader";
 
 const DocumentUpload = ({ register, errors, clearErrors }) => {
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-semibold text-gray-800">Documents</h2>
-      <div className=" flex flex-wrap justify-center items-center">
+    <section className="max-w-7xl mx-auto">
+      
         {[
           { name: "birthCertificate", label: "Birth Certificate (optional)" },
           { name: "citizenship", label: "Citizenship Document (optional)" },
           { name: "marksheet", label: "10th Class Marksheet (optional)" },
         ].map((doc) => (
-          <div className=" flex justify-center items-center gap-4" key={doc.name}>
+          <div
+            className="justify-center items-center space-y-2"
+            key={doc.name}
+          >
             <ImageUploader
               name={doc.name}
               register={register}
@@ -21,8 +23,8 @@ const DocumentUpload = ({ register, errors, clearErrors }) => {
             />
           </div>
         ))}
-      </div>
-    </div>
+      
+    </section>
   );
 };
 

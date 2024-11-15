@@ -1,16 +1,42 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import Button from "@/components/Button";
 import Loadding from "./Loader/Spinner";
 import Modal from "./common/Modal";
 import AddStudentFormModal from "@/pages/admin/StudentForm/AddStudentFormModal";
 import suk from "../assets/suk.jpg";
+import useStudentStore from "@/store/studentStore";
+import Loader from "./common/Loader";
 
-const ProfileCard = ({ onDelete, studentInfo, loading }) => {
+
+const ProfileImage = React.memo(({ imageUrl, altText }) => (
+  <div className="bg-red-300 mx-auto h-24 w-24 rounded-full flex items-center justify-center mt-1">
+    <img
+      src={imageUrl || suk}
+      alt={altText}
+      className="w-full h-full rounded-full border-2 object-cover"
+    />
+  </div>
+));
+
+
+const EditDeleteButtons = React.memo(({ onEdit, onDelete, isDisabled }) => (
+  <div className="flex justify-center space-x-2 mt-2">
+    <Button type="edit" className="flex-shrink-0" onClick={onEdit}>
+      Edit
+    </Button>
+    <Button type="delete" className="flex-shrink-0" onClick={onDelete} disabled={isDisabled}>
+      Delete
+    </Button>
+  </div>
+));
+
+const ProfileCard = ({ studentInfo }) => {
   const [keys, setKeys] = useState([]);
   const [openModal, setOpenModal] = useState(-1);
-  const [showAddStudentModal, setShowAddStudentModal] = useState(-1);
+  const [showAddStudentModal, setShowAddStudentModal] = useState(false);
   const [showAllDetails, setShowAllDetails] = useState(false);
   const additionalContentRef = useRef(null);
+  const { deleteStudent, deleteLoading } = useStudentStore();
 
   useEffect(() => {
     if (studentInfo) {
@@ -20,14 +46,21 @@ const ProfileCard = ({ onDelete, studentInfo, loading }) => {
     }
   }, [studentInfo]);
 
-  const handleDelete = (id) => {
+  // Handle delete logic
+  const handleDelete = async (id) => {
     if (id) {
-      onDelete(id);
+      await deleteStudent(id);
     }
   };
 
-  const limitedKeys = keys.slice(0, 6);
+  const limitedKeys = useMemo(() => keys.slice(0, 4), [keys]);
 
+
+  const handleShowAllDetailsToggle = useCallback(() => {
+    setShowAllDetails((prev) => !prev);
+  }, []);
+
+  // Scroll to additional content when "View All" is clicked
   useEffect(() => {
     if (showAllDetails && additionalContentRef.current) {
       additionalContentRef.current.scrollIntoView({
@@ -37,9 +70,12 @@ const ProfileCard = ({ onDelete, studentInfo, loading }) => {
     }
   }, [showAllDetails]);
 
+  const studentProfileImage = studentInfo?.user_profile_profilePicture || suk;
+  const studentFirstName = studentInfo?.fname || "Unknown";
   return (
     <>
-      <div className="border rounded-sm p-4 md:p-4 shadow-md flex flex-col bg-white">
+      {deleteLoading && <Loader />}
+      <div className="border rounded-sm p-2 md:p-4 shadow-md flex flex-col bg-white">
         <div className="border-b-2">
           <h2 className="font-bold text-xl text-[#233255CC] text-center">
             Student Details
@@ -47,13 +83,7 @@ const ProfileCard = ({ onDelete, studentInfo, loading }) => {
         </div>
 
         <div className="flex flex-col max-h-[530px] w-full overflow-y-auto scrollbar-thin">
-          <div className="bg-red-300 mx-auto h-24 w-24 rounded-full flex items-center justify-center mt-1">
-            <img
-              src={suk}
-              alt={`${studentInfo?.fname}'s profile`}
-              className="w-full h-full rounded-full border-2 object-cover"
-            />
-          </div>
+          <ProfileImage imageUrl={studentProfileImage} altText={`${studentFirstName}'s profile`} />
 
           <div className="mt-4 flex-1 flex-wrap break-words">
             {limitedKeys.length === 0 ? (
@@ -71,12 +101,12 @@ const ProfileCard = ({ onDelete, studentInfo, loading }) => {
                     </div>
                   );
                 } else {
-                  return null; // Skip rendering for undefined or empty fields
+                  return null;
                 }
               })
             )}
 
-            {/* Additional content area for "View All" */}
+
             {showAllDetails && (
               <div ref={additionalContentRef}>
                 {keys.slice(6).map((key) => {
@@ -100,46 +130,36 @@ const ProfileCard = ({ onDelete, studentInfo, loading }) => {
 
           <button
             className="mt-0 inline text-blue-700 hover:text-blue-800 hover:underline ml-auto p-2"
-            onClick={() => setShowAllDetails((prev) => !prev)}
+            onClick={handleShowAllDetailsToggle}
           >
             {showAllDetails ? "Show Less" : "View All"}
           </button>
 
+          {/* Modal for Delete Confirmation */}
           <Modal
             title={`Delete ${studentInfo?.fatherName}`}
             desc="Are You Sure?"
             actionName="Delete"
-            dangerAction={() => handleDelete(studentInfo?.studentId)}
-            showModal={openModal === studentInfo?.studentId}
+            dangerAction={() => handleDelete(studentInfo?.user_id)}
+            showModal={openModal === studentInfo?.user_id}
             cancelOption={() => setOpenModal(-1)}
           />
 
+          {/* Modal for Adding/Editing Student */}
           <AddStudentFormModal
             cancelOption={() => setShowAddStudentModal(false)}
-            showModal={showAddStudentModal === studentInfo?.studentId}
-            studentId={studentInfo?.studentId}
+            showModal={showAddStudentModal}
+            studentId={studentInfo?.user_id}
             initialData={studentInfo}
           />
         </div>
 
-        <div className="flex justify-center space-x-2 mt-2 sticky bottom-0">
-          <Button
-            type="edit"
-            className="flex-shrink-0"
-            onClick={() => setShowAddStudentModal(studentInfo.studentId)}
-          >
-            Edit
-          </Button>
-          <Button
-            isDisable={loading}
-            type="delete"
-            className="flex-shrink-0"
-            onClick={() => setOpenModal(studentInfo.studentId)}
-          >
-            Delete
-            {loading && <Loadding />}
-          </Button>
-        </div>
+        {/* Edit/Delete Buttons */}
+        <EditDeleteButtons
+          onEdit={() => setShowAddStudentModal(true)}  // Open modal for editing
+          onDelete={() => setOpenModal(studentInfo?.user_id)}
+          isDisabled={deleteLoading}
+        />
       </div>
     </>
   );
