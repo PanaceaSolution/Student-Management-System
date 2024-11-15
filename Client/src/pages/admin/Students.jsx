@@ -1,10 +1,10 @@
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import Paginations from "@/components/common/Paginations";
 import Table from "@/components/common/Tables";
 import ResultShowing from "@/components/common/ResultShowing";
 import ProfileCard from "@/components/ProfileCard";
 import Select from "@/components/Select";
-import SearchBox from "@/components/SearchBox"; 
+import SearchBox from "@/components/SearchBox";
 import { Button } from "@/components/ui/button";
 import { DateSelect } from "@/components/DateSelect";
 import AddStudentFormModal from "./StudentForm/AddStudentFormModal";
@@ -61,10 +61,9 @@ const Students = () => {
   const { getAllStudents, loading, error, students, totalPages, total } = useStudentStore();
 
   const itemsPerPage = 8;
-
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // Ensure query is correct whenever filters or page change
+ 
   const query = useMemo(() => {
     const params = new URLSearchParams();
     if (selectedGender) params.append("gender", selectedGender);
@@ -75,15 +74,8 @@ const Students = () => {
     params.append("role", "STUDENT");
     params.append("limit", itemsPerPage);
     return `${params.toString()}`;
-  }, [
-    selectedGender,
-    selectedDepartment,
-    debouncedSearchTerm,
-    date,
-    currentPage,
-  ]);
+  }, [selectedGender, selectedDepartment, debouncedSearchTerm, date, currentPage]);
 
-  // Fetch students when page or filters change (updated to prevent infinite loop)
   useEffect(() => {
     const fetchStudents = async () => {
       if (query) {
@@ -92,7 +84,7 @@ const Students = () => {
     };
 
     fetchStudents();
-  }, [query, getAllStudents]); 
+  }, [query, getAllStudents]);
 
   // Export function logic
   const { exportToCSV, exportToPDF } = useExport();
@@ -128,27 +120,31 @@ const Students = () => {
     setActiveTab(tab);
   }, []);
 
-  const handleSearchChange = (event) => {
+  const handleSearchChange = useCallback((event) => {
     setSearchTerm(event.target.value);
-  };
+  }, []);
 
-  const handleGenderChange = (event) => {
+  const handleGenderChange = useCallback((event) => {
     setSelectedGender(event.target.value);
-  };
+  }, []);
 
-  const handleDepartmentChange = (event) => {
+  const handleDepartmentChange = useCallback((event) => {
     setSelectedDepartment(event.target.value);
-  };
+  }, []);
 
-  const handleDateChange = (selectedDate) => {
-    if (selectedDate !== date) { // Prevent unnecessary updates
+  const handleDateChange = useCallback((selectedDate) => {
+    if (selectedDate !== date) {
       setDate(selectedDate);
     }
-  };
+  }, [date]);
 
-  //Pagination logic
+  // Memoized flattened students data
+  const flattenedStudents = useMemo(() => flattenData(students), [students]);
+
+  // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
   return (
     <section>
       <div className="max-w-full mx-auto p-2">
@@ -228,7 +224,7 @@ const Students = () => {
               ) : (
                 <Table
                   setStudentInfo={setStudentInfo}
-                  items={flattenData(students)}
+                  items={flattenedStudents}
                   loading={loading}
                 />
               )}
