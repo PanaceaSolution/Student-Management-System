@@ -100,7 +100,7 @@ export class AuthenticationService {
         role,
         staffRole,
       );
-      console.log('Generating username:', username);
+      console.log('Generating username:', username);    
 
       const newUser = this.userRepository.create({
         email,
@@ -394,10 +394,10 @@ export class AuthenticationService {
         updatedFields['role'] = role;
       }
       await this.userRepository.save(user);
-      console.log('User base data updated:', {
-        email: user.email,
-        role: user.role,
-      });
+      // console.log('User base data updated:', {
+      //   email: user.email,
+      //   role: user.role,
+      // });
 
       let profilePictureUrl: string | null = null;
       if (profile) {
@@ -482,7 +482,7 @@ export class AuthenticationService {
       if (userProfile?.profilePicture) {
         const publicId = extractPublicIdFromUrl(userProfile.profilePicture);
         await deleteFileFromCloudinary(publicId);
-        console.log('Old profile picture deleted from Cloudinary');
+        // console.log('Old profile picture deleted from Cloudinary');
       }
 
       const [uploadedProfilePicture] = await uploadFilesToCloudinary(
@@ -521,7 +521,7 @@ export class AuthenticationService {
       profileUpdateData,
     );
     updatedFields['profile'] = profileUpdateData;
-    console.log('User profile updated:', profileUpdateData);
+    // console.log('User profile updated:', profileUpdateData);
   }
 
   private async updateUserContact(

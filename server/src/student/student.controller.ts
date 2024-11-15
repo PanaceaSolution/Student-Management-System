@@ -37,8 +37,8 @@ export class StudentController {
     @Body() createStudentDto: StudentDto,
     @UploadedFiles() files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
   ) {
-    console.log('Received files:', files);
-    console.log('Received body:', createStudentDto);
+    // console.log('Received files:', files);
+    // console.log('Received body:', createStudentDto);
     return this.studentService.createStudent(createStudentDto, files);
   }
   @Get('')
