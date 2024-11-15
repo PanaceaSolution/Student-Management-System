@@ -109,6 +109,7 @@ const AddStudentForm = ({ studentId, initialData }) => {
   };
 
   const onSubmit = async (data) => {
+    console.log(data)
     const formData = new FormData();
     const newData = { ...data };
     // **Profile Information**

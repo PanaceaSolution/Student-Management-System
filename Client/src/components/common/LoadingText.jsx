@@ -29,7 +29,7 @@ const LoadingText = () => {
           color="blue"
         ></l-line-spinner>
       </div>
-      <span className="font-semibold text-lg ">Loading{dots}</span>
+      <span className="font-semibold text-lg text-white">Loading{dots}</span>
     </div>
   );
 };

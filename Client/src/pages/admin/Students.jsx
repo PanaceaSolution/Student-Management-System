@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import React, { useState, useMemo, useCallback, useEffect, } from "react";
 import Paginations from "@/components/common/Paginations";
 import Table from "@/components/common/Tables";
 import ResultShowing from "@/components/common/ResultShowing";
