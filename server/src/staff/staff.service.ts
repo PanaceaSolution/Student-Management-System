@@ -130,7 +130,7 @@ export class StaffService {
       hireDate,
       salary,
       staffRole: staffRole.trim() as STAFFROLE,
-      user: userReference,
+      // user: userReference,
     });
 
     await this.staffRepository.save(newStaff);
@@ -138,8 +138,8 @@ export class StaffService {
     return {
       status: 201,
       message: 'Staff created successfully',
-      staff: newStaff,
-      user: createUserResponse,
+      staff: { ...newStaff, user: createUserResponse.user },
+      // user: createUserResponse,
     };
   }
 
