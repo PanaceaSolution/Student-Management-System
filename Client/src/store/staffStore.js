@@ -22,8 +22,9 @@ const useStaffStore = create(
                   const res = await getAllUserService(role);
                   if (res.status === 200) {
                      set({
-                        staff: res.data.filter(staff => staff.staffRole !== "TEACHER"),
-                        teacher: res.data.filter(teacher => teacher.staffRole === "TEACHER"),
+                        // staff: res.data.filter(staff => staff.staffRole !== "TEACHER"),
+                        // teacher: res.data.filter(teacher => teacher.staffRole === "TEACHER"),
+                        staff: res.data,
                         totalUsers: res.total,
                         pages: res.totalPages,
                         loading: false

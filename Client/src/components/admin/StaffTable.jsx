@@ -11,7 +11,6 @@ import { Pagination } from "./Pagination";
 import ResultShowing from "../common/ResultShowing";
 import { Button } from "../ui/button";
 import { Pencil, Trash2 } from "lucide-react";
-import Loadding from "../Loader/Loadding";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -91,7 +90,7 @@ const StaffTable = ({ user, handleUserData, tableHead, tableFields, setCardOpen,
                               onClick={() => handleDelete(user.user.id)}
                               disabled={loading}
                            >
-                              {loading ? <Loadding /> : <Trash2 />}
+                              <Trash2 />
                            </Button>
                         </TableCell>
                      </TableRow>

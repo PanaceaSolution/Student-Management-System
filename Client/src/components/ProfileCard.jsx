@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import Button from "@/components/Button";
-import Loadding from "./Loader/Loadding";
+import Loadding from "./Loader/Spinner";
 import Modal from "./common/Modal";
 import AddStudentFormModal from "@/pages/admin/StudentForm/AddStudentFormModal";
 import suk from "../assets/suk.jpg";

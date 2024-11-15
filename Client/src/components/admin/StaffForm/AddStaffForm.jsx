@@ -16,14 +16,13 @@ import StaffInfo from './StaffInfo';
 import AddressInfo from '@/pages/admin/StudentForm/AddressInfo';
 import ProfilePicUpload from '@/components/common/profilePicUpload';
 import StaffDocumentUpload from './StaffDocumentUpload';
-import Loadding from '@/components/Loader/Loadding';
 
 const documentFields = [
    { name: "birthCertificate", label: "Birth Certificate (optional)" },
    { name: "citizenship", label: "Citizenship Document (optional)" },
 ]
 
-const AddStaffForm = ({ formOpen, setFormOpen }) => {
+const AddStaffForm = ({ formOpen, setFormOpen, setLoading }) => {
    const { addStaff, loading } = useStaffStore();
    const steps = ["Personal Info", "Address Info", "Document Upload"];
    const [currentStep, setCurrentStep] = useState(0);
@@ -210,15 +209,7 @@ const AddStaffForm = ({ formOpen, setFormOpen }) => {
                         disabled={loading}
                         aria-label="Submit Form"
                      >
-                        {loading
-                           ? (
-                              <div className="flex gap-1 items-center">
-                                 <Loadding />
-                                 <p className="text-sm text-gray-500">Submitting...</p>
-                              </div>
-                           )
-                           : "Submit"
-                        }
+                        Submit
                      </button>
                   )}
                </div>

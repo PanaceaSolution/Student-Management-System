@@ -57,13 +57,13 @@ const Teachers = () => {
   const [cardOpen, setCardOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
 
-  const { teacher, getStaff, deleteStaff, loading } = useStaffStore()
+  const { staff, getStaff, deleteStaff, loading } = useStaffStore()
 
   useEffect(() => {
     getStaff("STAFF");
   }, []);
 
-  // const teacher = useMemo(() => staff, [staff]);
+  const teacher = useMemo(() => staff, [staff]);
 
   const { exportToCSV, exportToPDF } = useExport();
   // Handle format selection and trigger export
