@@ -98,7 +98,9 @@ const AddStaffForm = ({ formOpen, setFormOpen }) => {
 
       try {
          const res = await addStaff(formattedData);
-         if (res.status === 201) {
+         console.log(res);
+
+         if (res?.status === 201) {
             setFormOpen(false);
             reset();
             setCurrentStep(0);

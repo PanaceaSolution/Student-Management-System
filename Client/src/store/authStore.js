@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { login as loginService } from '@/services/authServices';
+import toast from 'react-hot-toast';
 
 // Utility function to determine role based on username
 const getRoleFromUsername = (username) => {
@@ -24,17 +25,21 @@ const useAuthStore = create(
                try {
                   const data = await loginService(userData);
 
-                  // Set role based on username if role is 'STAFF'
-                  const { username, role } = data.payload;
-                  const finalRole = role === 'STAFF' ? getRoleFromUsername(username) : role;
+                  if (data.success) {
+                     // Set role based on username if role is 'STAFF'
+                     const { username, role } = data.payload;
+                     const finalRole = role === 'STAFF' ? getRoleFromUsername(username) : role;
 
-                  set({
-                     isAuthenticated: data.success,
-                     loggedInUser: { ...data.payload, role: finalRole }
-                  });
+                     set({
+                        isAuthenticated: data.success,
+                        loggedInUser: { ...data.payload, role: finalRole }
+                     });
+                     toast.success(data.message);
+                  }
                   return data;
                } catch (error) {
                   set({ isAuthenticated: false, loggedInUser: null });
+                  toast.error(error.message);
                } finally {
                   set({ loading: false });
                }

@@ -1,12 +1,9 @@
-import { Button } from "../ui/button";
-import EditStaffForm from "./StaffForm/EditStaffForm";
 import {
    Dialog,
    DialogContent,
    DialogDescription,
    DialogHeader,
    DialogTitle,
-   DialogTrigger,
 } from "@/components/ui/dialog"
 import {
    Accordion,
@@ -23,8 +20,20 @@ const DetailsCard = ({
    setCardOpen,
 }) => {
 
-   const getNestedValue = (obj, path) =>
-      path.split('.').reduce((acc, part) => acc && acc[part], obj) || "N/A";
+   const getNestedValue = (obj, path) => {
+      try {
+         return path.split('.').reduce((acc, part) => {
+            if (part.endsWith(']')) {
+               const [arrayKey, index] = part.split(/[\[\]]/).filter(Boolean);
+               return acc && acc[arrayKey] ? acc[arrayKey][index] : undefined;
+            }
+            return acc && acc[part];
+         }, obj) || "N/A";
+      } catch {
+         return "N/A";
+      }
+   };
+
 
    const renderDocument = (url, label) => {
       const isImage = /\.(jpg|jpeg|png|gif|bmp)$/i.test(url);

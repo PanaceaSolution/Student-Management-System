@@ -37,23 +37,66 @@ const useStaffStore = create(
             addStaff: async (staffData) => {
                set({ loading: true, error: null });
                try {
-                  const data = await createStaffService(staffData);
-                  if (data.status === 201) {
+                  const res = await createStaffService(staffData);
+                  if (res.status === 201) {
+                     const formattedStaff = {
+                        user: {
+                           id: res.staff.user.userId,
+                           email: res.staff.user.email,
+                           username: res.staff.user.username,
+                           role: res.staff.user.role,
+                           isActivated: res.staff.user.isActivated,
+                           createdAt: res.staff.user.createdAt,
+                           profile: {
+                              fname: res.user.user.profile.fname,
+                              lname: res.user.user.profile.lname,
+                              gender: res.user.user.profile.gender,
+                              dob: res.user.user.profile.dob,
+                              profilePicture: res.user.user.profile.profilePicture,
+                           },
+                           contact: {
+                              phoneNumber: res.user.user.contact.phoneNumber,
+                              alternatePhoneNumber: res.user.user.contact.alternatePhoneNumber,
+                              telephoneNumber: res.user.user.contact.telephoneNumber,
+                           },
+                           address: res.user.user.address.map((address) => ({
+                              addressType: address.addressType,
+                              wardNumber: address.wardNumber,
+                              municipality: address.municipality,
+                              district: address.district,
+                              province: address.province,
+                           })),
+                           documents: res.user.user.documents.map((doc) => ({
+                              documentName: doc.documentName,
+                              documentFile: doc.documentFile,
+                           })),
+                        },
+                        staffId: res.staff.staffId,
+                        hireDate: res.staff.hireDate,
+                        salary: res.staff.salary,
+                        staffRole: res.staff.staffRole,
+                     };
+                     console.log(formattedStaff);
+
+
+                     // Add the formatted staff to the state
                      set((state) => ({
-                        staff: [...state.staff, data.staff],
+                        staff: [...state.staff, formattedStaff],
                         loading: false,
                      }));
-                     toast.success(data.message);
+
+                     toast.success(res.message);
                   } else {
-                     toast.error(data.message);
+                     toast.error(res.message);
                      set({ loading: false });
                   }
-                  return data;
+                  return res;
                } catch (error) {
                   set({ error: error.message, loading: false });
-                  toast.error("Failed to add staff");
+                  toast.error(error.message);
                }
             },
+
 
             // Update an existing staff member
             updateStaff: async (staffId, updatedStaffData) => {
