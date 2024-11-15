@@ -64,9 +64,8 @@ const Staffs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [cardOpen, setCardOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
 
-  const { staff, getStaff, deleteStaff } = useStaffStore()
+  const { staff, getStaff, deleteStaff, loading } = useStaffStore()
 
   useEffect(() => {
     getStaff("STAFF");
@@ -112,12 +111,10 @@ const Staffs = () => {
   }
 
   const handleDelete = (id) => {
-    setLoading(true);
     const res = deleteStaff(id);
     if (res.status === 200) {
       setSelectedData(null);
     }
-    setLoading(false);
   };
 
   return (
@@ -133,7 +130,7 @@ const Staffs = () => {
                   onChange={handleExportChange}
                   className="w-32 bg-white"
                 />
-                <AddStaffForm formOpen={formOpen} setFormOpen={setFormOpen} selectedData={selectedData} setLoading={setLoading} />
+                <AddStaffForm formOpen={formOpen} setFormOpen={setFormOpen} selectedData={selectedData} />
               </div>
             </div>
             <div className="border-b-2 p-2">
@@ -202,7 +199,7 @@ const Staffs = () => {
       </div>
 
       {loading === true && (
-        <div className="fixed top-0 left-0 w-full h-screen bg-black opacity-50 z-50 flex justify-center items-center">
+        <div className="fixed top-0 left-0 w-full h-screen bg-black opacity-50 z-[500] flex justify-center items-center">
           <Spinner />
         </div>
       )}

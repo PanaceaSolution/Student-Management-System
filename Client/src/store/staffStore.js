@@ -17,7 +17,6 @@ const useStaffStore = create(
 
             // Get all staff
             getStaff: async (role) => {
-               set({ loading: true, error: null });
                try {
                   const res = await getAllUserService(role);
                   if (res.status === 200) {
@@ -27,13 +26,10 @@ const useStaffStore = create(
                         staff: res.data,
                         totalUsers: res.total,
                         pages: res.totalPages,
-                        loading: false
                      })
-                  } else {
-                     set({ loading: false })
                   }
                } catch (error) {
-                  set({ error: error.message, loading: false })
+                  set({ error: error.message })
                }
             },
 

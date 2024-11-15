@@ -22,7 +22,7 @@ const documentFields = [
    { name: "citizenship", label: "Citizenship Document (optional)" },
 ]
 
-const AddStaffForm = ({ formOpen, setFormOpen, setLoading }) => {
+const AddStaffForm = ({ formOpen, setFormOpen }) => {
    const { addStaff, loading } = useStaffStore();
    const steps = ["Personal Info", "Address Info", "Document Upload"];
    const [currentStep, setCurrentStep] = useState(0);
