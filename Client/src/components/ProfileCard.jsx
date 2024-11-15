@@ -1,11 +1,16 @@
-import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import Button from "@/components/Button";
 import Modal from "./common/Modal";
 import AddStudentFormModal from "@/pages/admin/StudentForm/AddStudentFormModal";
 import suk from "../assets/suk.jpg";
 import useStudentStore from "@/store/studentStore";
 import Loader from "./common/Loader";
-
 
 const ProfileImage = React.memo(({ imageUrl, altText }) => (
   <div className="bg-red-300 mx-auto h-24 w-24 rounded-full flex items-center justify-center mt-1">
@@ -17,13 +22,17 @@ const ProfileImage = React.memo(({ imageUrl, altText }) => (
   </div>
 ));
 
-
 const EditDeleteButtons = React.memo(({ onEdit, onDelete, isDisabled }) => (
   <div className="flex justify-center space-x-2 mt-2">
     <Button type="edit" className="flex-shrink-0" onClick={onEdit}>
       Edit
     </Button>
-    <Button type="delete" className="flex-shrink-0" onClick={onDelete} disabled={isDisabled}>
+    <Button
+      type="delete"
+      className="flex-shrink-0"
+      onClick={onDelete}
+      disabled={isDisabled}
+    >
       Delete
     </Button>
   </div>
@@ -54,7 +63,6 @@ const ProfileCard = ({ studentInfo }) => {
 
   const limitedKeys = useMemo(() => keys.slice(0, 4), [keys]);
 
- 
   const handleShowAllDetailsToggle = useCallback(() => {
     setShowAllDetails((prev) => !prev);
   }, []);
@@ -70,7 +78,7 @@ const ProfileCard = ({ studentInfo }) => {
   }, [showAllDetails]);
 
   const studentProfileImage = studentInfo?.user_profile_profilePicture || suk;
-  const studentFirstName = studentInfo?.fname || "Unknown";
+  const studentFirstName = studentInfo?.user_username || "Unknown";
   return (
     <>
       {deleteLoading && <Loader />}
@@ -82,7 +90,10 @@ const ProfileCard = ({ studentInfo }) => {
         </div>
 
         <div className="flex flex-col max-h-[530px] w-full overflow-y-auto scrollbar-thin">
-          <ProfileImage imageUrl={studentProfileImage} altText={`${studentFirstName}'s profile`} />
+          <ProfileImage
+            imageUrl={studentProfileImage}
+            altText={`${studentFirstName}'s profile`}
+          />
 
           <div className="mt-4 flex-1 flex-wrap break-words">
             {limitedKeys.length === 0 ? (
@@ -105,7 +116,6 @@ const ProfileCard = ({ studentInfo }) => {
               })
             )}
 
-           
             {showAllDetails && (
               <div ref={additionalContentRef}>
                 {keys.slice(6).map((key) => {
@@ -136,7 +146,7 @@ const ProfileCard = ({ studentInfo }) => {
 
           {/* Modal for Delete Confirmation */}
           <Modal
-            title={`Delete ${studentInfo?.fatherName}`}
+            title={`Delete ${studentInfo?.user_username}`}
             desc="Are You Sure?"
             actionName="Delete"
             dangerAction={() => handleDelete(studentInfo?.user_id)}
@@ -155,7 +165,7 @@ const ProfileCard = ({ studentInfo }) => {
 
         {/* Edit/Delete Buttons */}
         <EditDeleteButtons
-          onEdit={() => setShowAddStudentModal(true)}  // Open modal for editing
+          onEdit={() => setShowAddStudentModal(true)}
           onDelete={() => setOpenModal(studentInfo?.user_id)}
           isDisabled={deleteLoading}
         />
