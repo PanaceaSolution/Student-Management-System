@@ -22,10 +22,9 @@ const documentFields = [
    { name: "citizenship", label: "Citizenship Document (optional)" },
 ]
 
-const AddStaffForm = () => {
+const AddStaffForm = ({ formOpen, setFormOpen }) => {
    const { addStaff, loading } = useStaffStore();
    const steps = ["Personal Info", "Address Info", "Document Upload"];
-   const [isOpen, setIsOpen] = useState(false);
    const [currentStep, setCurrentStep] = useState(0);
    const [profilePic, setProfilePic] = useState('');
    const [documents, setDocuments] = useState({
@@ -49,17 +48,17 @@ const AddStaffForm = () => {
       formattedData.append("email", data.email);
       formattedData.append("password", data.password || 'ijijisj');
       formattedData.append("role", "STAFF");
-      formattedData.append("staffRole", "ACCOUNTANT");
+      formattedData.append("staffRole", data.staffRole);
       formattedData.append("salary", data.salary);
       formattedData.append("hireDate", data.hireDate);
 
       // Address info
       formattedData.append("address", JSON.stringify([
          {
-            wardNumber: data.wardNumber || '6',
-            municipality: data.municipality || "KTM",
-            province: data.province || "Province 3",
-            district: data.district || "Kathmandu",
+            wardNumber: data.wardNumber,
+            municipality: data.municipality,
+            province: data.province,
+            district: data.district,
          }
       ]));
 
@@ -75,7 +74,7 @@ const AddStaffForm = () => {
       formattedData.append("contact", JSON.stringify({
          phoneNumber: data.phoneNumber,
          alternatePhoneNumber: data.alternatePhoneNumber,
-         telephoneNumber: data.telephoneNumber || '2187387821',
+         telephoneNumber: data.telephoneNumber,
       }));
 
       // Document info
@@ -99,8 +98,8 @@ const AddStaffForm = () => {
 
       try {
          const res = await addStaff(formattedData);
-         if (res) {
-            setIsOpen(false);
+         if (res.status === 201) {
+            setFormOpen(false);
             reset();
             setCurrentStep(0);
             setProfilePic(null);
@@ -127,7 +126,7 @@ const AddStaffForm = () => {
    };
 
    return (
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={formOpen} onOpenChange={setFormOpen}>
          <DialogTrigger asChild>
             <Button
                variant="create"
@@ -210,7 +209,7 @@ const AddStaffForm = () => {
                         disabled={loading}
                         aria-label="Submit Form"
                      >
-                        {loading ? "Submitting..." : "Submit"}
+                        Submit
                      </button>
                   )}
                </div>

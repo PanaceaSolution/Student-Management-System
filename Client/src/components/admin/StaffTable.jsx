@@ -9,21 +9,21 @@ import {
 import { useState } from "react";
 import { Pagination } from "./Pagination";
 import ResultShowing from "../common/ResultShowing";
+import { Button } from "../ui/button";
+import { Pencil, Trash2 } from "lucide-react";
 
 const ITEMS_PER_PAGE = 10;
 
-const StaffTable = ({ user, handleUserId, tableHead, tableFields, loading }) => {
-   const [selectedUserId, setSelectedUserId] = useState(null);
+const StaffTable = ({ user, handleUserData, tableHead, tableFields, setCardOpen, handleDelete, handleEdit, loading }) => {
    const [currentPage, setCurrentPage] = useState(1);
 
    const getNestedValue = (obj, path) => {
       return path.split('.').reduce((acc, part) => acc && acc[part], obj);
    };
 
-   const handleCheckboxChange = (id) => {
-      const newSelectedId = selectedUserId === id ? null : id;
-      setSelectedUserId(newSelectedId);
-      handleUserId(newSelectedId);
+   const handleCheckboxChange = (data) => {
+      handleUserData(data);
+      setCardOpen(true)
    };
 
    const totalPages = Math.ceil(user.length / ITEMS_PER_PAGE);
@@ -63,19 +63,36 @@ const StaffTable = ({ user, handleUserId, tableHead, tableFields, loading }) => 
                   </TableRow>
                ) : (
                   currentPageData.map((user) => (
-                     <TableRow key={user.id} className="cursor-pointer" onClick={() => handleCheckboxChange(user)}>
+                     <TableRow key={user.user.id} className="cursor-pointer" >
                         <TableCell>
                            <input
                               type="checkbox"
-                              onChange={() => handleCheckboxChange(user)}
-                              checked={selectedUserId === user}
                            />
                         </TableCell>
                         {tableFields.map((field, index) => (
-                           <TableCell key={index}>
+                           <TableCell key={index} onClick={() => handleCheckboxChange(user)}>
                               {getNestedValue(user, field)}
                            </TableCell>
                         ))}
+                        <TableCell className="flex justify-center gap-2">
+                           <Button
+                              variant="edit"
+                              size="icon"
+                              className="uppercase mr-2"
+                              onClick={() => handleEdit(user)}
+                           >
+                              <Pencil />
+                           </Button>
+                           <Button
+                              variant="destructive"
+                              size="icon"
+                              className="uppercase"
+                              onClick={() => handleDelete(user.user.id)}
+                              disabled={loading}
+                           >
+                              <Trash2 />
+                           </Button>
+                        </TableCell>
                      </TableRow>
                   ))
                )}

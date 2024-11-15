@@ -14,18 +14,26 @@ const PersonalInfo = ({ register, errors, clearErrors }) => {
           { name: "religion", label: "Religion*" },
           { name: "registrationNumber", label: "Registration-Number*" },
           { name: "previousSchool", label: "Previous-School*" },
-          { name: "transportationMode", label: "Transportation-Mode" },
-          { name: "email", label: "Email*" },
           { name: "phoneNumber", label: "Phone Number*" },
           { name: "alternatePhoneNumber", label: "Alternate-PhoneNumber" },
           { name: "telephoneNumber", label: "Tele-phoneNumber" },
           { name: "rollNumber", label: "Roll-Number*" },
+
+          { name: "email", label: "Email*", type: "email" },
+
+          {
+            name: "section",
+            label: "Section*",
+            type: "select",
+            options: ["A", "B", "C", "D", "E", "F", "G", "H"],
+          },
           {
             name: "gender",
             label: "Gender*",
             type: "select",
             options: ["MALE", "FEMALE", "OTHERS"],
           },
+
           {
             name: "bloodType",
             label: "Blood Type*",
@@ -48,6 +56,12 @@ const PersonalInfo = ({ register, errors, clearErrors }) => {
               "Grade VII",
               "Grade VIII",
             ],
+          },
+          {
+            name: "transportationMode",
+            label: "Transportation Mode",
+            type: "select",
+            options: ["BUS", "WALK"],
           },
           {
             name: "dob",
@@ -88,9 +102,13 @@ const PersonalInfo = ({ register, errors, clearErrors }) => {
             ) : (
               <input
                 id={field.name}
-                type={field.type === "date" ? "date" : "text"}
+                type={field.type === "date" ? "date" : field.type}
                 {...register(field.name, {
                   required: `${field.label} is required`,
+                  pattern: field.type === "email" && {
+                    value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                    message: "Please enter a valid email address",
+                  },
                   onChange: () => clearErrors(field.name),
                 })}
                 className={`mt-1 block w-full rounded-sm border border-gray-300 py-2 px-3 text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-600 ${

@@ -4,34 +4,33 @@ import toast from "react-hot-toast";
 const URL = "http://localhost:3000";
 
 export const getAllStudentsService = async (query) => {
-   try {
-      const response = await fetch(`${URL}/student/all-students?${query}`, { 
-         method: "GET",
-         headers: {
-            "Content-Type": "application/json",
-         },
-      });
-      if (!response.ok) {
-         let errorMessage = "An unknown error occurred.";
-         try {
-            const error = await response.json();
-            errorMessage = error.message || "Something went wrong.";
-         } catch (err) {
-            errorMessage = response.statusText || "Failed to fetch students.";
-         }
-         toast.error(errorMessage);
-         return null;
+  try {
+    const response = await fetch(`${URL}/auth/users/role?${query}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) {
+      let errorMessage = "An unknown error occurred.";
+      try {
+        const error = await response.json();
+        errorMessage = error.message || "Something went wrong.";
+      } catch (err) {
+        errorMessage = response.statusText || "Failed to fetch students.";
       }
+      toast.error(errorMessage);
+      return null;
+    }
 
-      const data = await response.json();
-      return data;
-   } catch (error) {
-      console.error("Error while fetching students:", error);
-      toast.error("An error occurred while fetching students.");
-      throw error;
-   }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error while fetching students:", error);
+    toast.error("An error occurred while fetching students.");
+    throw error;
+  }
 };
-
 
 export const getStudentByIdService = async (id) => {
   try {
@@ -51,7 +50,7 @@ export const getStudentByIdService = async (id) => {
 
 export const createStudentService = async (studentData) => {
   try {
-    const response = await fetch(`http://localhost:3000/student/create`, {
+    const response = await fetch(`${URL}/student/create`, {
       method: "POST",
       headers: {
         // "Content-Type": "multipart/form-data",
@@ -99,16 +98,30 @@ export const updateStudentService = async (id, updatedStudentData) => {
 
 export const deleteStudentService = async (id) => {
   try {
-    const response = await fetch(`${URL}/student/${id}`, {
+    const response = await fetch(`${URL}/auth/delete`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
       },
+      body: JSON.stringify({ userIds: [`${id}`] }),
     });
+    if (!response.ok) {
+      let errorMessage = "An unknown error occurred.";
+      try {
+        const error = await response.json();
+        errorMessage = error.message || "Something went wrong.";
+      } catch (err) {
+        errorMessage = response.statusText || "Failed to Delete student.";
+      }
+      toast.error(errorMessage);
+      return null;
+    }
+
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error while deleting student:", error);
+    console.error("Error while creating student:", error);
+    toast.error("An error occurred while creating the student.");
     throw error;
   }
 };

@@ -2,7 +2,6 @@ import { createStaffService, updateStaffService } from "@/services/staffServices
 import toast from "react-hot-toast";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import useUserStore from "./userStore";
 import { deleteUserService, getAllUserService } from "@/services/userService";
 
 const useStaffStore = create(
@@ -18,21 +17,19 @@ const useStaffStore = create(
 
             // Get all staff
             getStaff: async (role) => {
-               set({ loading: true, error: null });
                try {
-                  const data = await getAllUserService(role);
-                  if (data.status === 200) {
+                  const res = await getAllUserService(role);
+                  if (res.status === 200) {
                      set({
-                        staff: data.data,
-                        totalUsers: data.total,
-                        pages: data.totalPages,
-                        loading: false
+                        // staff: res.data.filter(staff => staff.staffRole !== "TEACHER"),
+                        // teacher: res.data.filter(teacher => teacher.staffRole === "TEACHER"),
+                        staff: res.data,
+                        totalUsers: res.total,
+                        pages: res.totalPages,
                      })
-                  } else {
-                     set({ loading: false })
                   }
                } catch (error) {
-                  set({ error: error.message, loading: false })
+                  set({ error: error.message })
                }
             },
 
@@ -43,7 +40,7 @@ const useStaffStore = create(
                   const data = await createStaffService(staffData);
                   if (data.status === 201) {
                      set((state) => ({
-                        staff: [...state.staff, data],
+                        staff: [...state.staff, data.staff],
                         loading: false,
                      }));
                      toast.success(data.message);
@@ -51,6 +48,7 @@ const useStaffStore = create(
                      toast.error(data.message);
                      set({ loading: false });
                   }
+                  return data;
                } catch (error) {
                   set({ error: error.message, loading: false });
                   toast.error("Failed to add staff");
@@ -81,7 +79,7 @@ const useStaffStore = create(
                   const data = await deleteUserService(id);
                   if (data.status === 200) {
                      set((state) => ({
-                        staff: state.staff.filter((user) => user.id !== id),
+                        staff: state.staff.filter((user) => user.user.id !== id),
                         loading: false
                      }));
                      toast.success('User deleted successfully');
@@ -89,6 +87,7 @@ const useStaffStore = create(
                      toast.error('Failed to delete user');
                      set({ loading: false });
                   }
+                  return data;
                } catch (error) {
                   set({ error: error.message, loading: false });
                   toast.error("Failed to delete user");

@@ -21,9 +21,7 @@ const AddStudentForm = ({ studentId, initialData }) => {
   } = useForm();
 
   const [currentStep, setCurrentStep] = useState(0);
-  // const [profilePic, setProfilePic] = useState(null);
   const { addStudent, loading } = useStudentStore();
-
   // Initialize form values with initialData if provided
   useEffect(() => {
     if (initialData) {
@@ -111,7 +109,7 @@ const AddStudentForm = ({ studentId, initialData }) => {
   };
 
   const onSubmit = async (data) => {
-    console.log("data", data);
+    console.log(data)
     const formData = new FormData();
     const newData = { ...data };
     // **Profile Information**
@@ -186,9 +184,7 @@ const AddStudentForm = ({ studentId, initialData }) => {
     try {
       if (studentId) {
         console.log("Edit student logic");
-        // Perform the edit logic here (update the student)
       } else {
-        console.log("Adding new student");
         await addStudent(formData);
       }
     } catch (error) {

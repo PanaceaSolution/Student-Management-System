@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 
+
 } from '@nestjs/common';
 import { Equal, Repository } from 'typeorm';
 
@@ -188,8 +189,12 @@ export class StaffService {
     return `This action returns all staff`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} staff`;
+  async findStaffById(id: string) {
+    const student = await this.staffRepository.findOne({ where: { staffId: id } });
+    if (!student) {
+      throw new NotFoundException(`Student with ID ${id} not found`);
+    }
+    return student;
   }
 
   remove(id: number) {

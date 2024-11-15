@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect, } from "react";
 import Paginations from "@/components/common/Paginations";
 import Table from "@/components/common/Tables";
 import ResultShowing from "@/components/common/ResultShowing";
@@ -10,6 +10,7 @@ import { DateSelect } from "@/components/DateSelect";
 import AddStudentFormModal from "./StudentForm/AddStudentFormModal";
 import useExport from "@/hooks/useExport";
 import useStudentStore from "@/store/studentStore";
+import { flattenData } from "@/utilities/utilities.js";
 
 // Custom hook for debouncing input value
 const useDebounce = (value, delay) => {
@@ -46,6 +47,7 @@ const Department = [
   { value: "BCA", label: "BCA" },
   { value: "BIM", label: "BIM" },
 ];
+
 const Students = () => {
   const [selectedExport, setSelectedExport] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
@@ -56,14 +58,12 @@ const Students = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [date, setDate] = useState(null);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+  const { getAllStudents, loading, error, students, totalPages, total } = useStudentStore();
 
-  const { getAllStudents, loading, error, students, totalPages, totalItems } =
-    useStudentStore();
   const itemsPerPage = 8;
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  const debouncedSearchTerm = useDebounce(searchTerm, 300); // Debounced search term for efficiency
-
-  // Ensure query is correct whenever filters or page change
+ 
   const query = useMemo(() => {
     const params = new URLSearchParams();
     if (selectedGender) params.append("gender", selectedGender);
@@ -71,23 +71,20 @@ const Students = () => {
     if (debouncedSearchTerm) params.append("firstName", debouncedSearchTerm);
     if (date) params.append("date", date);
     params.append("page", currentPage);
+    params.append("role", "STUDENT");
+    params.append("limit", itemsPerPage);
     return `${params.toString()}`;
-  }, [
-    selectedGender,
-    selectedDepartment,
-    debouncedSearchTerm,
-    date,
-    currentPage,
-  ]);
+  }, [selectedGender, selectedDepartment, debouncedSearchTerm, date, currentPage]);
 
-  // Fetch students when page or filters change
   useEffect(() => {
     const fetchStudents = async () => {
-      await getAllStudents(query);
+      if (query) {
+        await getAllStudents(query);
+      }
     };
 
     fetchStudents();
-  }, [query, getAllStudents, currentPage]);
+  }, [query, getAllStudents]);
 
   // Export function logic
   const { exportToCSV, exportToPDF } = useExport();
@@ -97,15 +94,23 @@ const Students = () => {
       const value = event.target.value;
       setSelectedExport(value);
       if (value === "CSV") {
-        exportToCSV(students, "students.csv");
+        if (students.length > 0) {
+          exportToCSV(flattenData(students), "students.csv");
+        } else {
+          alert("No students to export");
+        }
       } else if (value === "PDF") {
-        const headers = [
-          { header: "First Name", dataKey: "firstName" },
-          { header: "Last Name", dataKey: "lastName" },
-          { header: "Gender", dataKey: "gender" },
-          { header: "Class", dataKey: "class" },
-        ];
-        exportToPDF(students, headers, "Students List", "students.pdf");
+        if (students.length > 0) {
+          const headers = [
+            { header: "First Name", dataKey: "firstName" },
+            { header: "Last Name", dataKey: "lastName" },
+            { header: "Gender", dataKey: "gender" },
+            { header: "Class", dataKey: "class" },
+          ];
+          exportToPDF(flattenData(students), headers, "Students List", "students.pdf");
+        } else {
+          alert("No students to export");
+        }
       }
     },
     [students, exportToCSV, exportToPDF]
@@ -115,25 +120,31 @@ const Students = () => {
     setActiveTab(tab);
   }, []);
 
-  const handleSearchChange = (event) => {
+  const handleSearchChange = useCallback((event) => {
     setSearchTerm(event.target.value);
-  };
+  }, []);
 
-  const handleGenderChange = (event) => {
+  const handleGenderChange = useCallback((event) => {
     setSelectedGender(event.target.value);
-  };
+  }, []);
 
-  const handleDepartmentChange = (event) => {
+  const handleDepartmentChange = useCallback((event) => {
     setSelectedDepartment(event.target.value);
-  };
+  }, []);
 
-  const handleDateChange = (selectedDate) => {
-    setDate(selectedDate);
-  };
+  const handleDateChange = useCallback((selectedDate) => {
+    if (selectedDate !== date) {
+      setDate(selectedDate);
+    }
+  }, [date]);
 
-  //Pagination logic
+  // Memoized flattened students data
+  const flattenedStudents = useMemo(() => flattenData(students), [students]);
+
+  // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
   return (
     <section>
       <div className="max-w-full mx-auto p-2">
@@ -204,7 +215,7 @@ const Students = () => {
             <ResultShowing
               start={indexOfFirstItem + 1}
               end={indexOfLastItem}
-              total={totalItems}
+              total={total}
             />
 
             <div className="relative w-full overflow-x-auto shadow-md">
@@ -213,7 +224,7 @@ const Students = () => {
               ) : (
                 <Table
                   setStudentInfo={setStudentInfo}
-                  items={students}
+                  items={flattenedStudents}
                   loading={loading}
                 />
               )}

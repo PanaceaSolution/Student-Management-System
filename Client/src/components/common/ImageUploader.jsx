@@ -8,7 +8,7 @@ const ImageUploader = ({
   clearErrors,
   name,
 }) => {
-  const [image, setImage] = useState(defaultImage || null); // Initialize with defaultImage
+  const [image, setImage] = useState(defaultImage || null); 
   const [loading, setLoading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [showRemove, setShowRemove] = useState(false);
@@ -32,35 +32,37 @@ const ImageUploader = ({
     setLoading(true);
     const reader = new FileReader();
     reader.onload = () => {
-      setImage(reader.result); // Set the uploaded image
+      setImage(reader.result); 
       setLoading(false);
     };
     reader.readAsDataURL(file);
   };
 
   const handleRemove = () => {
-    setImage(null); // Clear image
-    setShowRemove(false); // Hide remove button
+    setImage(null); 
+    setShowRemove(false); 
   };
 
   const handleMouseOver = () => {
-    setShowRemove(true); // Show remove button when hovered
+    setShowRemove(true); 
   };
 
   const handleMouseOut = () => {
-    setShowRemove(false); // Hide remove button when not hovered
+    setShowRemove(false); 
   };
-console.log(errors.message)
+
   return (
     <>
+      <p className="text-gray-900 font-semibold:">Uploade {name}:</p>
       <div
-        className={`relative w-full md:w-64 h-48 border-2 border-dashed rounded-sm border-black ${
+        className={`relative w-full  h-52 border-2 border-dashed rounded-sm border-black ${
           dragging ? "bg-blue-100" : "bg-gray-300"
         } flex justify-center items-center`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
+      
         {loading ? (
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
             <div className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full text-white" />
@@ -108,6 +110,7 @@ console.log(errors.message)
             />
           </div>
         )}
+      
       </div>
       {errors && (
         <p className="text-red-500 text-sm">{errors[name]?.message}</p>
