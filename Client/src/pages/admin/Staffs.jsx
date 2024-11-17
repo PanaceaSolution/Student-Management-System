@@ -33,24 +33,35 @@ const Role = [
 ];
 
 const staffTableHead = ["", "First Name", "Last Name", "Phone Number", "Gender", "Role", "Actions"];
-const staffTableFields = ["user.profile.fname", "user.profile.lname", "user.contact.phoneNumber", "user.profile.gender", "staffRole"];
+const staffTableFields = [
+  "user_profile_fname",
+  "user_profile_lname",
+  "user_contact_phoneNumber",
+  "user_profile_gender",
+  "staffRole",
+];
 
 const personalInfo = [
-  { label: "First Name", key: "user.profile.fname" },
-  { label: "Last Name", key: "user.profile.lname" },
-  { label: "Gender", key: "user.profile.gender" },
-  { label: "Email", key: "user.email" },
+  { label: "First Name", key: "user_profile_fname" },
+  { label: "Last Name", key: "user_profile_lname" },
+  { label: "Gender", key: "user_profile_gender" },
+  { label: "Email", key: "user_email" },
   { label: "Role", key: "staffRole" },
   { label: "Salary", key: "salary" },
-  { label: "Date of Birth", key: "user.profile.dob" },
+  { label: "Date of Birth", key: "user_profile_dob" },
   { label: "Enrollment Date", key: "hireDate" },
-  { label: "Phone Number", key: "user.contact.phoneNumber" },
-  { label: "Telephone Number", key: "user.contact.telephoneNumber" },
-  { label: "Ward Number", key: "user.address[0].wardNumber" },
-  { label: "Municipality", key: "user.address[0].municipality" },
-  { label: "District", key: "user.address[0].district" },
-  { label: "Province", key: "user.address[0].province" },
+  { label: "Phone Number", key: "user_contact_phoneNumber" },
+  { label: "Telephone Number", key: "user_contact_telephoneNumber" },
+  { label: "Ward Number", key: "user_address_0_wardNumber" },
+  { label: "Municipality", key: "user_address_0_municipality" },
+  { label: "District", key: "user_address_0_district" },
+  { label: "Province", key: "user_address_0_province" },
 ];
+
+const personalDocuments = [
+  { label: "CitizenShip", key: "user_documents_0_documentFile" },
+  { label: "Birth Certificate", key: "user_documents_1_documentFile" }
+]
 
 
 const Staffs = () => {
@@ -103,6 +114,7 @@ const Staffs = () => {
 
   const handleUserData = (data) => {
     setSelectedData(data);
+    setCardOpen(true)
   };
 
   const handleEdit = (data) => {
@@ -184,16 +196,15 @@ const Staffs = () => {
 
           {/* Conditionally show the DetailsCard */}
           {selectedData && (
-            <div className="lg:col-span-2 2xl:col-span-1 px-3 lg:pr-4">
-              <DetailsCard
-                title="Staff"
-                userDetails={selectedData}
-                loading={loading}
-                cardOpen={cardOpen}
-                setCardOpen={setCardOpen}
-                personalInfo={personalInfo}
-              />
-            </div>
+            <DetailsCard
+              title="Staff"
+              userDetails={selectedData}
+              loading={loading}
+              cardOpen={cardOpen}
+              setCardOpen={setCardOpen}
+              personalInfo={personalInfo}
+              personalDocuments={personalDocuments}
+            />
           )}
         </div>
       </div>

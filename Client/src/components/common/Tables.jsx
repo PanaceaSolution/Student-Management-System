@@ -6,7 +6,8 @@ import Loader from "../common/Loader";
 import useStudentStore from "@/store/studentStore";
 import { flattenData } from "@/utilities/utilities";
 import LoadingText from "./LoadingText";
-const Tables = React.memo(({ items, setStudentInfo,loading }) => {
+import { Button } from "../ui/button";
+const Tables = React.memo(({ items, loading, handleUserData }) => {
   const flattenedStudents = useMemo(() => flattenData(items), [items]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [headerValue, setHeaderValue] = useState([]);
@@ -15,23 +16,17 @@ const Tables = React.memo(({ items, setStudentInfo,loading }) => {
   const { deleteStudent, deleteLoading } = useStudentStore();
 
   // Handle checkbox selection
-  const handleCheckboxChange = useCallback((id) => {
-    setSelectedIds((prevSelectedIds) => {
-      if (prevSelectedIds.includes(id)) {
-        return prevSelectedIds.filter((selectedId) => selectedId !== id);
-      } else {
-        return [id];
-      }
-    });
+  const handleCheckboxChange = useCallback((data) => {
+    handleUserData(data)
   }, []);
 
-  // Set student info based on selected checkbox
-  useEffect(() => {
-    const studentDetails = flattenedStudents?.find(
-      (item) => item?.user_id === selectedIds[0]
-    );
-    setStudentInfo(studentDetails || {});
-  }, [selectedIds, flattenedStudents, setStudentInfo]);
+  // // Set student info based on selected checkbox
+  // useEffect(() => {
+  //   const studentDetails = flattenedStudents?.find(
+  //     (item) => item?.user_id === selectedIds[0]
+  //   );
+  //   setStudentInfo(studentDetails || {});
+  // }, [selectedIds, flattenedStudents, setStudentInfo]);
 
   // Update headers based on flattenedStudents
   useEffect(() => {
@@ -92,7 +87,7 @@ const Tables = React.memo(({ items, setStudentInfo,loading }) => {
                 )}
               </th>
               {displayedHeaderValue?.map((key) => (
-                <th key={key} scope="col" className="px-6 py-3">
+                <th key={key} scope="col" className="px-4 py-3">
                   {key}
                 </th>
               ))}
@@ -120,47 +115,59 @@ const Tables = React.memo(({ items, setStudentInfo,loading }) => {
             </tr>
           </thead>
           <tbody>
-            {loading && <span className="text-center flex justify-center items-center"><LoadingText/></span>}
-            {flattenedStudents?.map((data) => (
-              <tr
-                key={data?.user_id}
-                className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-              >
-                <td className="w-4 p-4">
-                  <div className="flex flattenedStudents-center">
-                    <input
-                      id={`checkbox-table-search-${data?.user_id}`}
-                      type="checkbox"
-                      checked={selectedIds.includes(data?.user_id)}
-                      onChange={() => handleCheckboxChange(data?.user_id)}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                    />
-                    <label
-                      htmlFor={`checkbox-table-search-${data?.user_id}`}
-                      className="sr-only"
-                    >
-                      checkbox
-                    </label>
-                  </div>
-                </td>
-                {displayedHeaderValue?.map((key) => (
-                  <td key={key} className="px-2 py-1">
-                    {data[key]}
-                  </td>
-                ))}
-                <td className="flex flattenedStudents-center px-6 py-4">
-                  <button className="font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                    <Pencil size={20} color="#1ec859" />
-                  </button>
-                  <button
-                    onClick={() => setOpenModal(data?.user_id)}
-                    className="font-medium text-red-600 dark:text-red-500 hover:underline ms-3"
-                  >
-                    <Trash2 size={20} />
-                  </button>
+            {loading ?
+              <tr>
+                <td className="w-full flex justify-center items-center">
+                  <LoadingText />
                 </td>
               </tr>
-            ))}
+              : flattenedStudents?.map((data) => (
+                <tr
+                  key={data?.user_id}
+                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                >
+                  <td className="w-4 p-4">
+                    <div className="flex flattenedStudents-center">
+                      <input
+                        id={`checkbox-table-search-${data?.user_id}`}
+                        type="checkbox"
+                        // checked={selectedIds.includes(data?.user_id)}
+                        // onChange={() => handleCheckboxChange(data?.user_id)}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                      />
+                      <label
+                        htmlFor={`checkbox-table-search-${data?.user_id}`}
+                        className="sr-only"
+                      >
+                        checkbox
+                      </label>
+                    </div>
+                  </td>
+                  {displayedHeaderValue?.map((key) => (
+                    <td key={key} className="px-4 py-1 cursor-pointer" onClick={() => handleCheckboxChange(data)}>
+                      {data[key]}
+                    </td>
+                  ))}
+                  <td className="flex flattenedStudents-center px-6 py-4">
+                    <Button
+                      variant="edit"
+                      size="icon"
+                      className="mr-2"
+                    >
+                      <Pencil />
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => setOpenModal(data?.user_id)}
+                    >
+                      <Trash2 />
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            }
+
           </tbody>
         </table>
       )}
