@@ -8,6 +8,7 @@ import {
   IsNotEmpty,
   ValidateNested,
   IsUUID,
+  IsArray,
   
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';

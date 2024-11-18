@@ -17,5 +17,6 @@ import { UserDocuments } from '../user/userEntity/document.entity';
   ],
   controllers: [StaffController],
   providers: [StaffService, AuthenticationService],
+  exports:[TypeOrmModule]
 })
 export class StaffModule {}

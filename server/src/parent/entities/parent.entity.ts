@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne, OneToMany } from 'typeorm';
 import { User } from '../../user/authentication/entities/authentication.entity';
 import { Student } from '../../student/entities/student.entity';
 
@@ -10,11 +10,11 @@ export class Parent {
   @Column({ type: 'simple-array', nullable: true })
   childNames: string[];
 
-  @ManyToOne(() => User, (user) => user.parent, { onDelete: 'CASCADE' })
+  @OneToOne(() => User, (user) => user.parent, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @ManyToOne(() => Student, (student) => student.parent, { nullable: true, onDelete: 'CASCADE' })
+  @OneToMany(() => Student, (student) => student.parent, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'studentId' })
-  student: Student;
+  student: Student[];
 }
