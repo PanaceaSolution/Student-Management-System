@@ -15,6 +15,7 @@ export class RegisterUserDto {
   @IsNotEmpty({ message: 'Role is required' })
   role: ROLE;
 
+  
   @IsString()
   @IsOptional()
   refreshToken: string;
