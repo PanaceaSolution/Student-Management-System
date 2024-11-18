@@ -44,7 +44,7 @@ export class AuthenticationController {
     files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
   ) {
     try {
-      console.log('Parsed and Validated Register DTO:', body);
+      // console.log('Parsed and Validated Register DTO:', body);
       return this.authenticationService.register(body, files);
     } catch (error) {
       console.error('Error parsing JSON strings in form-data:', error);
@@ -80,8 +80,8 @@ export class AuthenticationController {
     files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] } = {},
   ) {
     try {
-      console.log('UpdateUser DTO:', updateUserDto);
-      console.log('Received files for update:', files);
+      // console.log('UpdateUser DTO:', updateUserDto);
+      // console.log('Received files for update:', files);
       return this.authenticationService.updateUser(id, updateUserDto, files);
     } catch (error) {
       console.error('Error updating user:', error);

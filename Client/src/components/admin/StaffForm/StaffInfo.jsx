@@ -1,93 +1,102 @@
 import { Label } from '../../ui/label';
 import { Input } from '../../ui/input';
-import ProfilePicUpload from '@/components/common/profilePicUpload';
+import { AtSign, CircleDollarSign, Phone, Smartphone, SquareUser, SquareUserRound, User } from 'lucide-react';
 
 const StaffInfo = ({
    register,
    errors,
-   user,
-   profilePic,
-   setProfilePic,
    clearErrors
 }) => {
    const formFields = [
       {
          name: "fname",
-         label: "First Name",
+         label: "First Name*",
          required: "First Name is required",
          placeholder: "Enter First Name",
          type: "text",
          condition: true,
+         icon: <User size={20} />
       },
       {
          name: "lname",
-         label: "Last Name",
+         label: "Last Name*",
          required: "Last Name is required",
          placeholder: "Enter Last Name",
          type: "text",
          condition: true,
+         icon: <User size={20} />
       },
       {
          name: "email",
-         label: "Email",
+         label: "Email*",
          required: "Email is required",
          placeholder: "Enter Email",
          type: "email",
          condition: true,
-      },
-      {
-         name: "phoneNumber",
-         label: "Phone",
-         required: "Phone is required",
-         placeholder: "Enter Phone",
-         type: "number",
-         condition: true,
-      },
-      {
-         name: "gender",
-         label: "Gender",
-         required: "Gender is required",
-         placeholder: "Select Gender",
-         type: "select",
-         options: ["Male", "Female", "Other"],
-         condition: true,
-      },
-      {
-         name: "bloodType",
-         label: "Blood Type",
-         required: "Blood Type is required",
-         placeholder: "Select Blood Type",
-         type: "select",
-         options: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
-         condition: true,
+         icon: <AtSign size={20} />
       },
       {
          name: "salary",
-         label: "Salary",
+         label: "Salary*",
          required: "Salary is required",
          placeholder: "Enter Salary",
          type: "number",
          condition: true,
+         icon: <CircleDollarSign size={20} />
       },
       {
-         name: "role",
-         label: "Role",
-         required: "Role is required",
-         placeholder: "Select Role",
+         name: "gender",
+         label: "Gender*",
+         required: "Gender is required",
+         placeholder: "Select Gender",
          type: "select",
-         options: ["Accountant", "Librarian", "Janitor"],
-         condition: user !== "Teacher",
+         options: ["MALE", "FEMALE", "OTHER"],
+         condition: true,
+      },
+      {
+         name: "staffRole",
+         label: "Staff Role*",
+         required: "Staff Role is required",
+         placeholder: "Select a Role",
+         type: "select",
+         options: ["ACCOUNTANT", "LIBRARIAN", "TEACHER"],
+         condition: true,
+      },
+      {
+         name: "phoneNumber",
+         label: "Phone*",
+         required: "Phone is required",
+         placeholder: "Enter Phone",
+         type: "number",
+         condition: true,
+         icon: <Smartphone size={20} />
+      },
+      {
+         name: "alternatePhoneNumber",
+         label: "Alternate Phone Number",
+         placeholder: "Enter Alternate Phone Number",
+         type: "number",
+         condition: true,
+         icon: <Smartphone size={20} />
+      },
+      {
+         name: 'telephoneNumber',
+         label: 'Telephone Number',
+         placeholder: 'Enter Telephone Number',
+         type: 'number',
+         condition: true,
+         icon: <Phone size={20} />
       },
       {
          name: "dob",
-         label: "Date of Birth",
+         label: "Date of Birth*",
          required: "Date of Birth is required",
          type: "date",
          condition: true,
       },
       {
-         name: "enrollDate",
-         label: "Enrollment Date",
+         name: "hireDate",
+         label: "Enrollment Date*",
          required: "Enrollment Date is required",
          type: "date",
          condition: true,
@@ -101,38 +110,45 @@ const StaffInfo = ({
                field.condition && (
                   <div key={index}>
                      <Label htmlFor={field.name} className="block text-sm font-medium text-gray-900">{field.label}</Label>
-                     {field.type === "select" ? (
-                        <select
-                           id={field.name}
-                           defaultValue=""
-                           {...register(field.name, {
-                              required: field.required,
-                              validate: (value) => value !== "" || "This field is required",
-                              onChange: () => clearErrors(field.name),
-                           })}
-                           className={`w-full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${errors[field.name] ? "border-red-500" : ""
-                              }`}
-                        >
-                           <option value="" disabled>
-                              {field.placeholder}
-                           </option>
-                           {field.options.map((option, idx) => (
-                              <option key={idx} value={option}>
-                                 {option}
+                     <div className="relative">
+                        {field.icon && (
+                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                              {field.icon}
+                           </div>
+                        )}
+                        {field.type === "select" ? (
+                           <select
+                              id={field.name}
+                              defaultValue=""
+                              {...register(field.name, {
+                                 required: field.required,
+                                 validate: (value) => value !== "" || "This field is required",
+                                 onChange: () => clearErrors(field.name),
+                              })}
+                              className={`w-full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${errors[field.name] ? "border-red-500" : ""
+                                 } ${field.icon ? 'pl-10' : ''}`}
+                           >
+                              <option value="" disabled>
+                                 {field.placeholder}
                               </option>
-                           ))}
-                        </select>
-                     ) : (
-                        <Input
-                           id={field.name}
-                           type={field.type}
-                           className={`w-full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${errors[field.name] ? "border-red-500" : ""}`}
-                           placeholder={field.placeholder}
-                           {...register(field.name, {
-                              required: field.required,
-                           })}
-                        />
-                     )}
+                              {field.options && field.options.map((option, idx) => (
+                                 <option key={idx} value={option}>
+                                    {option}
+                                 </option>
+                              ))}
+                           </select>
+                        ) : (
+                           <Input
+                              id={field.name}
+                              type={field.type}
+                              className={`w-full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${errors[field.name] ? "border-red-500" : ""} ${field.icon ? 'pl-10' : ''}`}
+                              placeholder={field.placeholder}
+                              {...register(field.name, {
+                                 required: field.required,
+                              })}
+                           />
+                        )}
+                     </div>
                      {errors[field.name] && (
                         <p className="text-red-600 text-sm">{errors[field.name].message}</p>
                      )}
@@ -140,14 +156,6 @@ const StaffInfo = ({
                )
             )}
          </div>
-
-         {/* Profile Picture Upload */}
-         <ProfilePicUpload
-            profilePic={profilePic}
-            setProfilePic={setProfilePic}
-            clearErrors={clearErrors}
-            errors={errors}
-         />
       </div>
    )
 }

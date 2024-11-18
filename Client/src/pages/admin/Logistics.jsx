@@ -1,8 +1,9 @@
 import React from 'react'
-
 const Logistics = () => {
    return (
-      <div>Logistics</div>
+      <div>
+         Logistics
+      </div>
    )
 }
 

@@ -9,6 +9,7 @@ import {
   UploadedFiles,
   BadRequestException,
   UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { StaffService } from './staff.service';
 import { StaffDto } from './dto/staff.dto';
@@ -18,7 +19,7 @@ import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Controller('staff')
 export class StaffController {
-  constructor(private readonly staffService: StaffService) {}
+  constructor(private readonly staffService: StaffService) { }
 
   @Post('/create')
   @UseInterceptors(
@@ -37,7 +38,7 @@ export class StaffController {
 
     return this.staffService.createStaff(createStaffDto, files);
   }
-  
+
   @Patch('update/:id')
   @UseInterceptors(
     FileFieldsInterceptor([
@@ -46,7 +47,7 @@ export class StaffController {
     ]),
   )
   async updateStaff(
-    @Param('id') id:UUID,
+    @Param('id') id: UUID,
     @Body() updateStaffDto: Partial<StaffDto>,
     @UploadedFiles()
     files: {
@@ -59,15 +60,17 @@ export class StaffController {
 
 
 
-  @Get()
-  findAll() {
-    return this.staffService.findAll();
-  }
+  // @Get('all-staff')
+  // async getStaffs(@Query('page') page: string, @Query('limit') limit: string) {
+  //   const pageNumber = parseInt(page) || 1; 
+  //   const pageSize = parseInt(limit) || 8; 
+  //   return this.staffService.getAllStaff(pageNumber, pageSize);
+  // }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.staffService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.staffService.findOne(+id);
+  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

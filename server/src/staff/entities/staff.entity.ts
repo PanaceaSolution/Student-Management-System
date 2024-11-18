@@ -11,7 +11,7 @@ import { User } from '../../user/authentication/entities/authentication.entity';
 import { STAFFROLE } from '../../utils/role.helper';
 import { Course } from 'src/course/entities/course.entity';
 import { Class } from 'src/classes/entities/class.entity';
-
+import { Assignment } from 'src/assignment/entities/assignment.entity';
 @Entity()
 export class Staff {
   @PrimaryGeneratedColumn('uuid')
@@ -29,7 +29,7 @@ export class Staff {
     nullable: true,
   })
   staffRole: STAFFROLE;
-  
+
   @OneToOne(() => User, (user) => user.staff, { cascade: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
@@ -39,5 +39,8 @@ export class Staff {
 
   @OneToMany(() => Class, (class_) => class_.classTeacher)
   classes: Class[];
+
+  @OneToMany(() => Assignment, (assignment) => assignment.staffId)
+  assignments: Assignment[];
 
 }
