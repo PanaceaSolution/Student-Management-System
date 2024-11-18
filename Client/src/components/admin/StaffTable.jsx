@@ -22,14 +22,11 @@ const StaffTable = ({ user, handleUserData, tableHead, tableFields, handleDelete
       handleUserData(data);
    };
 
-   const flattenedStaff = useMemo(() => flattenData(user), [user]);
-
-
    const totalPages = Math.ceil(user.length / ITEMS_PER_PAGE);
    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
    const currentPageData = useMemo(
-      () => flattenedStaff.slice(startIndex, startIndex + ITEMS_PER_PAGE),
-      [flattenedStaff, currentPage]
+      () => user.slice(startIndex, startIndex + ITEMS_PER_PAGE),
+      [user, currentPage]
    );
 
    // Calculate the range of results being displayed
@@ -92,7 +89,7 @@ const StaffTable = ({ user, handleUserData, tableHead, tableFields, handleDelete
                               <Button
                                  variant="destructive"
                                  size="icon"
-                                 onClick={() => handleDelete(user.user.id)}
+                                 onClick={() => handleDelete(user.user_id)}
                                  disabled={loading}
                               >
                                  <Trash2 />
