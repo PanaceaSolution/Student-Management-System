@@ -23,14 +23,20 @@ export class StudentService {
     private readonly userService: AuthenticationService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) { }
+  ) {}
   async createStudent(
     createStudentDto: StudentDto,
     files: {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ): Promise<{ status: number; message: string; student?: any; user?: any, plainPassword?: any }> {
+  ): Promise<{
+    status: number;
+    message: string;
+    student?: any;
+    user?: any;
+    plainPassword?: any;
+  }> {
     const {
       fatherName,
       motherName,
@@ -53,7 +59,9 @@ export class StudentService {
     } = createStudentDto;
 
     if (!profile || !profile.fname || !profile.lname) {
-      throw new BadRequestException('Profile information (fname and lname) is required.');
+      throw new BadRequestException(
+        'Profile information (fname and lname) is required.',
+      );
     }
 
     const AD = moment(admissionDate, 'YYYY-MM-DD');
@@ -76,13 +84,17 @@ export class StudentService {
 
     if (files.documents && files.documents.length > 0) {
       const documentBuffers = files.documents.map((doc) => doc.buffer);
-      const uploadedDocumentUrls = await uploadFilesToCloudinary(documentBuffers, 'documents');
+      const uploadedDocumentUrls = await uploadFilesToCloudinary(
+        documentBuffers,
+        'documents',
+      );
 
       documentUrls.push(
         ...uploadedDocumentUrls.map((url, index) => ({
-          documentName: documentMetadata[index]?.documentName || `Document ${index + 1}`,
+          documentName:
+            documentMetadata[index]?.documentName || `Document ${index + 1}`,
           documentFile: url,
-        }))
+        })),
       );
     }
 
@@ -100,10 +112,15 @@ export class StudentService {
       profilePicture: profilePictureUrl,
     };
 
-    const createUserResponse = await this.userService.register(registerDto, files);
+    const createUserResponse = await this.userService.register(
+      registerDto,
+      files,
+    );
 
     if (!createUserResponse || !createUserResponse.user) {
-      throw new InternalServerErrorException('Error occurs while creating user');
+      throw new InternalServerErrorException(
+        'Error occurs while creating user',
+      );
     }
 
     const userReference = await this.userRepository.findOne({
@@ -131,9 +148,9 @@ export class StudentService {
     });
 
     await this.studentRepository.save(newStudent);
-    let plainPassword = decryptdPassword(newStudent.user.password)
-    console.log("Student password is", plainPassword);
-    
+    let plainPassword = decryptdPassword(newStudent.user.password);
+    console.log('Student password is', plainPassword);
+
     return {
       status: 201,
       message: 'Student created successfully',
@@ -152,7 +169,6 @@ export class StudentService {
     } = {},
   ) {
     try {
-
       const {
         admissionDate,
         rollNumber,
@@ -172,15 +188,14 @@ export class StudentService {
         where: {
           studentId: Equal(id.toString()),
         },
-        relations: [
-          'user'
-        ]
+        relations: ['user'],
       });
       // console.log('student is', student);
 
       if (!student) {
         throw new NotFoundException('Student not found');
-      } if (!student.user) {
+      }
+      if (!student.user) {
         throw new NotFoundException('User associated with student not found');
       }
       const userUpdateResult = await this.userService.updateUser(
@@ -236,19 +251,26 @@ export class StudentService {
       throw new Error('Internal server problem');
     }
   }
+
   async getAllStudents(page: number, limit: number) {
     try {
       const skip = (page - 1) * limit;
 
       const [students, total] = await this.studentRepository.findAndCount({
-        relations: ['user', 'user.profile', 'user.contact', 'user.address', 'user.document'],
+        relations: [
+          'user',
+          'user.profile',
+          'user.contact',
+          'user.address',
+          'user.document',
+        ],
         skip,
         take: limit,
       });
 
       const formattedStudents = students
-        .filter(student => student.user !== null)
-        .map(student => ({
+        .filter((student) => student.user !== null)
+        .map((student) => ({
           id: student.studentId,
           admissionDate: student.admissionDate,
           rollNumber: student.rollNumber,
@@ -287,6 +309,5 @@ export class StudentService {
       });
     }
   }
-
 }
 
