@@ -162,15 +162,19 @@ export class StaffService {
       console.log(updatedStaff);
 
       return {
-        msg: 'staff updated successfully',
+        status:201,
+        message: 'staff updated successfully',
         updateUser,
         updatedStaff,
+        success:true
       };
     } catch (error) {
       console.log(error);
       return {
-        message: 'error occured',
+        message: 'Internal server error',
         error,
+        status:500,
+        success:false
       };
     }
   }
