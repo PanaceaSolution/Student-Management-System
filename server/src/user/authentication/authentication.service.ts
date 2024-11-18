@@ -734,14 +734,13 @@ export class AuthenticationService {
           success: false,
         });
       }
-
       let roleData;
       switch (role) {
         case ROLE.STUDENT:
-          roleData = await this.studentRepository.find({ relations: ['user'] });
+          roleData = await this.studentRepository.find({});
           break;
         case ROLE.PARENT:
-          roleData = await this.parentRepository.find({ relations: ['user'] });
+          roleData = await this.parentRepository.find({});
           break;
         case ROLE.STAFF:
           if (
@@ -751,32 +750,17 @@ export class AuthenticationService {
           ) {
             roleData = await this.staffRepository.find({
               where: { staffRole: staffRole },
-              relations: ['user'],
+              // relations: ['users']
             });
           } else {
-            roleData = await this.staffRepository.find({ relations: ['user'] });
+            roleData = await this.staffRepository.find({});
           }
           break;
         default:
           break;
       }
 
-      console.log('Role Data:', roleData);
-
-      const filteredRoleData = roleData.filter(
-        (item: any) => item.user !== null,
-      );
-
-      console.log('Filtered Role Data:', filteredRoleData);
-
-      // Create a map of roleData by userId for quick lookup
-      const roleDataMap = new Map(
-        filteredRoleData.map((item: any) => [item.user.id, item]),
-      );
-
-      // Log the roleDataMap keys
-      console.log('Role Data Map Keys:', Array.from(roleDataMap.keys()));
-
+      // console.log(data)
       const whereClause = { role } as any;
       const [users, total] = await this.userRepository.findAndCount({
         where: whereClause,
@@ -787,26 +771,22 @@ export class AuthenticationService {
       });
 
       const formattedUsers = users.map(this.formatUserResponse);
+      // console.log(formattedUsers);
 
-      console.log(
-        'Formatted Users IDs:',
-        formattedUsers.map((user) => user.id),
-      );
-
-      const finalData = formattedUsers.map((user) => {
-        const roleInfo = roleDataMap.get(user.id);
-        console.log(`User ID: ${user.id}, Role Info:`, roleInfo);
-        return {
-          ...user,
-          roleInfo: roleInfo || null,
-        };
-      });
+      const finalData = formattedUsers
+        .map((user, index) =>
+          roleData[index] ? { user, ...roleData[index] } : null,
+        )
+        .filter((pair) => pair !== null);
+      // console.log(finalData);
 
       return {
         message: 'Users fetched successfully',
         status: 200,
         success: true,
         data: finalData,
+
+        // roleData: roleData,
         total,
         page,
         limit,
