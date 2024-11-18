@@ -761,6 +761,22 @@ export class AuthenticationService {
           break;
       }
 
+      console.log('Role Data:', roleData);
+
+      const filteredRoleData = roleData.filter(
+        (item: any) => item.user !== null,
+      );
+
+      console.log('Filtered Role Data:', filteredRoleData);
+
+      // Create a map of roleData by userId for quick lookup
+      const roleDataMap = new Map(
+        filteredRoleData.map((item: any) => [item.user.id, item]),
+      );
+
+      // Log the roleDataMap keys
+      console.log('Role Data Map Keys:', Array.from(roleDataMap.keys()));
+
       const whereClause = { role } as any;
       const [users, total] = await this.userRepository.findAndCount({
         where: whereClause,
@@ -773,26 +789,18 @@ export class AuthenticationService {
       const formattedUsers = users.map(this.formatUserResponse);
 
       console.log(
-        'Formatted Users:',
+        'Formatted Users IDs:',
         formattedUsers.map((user) => user.id),
       );
-      // console.log('Role Data', roleData);
 
-      const filteredRoleData = roleData.filter(
-        (item: any) => item.user !== null,
-      );
-
-      // Create a map of roleData by userId for quick lookup
-      const roleDataMap = new Map(
-        filteredRoleData.map((item: any) => [item.user.userId, item]),
-      );
-
-      const finalData = formattedUsers
-        .map((user) => {
-          const roleInfo = roleDataMap.get(user.id);
-          return roleInfo ? [user, roleInfo] : [user, null];
-        })
-        .filter((pair) => pair !== null);
+      const finalData = formattedUsers.map((user) => {
+        const roleInfo = roleDataMap.get(user.id);
+        console.log(`User ID: ${user.id}, Role Info:`, roleInfo);
+        return {
+          ...user,
+          roleInfo: roleInfo || null,
+        };
+      });
 
       return {
         message: 'Users fetched successfully',
