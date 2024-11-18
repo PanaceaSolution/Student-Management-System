@@ -6,6 +6,7 @@ import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { Student } from '../student/entities/student.entity'; 
 import { CourseEnrollment } from '../course/course-enrollment/entities/course-enrollment.entity';
+import { Staff } from 'src/staff/entities/staff.entity';
 
 @Injectable()
 export class CourseService {
@@ -18,11 +19,29 @@ export class CourseService {
 
     @InjectRepository(CourseEnrollment)
     private readonly courseEnrollmentRepository: Repository<CourseEnrollment>,
+
+    @InjectRepository(Staff)
+    private readonly staffRepository: Repository<Staff>,
   ) {}
 
 
+
   async create(createCourseDto: CreateCourseDto): Promise<Course> {
-    const course = this.courseRepository.create(createCourseDto);
+    
+    const teacher = await this.staffRepository.findOne({
+      where: { staffId: createCourseDto.teacherId },
+    });
+  
+    if (!teacher) {
+      throw new NotFoundException(`Teacher with ID ${createCourseDto.teacherId} not found`);
+    }
+  
+    // Create the course with the teacher entity
+    const course = this.courseRepository.create({
+      ...createCourseDto,
+      teacher,
+    });
+  
     return this.courseRepository.save(course);
   }
 

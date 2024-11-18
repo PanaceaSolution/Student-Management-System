@@ -132,6 +132,8 @@ export class StudentService {
 
     await this.studentRepository.save(newStudent);
     let plainPassword = decryptdPassword(newStudent.user.password)
+    console.log("Student password is", plainPassword);
+    
     return {
       status: 201,
       message: 'Student created successfully',
