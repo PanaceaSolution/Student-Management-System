@@ -65,7 +65,7 @@ export class AuthenticationService {
     @InjectRepository(UserDocuments)
     private readonly documentRepository: Repository<UserDocuments>,
     private jwtService: JwtService,
-  ) { }
+  ) {}
   async register(
     RegisterDto: RegisterUserDto,
     files: {
@@ -100,7 +100,7 @@ export class AuthenticationService {
         role,
         staffRole,
       );
-      console.log('Generating username:', username);    
+      console.log('Generating username:', username);
 
       const newUser = this.userRepository.create({
         email,
@@ -738,7 +738,7 @@ export class AuthenticationService {
       let roleData;
       switch (role) {
         case ROLE.STUDENT:
-          roleData = await this.studentRepository.find({relations:['user']});
+          roleData = await this.studentRepository.find({ relations: ['user'] });
           break;
         case ROLE.PARENT:
           roleData = await this.parentRepository.find({ relations: ['user'] });
@@ -772,22 +772,25 @@ export class AuthenticationService {
 
       const formattedUsers = users.map(this.formatUserResponse);
 
-
-      //    console.log(
-      //      'Formatted Users:',
-      //      formattedUsers.map((user) => user.id),
-      //    );
+      console.log(
+        'Formatted Users:',
+        formattedUsers.map((user) => user.id),
+      );
       // console.log('Role Data', roleData);
-      
+
+      const filteredRoleData = roleData.filter(
+        (item: any) => item.user !== null,
+      );
+
       // Create a map of roleData by userId for quick lookup
       const roleDataMap = new Map(
-        roleData.map((item: any) => [item.user.userId, item]),
+        filteredRoleData.map((item: any) => [item.user.userId, item]),
       );
 
       const finalData = formattedUsers
         .map((user) => {
           const roleInfo = roleDataMap.get(user.id);
-          return roleInfo ? [user, roleInfo] : null;
+          return roleInfo ? [user, roleInfo] : [user, null];
         })
         .filter((pair) => pair !== null);
 
