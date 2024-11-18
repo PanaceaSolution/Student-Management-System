@@ -6,6 +6,7 @@ import React, {
   useMemo,
 } from "react";
 import Button from "@/components/Button";
+import Loadding from "./Loader/Spinner";
 import Modal from "./common/Modal";
 import AddStudentFormModal from "@/pages/admin/StudentForm/AddStudentFormModal";
 import suk from "../assets/suk.jpg";
@@ -63,6 +64,7 @@ const ProfileCard = ({ studentInfo }) => {
 
   const limitedKeys = useMemo(() => keys.slice(0, 4), [keys]);
 
+
   const handleShowAllDetailsToggle = useCallback(() => {
     setShowAllDetails((prev) => !prev);
   }, []);
@@ -115,6 +117,7 @@ const ProfileCard = ({ studentInfo }) => {
                 }
               })
             )}
+
 
             {showAllDetails && (
               <div ref={additionalContentRef}>

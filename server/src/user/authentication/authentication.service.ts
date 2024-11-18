@@ -65,7 +65,7 @@ export class AuthenticationService {
     @InjectRepository(UserDocuments)
     private readonly documentRepository: Repository<UserDocuments>,
     private jwtService: JwtService,
-  ) {}
+  ) { }
   async register(
     RegisterDto: RegisterUserDto,
     files: {
@@ -771,11 +771,11 @@ export class AuthenticationService {
 
       const formattedUsers = users.map(this.formatUserResponse);
       // console.log(formattedUsers);
-      
+
 
       const finalData = formattedUsers
         .map((user, index) =>
-          roleData[index] ? {user, ...roleData[index]} : null,
+          roleData[index] ? { user, ...roleData[index] } : null,
         )
         .filter((pair) => pair !== null);
       // console.log(finalData);
@@ -785,7 +785,7 @@ export class AuthenticationService {
         status: 200,
         success: true,
         data: finalData,
-        
+
         // roleData: roleData,
         total,
         page,

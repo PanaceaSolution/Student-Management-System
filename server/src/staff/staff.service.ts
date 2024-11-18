@@ -31,7 +31,7 @@ export class StaffService {
     private readonly userService: AuthenticationService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async createStaff(
     createStaffDto: StaffDto,

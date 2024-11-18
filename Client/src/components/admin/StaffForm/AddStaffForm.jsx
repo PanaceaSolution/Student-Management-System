@@ -14,7 +14,6 @@ import StepIndicator from '@/pages/admin/StudentForm/StepIndicator';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import StaffInfo from './StaffInfo';
 import AddressInfo from '@/pages/admin/StudentForm/AddressInfo';
-import DocumentUpload from '@/pages/admin/StudentForm/DocumentUpload';
 import ProfilePicUpload from '@/components/common/profilePicUpload';
 import StaffDocumentUpload from './StaffDocumentUpload';
 
@@ -23,10 +22,9 @@ const documentFields = [
    { name: "citizenship", label: "Citizenship Document (optional)" },
 ]
 
-const AddStaffForm = () => {
-   const { addStaff, loading, error } = useStaffStore();
+const AddStaffForm = ({ formOpen, setFormOpen }) => {
+   const { addStaff, loading } = useStaffStore();
    const steps = ["Personal Info", "Address Info", "Document Upload"];
-   const [isOpen, setIsOpen] = useState(false);
    const [currentStep, setCurrentStep] = useState(0);
    const [profilePic, setProfilePic] = useState('');
    const [documents, setDocuments] = useState({
@@ -50,17 +48,17 @@ const AddStaffForm = () => {
       formattedData.append("email", data.email);
       formattedData.append("password", data.password || 'ijijisj');
       formattedData.append("role", "STAFF");
-      formattedData.append("staffRole", "ACCOUNTANT");
+      formattedData.append("staffRole", data.staffRole);
       formattedData.append("salary", data.salary);
       formattedData.append("hireDate", data.hireDate);
 
       // Address info
       formattedData.append("address", JSON.stringify([
          {
-            wardNumber: data.wardNumber || '6',
-            municipality: data.municipality || "KTM",
-            province: data.province || "Province 3",
-            district: data.district || "Kathmandu",
+            wardNumber: data.wardNumber,
+            municipality: data.municipality,
+            province: data.province,
+            district: data.district,
          }
       ]));
 
@@ -76,7 +74,7 @@ const AddStaffForm = () => {
       formattedData.append("contact", JSON.stringify({
          phoneNumber: data.phoneNumber,
          alternatePhoneNumber: data.alternatePhoneNumber,
-         telephoneNumber: data.telephoneNumber || '2187387821',
+         telephoneNumber: data.telephoneNumber,
       }));
 
       // Document info
@@ -100,8 +98,10 @@ const AddStaffForm = () => {
 
       try {
          const res = await addStaff(formattedData);
-         if (res) {
-            setIsOpen(false);
+         console.log(res);
+
+         if (res?.status === 201) {
+            setFormOpen(false);
             reset();
             setCurrentStep(0);
             setProfilePic(null);
@@ -128,7 +128,7 @@ const AddStaffForm = () => {
    };
 
    return (
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={formOpen} onOpenChange={setFormOpen}>
          <DialogTrigger asChild>
             <Button
                variant="create"
@@ -137,7 +137,7 @@ const AddStaffForm = () => {
                Add Staff
             </Button>
          </DialogTrigger>
-         <DialogContent className="bg-white overflow-y-auto sm:max-w-4xl">
+         <DialogContent className="bg-white overflow-y-auto sm:w-full sm:max-w-3xl">
             <DialogHeader>
                <DialogTitle className="text-xl font-bold text-center uppercase">
                   Staff Registration
@@ -211,7 +211,7 @@ const AddStaffForm = () => {
                         disabled={loading}
                         aria-label="Submit Form"
                      >
-                        {loading ? "Submitting..." : "Submit"}
+                        Submit
                      </button>
                   )}
                </div>

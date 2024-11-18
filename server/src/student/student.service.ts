@@ -30,7 +30,7 @@ export class StudentService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ): Promise<{ status: number; message: string; student?: any; user?: any ,plainPassword?:any }> {
+  ): Promise<{ status: number; message: string; student?: any; user?: any, plainPassword?: any }> {
     const {
       fatherName,
       motherName,
@@ -137,7 +137,7 @@ export class StudentService {
       message: 'Student created successfully',
       student: newStudent,
       user: createUserResponse.user,
-      plainPassword:plainPassword,
+      plainPassword: plainPassword,
     };
   }
 
@@ -150,7 +150,7 @@ export class StudentService {
     } = {},
   ) {
     try {
-    
+
       const {
         admissionDate,
         rollNumber,
@@ -170,22 +170,22 @@ export class StudentService {
         where: {
           studentId: Equal(id.toString()),
         },
-        relations:[
+        relations: [
           'user'
         ]
       });
       // console.log('student is', student);
-      
+
       if (!student) {
         throw new NotFoundException('Student not found');
-      }if (!student.user) {
+      } if (!student.user) {
         throw new NotFoundException('User associated with student not found');
       }
-  const userUpdateResult = await this.userService.updateUser(
-    student.user.userId,
-    updateStudentDto,
-    files,
-  );
+      const userUpdateResult = await this.userService.updateUser(
+        student.user.userId,
+        updateStudentDto,
+        files,
+      );
 
       if (fatherName !== undefined) {
         student.fatherName = fatherName;
@@ -236,55 +236,55 @@ export class StudentService {
   }
   async getAllStudents(page: number, limit: number) {
     try {
-        const skip = (page - 1) * limit;
+      const skip = (page - 1) * limit;
 
-        const [students, total] = await this.studentRepository.findAndCount({
-            relations: ['user', 'user.profile', 'user.contact', 'user.address', 'user.document'],
-            skip,
-            take: limit,
-        });
+      const [students, total] = await this.studentRepository.findAndCount({
+        relations: ['user', 'user.profile', 'user.contact', 'user.address', 'user.document'],
+        skip,
+        take: limit,
+      });
 
-        const formattedStudents = students
-            .filter(student => student.user !== null) 
-            .map(student => ({
-                id: student.studentId,
-                admissionDate: student.admissionDate,
-                rollNumber: student.rollNumber,
-                registrationNumber: student.registrationNumber,
-                studentClass: student.studentClass,
-                section: student.section,
-                transportationMode: student.transportationMode,
-                user: student.user && {
-                    id: student.user.userId,
-                    email: student.user.email,
-                    username: student.user.username,
-                    role: student.user.role,
-                    profile: student.user.profile,
-                    contact: student.user.contact,
-                    address: student.user.address,
-                    documents: student.user.document,
-                },
-            }));
+      const formattedStudents = students
+        .filter(student => student.user !== null)
+        .map(student => ({
+          id: student.studentId,
+          admissionDate: student.admissionDate,
+          rollNumber: student.rollNumber,
+          registrationNumber: student.registrationNumber,
+          studentClass: student.studentClass,
+          section: student.section,
+          transportationMode: student.transportationMode,
+          user: student.user && {
+            id: student.user.userId,
+            email: student.user.email,
+            username: student.user.username,
+            role: student.user.role,
+            profile: student.user.profile,
+            contact: student.user.contact,
+            address: student.user.address,
+            documents: student.user.document,
+          },
+        }));
 
-        return {
-            message: 'Students fetched successfully',
-            status: 200,
-            success: true,
-            data: formattedStudents,
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit),
-        };
+      return {
+        message: 'Students fetched successfully',
+        status: 200,
+        success: true,
+        data: formattedStudents,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
     } catch (error) {
-        console.error('Error fetching students:', error);
-        throw new InternalServerErrorException({
-            message: 'Failed to fetch students',
-            status: 500,
-            success: false,
-        });
+      console.error('Error fetching students:', error);
+      throw new InternalServerErrorException({
+        message: 'Failed to fetch students',
+        status: 500,
+        success: false,
+      });
     }
-}
+  }
 
 }
 

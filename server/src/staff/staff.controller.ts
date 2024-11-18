@@ -19,7 +19,7 @@ import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Controller('staff')
 export class StaffController {
-  constructor(private readonly staffService: StaffService) {}
+  constructor(private readonly staffService: StaffService) { }
 
   @Post('/create')
   @UseInterceptors(
@@ -38,7 +38,7 @@ export class StaffController {
 
     return this.staffService.createStaff(createStaffDto, files);
   }
-  
+
   @Patch('update/:id')
   @UseInterceptors(
     FileFieldsInterceptor([
@@ -47,7 +47,7 @@ export class StaffController {
     ]),
   )
   async updateStaff(
-    @Param('id') id:UUID,
+    @Param('id') id: UUID,
     @Body() updateStaffDto: Partial<StaffDto>,
     @UploadedFiles()
     files: {
@@ -67,10 +67,10 @@ export class StaffController {
   //   return this.staffService.getAllStaff(pageNumber, pageSize);
   // }
 
-  @Get(':id')
-  async getStaffById(@Param('id') id: string) {
-    return this.staffService.findStaffById(id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.staffService.findOne(+id);
+  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

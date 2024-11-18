@@ -6,26 +6,31 @@ import {
    TableHeader,
    TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
-import { Pagination } from "./Pagination";
+import { useMemo, useState } from "react";
 import ResultShowing from "../common/ResultShowing";
-
+import { Button } from "../ui/button";
+import { Pencil, Trash2 } from "lucide-react";
+import Paginations from "../common/Paginations";
+import { flattenData } from "@/utilities/utilities";
 
 const ITEMS_PER_PAGE = 10;
 
-const StaffTable = ({ user, handleUserId, tableHead, tableFields }) => {
-   const [selectedUserId, setSelectedUserId] = useState(null);
+const StaffTable = ({ user, handleUserData, tableHead, tableFields, handleDelete, handleEdit, loading }) => {
    const [currentPage, setCurrentPage] = useState(1);
 
-   const handleCheckboxChange = (id) => {
-      const newSelectedId = selectedUserId === id ? null : id;
-      setSelectedUserId(newSelectedId);
-      handleUserId(newSelectedId);
+   const handleCheckboxChange = (data) => {
+      handleUserData(data);
    };
+
+   const flattenedStaff = useMemo(() => flattenData(user), [user]);
+
 
    const totalPages = Math.ceil(user.length / ITEMS_PER_PAGE);
    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-   const currentPageData = user.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+   const currentPageData = useMemo(
+      () => flattenedStaff.slice(startIndex, startIndex + ITEMS_PER_PAGE),
+      [flattenedStaff, currentPage]
+   );
 
    // Calculate the range of results being displayed
    const startResult = startIndex + 1;
@@ -52,31 +57,60 @@ const StaffTable = ({ user, handleUserId, tableHead, tableFields }) => {
                </TableRow>
             </TableHeader>
             <TableBody>
-               {currentPageData.map((user) => (
-                  <TableRow key={user.id} className="cursor-pointer">
-                     <TableCell>
-                        <input
-                           type="checkbox"
-                           onChange={() => handleCheckboxChange(user.id)}
-                           checked={selectedUserId === user.id}
-                        />
+               {user.length === 0 ? (
+                  <TableRow>
+                     <TableCell colSpan={tableHead.length}>
+                        <div className="text-center py-4">No Staff Found</div>
                      </TableCell>
-                     {tableFields.map((field, index) => (
-                        <TableCell key={index}>
-                           {user[field]}
-                        </TableCell>
-                     ))}
                   </TableRow>
-               ))}
+               ) : (
+                  currentPageData.map((user) => {
+                     return (
+                        <TableRow key={user.user_id} className="cursor-pointer" >
+                           <TableCell>
+                              <input
+                                 type="checkbox"
+                              />
+                           </TableCell>
+                           {tableFields.map((field, index) => (
+                              <TableCell
+                                 key={index}
+                                 onClick={() => handleCheckboxChange(user)}
+                              >
+                                 {user[field]}
+                              </TableCell>
+                           ))}
+                           <TableCell className="flex justify-center gap-2">
+                              <Button
+                                 variant="edit"
+                                 size="icon"
+                                 className="mr-2"
+                                 onClick={() => handleEdit(user)}
+                              >
+                                 <Pencil />
+                              </Button>
+                              <Button
+                                 variant="destructive"
+                                 size="icon"
+                                 onClick={() => handleDelete(user.user.id)}
+                                 disabled={loading}
+                              >
+                                 <Trash2 />
+                              </Button>
+                           </TableCell>
+                        </TableRow>
+                     )
+                  })
+               )}
             </TableBody>
          </Table>
 
          {/* Pagination Controls */}
-         {user.length > 10 && <Pagination
+         <Paginations
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
-         />}
+         />
       </>
    );
 };

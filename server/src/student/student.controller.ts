@@ -20,7 +20,7 @@ import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Controller('student')
 export class StudentController {
-  constructor(private readonly studentService: StudentService) {}
+  constructor(private readonly studentService: StudentService) { }
 
   // @Get('all-students')
   // async getStudents() {
