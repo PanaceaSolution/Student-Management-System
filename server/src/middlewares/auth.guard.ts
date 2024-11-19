@@ -1,7 +1,7 @@
 import {
+  Injectable,
   CanActivate,
   ExecutionContext,
-  Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { FullAuthService } from './full-auth.service';
@@ -12,18 +12,18 @@ export class AuthGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
-    const token = request.cookies?.accessToken;
-
+    const token = request.cookies?.accessToken; 
+console.log(token)
     if (!token) {
-      throw new UnauthorizedException('Authentication Invalid');
+      throw new UnauthorizedException('Authentication Invalid: No access token found');
     }
 
     try {
       const user = this.fullAuthService.isTokenValid(token);
-      request['user'] = user; 
+      request.user = user; 
       return true;
     } catch (error) {
-      throw new UnauthorizedException('Authentication Invalid');
+      throw new UnauthorizedException('Authentication Invalid: Invalid token');
     }
   }
 }

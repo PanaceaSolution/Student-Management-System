@@ -7,6 +7,7 @@ import {
   HttpException,
   NotFoundException,
   ForbiddenException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
@@ -240,95 +241,74 @@ export class AuthenticationService {
     }
   }
 
-  async login(loginDto: LoginDto, @Res() res: Response) {
+  async login(loginDto: LoginDto, res: Response) {
     try {
       const { username, password } = loginDto;
-  
+
       if (!username || !password) {
-        return res.status(401).json({
-          message: 'Please fill both username and password',
-          success: false,
-        });
+        throw new BadRequestException('Username and password are required');
       }
-  
+
+      // Find the user by username
       const user = await this.userRepository.findOne({
         where: { username },
-        relations: ['profile'], // Fetch related profile info
+        relations: ['profile'], 
       });
-  
+
       if (!user) {
-        return res.status(404).json({
-          message: 'User not found',
-          success: false,
-        });
+        throw new UnauthorizedException('User not found');
       }
-  
-      // Check if user is activated
+
       if (!user.isActivated) {
-        return res.status(403).json({
-          message: 'Your account is deactivated. Please contact support.',
-          success: false,
-        });
+        throw new UnauthorizedException('Account is deactivated');
       }
-  
       const decryptedPassword = decryptdPassword(user.password);
       if (password !== decryptedPassword) {
-        return res.status(401).json({
-          message: 'Invalid password',
-          success: false,
-        });
+        throw new UnauthorizedException('Invalid credentials');
       }
-  
+
       const payload = this.fullAuthService.createPayload({
         username: user.username,
         role: user.role,
       });
-  
-      const { accessToken, refreshToken } = await this.fullAuthService.generateTokensAndAttachCookies(
-        res,
-        payload,
-      );
-  
-      await this.userRepository.update(
-        { username: user.username },
-        { refreshToken },
-      );
-  
+
+      const { accessToken, refreshToken } =
+        await this.fullAuthService.generateTokensAndAttachCookies(res, payload,user.userId.toString());
+
       return res.status(200).json({
         message: 'Login successful',
         success: true,
         user: {
           username: user.username,
           role: user.role,
-          profile: {
-            fname: user.profile?.fname,
-            lname: user.profile?.lname,
-            profilePicture: user.profile?.profilePicture,
-          },
-          isActivated: user.isActivated,
+          profile: user.profile
+            ? {
+                fname: user.profile.fname,
+                lname: user.profile.lname,
+                profilePicture: user.profile.profilePicture,
+              }
+            : null,
         },
       });
     } catch (error) {
-      console.error('Error during login:', error);
-      return res.status(500).json({
-        message: 'Internal server error',
-        success: false,
-      });
+      console.error('Login error:', error.message);
+      if (!(error instanceof UnauthorizedException || error instanceof BadRequestException)) {
+        throw new InternalServerErrorException('Internal server error');
+      }
+      throw error;
     }
   }
-  
+
+
   
   
   
 
-  async logout(@Res() res: Response, userId: UUID) {
+  async logout(@Res() res: Response, refreshToken: string) {
     try {
-      await this.userRepository.update(
-        { userId: userId },
-        { refreshToken: null },
-      );
+      // Invalidate the refresh token in the database
+      await this.fullAuthService.invalidateRefreshToken(refreshToken);
   
-      // Use FullAuthService for clearing cookies
       this.fullAuthService.clearCookies(res);
   
       return res.status(200).json({
@@ -342,7 +322,7 @@ export class AuthenticationService {
       });
     }
   }
-
+  
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     return this.refreshTokenUtil.refreshToken(req, res); // Delegate to utility
   }

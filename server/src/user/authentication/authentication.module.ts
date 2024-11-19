@@ -13,6 +13,7 @@ import * as multer from 'multer';
 import { Student } from 'src/student/entities/student.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
 import { Parent } from 'src/parent/entities/parent.entity';
+import { RefreshToken } from '../userEntity/refresh-token.entity'; // Import RefreshToken entity
 import { StaffModule } from 'src/staff/staff.module';
 import { FullAuthService } from '../../middlewares/full-auth.service';
 import { RefreshTokenUtil } from '../../middlewares/refresh-token.util';
@@ -28,27 +29,28 @@ import { RefreshTokenUtil } from '../../middlewares/refresh-token.util';
       Student,
       Staff,
       Parent,
+      RefreshToken, // Register the RefreshToken entity in TypeORM
     ]),
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: process.env.JWT_LIFETIME },
+      secret: process.env.JWT_SECRET, // JWT secret from environment variables
+      signOptions: { expiresIn: process.env.JWT_LIFETIME }, // Token expiration from environment variables
     }),
     MulterModule.register({
-      storage: multer.memoryStorage(),
+      storage: multer.memoryStorage(), // Configure in-memory storage for Multer
     }),
-    forwardRef(() => StaffModule),
+    forwardRef(() => StaffModule), // Forward reference to StaffModule for dependency resolution
   ],
   controllers: [AuthenticationController],
   providers: [
-    AuthenticationService, 
-    FullAuthService, 
-    RefreshTokenUtil, 
+    AuthenticationService, // Core service for authentication logic
+    FullAuthService, // Service for handling tokens and cookies
+    RefreshTokenUtil, // Utility for handling token refresh logic
   ],
   exports: [
-    AuthenticationService, 
-    FullAuthService,
-    RefreshTokenUtil, 
-    JwtModule, 
+    AuthenticationService, // Allow other modules to use the authentication service
+    FullAuthService, // Allow other modules to use the full auth service
+    RefreshTokenUtil, // Export the RefreshTokenUtil for use elsewhere
+    JwtModule, // Export the JWT module for token-related functionalities
   ],
 })
 export class AuthenticationModule {}

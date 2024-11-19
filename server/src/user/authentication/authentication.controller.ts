@@ -57,10 +57,18 @@ export class AuthenticationController {
     return this.authenticationService.login(loginDto, res);
   }
 
+ 
   @Post('logout')
   @UseGuards(AuthGuard)
-  async logout(@Req() request: Request, @Body('userId') userId: UUID, @Res() res: Response) {
-    return this.authenticationService.logout(res, userId);
+  async logout(@Req() req: Request, @Res() res: Response) {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+      return res.status(400).json({
+        message: 'No refresh token provided',
+        success: false,
+      });
+    }
+    return this.authenticationService.logout(res, refreshToken);
   }
 
   @Post('refresh-token')
@@ -139,6 +147,7 @@ export class AuthenticationController {
     }
   }
     @Get('users/role')
+    @UseGuards(AuthGuard)
   async getUsersByRole(
     @Query('role') role: ROLE,
     @Query('staffRole') staffRole?: STAFFROLE,
