@@ -6,15 +6,12 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, Equal, Repository } from 'typeorm';
+import { DeepPartial, Equal, In, Repository } from 'typeorm';
 import { Parent } from './entities/parent.entity';
 import { ParentDto } from './dto/parent.dto';
 import { ROLE } from '../utils/role.helper';
 import { AuthenticationService } from 'src/user/authentication/authentication.service';
-import {
-  decryptdPassword,
-  generateRandomPassword,
-} from 'src/utils/utils';
+import { decryptdPassword, generateRandomPassword } from 'src/utils/utils';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { Student } from 'src/student/entities/student.entity';
@@ -44,8 +41,16 @@ export class ParentService {
     user?: any;
     plainPassword?: any;
   }> {
-    const { childNames, email, role, profile, contact, address, document, studentId } =
-      createdParentDto;
+    const {
+      childNames,
+      email,
+      role,
+      profile,
+      contact,
+      address,
+      document,
+      studentId,
+    } = createdParentDto;
 
     if (!profile || !profile.fname || !profile.lname) {
       throw new BadRequestException(
@@ -110,53 +115,61 @@ export class ParentService {
       refreshToken: null,
     };
 
-    const createUserResponse = await this.userService.register(
-      registerDto,
-      files,
-    );
-    if (!createUserResponse || !createUserResponse.user) {
-      throw new InternalServerErrorException(
-        'Error occurred while creating user',
-      );
-    }
-
-    const userReference = await this.userRepository.findOne({
-      where: { userId: createUserResponse.user.id },
-    });
-
-    if (!userReference) {
-      return { status: 500, message: 'Error finding user after creation' };
-    }
-
     //linking student
     let students = [];
-  if (studentId && studentId.length > 0) {
-    students = await this.studentRepository.findByIds(studentId);
+    if (studentId && studentId.length > 0) {
+      students = await this.studentRepository.find({
+        where: { studentId: In(studentId) },
+      });
 
-    if (students.length !== studentId.length) {
-      throw new NotFoundException('One or more student IDs are invalid.');
+      if (students.length !== studentId.length) {
+        throw new NotFoundException('One or more student IDs are invalid.');
+      }
     }
-  }
-
 
     const newParent = this.parentRepository.create({
       childNames,
-      user: userReference,
-      student: students
+      // user: userReference,
+      student: students,
     });
 
-    await this.parentRepository.save(newParent);
-    let plainPassword = decryptdPassword(userReference.password);
-    return {
-      status: 201,
-      message: 'Parent created successfully',
-      parent: {
+    const parentCreated = await this.parentRepository.save(newParent);
+    if (parentCreated) {
+      const createUserResponse = await this.userService.register(
+        registerDto,
+        files,
+      );
+      if (!createUserResponse || !createUserResponse.user) {
+        throw new InternalServerErrorException(
+          'Error occurred while creating user',
+        );
+      }
+
+      const userReference = await this.userRepository.findOne({
+        where: { userId: createUserResponse.user.id },
+      });
+      console.log(userReference);
+
+      if (!userReference) {
+        return { status: 500, message: 'Error finding user after creation' };
+      }
+      const finalUser = await this.parentRepository.save({
         ...newParent,
-        documents: documentUrls,
-      },
-      user: createUserResponse.user,
-      plainPassword: plainPassword,
-    };
+        user: userReference,
+      });
+      console.log(finalUser);
+      let plainPassword = decryptdPassword(userReference.password);
+      return {
+        status: 201,
+        message: 'Parent created successfully',
+        parent: {
+          ...newParent,
+          documents: documentUrls,
+        },
+        user: createUserResponse.user,
+        plainPassword: plainPassword,
+      };
+    }
   }
 
   async updateParent(
@@ -205,7 +218,7 @@ export class ParentService {
         message: 'Parent Updated successfully',
       };
     } catch (error) {
-      console.error('Error occur',error)
+      console.error('Error occur', error);
       throw new Error('Internal server problem');
     }
   }
