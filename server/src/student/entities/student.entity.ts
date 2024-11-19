@@ -14,6 +14,7 @@ import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { TRANSPORTATION_MODE } from '../../utils/role.helper';
 import { User } from '../../user/authentication/entities/authentication.entity';
 import { Assignment } from 'src/assignment/entities/assignment.entity';
+import { Course } from 'src/course/entities/course.entity';
 
 @Entity({ name: 'Student' })
 
@@ -63,8 +64,11 @@ export class Student {
   user: User;
   parent: any;
 
-  @OneToMany(() => Assignment, (assignment) => assignment.studentId)
+  @ManyToOne(() => Assignment, (assignment) => assignment.studentId)
   assignments: Assignment[];
+
+  @ManyToOne(() => Course, (course) => course.courseId)
+  course: Course[];
 
   // @ManyToOne(() => Parent, (parent) => parent.students, { nullable: true })
   // @JoinColumn({ name: 'parentId' })
