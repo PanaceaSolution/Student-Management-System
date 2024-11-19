@@ -6,9 +6,7 @@ import React, {
   useMemo,
 } from "react";
 import Button from "@/components/Button";
-import Loadding from "./Loader/Spinner";
 import Modal from "./common/Modal";
-import AddStudentFormModal from "@/pages/admin/StudentForm/AddStudentFormModal";
 import suk from "../assets/suk.jpg";
 import useStudentStore from "@/store/studentStore";
 import Loader from "./common/Loader";
@@ -41,7 +39,7 @@ const EditDeleteButtons = React.memo(({ onEdit, onDelete, isDisabled }) => (
 
 const ProfileCard = ({ studentInfo }) => {
   const [keys, setKeys] = useState([]);
-  const [openModal, setOpenModal] = useState(-1);
+  const [openModal, setOpenModal] = useState(false);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
   const [showAllDetails, setShowAllDetails] = useState(false);
   const additionalContentRef = useRef(null);
@@ -154,16 +152,10 @@ const ProfileCard = ({ studentInfo }) => {
             actionName="Delete"
             dangerAction={() => handleDelete(studentInfo?.user_id)}
             showModal={openModal === studentInfo?.user_id}
-            cancelOption={() => setOpenModal(-1)}
+            cancelOption={() => setOpenModal(false)}
           />
 
-          {/* Modal for Adding/Editing Student */}
-          <AddStudentFormModal
-            cancelOption={() => setShowAddStudentModal(false)}
-            showModal={showAddStudentModal}
-            studentId={studentInfo?.user_id}
-            initialData={studentInfo}
-          />
+         
         </div>
 
         {/* Edit/Delete Buttons */}

@@ -84,10 +84,10 @@ const useStudentStore = create(
         },
 
         // Update an existing student
-        updateStudent: async (studentId, updatedStudentData) => {
+        updateStudent: async (studentId, formData) => {
           set({ loading: true, error: null });
           try {
-            const data = await updateStudentService(studentId, updatedStudentData);
+            const data = await updateStudentService(studentId, formData);
             if (data) {
               toast.success(data.message);
               set((state) => ({
