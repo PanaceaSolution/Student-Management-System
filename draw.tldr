@@ -140,11 +140,34 @@
 			"typeName": "shape"
 		},
 		{
+			"x": 364.0634376696271,
+			"y": 1122.484243147198,
+			"rotation": 0,
+			"isLocked": false,
+			"opacity": 1,
+			"meta": {},
+			"id": "shape:A2eIplRIBH3GKOlSFZwLl",
+			"type": "text",
+			"props": {
+				"color": "black",
+				"size": "xl",
+				"w": 2071.199951171875,
+				"text": "1. In login we need username, profile picture and other details to show on users portfolio.",
+				"font": "draw",
+				"textAlign": "start",
+				"autoSize": true,
+				"scale": 1
+			},
+			"parentId": "page:page",
+			"index": "a55Vy",
+			"typeName": "shape"
+		},
+		{
 			"id": "pointer:pointer",
 			"typeName": "pointer",
-			"x": 633.6710809044243,
-			"y": 1284.372852689661,
-			"lastActivityTimestamp": 1731913420952,
+			"x": 361.5698991570064,
+			"y": 1751.2354137342186,
+			"lastActivityTimestamp": 1731998897054,
 			"meta": {}
 		},
 		{
@@ -166,8 +189,8 @@
 			"screenBounds": {
 				"x": 0,
 				"y": 0,
-				"w": 1300,
-				"h": 543.2000122070312
+				"w": 1185.5999755859375,
+				"h": 661.6000366210938
 			},
 			"insets": [
 				false,
@@ -195,10 +218,10 @@
 			"typeName": "instance"
 		},
 		{
-			"editingShapeId": "shape:A2eIplRIBH3GKOlSFZwLl",
+			"editingShapeId": "shape:OLUo1h9Kx39JmANL3mkci",
 			"croppingShapeId": null,
 			"selectedShapeIds": [
-				"shape:A2eIplRIBH3GKOlSFZwLl"
+				"shape:OLUo1h9Kx39JmANL3mkci"
 			],
 			"hoveredShapeId": null,
 			"erasingShapeIds": [],
@@ -210,34 +233,34 @@
 			"typeName": "instance_page_state"
 		},
 		{
-			"x": 906.6449124595686,
-			"y": -266.5521553656324,
-			"z": 0.3827786241012983,
+			"x": 1043.7165247216426,
+			"y": -870.4613114387525,
+			"z": 0.3542338485962158,
 			"meta": {},
 			"id": "camera:page:page",
 			"typeName": "camera"
 		},
 		{
-			"x": 364.0634376696271,
-			"y": 1122.484243147198,
+			"x": 214.7742154410953,
+			"y": 1760.2690287309574,
 			"rotation": 0,
 			"isLocked": false,
 			"opacity": 1,
 			"meta": {},
-			"id": "shape:A2eIplRIBH3GKOlSFZwLl",
+			"id": "shape:OLUo1h9Kx39JmANL3mkci",
 			"type": "text",
 			"props": {
 				"color": "black",
 				"size": "xl",
-				"w": 2071.199951171875,
-				"text": "1. In login we need username, profile picture and other details to show on users portfolio.",
+				"w": 16.100000381469727,
+				"text": "",
 				"font": "draw",
 				"textAlign": "start",
 				"autoSize": true,
 				"scale": 1
 			},
 			"parentId": "page:page",
-			"index": "a55Vy",
+			"index": "a6AHi",
 			"typeName": "shape"
 		}
 	]
