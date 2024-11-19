@@ -65,7 +65,7 @@ export class AuthenticationService {
     @InjectRepository(UserDocuments)
     private readonly documentRepository: Repository<UserDocuments>,
     private jwtService: JwtService,
-  ) { }
+  ) {}
   async register(
     RegisterDto: RegisterUserDto,
     files: {
@@ -100,7 +100,7 @@ export class AuthenticationService {
         role,
         staffRole,
       );
-      console.log('Generating username:', username);    
+      console.log('Generating username:', username);
 
       const newUser = this.userRepository.create({
         email,
@@ -750,6 +750,7 @@ export class AuthenticationService {
           ) {
             roleData = await this.staffRepository.find({
               where: { staffRole: staffRole },
+              // relations: ['users']
             });
           } else {
             roleData = await this.staffRepository.find({});
@@ -771,7 +772,6 @@ export class AuthenticationService {
 
       const formattedUsers = users.map(this.formatUserResponse);
       // console.log(formattedUsers);
-
 
       const finalData = formattedUsers
         .map((user, index) =>

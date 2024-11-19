@@ -6,11 +6,11 @@ import { Course } from './entities/course.entity';
 import { Student } from '../student/entities/student.entity';
 import { CourseEnrollment } from './course-enrollment/entities/course-enrollment.entity';
 
-@Controller('courses')
+@Controller('course')
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
-  @Post()
+  @Post('/create')
   create(@Body() createCourseDto: CreateCourseDto): Promise<Course> {
     return this.courseService.create(createCourseDto);
   }
@@ -25,7 +25,7 @@ export class CourseController {
     return this.courseService.findOne(courseId);
   }
 
-  @Put(':courseId')
+  @Put('/update/courseId')
   update(
     @Param('courseId') courseId: string,
     @Body() updateCourseDto: UpdateCourseDto,
@@ -33,7 +33,7 @@ export class CourseController {
     return this.courseService.update(courseId, updateCourseDto);
   }
 
-  @Delete(':courseId')
+  @Delete('/delete/:courseId')
   remove(@Param('courseId') courseId: string): Promise<void> {
     return this.courseService.remove(courseId);
   }

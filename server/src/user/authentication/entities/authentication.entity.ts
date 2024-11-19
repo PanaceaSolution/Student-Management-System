@@ -76,18 +76,18 @@ export class User {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
   student: Student;
-  @OneToMany(() => Parent, (parent) => parent.user, {
+
+  @OneToOne(() => Parent, (parent) => parent.user, {
     cascade: true,
     onDelete: 'CASCADE',
   })
-  parent: Parent[];
+  parent: Parent;
+
   @OneToOne(() => Staff, (staff) => staff.user, {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'staffId' })
   staff: Staff;
  
 }
