@@ -57,7 +57,11 @@ export class StaffController {
   ) {
     return this.staffService.updateStaff(id, updateStaffDto, files);
   }
-
+  @Get()
+  async getAllStaff() {
+    return this.staffService.findAllStaff();
+  }
+  
 
 
   // @Get('all-staff')
