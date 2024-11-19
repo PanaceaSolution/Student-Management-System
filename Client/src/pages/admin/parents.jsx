@@ -50,7 +50,7 @@ const Parents = () => {
    const { parents, getAllParents, parentById, getParentsById, deleteParent } = useParentStore()
 
    useEffect(() => {
-      getAllParents();
+      getAllParents("PARENT");
    }, [getAllParents])
 
    const { exportToCSV, exportToPDF } = useExport()

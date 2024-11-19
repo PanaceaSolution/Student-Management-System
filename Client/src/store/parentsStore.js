@@ -1,4 +1,5 @@
 import { createParentService, deleteParentService, getAllParentsService, getParentsByIdService, updateParentService } from "@/services/parentsServices";
+import { getAllUserService } from "@/services/userService";
 import toast from "react-hot-toast";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
@@ -13,23 +14,16 @@ const useParentStore = create(
             parentById: {},
 
             // Get all parents
-            getAllParents: async () => {
+            getAllParents: async (role) => {
                set({ loading: true, error: null });
                try {
-                  const data = await getAllParentsService();
-                  set({ parents: data, loading: false });
-                  return data;
-               } catch (error) {
-                  set({ error: error.message, loading: false });
-                  return error;
-               }
-            },
-
-            getParentsById: async (parentId) => {
-               set({ loading: true, error: null });
-               try {
-                  const data = await getParentsByIdService(parentId);
-                  set({ parentById: data, loading: false });
+                  const res = await getAllUserService(role);
+                  if (res.success) {
+                     set({
+                        parents: res.parents,
+                        loading: false
+                     });
+                  }
                   return data;
                } catch (error) {
                   set({ error: error.message, loading: false });
