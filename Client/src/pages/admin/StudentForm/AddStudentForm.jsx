@@ -89,6 +89,7 @@ const AddStudentForm = ({ studentId, initialData }) => {
         setValue("citizenship", initialData.user_documents_1_documentFile);
       if (initialData.user_documents_2_documentFile)
         setValue("marksheet", initialData.user_documents_2_documentFile);
+   
     }
   }, [initialData, setValue]);
   // Handle Next Step
@@ -173,13 +174,12 @@ const AddStudentForm = ({ studentId, initialData }) => {
     for (let key in newData) {
       formData.append(key, newData[key]);
     }
-    formData.append("password", "Password@123");
     formData.append("role", "STUDENT");
     try {
       if (studentId) {
         console.log("Edit student logic");
         console.log("update",formData)
-        await updateStudent(studentId,formData)
+        await updateStudent({studentId,formData})
       } else {
         await addStudent(formData);
       }
@@ -222,6 +222,7 @@ const AddStudentForm = ({ studentId, initialData }) => {
             register={register}
             errors={errors}
             clearErrors={clearErrors}
+            getValues={getValues}
           />
         )}
 
