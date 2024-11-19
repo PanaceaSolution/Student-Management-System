@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
    Dialog,
@@ -16,16 +16,16 @@ import StaffInfo from './StaffInfo';
 import AddressInfo from '@/pages/admin/StudentForm/AddressInfo';
 import ProfilePicUpload from '@/components/common/profilePicUpload';
 import StaffDocumentUpload from './StaffDocumentUpload';
+import ImageUploader from '@/components/common/ImageUploader';
 
 const documentFields = [
    { name: "birthCertificate", label: "Birth Certificate (optional)" },
    { name: "citizenship", label: "Citizenship Document (optional)" },
 ]
 
-const AddStaffForm = ({ formOpen, setFormOpen }) => {
-   const { addStaff, loading } = useStaffStore();
+const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, currentStep, setCurrentStep }) => {
+   const { addStaff, updateStaff, loading } = useStaffStore();
    const steps = ["Personal Info", "Address Info", "Document Upload"];
-   const [currentStep, setCurrentStep] = useState(0);
    const [profilePic, setProfilePic] = useState('');
    const [documents, setDocuments] = useState({
       birthCertificate: null,
@@ -38,15 +38,54 @@ const AddStaffForm = ({ formOpen, setFormOpen }) => {
       formState: { errors },
       trigger,
       clearErrors,
-      reset
-   } = useForm({});
+      reset,
+      setValue,
+   } = useForm({
+   });
+
+   useEffect(() => {
+      if (selectedData) {
+         setValue("fname", selectedData.user_profile_fname);
+         setValue("lname", selectedData.user_profile_lname);
+         setValue("gender", selectedData.user_profile_gender);
+         setValue("dob", selectedData.user_profile_dob);
+         setProfilePic(selectedData.user_profile_profilePicture);
+         setValue("email", selectedData.user_email);
+         setValue("staffRole", selectedData.staffRole);
+         setValue("salary", selectedData.salary);
+         setValue("hireDate", selectedData.hireDate);
+         setValue("wardNumber", selectedData.user_address_0_wardNumber);
+         setValue("municipality", selectedData.user_address_0_municipality);
+         setValue("province", selectedData.user_address_0_province);
+         setValue("district", selectedData.user_address_0_district);
+         setValue("phoneNumber", selectedData.user_contact_phoneNumber);
+         setValue("alternatePhoneNumber", selectedData.user_contact_alternatePhoneNumber);
+         setValue("telephoneNumber", selectedData.user_contact_telephoneNumber);
+         setDocuments({
+            birthCertificate: selectedData.user_documents_0_documentFile,
+            citizenship: selectedData.user_documents_1_documentFile,
+         })
+      }
+   }, [selectedData, setValue])
+
+   const resetFormState = () => {
+      reset({});
+      setProfilePic(null);
+      setDocuments({ birthCertificate: null, citizenship: null });
+   };
+
+   const handleAddForm = () => {
+      resetFormState();
+      setCurrentStep(0);
+      setSelectedData(null);
+      setFormOpen(true);
+   };
 
    const onSubmit = async (data) => {
       const formattedData = new FormData();
 
       // Append the fields to FormData
       formattedData.append("email", data.email);
-      formattedData.append("password", data.password || 'ijijisj');
       formattedData.append("role", "STAFF");
       formattedData.append("staffRole", data.staffRole);
       formattedData.append("salary", data.salary);
@@ -97,20 +136,35 @@ const AddStaffForm = ({ formOpen, setFormOpen }) => {
       }
 
       try {
-         const res = await addStaff(formattedData);
-         console.log(res);
+         if (selectedData) {
+            const res = await updateStaff(selectedData.staffId, formattedData);
+            if (res?.status === 200) {
+               setFormOpen(false);
+               reset();
+               setCurrentStep(0);
+               setProfilePic(null);
+               setDocuments({
+                  birthCertificate: null,
+                  citizenship: null,
+                  marksheet: null,
+               })
+            }
 
-         if (res?.status === 201) {
-            setFormOpen(false);
-            reset();
-            setCurrentStep(0);
-            setProfilePic(null);
-            setDocuments({
-               birthCertificate: null,
-               citizenship: null,
-               marksheet: null,
-            })
+         } else {
+            const res = await addStaff(formattedData);
+            if (res?.status === 201) {
+               setFormOpen(false);
+               reset();
+               setCurrentStep(0);
+               setProfilePic(null);
+               setDocuments({
+                  birthCertificate: null,
+                  citizenship: null,
+                  marksheet: null,
+               })
+            }
          }
+
       } catch (error) {
          console.error("Error adding staff:", error);
       }
@@ -133,6 +187,7 @@ const AddStaffForm = ({ formOpen, setFormOpen }) => {
             <Button
                variant="create"
                className="uppercase"
+               onClick={() => handleAddForm()}
             >
                Add Staff
             </Button>

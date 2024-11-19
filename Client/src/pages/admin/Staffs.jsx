@@ -75,16 +75,13 @@ const Staffs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [cardOpen, setCardOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
 
   const { staff, getStaff, deleteStaff, loading } = useStaffStore()
 
   useEffect(() => {
     getStaff("STAFF");
   }, []);
-
-
-
-  // const staff = useMemo(() => allUsers, [allUsers]);
 
   // Handle format selection and trigger export
   const { exportToCSV, exportToPDF } = useExport()
@@ -118,15 +115,13 @@ const Staffs = () => {
   };
 
   const handleEdit = (data) => {
+    setCurrentStep(0);
     setFormOpen(true);
     setSelectedData(data)
   }
 
-  const handleDelete = (id) => {
-    const res = deleteStaff(id);
-    if (res.status === 200) {
-      setSelectedData(null);
-    }
+  const handleDelete = async (id) => {
+    await deleteStaff(id);
   };
 
   return (
@@ -142,7 +137,15 @@ const Staffs = () => {
                   onChange={handleExportChange}
                   className="w-32 bg-white"
                 />
-                <AddStaffForm formOpen={formOpen} setFormOpen={setFormOpen} selectedData={selectedData} />
+                <AddStaffForm
+                  formOpen={formOpen}
+                  setFormOpen={setFormOpen}
+                  selectedData={selectedData}
+                  setSelectedData={setSelectedData}
+                  currentStep={currentStep}
+                  setCurrentStep={setCurrentStep}
+                  loading={loading}
+                />
               </div>
             </div>
             <div className="border-b-2 p-2">
