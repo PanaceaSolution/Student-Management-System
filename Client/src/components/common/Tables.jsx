@@ -9,9 +9,9 @@ import LoadingText from "./LoadingText";
 import { Button } from "../ui/button";
 import AddStudentFormModal from "@/pages/admin/StudentForm/AddStudentFormModal";
 
-const Tables = React.memo(({ items, loading }) => {
-  const flattenedStudents = useMemo(() => flattenData(items), [items]);
-  
+const Tables = React.memo(({ items, loading, handleUserData }) => {
+  const flattenedStudents = useMemo(() => flattenData(items.flat()), [items]);
+
   const [selectedIds, setSelectedIds] = useState([]);
   const [headerValue, setHeaderValue] = useState([]);
   const [openModal, setOpenModal] = useState(-1);
@@ -19,13 +19,17 @@ const Tables = React.memo(({ items, loading }) => {
   const { deleteStudent, deleteLoading } = useStudentStore();
   const [showEdit, setShowEdit] = useState(-1);
   // Handle checkbox selection
-  const handleCheckboxChange = useCallback((id) => {
-    setSelectedIds((prev) =>
-      prev.includes(id)
-        ? prev.filter((selectedId) => selectedId !== id)
-        : [...prev, id]
-    );
-  }, []);
+  // const handleCheckboxChange = useCallback((id) => {
+  //   setSelectedIds((prev) =>
+  //     prev.includes(id)
+  //       ? prev.filter((selectedId) => selectedId !== id)
+  //       : [...prev, id]
+  //   );
+  // }, []);
+
+  const handleOpenCard = useCallback((data) => {
+    handleUserData(data);
+  })
 
   // Update headers based on flattenedStudents
   useEffect(() => {
@@ -150,7 +154,7 @@ const Tables = React.memo(({ items, loading }) => {
                     <td
                       key={key}
                       className="px-4 py-1 cursor-pointer"
-                      onClick={() => handleCheckboxChange(data)}
+                      onClick={() => handleOpenCard(data)}
                     >
                       {data[key]}
                     </td>

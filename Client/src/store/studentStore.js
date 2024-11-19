@@ -66,7 +66,7 @@ const useStudentStore = create(
             const data = await createStudentService(studentData);
             if (data) {
               set((state) => ({
-                students: [...state.students, data],
+                students: [...state.students, data.data],
                 loading: false,
               }));
               toast.success(data?.message || "Student added successfully");

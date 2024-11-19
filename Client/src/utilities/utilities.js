@@ -1,48 +1,44 @@
+// Recursive function to flatten nested data (objects and arrays)
 export function flattenNestedData(data, parentKey = '') {
   let result = {};
 
+  // If data is an array, iterate through it
   if (Array.isArray(data)) {
     data.forEach((item, index) => {
       const itemKey = parentKey ? `${parentKey}_${index}` : `${index}`;
       result = { ...result, ...flattenNestedData(item, itemKey) };
     });
-  } else if (typeof data === 'object' && data !== null) {
+  }
+  // If data is an object, iterate through the keys
+  else if (typeof data === 'object' && data !== null) {
     Object.keys(data).forEach(key => {
       const newKey = parentKey ? `${parentKey}_${key}` : key;
 
+      // If the value is an array, recursively flatten its elements
       if (Array.isArray(data[key])) {
-        // Flatten array items
         data[key].forEach((arrItem, arrIndex) => {
           const arrayItemKey = `${newKey}_${arrIndex}`;
           result = { ...result, ...flattenNestedData(arrItem, arrayItemKey) };
         });
-      } else if (typeof data[key] === 'object' && data[key] !== null) {
-        // Flatten nested objects
+      }
+      // If the value is an object, recursively flatten it
+      else if (typeof data[key] === 'object' && data[key] !== null) {
         result = { ...result, ...flattenNestedData(data[key], newKey) };
-      } else {
-        // Base case: if it's a primitive value, set it in the result
+      }
+      // If it's a primitive value, add it to the result
+      else {
         result[newKey] = data[key];
       }
     });
   } else {
-    // Base case: if it's a primitive value, set it in the result
+    // For primitive values, just add them with the current key
     result[parentKey] = data;
   }
 
   return result;
 }
 
-// Function to flatten an array of arrays of data objects
+// A helper function to flatten an array of data items
 export function flattenData(data) {
-  let flattenedResult = [];
-  
-  // Loop through the array of arrays and flatten each inner array of objects
-  data.forEach(innerArray => {
-    // For each inner array, flatten the objects inside it and merge into the final result
-    innerArray.forEach(item => {
-      flattenedResult.push(flattenNestedData(item));
-    });
-  });
-
-  return flattenedResult;
+  return data.map(item => flattenNestedData(item));
 }
