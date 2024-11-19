@@ -118,7 +118,7 @@ export class StaffService {
       hireDate,
       salary,
       staffRole: staffRole.trim() as STAFFROLE,
-      // user: userReference,
+      user: userReference,
     });
     const plainPassword = decryptdPassword(userReference.password)
   console.log("Plainpassword is", plainPassword);

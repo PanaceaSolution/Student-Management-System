@@ -734,7 +734,7 @@ export class AuthenticationService {
           success: false,
         });
       }
-      let roleData;
+      let roleData:any;
       switch (role) {
         case ROLE.STUDENT:
           roleData = await this.studentRepository.find({});
@@ -750,10 +750,10 @@ export class AuthenticationService {
           ) {
             roleData = await this.staffRepository.find({
               where: { staffRole: staffRole },
-              // relations: ['users']
             });
           } else {
-            roleData = await this.staffRepository.find({});
+            roleData = await this.staffRepository.find({
+            });
           }
           break;
         default:
