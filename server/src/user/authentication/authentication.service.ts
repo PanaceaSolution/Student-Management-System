@@ -28,6 +28,7 @@ import {
   encryptdPassword,
   decryptdPassword,
 } from '../../utils/utils';
+import { RefreshTokenUtil } from 'src/middlewares/refresh-token.util';
 import {
   deleteFileFromCloudinary,
   extractPublicIdFromUrl,
@@ -39,6 +40,7 @@ import { STAFFROLE } from '../../utils/role.helper';
 import { Student } from 'src/student/entities/student.entity';
 import { Parent } from 'src/parent/entities/parent.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
+import { FullAuthService } from 'src/middlewares/full-auth.service';
 
 @Injectable()
 export class AuthenticationService {
@@ -66,7 +68,9 @@ export class AuthenticationService {
     @InjectRepository(UserDocuments)
     private readonly documentRepository: Repository<UserDocuments>,
     private readonly staffService: StaffService,
-    private jwtService: JwtService,
+    private readonly jwtService: JwtService, // Keep this for manual signing/verification if needed
+    private readonly fullAuthService: FullAuthService,
+    private readonly refreshTokenUtil: RefreshTokenUtil,
   ) {}
   async register(
     RegisterDto: RegisterUserDto,
@@ -239,59 +243,71 @@ export class AuthenticationService {
   async login(loginDto: LoginDto, @Res() res: Response) {
     try {
       const { username, password } = loginDto;
+  
       if (!username || !password) {
         return res.status(401).json({
           message: 'Please fill both username and password',
           success: false,
         });
       }
+  
       const user = await this.userRepository.findOne({
         where: { username },
+        relations: ['profile'], // Fetch related profile info
       });
-
+  
       if (!user) {
         return res.status(404).json({
           message: 'User not found',
           success: false,
         });
       }
-      const decryptedPassword = decryptdPassword(user.password);
-      let isPasswordValid = false;
-      if (user) {
-        isPasswordValid = password === decryptedPassword;
+  
+      // Check if user is activated
+      if (!user.isActivated) {
+        return res.status(403).json({
+          message: 'Your account is deactivated. Please contact support.',
+          success: false,
+        });
       }
-
-      if (!isPasswordValid) {
+  
+      const decryptedPassword = decryptdPassword(user.password);
+      if (password !== decryptedPassword) {
         return res.status(401).json({
           message: 'Invalid password',
           success: false,
         });
       }
-      const payload = { username: user.username, role: user.role };
-      const AccessToken = this.jwtService.sign(payload, {
-        expiresIn: '1d',
-        secret: process.env.JWT_SECRET,
+  
+      const payload = this.fullAuthService.createPayload({
+        username: user.username,
+        role: user.role,
       });
-
-      const RefreshToken = this.jwtService.sign(payload, {
-        expiresIn: '7d',
-        secret: process.env.JWT_SECRET,
-      });
-      res.cookie('accessToken', AccessToken, {
-        httpOnly: true,
-        sameSite: 'strict',
-      });
-      res.cookie('refreshToken', RefreshToken, {
-        httpOnly: true,
-        sameSite: 'strict',
-      });
-
+  
+      const { accessToken, refreshToken } = await this.fullAuthService.generateTokensAndAttachCookies(
+        res,
+        payload,
+      );
+  
       await this.userRepository.update(
         { username: user.username },
-        { refreshToken: RefreshToken },
+        { refreshToken },
       );
-
-      return res.status(200).json({ payload, success: true });
+  
+      return res.status(200).json({
+        message: 'Login successful',
+        success: true,
+        user: {
+          username: user.username,
+          role: user.role,
+          profile: {
+            fname: user.profile?.fname,
+            lname: user.profile?.lname,
+            profilePicture: user.profile?.profilePicture,
+          },
+          isActivated: user.isActivated,
+        },
+      });
     } catch (error) {
       console.error('Error during login:', error);
       return res.status(500).json({
@@ -300,6 +316,10 @@ export class AuthenticationService {
       });
     }
   }
+  
+  
+  
+  
 
   async logout(@Res() res: Response, userId: UUID) {
     try {
@@ -307,8 +327,10 @@ export class AuthenticationService {
         { userId: userId },
         { refreshToken: null },
       );
-      res.clearCookie('accessToken');
-      res.clearCookie('refreshToken');
+  
+      // Use FullAuthService for clearing cookies
+      this.fullAuthService.clearCookies(res);
+  
       return res.status(200).json({
         message: 'Logout successful',
         success: true,
@@ -322,41 +344,7 @@ export class AuthenticationService {
   }
 
   async refreshToken(@Req() req: Request, @Res() res: Response) {
-    const refreshToken = req.cookies.refreshToken;
-
-    if (!refreshToken) {
-      return res.status(403).json({
-        message: 'No refresh token is provided',
-        success: false,
-      });
-    }
-
-    try {
-      const decoded = this.jwtService.verify(refreshToken);
-
-      const payload = {
-        username: decoded.username,
-        role: decoded.role,
-      };
-
-      const newAccessToken = this.jwtService.sign(payload, {
-        expiresIn: '15m',
-      });
-      res.cookie('accessToken', newAccessToken, {
-        httpOnly: true,
-        sameSite: 'strict',
-      });
-
-      return res.status(200).json({
-        message: 'New access token generated',
-        success: true,
-      });
-    } catch (error) {
-      return res.status(401).json({
-        message: 'Invalid refresh token',
-        success: false,
-      });
-    }
+    return this.refreshTokenUtil.refreshToken(req, res); // Delegate to utility
   }
   async updateUser(
     id: UUID,
@@ -365,19 +353,21 @@ export class AuthenticationService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     } = {},
+    fallbackDocuments?: string, // Accept a fallback URL for documents
+    fallbackProfilePicture?: string, // Accept a fallback URL for profile picture
   ) {
     try {
       const { email, role, profile, contact, document, address } = updateData;
-
+  
       const user = await this.userRepository.findOne({
         where: { userId: Equal(id.toString()) },
       });
       if (!user) {
         throw new NotFoundException('User not found');
       }
-
+  
       const updatedFields = {};
-
+  
       if (email !== undefined) {
         const emailInUse = await this.userRepository.findOne({
           where: { email, userId: Not(Equal(id.toString())) },
@@ -390,26 +380,23 @@ export class AuthenticationService {
         user.email = email;
         updatedFields['email'] = email;
       }
-
+  
       if (role !== undefined) {
         user.role = role;
         updatedFields['role'] = role;
       }
       await this.userRepository.save(user);
-      // console.log('User base data updated:', {
-      //   email: user.email,
-      //   role: user.role,
-      // });
-
-      let profilePictureUrl: string | null = null;
+  
+      let profilePictureUrl: string | null = fallbackProfilePicture || null;
       if (profile) {
         profilePictureUrl = await this.handleProfilePictureUpdate(
           files.profilePicture,
           user.userId.toString(),
           updatedFields,
+          profilePictureUrl, // Use fallbackProfilePicture as a fallback
         );
       }
-
+  
       if (profile) {
         await this.updateUserProfile(
           profile,
@@ -418,7 +405,7 @@ export class AuthenticationService {
           updatedFields,
         );
       }
-
+  
       if (contact) {
         await this.updateUserContact(
           contact,
@@ -426,7 +413,7 @@ export class AuthenticationService {
           updatedFields,
         );
       }
-
+  
       if (address) {
         await this.updateUserAddress(
           address,
@@ -434,21 +421,22 @@ export class AuthenticationService {
           updatedFields,
         );
       }
-
+  
       if (document) {
         await this.updateUserDocuments(
           document,
           files.documents,
           user.userId.toString(),
           updatedFields,
+          files.documents && files.documents.length === 0 ? 'your-fallback-url' : undefined,
         );
       }
-
+  
       const updatedUser = await this.userRepository.findOne({
         where: { userId: Equal(id.toString()) },
         relations: ['profile', 'address', 'contact', 'document'],
       });
-
+  
       return {
         message: 'User updated successfully',
         status: 200,
@@ -469,24 +457,25 @@ export class AuthenticationService {
     profilePictureFiles: Express.Multer.File[],
     userId: string,
     updatedFields: Record<string, any>,
+    fallbackProfilePicture?: string,
   ): Promise<string | null> {
-    let profilePictureUrl: string | null = null;
-
+    let profilePictureUrl: string | null = fallbackProfilePicture || null;
+  
     if (profilePictureFiles && profilePictureFiles.length > 0) {
       const file = profilePictureFiles[0];
       if (!file.mimetype.startsWith('image/')) {
         throw new BadRequestException('Profile picture must be an image file');
       }
-
+  
       const userProfile = await this.profileRepository.findOne({
         where: { user: Equal(userId) },
       });
+  
       if (userProfile?.profilePicture) {
         const publicId = extractPublicIdFromUrl(userProfile.profilePicture);
         await deleteFileFromCloudinary(publicId);
-        // console.log('Old profile picture deleted from Cloudinary');
       }
-
+  
       const [uploadedProfilePicture] = await uploadFilesToCloudinary(
         [file.buffer],
         'profile_pictures',
@@ -494,7 +483,7 @@ export class AuthenticationService {
       profilePictureUrl = uploadedProfilePicture;
       updatedFields['profilePicture'] = profilePictureUrl;
     }
-
+  
     return profilePictureUrl;
   }
 
@@ -582,24 +571,23 @@ export class AuthenticationService {
   }
 
   private async updateUserDocuments(
-    documentData,
-    documentFiles: Express.Multer.File[],
+    documentData: any,
+    documentFiles: Express.Multer.File[] = [],
     userId: string,
     updatedFields: Record<string, any>,
+    fallbackDocumentFile?: string,
   ) {
     const documents =
-      typeof documentData === 'string'
-        ? JSON.parse(documentData)
-        : documentData;
-
+      typeof documentData === 'string' ? JSON.parse(documentData) : documentData;
+  
     if (Array.isArray(documents) && documents.length > 0) {
       await this.documentRepository.delete({ user: Equal(userId) });
-      console.log('Old documents deleted');
-
+  
       const newDocuments = await Promise.all(
         documents.map(async (doc, index) => {
-          let documentFileUrl = doc.documentFile;
-
+          let documentFileUrl = doc.documentFile || null;
+  
+          // If a file exists, upload it and use the resulting URL
           if (documentFiles && documentFiles[index]) {
             const [uploadedDocumentUrl] = await uploadFilesToCloudinary(
               [documentFiles[index].buffer],
@@ -607,7 +595,19 @@ export class AuthenticationService {
             );
             documentFileUrl = uploadedDocumentUrl;
           }
-
+  
+          // Use the fallback URL if no file or document URL is provided
+          if (!documentFileUrl && fallbackDocumentFile) {
+            documentFileUrl = fallbackDocumentFile;
+          }
+  
+          // If no documentFileUrl is still found, throw an exception
+          if (!documentFileUrl) {
+            throw new BadRequestException(
+              `Document file or URL is required for "${doc.documentName}"`,
+            );
+          }
+  
           return this.documentRepository.create({
             documentName: doc.documentName ?? `Document ${index + 1}`,
             documentFile: documentFileUrl,
@@ -615,12 +615,13 @@ export class AuthenticationService {
           });
         }),
       );
-
+  
       const savedDocuments = await this.documentRepository.save(newDocuments);
       updatedFields['documents'] = savedDocuments;
-      console.log('New documents saved:', savedDocuments);
     }
   }
+  
+  
 
   private formatUserResponse(user: User) {
     return {
@@ -778,7 +779,7 @@ export class AuthenticationService {
         const paginatedStaff = roleData.slice(skip, skip + limit);
   
         const formattedStaff = paginatedStaff.map((staff) => ({
-          user: this.formatUserResponse(staff.user), // Use the formatUserResponse function
+          user: this.formatUserResponse(staff.user), 
           staffId: staff.staffId,
           hireDate: staff.hireDate,
           salary: staff.salary,

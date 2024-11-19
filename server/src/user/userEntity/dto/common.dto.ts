@@ -69,5 +69,5 @@ export class UserDocumentsDto {
   documentName: string;
 
   @IsNotEmpty({ message: 'Document file is required' })
-  documentFile: string ; // Allows file or URL as a string
+  documentFile: string ; 
 }

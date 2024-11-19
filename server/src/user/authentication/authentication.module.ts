@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { AuthenticationService } from './authentication.service';
 import { AuthenticationController } from './authentication.controller';
@@ -14,6 +14,8 @@ import { Student } from 'src/student/entities/student.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
 import { Parent } from 'src/parent/entities/parent.entity';
 import { StaffModule } from 'src/staff/staff.module';
+import { FullAuthService } from '../../middlewares/full-auth.service';
+import { RefreshTokenUtil } from '../../middlewares/refresh-token.util';
 
 @Module({
   imports: [
@@ -21,22 +23,32 @@ import { StaffModule } from 'src/staff/staff.module';
       User,
       UserAddress,
       UserContact,
-      UserProfile, 
+      UserProfile,
       UserDocuments,
       Student,
       Staff,
-      Parent
+      Parent,
     ]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-    }), 
+      signOptions: { expiresIn: process.env.JWT_LIFETIME },
+    }),
     MulterModule.register({
-      storage: multer.memoryStorage(), 
+      storage: multer.memoryStorage(),
     }),
     forwardRef(() => StaffModule),
   ],
   controllers: [AuthenticationController],
-  providers: [AuthenticationService],
-  exports: [JwtModule, AuthenticationService, TypeOrmModule],
+  providers: [
+    AuthenticationService, 
+    FullAuthService, 
+    RefreshTokenUtil, 
+  ],
+  exports: [
+    AuthenticationService, 
+    FullAuthService,
+    RefreshTokenUtil, 
+    JwtModule, 
+  ],
 })
 export class AuthenticationModule {}

@@ -8,6 +8,7 @@ import {
   Param,
   Req,
   Res,
+  UseGuards,
   Patch,
   BadRequestException,
   UploadedFiles,
@@ -25,6 +26,7 @@ import {
   FileFieldsInterceptor,
 } from '@nestjs/platform-express';
 import { ROLE, STAFFROLE } from 'src/utils/role.helper';
+import { AuthGuard } from '../../middlewares/auth.guard';
 
 
 @Controller('auth')
@@ -90,6 +92,7 @@ export class AuthenticationController {
   }
 
   @Get('all')
+  @UseGuards(AuthGuard)
   async getAllUsers(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
