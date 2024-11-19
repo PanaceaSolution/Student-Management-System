@@ -11,6 +11,7 @@ import AddStudentFormModal from "@/pages/admin/StudentForm/AddStudentFormModal";
 
 const Tables = React.memo(({ items, loading }) => {
   const flattenedStudents = useMemo(() => flattenData(items), [items]);
+  
   const [selectedIds, setSelectedIds] = useState([]);
   const [headerValue, setHeaderValue] = useState([]);
   const [openModal, setOpenModal] = useState(-1);
