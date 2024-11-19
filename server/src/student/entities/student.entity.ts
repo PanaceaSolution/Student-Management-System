@@ -10,7 +10,6 @@ import {
 
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
-
 import { TRANSPORTATION_MODE } from '../../utils/role.helper';
 import { User } from '../../user/authentication/entities/authentication.entity';
 import { Assignment } from 'src/assignment/entities/assignment.entity';

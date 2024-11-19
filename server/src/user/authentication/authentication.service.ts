@@ -750,6 +750,7 @@ export class AuthenticationService {
           ) {
             roleData = await this.staffRepository.find({
               where: { staffRole: staffRole },
+              // relations: ['users']
             });
           } else {
             roleData = await this.staffRepository.find({

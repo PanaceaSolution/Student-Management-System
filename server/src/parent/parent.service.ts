@@ -11,14 +11,7 @@ import { Parent } from './entities/parent.entity';
 import { ParentDto } from './dto/parent.dto';
 import { ROLE } from '../utils/role.helper';
 import { AuthenticationService } from 'src/user/authentication/authentication.service';
-import {
-  decryptdPassword,
-  generateRandomPassword,
-  generateUsername,
-} from 'src/utils/utils';
-import * as fs from 'fs';
-import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { decryptdPassword, generateRandomPassword } from 'src/utils/utils';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { Student } from 'src/student/entities/student.entity';
@@ -135,6 +128,7 @@ export class ParentService {
 
     const newParent = this.parentRepository.create({
       childNames,
+      // user: userReference,
       student: students,
     });
 

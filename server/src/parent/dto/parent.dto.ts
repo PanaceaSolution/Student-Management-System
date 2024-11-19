@@ -21,11 +21,8 @@ export class ParentDto extends RegisterUserDto {
 
   @IsArray()
   @IsOptional()
-  @Transform(
-    ({ value }) => (typeof value === 'string' ? JSON.parse(value) : value),
-    { toClassOnly: true },
-  )
-  studentId?: string[];
+  @Transform(({ value }) => (typeof value === 'string' ? JSON.parse(value) : value), { toClassOnly: true })
+  studentId? : string[];
 
   @Transform(({ value }) => {
     const date = value ? new Date(value) : new Date();
