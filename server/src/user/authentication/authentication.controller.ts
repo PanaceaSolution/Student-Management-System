@@ -46,7 +46,6 @@ export class AuthenticationController {
     files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
   ) {
     try {
-      // console.log('Parsed and Validated Register DTO:', body);
       return this.authenticationService.register(body, files);
     } catch (error) {
       console.error('Error parsing JSON strings in form-data:', error);
@@ -59,6 +58,7 @@ export class AuthenticationController {
   }
 
   @Post('logout')
+  @UseGuards(AuthGuard)
   async logout(@Req() request: Request, @Body('userId') userId: UUID, @Res() res: Response) {
     return this.authenticationService.logout(res, userId);
   }
@@ -69,6 +69,7 @@ export class AuthenticationController {
   }
 
   @Patch('update/:id')
+  @UseGuards(AuthGuard)
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'profilePicture', maxCount: 1 },
@@ -104,6 +105,7 @@ export class AuthenticationController {
   }
 
   @Get('search')
+  @UseGuards(AuthGuard)
   async searchUser(
     @Query('search') searchTerm: string,
     @Query('searchBy') searchBy: 'name' | 'role' | 'email' | 'username',
