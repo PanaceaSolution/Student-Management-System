@@ -18,15 +18,16 @@ const AddStudentForm = ({ studentId, initialData }) => {
     reset,
     clearErrors,
     setValue,
+    getValues,
   } = useForm();
 
   const [currentStep, setCurrentStep] = useState(0);
-  const { addStudent, loading } = useStudentStore();
+  const { addStudent,updateStudent, loading } = useStudentStore();
   // Initialize form values with initialData if provided
   useEffect(() => {
     if (initialData) {
       // Use setValue to populate fields, handle nested objects (like address, contact)
-      if (initialData.email) setValue("email", initialData.email);
+      if (initialData.user_email) setValue("email", initialData.user_email);
       if (initialData.password) setValue("password", initialData.password);
       if (initialData.role) setValue("role", initialData.role);
       if (initialData.studentClass)
@@ -36,6 +37,10 @@ const AddStudentForm = ({ studentId, initialData }) => {
         setValue("rollNumber", initialData.rollNumber);
       if (initialData.fatherName)
         setValue("fatherName", initialData.fatherName);
+      if (initialData?.user_profile_fname)
+        setValue("fname", initialData.user_profile_fname);
+      if (initialData?.user_profile_lname)
+        setValue("lname", initialData.user_profile_lname);
       if (initialData.motherName)
         setValue("motherName", initialData.motherName);
       if (initialData.guardianName)
@@ -50,50 +55,40 @@ const AddStudentForm = ({ studentId, initialData }) => {
         setValue("registrationNumber", initialData.registrationNumber);
       if (initialData.previousSchool)
         setValue("previousSchool", initialData.previousSchool);
-      if (initialData.profilePicture)
-        setValue("profilePicture", initialData.profilePicture);
+      if (initialData?.user_profile_profilePicture)
+        setValue("profilePicture", initialData.user_profile_profilePicture);
+      if (initialData.user_profile_dob)
+        setValue("dob", initialData.user_profile_dob);
+      if (initialData.user_contact_telephoneNumber)
+        setValue("telephoneNumber", initialData.user_contact_telephoneNumber);
+      if (initialData.user_contact_phoneNumber)
+        setValue("phoneNumber", initialData.user_contact_phoneNumber);
+      if (initialData.user_contact_alternatePhoneNumber)
+        setValue(
+          "alternatePhoneNumber",
+          initialData.user_contact_alternatePhoneNumber
+        );
+      if (initialData.section) setValue("section", initialData.section);
+      if (initialData.user_profile_gender)
+        setValue("gender", initialData.user_profile_gender);
+      if (initialData.transportationMode)
+        setValue("transportationMode", initialData.transportationMode);
+      if (initialData.user_address_0_wardNumber)
+        setValue("wardNumber", initialData.user_address_0_wardNumber);
 
-      // Handle nested objects (e.g., address, contact, documents)
-      if (initialData.address) {
-        const address = JSON.parse(initialData.address); // Assuming it's a stringified array
-        if (address && address[0]) {
-          setValue("permanentAddress", address[0].permanentAddress);
-          setValue("temporaryAddress", address[0].temporaryAddress);
-          setValue("villageName", address[0].villageName);
-          setValue("nationality", address[0].nationality);
-          setValue("province", address[0].province);
-          setValue("district", address[0].district);
-          setValue("municipality", address[0].municipality);
-        }
-      }
+      if (initialData.user_address_0_province)
+        setValue("province", initialData.user_address_0_province);
+      if (initialData.user_address_0_district)
+        setValue("district", initialData.user_address_0_district);
+      if (initialData.user_address_0_municipality)
+        setValue("municipality", initialData.user_address_0_municipality);
+      if (initialData.user_documents_0_documentFile)
+        setValue("birthCertificate", initialData.user_documents_0_documentFile);
 
-      if (initialData.contact) {
-        const contact = JSON.parse(initialData.contact);
-        if (contact) {
-          setValue("phoneNumber", contact.phoneNumber);
-          setValue("alternatePhoneNumber", contact.alternatePhoneNumber);
-          setValue("telephoneNumber", contact.telephoneNumber);
-        }
-      }
-
-      // Handle documents (if needed, based on uploaded document names)
-      if (initialData.document) {
-        const documentList = JSON.parse(initialData.document);
-        documentList.forEach((doc) => {
-          if (doc.documentName === "Birth Certificate") {
-            setDocuments((prevState) => ({
-              ...prevState,
-              birthCertificate: true,
-            }));
-          }
-          if (doc.documentName === "Citizenship") {
-            setDocuments((prevState) => ({ ...prevState, citizenship: true }));
-          }
-          if (doc.documentName === "Marksheet") {
-            setDocuments((prevState) => ({ ...prevState, marksheet: true }));
-          }
-        });
-      }
+      if (initialData.user_documents_1_documentFile)
+        setValue("citizenship", initialData.user_documents_1_documentFile);
+      if (initialData.user_documents_2_documentFile)
+        setValue("marksheet", initialData.user_documents_2_documentFile);
     }
   }, [initialData, setValue]);
   // Handle Next Step
@@ -109,7 +104,6 @@ const AddStudentForm = ({ studentId, initialData }) => {
   };
 
   const onSubmit = async (data) => {
-    console.log(data)
     const formData = new FormData();
     const newData = { ...data };
     // **Profile Information**
@@ -184,6 +178,8 @@ const AddStudentForm = ({ studentId, initialData }) => {
     try {
       if (studentId) {
         console.log("Edit student logic");
+        console.log("update",formData)
+        await updateStudent(studentId,formData)
       } else {
         await addStudent(formData);
       }
@@ -212,6 +208,7 @@ const AddStudentForm = ({ studentId, initialData }) => {
         {currentStep === 0 && (
           <div>
             <PersonalInfo
+              getValues={getValues}
               register={register}
               errors={errors}
               clearErrors={clearErrors}
@@ -231,6 +228,7 @@ const AddStudentForm = ({ studentId, initialData }) => {
         {/* Step 3 - Document Upload */}
         {currentStep === 2 && (
           <DocumentUpload
+            getValues={getValues}
             register={register}
             errors={errors}
             clearErrors={clearErrors}

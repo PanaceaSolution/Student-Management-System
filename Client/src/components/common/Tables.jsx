@@ -7,26 +7,24 @@ import useStudentStore from "@/store/studentStore";
 import { flattenData } from "@/utilities/utilities";
 import LoadingText from "./LoadingText";
 import { Button } from "../ui/button";
-const Tables = React.memo(({ items, loading, handleUserData }) => {
+import AddStudentFormModal from "@/pages/admin/StudentForm/AddStudentFormModal";
+
+const Tables = React.memo(({ items, loading }) => {
   const flattenedStudents = useMemo(() => flattenData(items), [items]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [headerValue, setHeaderValue] = useState([]);
   const [openModal, setOpenModal] = useState(-1);
   const [showAllKeys, setShowAllKeys] = useState(false);
   const { deleteStudent, deleteLoading } = useStudentStore();
-
+  const [showEdit, setShowEdit] = useState(-1);
   // Handle checkbox selection
-  const handleCheckboxChange = useCallback((data) => {
-    handleUserData(data)
+  const handleCheckboxChange = useCallback((id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id)
+        ? prev.filter((selectedId) => selectedId !== id)
+        : [...prev, id]
+    );
   }, []);
-
-  // // Set student info based on selected checkbox
-  // useEffect(() => {
-  //   const studentDetails = flattenedStudents?.find(
-  //     (item) => item?.user_id === selectedIds[0]
-  //   );
-  //   setStudentInfo(studentDetails || {});
-  // }, [selectedIds, flattenedStudents, setStudentInfo]);
 
   // Update headers based on flattenedStudents
   useEffect(() => {
@@ -59,9 +57,12 @@ const Tables = React.memo(({ items, loading, handleUserData }) => {
       setSelectedIds(flattenedStudents.map((item) => item.user_id));
     }
   };
-  const studentStudent = flattenedStudents.filter(
+
+  // Get the selected student info for deletion modal
+  const studentStudent = flattenedStudents.find(
     (item) => item?.user_id === openModal
-  )[0]?.user_username;
+  )?.user_username;
+
   return (
     <>
       {deleteLoading ? (
@@ -115,13 +116,14 @@ const Tables = React.memo(({ items, loading, handleUserData }) => {
             </tr>
           </thead>
           <tbody>
-            {loading ?
+            {loading ? (
               <tr>
                 <td className="w-full flex justify-center items-center">
                   <LoadingText />
                 </td>
               </tr>
-              : flattenedStudents?.map((data) => (
+            ) : (
+              flattenedStudents?.map((data) => (
                 <tr
                   key={data?.user_id}
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
@@ -131,8 +133,8 @@ const Tables = React.memo(({ items, loading, handleUserData }) => {
                       <input
                         id={`checkbox-table-search-${data?.user_id}`}
                         type="checkbox"
-                        // checked={selectedIds.includes(data?.user_id)}
-                        // onChange={() => handleCheckboxChange(data?.user_id)}
+                        checked={selectedIds.includes(data?.user_id)}
+                        onChange={() => handleCheckboxChange(data?.user_id)}
                         className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                       />
                       <label
@@ -144,12 +146,23 @@ const Tables = React.memo(({ items, loading, handleUserData }) => {
                     </div>
                   </td>
                   {displayedHeaderValue?.map((key) => (
-                    <td key={key} className="px-4 py-1 cursor-pointer" onClick={() => handleCheckboxChange(data)}>
+                    <td
+                      key={key}
+                      className="px-4 py-1 cursor-pointer"
+                      onClick={() => handleCheckboxChange(data)}
+                    >
                       {data[key]}
                     </td>
                   ))}
+                  <AddStudentFormModal
+                    cancelOption={() => setShowEdit(-1)}
+                    showModal={showEdit === data?.studentId}
+                    studentId={data?.studentId}
+                    initialData={data}
+                  />
                   <td className="flex flattenedStudents-center px-6 py-4">
                     <Button
+                      onClick={() => setShowEdit(data?.studentId)}
                       variant="edit"
                       size="icon"
                       className="mr-2"
@@ -166,8 +179,7 @@ const Tables = React.memo(({ items, loading, handleUserData }) => {
                   </td>
                 </tr>
               ))
-            }
-
+            )}
           </tbody>
         </table>
       )}

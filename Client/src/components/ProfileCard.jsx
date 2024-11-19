@@ -6,9 +6,7 @@ import React, {
   useMemo,
 } from "react";
 import Button from "@/components/Button";
-import Loadding from "./Loader/Spinner";
 import Modal from "./common/Modal";
-import AddStudentFormModal from "@/pages/admin/StudentForm/AddStudentFormModal";
 import suk from "../assets/suk.jpg";
 import useStudentStore from "@/store/studentStore";
 import Loader from "./common/Loader";
@@ -157,13 +155,7 @@ const ProfileCard = ({ studentInfo }) => {
             cancelOption={() => setOpenModal(false)}
           />
 
-          {/* Modal for Adding/Editing Student */}
-          <AddStudentFormModal
-            cancelOption={() => setShowAddStudentModal(false)}
-            showModal={showAddStudentModal}
-            studentId={studentInfo?.user_id}
-            initialData={studentInfo}
-          />
+         
         </div>
 
         {/* Edit/Delete Buttons */}
