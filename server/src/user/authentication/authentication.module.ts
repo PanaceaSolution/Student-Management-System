@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { AuthenticationService } from './authentication.service';
 import { AuthenticationController } from './authentication.controller';
@@ -13,6 +13,7 @@ import * as multer from 'multer';
 import { Student } from 'src/student/entities/student.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
 import { Parent } from 'src/parent/entities/parent.entity';
+import { StaffModule } from 'src/staff/staff.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { Parent } from 'src/parent/entities/parent.entity';
     MulterModule.register({
       storage: multer.memoryStorage(), 
     }),
+    forwardRef(() => StaffModule),
   ],
   controllers: [AuthenticationController],
   providers: [AuthenticationService],

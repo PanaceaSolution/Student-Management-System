@@ -4,31 +4,20 @@ import { CreateClassDto} from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-@Controller('classes')
+@Controller('class')
 export class ClassController {
   constructor(private readonly classService: ClassService) {}
 
-  @Get()
-  async findAll() {
-    return this.classService.findAll();
-  }
-
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.classService.findOne(id);
-  }
-
-  @Post()
+  @Post('/create')
   @UseInterceptors(FileInterceptor('routineFile'))
   async create(
     @Body() createClassDto: CreateClassDto,
     @UploadedFile() routineFile: Express.Multer.File,
   ) {
-    
     if (typeof createClassDto.subjects === 'string') {
       createClassDto.subjects = JSON.parse(createClassDto.subjects);
     }
-    
+
     return this.classService.create({
       ...createClassDto,
       routineFile,
@@ -42,7 +31,6 @@ export class ClassController {
     @Body() updateClassDto: UpdateClassDto,
     @UploadedFile() routineFile: Express.Multer.File,
   ) {
-    
     if (typeof updateClassDto.subjects === 'string') {
       updateClassDto.subjects = JSON.parse(updateClassDto.subjects);
     }
@@ -56,5 +44,15 @@ export class ClassController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.classService.remove(id);
+  }
+
+  @Get()
+  async findAll() {
+    return this.classService.findAll();
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.classService.findOne(id);
   }
 }

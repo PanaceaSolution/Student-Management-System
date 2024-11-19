@@ -27,4 +27,5 @@ export class Class {
   @ManyToMany(() => Course, (course) => course.classes, { eager: true })
   @JoinTable()
   subjects: Course[];
+  assignments: any;
 }

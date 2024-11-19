@@ -19,6 +19,7 @@ import { ROLE } from '../../utils/role.helper';
 import { UserAddress } from '../userEntity/address.entity';
 import { UserContact } from '../userEntity/contact.entity';
 import { UserDocuments } from '../userEntity/document.entity';
+import { StaffService } from 'src/staff/staff.service';
 import { UserProfile } from '../userEntity/profile.entity';
 import { CloudinaryError, DatabaseError } from '../../utils/custom-errors';
 import {
@@ -64,6 +65,7 @@ export class AuthenticationService {
     private readonly contactRepository: Repository<UserContact>,
     @InjectRepository(UserDocuments)
     private readonly documentRepository: Repository<UserDocuments>,
+    private readonly staffService: StaffService,
     private jwtService: JwtService,
   ) {}
   async register(
@@ -735,27 +737,80 @@ export class AuthenticationService {
         });
       }
 
+      if (role === ROLE.STAFF) {
+        if (!staffRole) {
+          const allStaffResponse = await this.staffService.findAllStaff();
+          if (allStaffResponse.status === 404) {
+            return {
+              message: 'No staff members found',
+              status: 404,
+              success: false,
+              data: [],
+              total: 0,
+              page,
+              limit,
+              totalPages: 0,
+            };
+          }
+
+          const total = allStaffResponse.data.length;
+          const paginatedStaff = allStaffResponse.data.slice(
+            skip,
+            skip + limit,
+          );
+
+          return {
+            message: 'Staff members fetched successfully',
+            status: 200,
+            success: true,
+            data: paginatedStaff,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+          };
+        }
+
+        const roleData = await this.staffRepository.find({
+          where: { staffRole: staffRole },
+          relations: [
+            'user',
+            'user.profile',
+            'user.address',
+            'user.contact',
+            'user.document',
+          ],
+        });
+
+        const total = roleData.length;
+        const paginatedStaff = roleData.slice(skip, skip + limit);
+
+        const formattedStaff = paginatedStaff.map((staff) => ({
+          user: this.formatUserResponse(staff.user), // Use the formatUserResponse function
+          staffId: staff.staffId,
+          hireDate: staff.hireDate,
+          salary: staff.salary,
+          staffRole: staff.staffRole,
+        }));
+        return {
+          message: 'Staff members fetched successfully',
+          status: 200,
+          success: true,
+          data: formattedStaff,
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        };
+      }
+
       let roleData;
       switch (role) {
         case ROLE.STUDENT:
-          roleData = await this.studentRepository.find({ relations: ['user'] });
+          roleData = await this.studentRepository.find({});
           break;
         case ROLE.PARENT:
-          roleData = await this.parentRepository.find({ relations: ['user'] });
-          break;
-        case ROLE.STAFF:
-          if (
-            staffRole == STAFFROLE.ACCOUNTANT ||
-            staffRole == STAFFROLE.LIBRARIAN ||
-            staffRole == STAFFROLE.TEACHER
-          ) {
-            roleData = await this.staffRepository.find({
-              where: { staffRole: staffRole },
-              relations: ['user'],
-            });
-          } else {
-            roleData = await this.staffRepository.find({ relations: ['user'] });
-          }
+          roleData = await this.parentRepository.find({});
           break;
         default:
           break;
@@ -764,7 +819,7 @@ export class AuthenticationService {
       const whereClause = { role } as any;
       const [users, total] = await this.userRepository.findAndCount({
         where: whereClause,
-        relations: ['profile', 'address', 'contact', 'document', 'staff'],
+        relations: ['profile', 'address', 'contact', 'document'],
         order: { createdAt: 'DESC' },
         skip,
         take: limit,
@@ -772,27 +827,9 @@ export class AuthenticationService {
 
       const formattedUsers = users.map(this.formatUserResponse);
 
-      console.log(
-        'Formatted Users:',
-        formattedUsers.map((user) => user.id),
+      const finalData = formattedUsers.map((user, index) =>
+        roleData && roleData[index] ? { user, ...roleData[index] } : null,
       );
-      // console.log('Role Data', roleData);
-
-      const filteredRoleData = roleData.filter(
-        (item: any) => item.user !== null,
-      );
-
-      // Create a map of roleData by userId for quick lookup
-      const roleDataMap = new Map(
-        filteredRoleData.map((item: any) => [item.user.userId, item]),
-      );
-
-      const finalData = formattedUsers
-        .map((user) => {
-          const roleInfo = roleDataMap.get(user.id);
-          return roleInfo ? [user, roleInfo] : [user, null];
-        })
-        .filter((pair) => pair !== null);
 
       return {
         message: 'Users fetched successfully',
@@ -808,7 +845,7 @@ export class AuthenticationService {
       if (error instanceof BadRequestException) {
         throw error;
       } else {
-        console.log(error);
+        console.error(error);
         throw new InternalServerErrorException({
           message: 'Failed to fetch users by role',
           status: 500,
