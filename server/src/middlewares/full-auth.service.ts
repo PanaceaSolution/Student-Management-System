@@ -14,7 +14,7 @@ export class FullAuthService {
     private readonly refreshTokenRepository: Repository<RefreshToken>,
   ) {}
 
-  
+
   createPayload(user: { username: string; role: string }): object {
     return {
       username: user.username,
@@ -28,6 +28,7 @@ export class FullAuthService {
     } catch {
       throw new UnauthorizedException('Invalid token');
     }
+    
   }
 
   async generateTokensAndAttachCookies(
