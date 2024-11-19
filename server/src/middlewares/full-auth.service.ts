@@ -18,7 +18,7 @@ export class FullAuthService {
     return {
       username: user.username,
       role: user.role,
-    };
+    }; 
   }
 
   isTokenValid(token: string): any {
