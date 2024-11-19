@@ -119,6 +119,7 @@ export class AuthenticationController {
     return await this.authenticationService.deleteUsers(userIds);
   }
   @Get('user/:id')
+  @UseGuards(AuthGuard)
   async getSingleUser(@Param('id') id: UUID) {
     try {
       return await this.authenticationService.getSingleUser(id);
@@ -157,6 +158,7 @@ export class AuthenticationController {
     }
   }
   @Patch('deactivate')
+  @UseGuards(AuthGuard)
   async deactivateUsers(@Body('userIds') userIds: UUID[]) {
     if (!Array.isArray(userIds) || userIds.length === 0) {
       throw new BadRequestException('userIds must be a non-empty array');
