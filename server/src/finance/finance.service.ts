@@ -55,7 +55,7 @@ export class FinanceService {
       total,
       amountInWords: totalInWords,
       agreementFile: agreementFileUrl,
-      remainingBalance: parseFloat(anualFee), // Initialize remaining balance with annual fee
+      remainingBalance: parseFloat(anualFee), 
     });
 
     return await this.financeRepository.save(finance);
