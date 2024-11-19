@@ -11,7 +11,11 @@ import { Staff } from './entities/staff.entity';
 import { StaffDto } from './dto/staff.dto';
 import { AuthenticationService } from '../user/authentication/authentication.service';
 import { User } from '../user/authentication/entities/authentication.entity';
-import { decryptdPassword, generateRandomPassword, generateUsername } from 'src/utils/utils';
+import {
+  decryptdPassword,
+  generateRandomPassword,
+  generateUsername,
+} from 'src/utils/utils';
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
@@ -28,7 +32,7 @@ export class StaffService {
     private readonly userService: AuthenticationService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) { }
+  ) {}
 
   async createStaff(
     createStaffDto: StaffDto,
@@ -108,8 +112,6 @@ export class StaffService {
       where: { userId: createUserResponse.user.id },
     });
 
-    // console.log('UserReference for staff', userReference);
-
     if (!userReference) {
       return { status: 500, message: 'Error finding user after creation' };
     }
@@ -118,11 +120,11 @@ export class StaffService {
       hireDate,
       salary,
       staffRole: staffRole.trim() as STAFFROLE,
-      // user: userReference,
+      user: userReference,
     });
-    const plainPassword = decryptdPassword(userReference.password)
-  console.log("Plainpassword is", plainPassword);
-  
+    const plainPassword = decryptdPassword(userReference.password);
+    console.log('Plainpassword is', plainPassword);
+
     await this.staffRepository.save(newStaff);
 
     return {
@@ -162,19 +164,19 @@ export class StaffService {
       console.log(updatedStaff);
 
       return {
-        status:201,
+        status: 201,
         message: 'staff updated successfully',
         updateUser,
         updatedStaff,
-        success:true
+        success: true,
       };
     } catch (error) {
       console.log(error);
       return {
         message: 'Internal server error',
         error,
-        status:500,
-        success:false
+        status: 500,
+        success: false,
       };
     }
   }
@@ -184,7 +186,9 @@ export class StaffService {
   }
 
   async findStaffById(id: string) {
-    const student = await this.staffRepository.findOne({ where: { staffId: id } });
+    const student = await this.staffRepository.findOne({
+      where: { staffId: id },
+    });
     if (!student) {
       throw new NotFoundException(`Student with ID ${id} not found`);
     }

@@ -760,7 +760,7 @@ export class AuthenticationService {
           break;
       }
 
-      // console.log(data)
+
       const whereClause = { role } as any;
       const [users, total] = await this.userRepository.findAndCount({
         where: whereClause,
