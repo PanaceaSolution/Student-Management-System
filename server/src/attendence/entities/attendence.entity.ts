@@ -19,8 +19,11 @@ export class Attendence {
   @Column({ type: 'boolean' })
   isPresent: boolean;
 
-  @Column({type:'varchar'})
-  section:string;
+  @Column({ type: 'varchar' })
+  section: string;
+
+  @Column({ type: 'varchar' })
+  className: string;
 
   @ManyToOne(() => Student, (student) => student.attendences, {
     onDelete: 'CASCADE',
