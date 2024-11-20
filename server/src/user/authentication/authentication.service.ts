@@ -693,9 +693,8 @@ export class AuthenticationService {
     limit: number = 10,
   ) {
     try {
-      
       const skip = (page - 1) * limit;
-  
+
       if (![ROLE.ADMIN, ROLE.STUDENT, ROLE.STAFF, ROLE.PARENT].includes(role)) {
         throw new BadRequestException({
           message: 'Invalid role provided',
@@ -703,7 +702,7 @@ export class AuthenticationService {
           success: false,
         });
       }
-  
+
       if (role === ROLE.STAFF) {
         if (!staffRole) {
           const allStaffResponse = await this.staffService.findAllStaff();
@@ -719,10 +718,13 @@ export class AuthenticationService {
               totalPages: 0,
             };
           }
-  
+
           const total = allStaffResponse.data.length;
-          const paginatedStaff = allStaffResponse.data.slice(skip, skip + limit);
-  
+          const paginatedStaff = allStaffResponse.data.slice(
+            skip,
+            skip + limit,
+          );
+
           return {
             message: 'Staff members fetched successfully',
             status: 200,
@@ -734,15 +736,21 @@ export class AuthenticationService {
             totalPages: Math.ceil(total / limit),
           };
         }
-  
+
         const roleData = await this.staffRepository.find({
           where: { staffRole: staffRole },
-          relations: ['user', 'user.profile', 'user.address', 'user.contact', 'user.document'],
+          relations: [
+            'user',
+            'user.profile',
+            'user.address',
+            'user.contact',
+            'user.document',
+          ],
         });
-  
+
         const total = roleData.length;
         const paginatedStaff = roleData.slice(skip, skip + limit);
-  
+
         const formattedStaff = paginatedStaff.map((staff) => ({
           user: this.formatUserResponse(staff.user), 
           staffId: staff.staffId,
@@ -761,7 +769,7 @@ export class AuthenticationService {
           totalPages: Math.ceil(total / limit),
         };
       }
-  
+
       let roleData;
       switch (role) {
         case ROLE.STUDENT:
@@ -773,7 +781,7 @@ export class AuthenticationService {
         default:
           break;
       }
-  
+
       const whereClause = { role } as any;
       const [users, total] = await this.userRepository.findAndCount({
         where: whereClause,
@@ -782,13 +790,13 @@ export class AuthenticationService {
         skip,
         take: limit,
       });
-  
+
       const formattedUsers = users.map(this.formatUserResponse);
-  
+
       const finalData = formattedUsers.map((user, index) =>
         roleData && roleData[index] ? { user, ...roleData[index] } : null,
       );
-  
+
       return {
         message: 'Users fetched successfully',
         status: 200,
@@ -812,7 +820,7 @@ export class AuthenticationService {
       }
     }
   }
-  
+
   async searchUser(
     searchTerm: string,
     searchBy: 'name' | 'role' | 'email' | 'username',

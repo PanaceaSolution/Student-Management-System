@@ -27,7 +27,6 @@ export class ParentService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
-
   async createParent(
     createdParentDto: ParentDto,
     files: {

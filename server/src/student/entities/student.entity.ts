@@ -14,6 +14,7 @@ import { TRANSPORTATION_MODE } from '../../utils/role.helper';
 import { User } from '../../user/authentication/entities/authentication.entity';
 import { Assignment } from 'src/assignment/entities/assignment.entity';
 import { Parent } from 'src/parent/entities/parent.entity';
+import { Attendence } from 'src/attendence/entities/attendence.entity';
 
 @Entity({ name: 'Student' })
 export class Student {
@@ -62,6 +63,9 @@ export class Student {
 
   @OneToMany(() => Assignment, (assignment) => assignment.studentId)
   assignments: Assignment[];
+
+  @OneToMany(() => Attendence, (attendence) => attendence.student)
+  attendences: Attendence[];
 
   @ManyToOne(() => Parent, (parent) => parent.student, { nullable: true })
   @JoinColumn({ name: 'parentId' })

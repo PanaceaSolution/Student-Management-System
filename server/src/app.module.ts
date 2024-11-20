@@ -18,6 +18,7 @@ import { StudentModule } from './student/student.module';
 import { ParentModule } from './parent/parent.module';
 import { StaffModule } from './staff/staff.module';
 import { ClassModule } from './classes/classes.module';
+import { AttendenceModule } from './attendence/attendence.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ClassModule } from './classes/classes.module';
     StaffModule,
     ParentModule,
     ClassModule,
+    AttendenceModule,
   ],
   controllers: [HealthController, UploadController],
   providers: [UploadService, CloudinaryProvider],
