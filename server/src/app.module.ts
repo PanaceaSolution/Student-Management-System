@@ -18,6 +18,7 @@ import { StaffModule } from './staff/staff.module';
 import { ClassModule } from './classes/classes.module';
 import { NoticeModule } from './notice/notice.module';
 
+import { AttendenceModule } from './attendence/attendence.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { NoticeModule } from './notice/notice.module';
     ParentModule,
     ClassModule,
     NoticeModule,
+    AttendenceModule,
   ],
   controllers: [HealthController, UploadController],
   providers: [UploadService, CloudinaryProvider],

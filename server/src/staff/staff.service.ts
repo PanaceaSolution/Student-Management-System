@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -29,6 +31,7 @@ export class StaffService {
   constructor(
     @InjectRepository(Staff)
     private readonly staffRepository: Repository<Staff>,
+    @Inject(forwardRef(() => AuthenticationService))
     private readonly userService: AuthenticationService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -181,21 +184,130 @@ export class StaffService {
     }
   }
 
-  findAll() {
-    return `This action returns all staff`;
-  }
-
-  async findStaffById(id: string) {
-    const student = await this.staffRepository.findOne({
-      where: { staffId: id },
-    });
-    if (!student) {
-      throw new NotFoundException(`Student with ID ${id} not found`);
+  async findAllStaff(): Promise<{ status: number; message: string; data?: any }> {
+    try {
+      const staffMembers = await this.staffRepository.find({
+        relations: ['user','user.profile', 'user.address', 'user.contact', 'user.document'],
+      });
+  
+      if (!staffMembers.length) {
+        return {
+          status: 404,
+          message: 'No staff members found',
+        };
+      }
+  
+      const formattedStaff = staffMembers.map((staff) => ({
+        user: {
+          id: staff.user.userId,
+          email: staff.user.email,
+          username: staff.user.username,
+          role: staff.user.role,
+          isActivated: staff.user.isActivated,
+          createdAt: staff.user.createdAt,
+          profile: {
+            fname: staff.user.profile?.fname,
+            lname: staff.user.profile?.lname,
+            gender: staff.user.profile?.gender,
+            dob: staff.user.profile?.dob,
+            profilePicture: staff.user.profile?.profilePicture,
+          },
+          contact: {
+            phoneNumber: staff.user.contact?.phoneNumber,
+            alternatePhoneNumber: staff.user.contact?.alternatePhoneNumber,
+            telephoneNumber: staff.user.contact?.telephoneNumber,
+          },
+          address: staff.user.address?.map((addr) => ({
+            addressType: addr.addressType,
+            wardNumber: addr.wardNumber,
+            municipality: addr.municipality,
+            district: addr.district,
+            province: addr.province,
+          })),
+          documents: staff.user.document?.map((doc) => ({
+            documentName: doc.documentName,
+            documentFile: doc.documentFile,
+          })),
+          staffId: staff.staffId,
+          hireDate: staff.hireDate,
+          salary: staff.salary,
+          staffRole: staff.staffRole,
+        },
+      }));
+  
+      return {
+        status: 200,
+        message: 'Staff members retrieved successfully',
+        data: formattedStaff,
+      };
+    } catch (error) {
+      console.error('Error fetching staff:', error);
+      return {
+        status: 500,
+        message: 'Internal server error',
+      };
     }
-    return student;
   }
+  
+  
+  async findStaffById(id: string): Promise<any> {
+    const staff = await this.staffRepository.findOne({
+      where: { staffId: id },
+      relations: ['user', 'user.address', 'user.contact', 'user.document'], 
+    });
+  
+    if (!staff) {
+      throw new NotFoundException(`Staff with ID ${id} not found`);
+    }
+  
+    const formattedStaff = {
+      staffId: staff.staffId,
+      hireDate: staff.hireDate,
+      salary: staff.salary,
+      staffRole: staff.staffRole,
+      user: {
+        id: staff.user.userId,
+        email: staff.user.email,
+        username: staff.user.username,
+        role: staff.user.role,
+        isActivated: staff.user.isActivated,
+        createdAt: staff.user.createdAt,
+        profile: {
+          fname: staff.user.profile?.fname,
+          lname: staff.user.profile?.lname,
+          gender: staff.user.profile?.gender,
+          dob: staff.user.profile?.dob,
+          profilePicture: staff.user.profile?.profilePicture,
+        },
+        contact: {
+          phoneNumber: staff.user.contact?.phoneNumber,
+          alternatePhoneNumber: staff.user.contact?.alternatePhoneNumber,
+          telephoneNumber: staff.user.contact?.telephoneNumber,
+        },
+        address: staff.user.address?.map((addr) => ({
+          addressType: addr.addressType,
+          wardNumber: addr.wardNumber,
+          municipality: addr.municipality,
+          district: addr.district,
+          province: addr.province,
+        })),
+        documents: staff.user.document?.map((doc) => ({
+          documentName: doc.documentName,
+          documentFile: doc.documentFile,
+        })),
+      },
+    };
+  
+    return {
+      status: 200,
+      message: `Staff with ID ${id} retrieved successfully`,
+      data: formattedStaff,
+    };
+  }
+  
 
   remove(id: number) {
     return `This action removes a #${id} staff`;
   }
+  
 }

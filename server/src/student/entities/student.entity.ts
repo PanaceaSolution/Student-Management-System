@@ -15,6 +15,7 @@ import { User } from '../../user/authentication/entities/authentication.entity';
 import { Assignment } from 'src/assignment/entities/assignment.entity';
 import { Course } from 'src/course/entities/course.entity';
 import { Parent } from 'src/parent/entities/parent.entity';
+import { Attendence } from 'src/attendence/entities/attendence.entity';
 
 
 @Entity({ name: 'Student' })
@@ -71,6 +72,9 @@ export class Student {
   // @ManyToOne(() => Parent, (parent) => parent.students, { nullable: true })
   // @JoinColumn({ name: 'parentId' })
   // parent: Parent;
+  @OneToMany(() => Attendence, (attendence) => attendence.student)
+  attendences: Attendence[];
+
   @ManyToOne(() => Parent, (parent) => parent.student, { nullable: true })
   @JoinColumn({ name: 'parentId' })
   parent: Parent;

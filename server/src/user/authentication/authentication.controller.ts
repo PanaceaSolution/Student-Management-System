@@ -8,6 +8,7 @@ import {
   Param,
   Req,
   Res,
+  UseGuards,
   Patch,
   BadRequestException,
   UploadedFiles,
@@ -25,6 +26,7 @@ import {
   FileFieldsInterceptor,
 } from '@nestjs/platform-express';
 import { ROLE, STAFFROLE } from 'src/utils/role.helper';
+import { AuthGuard } from '../../middlewares/auth.guard';
 
 
 @Controller('auth')
@@ -56,9 +58,18 @@ export class AuthenticationController {
     return this.authenticationService.login(loginDto, res);
   }
 
+ 
   @Post('logout')
-  async logout(@Req() request: Request, @Body('userId') userId: UUID, @Res() res: Response) {
-    return this.authenticationService.logout(res, userId);
+  @UseGuards(AuthGuard)
+  async logout(@Req() req: Request, @Res() res: Response) {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+      return res.status(400).json({
+        message: 'No refresh token provided',
+        success: false,
+      });
+    }
+    return this.authenticationService.logout(res, refreshToken);
   }
 
   @Post('refresh-token')
@@ -67,6 +78,7 @@ export class AuthenticationController {
   }
 
   @Patch('update/:id')
+  @UseGuards(AuthGuard)
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'profilePicture', maxCount: 1 },
@@ -80,8 +92,6 @@ export class AuthenticationController {
     files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] } = {},
   ) {
     try {
-      // console.log('UpdateUser DTO:', updateUserDto);
-      // console.log('Received files for update:', files);
       return this.authenticationService.updateUser(id, updateUserDto, files);
     } catch (error) {
       console.error('Error updating user:', error);
@@ -90,6 +100,7 @@ export class AuthenticationController {
   }
 
   @Get('all')
+  @UseGuards(AuthGuard)
   async getAllUsers(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
@@ -101,6 +112,7 @@ export class AuthenticationController {
   }
 
   @Get('search')
+  @UseGuards(AuthGuard)
   async searchUser(
     @Query('search') searchTerm: string,
     @Query('searchBy') searchBy: 'name' | 'role' | 'email' | 'username',
@@ -116,6 +128,7 @@ export class AuthenticationController {
     return await this.authenticationService.deleteUsers(userIds);
   }
   @Get('user/:id')
+  @UseGuards(AuthGuard)
   async getSingleUser(@Param('id') id: UUID) {
     try {
       return await this.authenticationService.getSingleUser(id);
@@ -133,6 +146,7 @@ export class AuthenticationController {
     }
   }
     @Get('users/role')
+    @UseGuards(AuthGuard)
   async getUsersByRole(
     @Query('role') role: ROLE,
     @Query('staffRole') staffRole?: STAFFROLE,
@@ -154,6 +168,7 @@ export class AuthenticationController {
     }
   }
   @Patch('deactivate')
+  @UseGuards(AuthGuard)
   async deactivateUsers(@Body('userIds') userIds: UUID[]) {
     if (!Array.isArray(userIds) || userIds.length === 0) {
       throw new BadRequestException('userIds must be a non-empty array');
