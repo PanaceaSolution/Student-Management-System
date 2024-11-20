@@ -69,7 +69,6 @@ export class AuthenticationService {
     @InjectRepository(UserDocuments)
     private readonly documentRepository: Repository<UserDocuments>,
     private readonly staffService: StaffService,
-    private readonly jwtService: JwtService,
     private readonly fullAuthService: FullAuthService,
     private readonly refreshTokenUtil: RefreshTokenUtil,
   ) {}
