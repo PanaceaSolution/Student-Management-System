@@ -12,19 +12,19 @@ function bufferToStream(buffer: Buffer): Readable {
 export async function deleteFileFromCloudinary(
   publicId: string,
 ): Promise<void> {
-  if (!publicId) {
-    throw new Error('No public_id provided for deletion');
-  }
+  // if (!publicId) {
+  //   throw new Error('No public_id provided for deletion');
+  // }
 
-  return new Promise((resolve, reject) => {
-    Cloudinary.uploader.destroy(publicId, (error, result) => {
-      if (error) {
-        console.error('Error deleting file from Cloudinary:', error);
-        return reject(new Error('Failed to delete file from Cloudinary'));
-      }
-      resolve();
-    });
-  });
+  // return new Promise((resolve, reject) => {
+  //   Cloudinary.uploader.destroy(publicId, (error, result) => {
+  //     if (error) {
+  //       console.error('Error deleting file from Cloudinary:', error);
+  //       return reject(new Error('Failed to delete file from Cloudinary'));
+  //     }
+  //     resolve();
+    // });
+  // });
 }
 
 export async function uploadSingleFileToCloudinary(

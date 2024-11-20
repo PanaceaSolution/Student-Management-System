@@ -17,6 +17,7 @@ import { UserAddress } from '../../userEntity/address.entity';
 import { UserDocuments } from '../../userEntity/document.entity';
 import { UserContact } from '../../userEntity/contact.entity';
 import { Staff } from '../../../staff/entities/staff.entity';
+import { RefreshToken } from 'src/user/userEntity/refresh-token.entity';
 
 @Entity({ name: 'User' })
 export class User {
@@ -89,5 +90,6 @@ export class User {
     onDelete: 'CASCADE',
   })
   staff: Staff;
- 
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
+  refreshTokens: RefreshToken[];
 }
