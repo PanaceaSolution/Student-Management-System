@@ -328,7 +328,7 @@ export class AuthenticationService {
     } = {},
   ) {
     try {
-      const { email, role, profile, contact, document, address } = updateData;
+      const { email, profile, contact, document, address } = updateData;
 
       const user = await this.userRepository.findOne({
         where: { userId: Equal(id.toString()) },
@@ -352,10 +352,10 @@ export class AuthenticationService {
         updatedFields['email'] = email;
       }
 
-      if (role !== undefined) {
-        user.role = role;
-        updatedFields['role'] = role;
-      }
+      // if (role !== undefined) {
+      //   user.role = role;
+      //   updatedFields['role'] = role;
+      // }
       await this.userRepository.save(user);
       // console.log('User base data updated:', {
       //   email: user.email,
@@ -588,8 +588,6 @@ export class AuthenticationService {
     }
   }
   
-  
-
   private formatUserResponse(user: User) {
     return {
       id: user.userId,
@@ -772,8 +770,7 @@ export class AuthenticationService {
         case ROLE.PARENT:
           roleData = await this.parentRepository.find({});
           break;
-        default:
-          break;
+ 
       }
   
       const whereClause = { role } as any;
@@ -1015,10 +1012,3 @@ export class AuthenticationService {
   }
 }
 
-async function uploadBase64ToCloudinary(base64Image: string, folder: string): Promise<string> {
-  const cloudinary = require('cloudinary').v2; 
-  const result = await cloudinary.uploader.upload(base64Image, {
-    folder: folder,
-  });
-  return result.secure_url;
-}
