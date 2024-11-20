@@ -69,7 +69,7 @@ export class AuthenticationService {
     @InjectRepository(UserDocuments)
     private readonly documentRepository: Repository<UserDocuments>,
     private readonly staffService: StaffService,
-    private readonly jwtService: JwtService, // Keep this for manual signing/verification if needed
+    private readonly jwtService: JwtService,
     private readonly fullAuthService: FullAuthService,
     private readonly refreshTokenUtil: RefreshTokenUtil,
   ) {}
@@ -107,7 +107,7 @@ export class AuthenticationService {
         role,
         staffRole,
       );
-      console.log('Generating username:', username);
+      console.log('Generating username:', username);    
 
       const newUser = this.userRepository.create({
         email,
@@ -249,7 +249,6 @@ export class AuthenticationService {
         throw new BadRequestException('Username and password are required');
       }
 
-      // Find the user by username
       const user = await this.userRepository.findOne({
         where: { username },
         relations: ['profile'], 
@@ -280,7 +279,7 @@ export class AuthenticationService {
         success: true,
         user: {
           username: user.username,
-          role: user.role,
+          accessToken,
           profile: user.profile
             ? {
                 fname: user.profile.fname,
@@ -299,14 +298,8 @@ export class AuthenticationService {
     }
   }
 
-
-  
-  
-  
-
   async logout(@Res() res: Response, refreshToken: string) {
     try {
-      // Invalidate the refresh token in the database
       await this.fullAuthService.invalidateRefreshToken(refreshToken);
   
       this.fullAuthService.clearCookies(res);
@@ -324,7 +317,7 @@ export class AuthenticationService {
   }
   
   async refreshToken(@Req() req: Request, @Res() res: Response) {
-    return this.refreshTokenUtil.refreshToken(req, res); // Delegate to utility
+    return this.refreshTokenUtil.refreshToken(req, res);
   }
   async updateUser(
     id: UUID,
@@ -333,21 +326,19 @@ export class AuthenticationService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     } = {},
-    fallbackDocuments?: string, // Accept a fallback URL for documents
-    fallbackProfilePicture?: string, // Accept a fallback URL for profile picture
   ) {
     try {
       const { email, role, profile, contact, document, address } = updateData;
-  
+
       const user = await this.userRepository.findOne({
         where: { userId: Equal(id.toString()) },
       });
       if (!user) {
         throw new NotFoundException('User not found');
       }
-  
+
       const updatedFields = {};
-  
+
       if (email !== undefined) {
         const emailInUse = await this.userRepository.findOne({
           where: { email, userId: Not(Equal(id.toString())) },
@@ -360,23 +351,26 @@ export class AuthenticationService {
         user.email = email;
         updatedFields['email'] = email;
       }
-  
+
       if (role !== undefined) {
         user.role = role;
         updatedFields['role'] = role;
       }
       await this.userRepository.save(user);
-  
-      let profilePictureUrl: string | null = fallbackProfilePicture || null;
+      // console.log('User base data updated:', {
+      //   email: user.email,
+      //   role: user.role,
+      // });
+
+      let profilePictureUrl: string | null = null;
       if (profile) {
         profilePictureUrl = await this.handleProfilePictureUpdate(
           files.profilePicture,
           user.userId.toString(),
           updatedFields,
-          profilePictureUrl, // Use fallbackProfilePicture as a fallback
         );
       }
-  
+
       if (profile) {
         await this.updateUserProfile(
           profile,
@@ -385,7 +379,7 @@ export class AuthenticationService {
           updatedFields,
         );
       }
-  
+
       if (contact) {
         await this.updateUserContact(
           contact,
@@ -393,7 +387,7 @@ export class AuthenticationService {
           updatedFields,
         );
       }
-  
+
       if (address) {
         await this.updateUserAddress(
           address,
@@ -401,7 +395,7 @@ export class AuthenticationService {
           updatedFields,
         );
       }
-  
+
       if (document) {
         await this.updateUserDocuments(
           document,
@@ -411,12 +405,12 @@ export class AuthenticationService {
           files.documents && files.documents.length === 0 ? 'your-fallback-url' : undefined,
         );
       }
-  
+
       const updatedUser = await this.userRepository.findOne({
         where: { userId: Equal(id.toString()) },
         relations: ['profile', 'address', 'contact', 'document'],
       });
-  
+
       return {
         message: 'User updated successfully',
         status: 200,
@@ -437,25 +431,23 @@ export class AuthenticationService {
     profilePictureFiles: Express.Multer.File[],
     userId: string,
     updatedFields: Record<string, any>,
-    fallbackProfilePicture?: string,
   ): Promise<string | null> {
-    let profilePictureUrl: string | null = fallbackProfilePicture || null;
-  
+    let profilePictureUrl: string | null = null;
+
     if (profilePictureFiles && profilePictureFiles.length > 0) {
       const file = profilePictureFiles[0];
       if (!file.mimetype.startsWith('image/')) {
         throw new BadRequestException('Profile picture must be an image file');
       }
-  
+
       const userProfile = await this.profileRepository.findOne({
         where: { user: Equal(userId) },
       });
-  
       if (userProfile?.profilePicture) {
         const publicId = extractPublicIdFromUrl(userProfile.profilePicture);
         await deleteFileFromCloudinary(publicId);
       }
-  
+
       const [uploadedProfilePicture] = await uploadFilesToCloudinary(
         [file.buffer],
         'profile_pictures',
@@ -463,7 +455,7 @@ export class AuthenticationService {
       profilePictureUrl = uploadedProfilePicture;
       updatedFields['profilePicture'] = profilePictureUrl;
     }
-  
+
     return profilePictureUrl;
   }
 
@@ -492,7 +484,6 @@ export class AuthenticationService {
       profileUpdateData,
     );
     updatedFields['profile'] = profileUpdateData;
-    // console.log('User profile updated:', profileUpdateData);
   }
 
   private async updateUserContact(
@@ -567,7 +558,6 @@ export class AuthenticationService {
         documents.map(async (doc, index) => {
           let documentFileUrl = doc.documentFile || null;
   
-          // If a file exists, upload it and use the resulting URL
           if (documentFiles && documentFiles[index]) {
             const [uploadedDocumentUrl] = await uploadFilesToCloudinary(
               [documentFiles[index].buffer],
@@ -575,13 +565,10 @@ export class AuthenticationService {
             );
             documentFileUrl = uploadedDocumentUrl;
           }
-  
-          // Use the fallback URL if no file or document URL is provided
+
           if (!documentFileUrl && fallbackDocumentFile) {
             documentFileUrl = fallbackDocumentFile;
           }
-  
-          // If no documentFileUrl is still found, throw an exception
           if (!documentFileUrl) {
             throw new BadRequestException(
               `Document file or URL is required for "${doc.documentName}"`,
@@ -1008,7 +995,7 @@ export class AuthenticationService {
               status: 500,
               success: false,
             });
-          }
+          } 
         }
       }
 
@@ -1026,4 +1013,12 @@ export class AuthenticationService {
       });
     }
   }
+}
+
+async function uploadBase64ToCloudinary(base64Image: string, folder: string): Promise<string> {
+  const cloudinary = require('cloudinary').v2; 
+  const result = await cloudinary.uploader.upload(base64Image, {
+    folder: folder,
+  });
+  return result.secure_url;
 }

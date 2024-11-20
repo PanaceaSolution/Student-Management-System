@@ -21,7 +21,6 @@ export class RolesGuard implements CanActivate {
   }
 }
 
-// Factory function for role-based guard
 export const AuthorizeRoles = (...roles: string[]) => {
   return new RolesGuard(roles);
 };

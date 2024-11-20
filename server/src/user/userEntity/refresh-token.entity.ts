@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../authentication/entities/authentication.entity';
 
-@Entity('refresh_tokens')
+@Entity('refreshTokens')
 export class RefreshToken {
   @PrimaryGeneratedColumn('uuid')
   id: string;
