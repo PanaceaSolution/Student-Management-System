@@ -770,7 +770,8 @@ export class AuthenticationService {
         case ROLE.PARENT:
           roleData = await this.parentRepository.find({});
           break;
- 
+        default:
+          break;
       }
   
       const whereClause = { role } as any;
