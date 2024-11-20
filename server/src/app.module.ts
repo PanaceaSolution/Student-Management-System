@@ -36,7 +36,7 @@ import { ClassModule } from './classes/classes.module';
         entities: [join(process.cwd(), 'dist/**/*.entity{.ts,.js}')],
         synchronize: true,
         ssl: {
-          rejectUnauthorized: false, // Disable strict SSL validation
+          rejectUnauthorized: false, 
         },
       }),
     }),
