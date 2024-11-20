@@ -4,7 +4,7 @@ import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { Course } from './entities/course.entity';
 import { Student } from '../student/entities/student.entity';
-import { CourseEnrollment } from './course-enrollment/entities/course-enrollment.entity';
+import { CourseEnrollment } from './courseEnrollment/entities/course-enrollment.entity';
 
 @Controller('course')
 export class CourseController {
