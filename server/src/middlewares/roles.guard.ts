@@ -18,7 +18,7 @@ export class RolesGuard implements CanActivate {
     }
 
     return true;
-  }
+  } 
 }
 
 export const AuthorizeRoles = (...roles: string[]) => {
