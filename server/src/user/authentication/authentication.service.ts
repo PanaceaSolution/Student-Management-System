@@ -71,7 +71,7 @@ export class AuthenticationService {
     private readonly staffService: StaffService,
     private readonly fullAuthService: FullAuthService,
     private readonly refreshTokenUtil: RefreshTokenUtil,
-  ) {}
+  ) { }
   async register(
     RegisterDto: RegisterUserDto,
     files: {
@@ -106,7 +106,7 @@ export class AuthenticationService {
         role,
         staffRole,
       );
-      console.log('Generating username:', username);    
+      console.log('Generating username:', username);
 
       const newUser = this.userRepository.create({
         email,
@@ -250,7 +250,7 @@ export class AuthenticationService {
 
       const user = await this.userRepository.findOne({
         where: { username },
-        relations: ['profile'], 
+        relations: ['profile'],
       });
 
       if (!user) {
@@ -266,12 +266,13 @@ export class AuthenticationService {
       }
 
       const payload = this.fullAuthService.createPayload({
+        id: user.userId,
         username: user.username,
         role: user.role,
       });
 
       const { accessToken, refreshToken } =
-        await this.fullAuthService.generateTokensAndAttachCookies(res, payload,user.userId.toString());
+        await this.fullAuthService.generateTokensAndAttachCookies(res, payload, user.userId.toString());
 
       return res.status(200).json({
         message: 'Login successful',
@@ -281,10 +282,10 @@ export class AuthenticationService {
           accessToken,
           profile: user.profile
             ? {
-                fname: user.profile.fname,
-                lname: user.profile.lname,
-                profilePicture: user.profile.profilePicture,
-              }
+              fname: user.profile.fname,
+              lname: user.profile.lname,
+              profilePicture: user.profile.profilePicture,
+            }
             : null,
         },
       });
@@ -300,9 +301,9 @@ export class AuthenticationService {
   async logout(@Res() res: Response, refreshToken: string) {
     try {
       await this.fullAuthService.invalidateRefreshToken(refreshToken);
-  
+
       this.fullAuthService.clearCookies(res);
-  
+
       return res.status(200).json({
         message: 'Logout successful',
         success: true,
@@ -314,7 +315,7 @@ export class AuthenticationService {
       });
     }
   }
-  
+
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     return this.refreshTokenUtil.refreshToken(req, res);
   }
@@ -549,14 +550,14 @@ export class AuthenticationService {
   ) {
     const documents =
       typeof documentData === 'string' ? JSON.parse(documentData) : documentData;
-  
+
     if (Array.isArray(documents) && documents.length > 0) {
       await this.documentRepository.delete({ user: Equal(userId) });
-  
+
       const newDocuments = await Promise.all(
         documents.map(async (doc, index) => {
           let documentFileUrl = doc.documentFile || null;
-  
+
           if (documentFiles && documentFiles[index]) {
             const [uploadedDocumentUrl] = await uploadFilesToCloudinary(
               [documentFiles[index].buffer],
@@ -573,7 +574,7 @@ export class AuthenticationService {
               `Document file or URL is required for "${doc.documentName}"`,
             );
           }
-  
+
           return this.documentRepository.create({
             documentName: doc.documentName ?? `Document ${index + 1}`,
             documentFile: documentFileUrl,
@@ -581,12 +582,12 @@ export class AuthenticationService {
           });
         }),
       );
-  
+
       const savedDocuments = await this.documentRepository.save(newDocuments);
       updatedFields['documents'] = savedDocuments;
     }
   }
-  
+
   private formatUserResponse(user: User) {
     return {
       id: user.userId,
@@ -751,7 +752,7 @@ export class AuthenticationService {
         const paginatedStaff = roleData.slice(skip, skip + limit);
 
         const formattedStaff = paginatedStaff.map((staff) => ({
-          user: this.formatUserResponse(staff.user), 
+          user: this.formatUserResponse(staff.user),
           staffId: staff.staffId,
           hireDate: staff.hireDate,
           salary: staff.salary,
@@ -1000,7 +1001,7 @@ export class AuthenticationService {
               status: 500,
               success: false,
             });
-          } 
+          }
         }
       }
 

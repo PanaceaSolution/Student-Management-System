@@ -40,6 +40,7 @@
     "heroicons": "^2.1.5",
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.3",
+    "jwt-decode": "^4.0.0",
     "ldrs": "^1.0.2",
     "lucide-react": "^0.446.0",
     "moment": "^2.30.1",
