@@ -20,6 +20,9 @@ export class Course {
   @Column({ type: 'date' })
   endDate: Date;
 
+  @Column('text')
+  file: string;
+
   @ManyToOne(() => Staff, (staff) => staff.courses, { nullable: false })
   teacher: Staff;
 

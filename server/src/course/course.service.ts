@@ -7,6 +7,7 @@ import { UpdateCourseDto } from './dto/update-course.dto';
 import { Student } from '../student/entities/student.entity'; 
 import { CourseEnrollment } from './courseEnrollment/entities/course-enrollment.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
+import { uploadSingleFileToCloudinary } from 'src/utils/file-upload.helper';
 
 @Injectable()
 export class CourseService {
@@ -26,8 +27,7 @@ export class CourseService {
 
 
 
-  async create(createCourseDto: CreateCourseDto): Promise<Course> {
-    
+  async create(createCourseDto: CreateCourseDto, file: Express.Multer.File): Promise<Course> {
     const teacher = await this.staffRepository.findOne({
       where: { staffId: createCourseDto.teacherId },
     });
@@ -35,18 +35,19 @@ export class CourseService {
     if (!teacher) {
       throw new NotFoundException(`Teacher with ID ${createCourseDto.teacherId} not found`);
     }
-  
-    // Create the course with the teacher entity
+
+    // Upload the file to Cloudinary
+    const folder = 'courses'; // Specify the folder name
+    const uploadResult = await uploadSingleFileToCloudinary(file, folder);
+
+    // Create the course with the teacher entity and uploaded file URL
     const course = this.courseRepository.create({
       ...createCourseDto,
       teacher,
+      file: uploadResult.secure_url, // Assuming you want to store the image URL
     });
   
     return this.courseRepository.save(course);
-  }
-
-  async findAll(): Promise<Course[]> {
-    return this.courseRepository.find();
   }
 
   async findOne(courseId: string): Promise<Course> {
@@ -57,8 +58,22 @@ export class CourseService {
     return course;
   }
 
-  async update(courseId: string, updateCourseDto: UpdateCourseDto): Promise<Course> {
+  async findAll():Promise<Course[]>{
+    return this.courseRepository.find()
+
+  }
+
+  async update(courseId: string, updateCourseDto: UpdateCourseDto, file?: Express.Multer.File): Promise<Course> {
     const course = await this.findOne(courseId);
+
+    // If a file is provided, upload it and update the imageUrl
+    if (file) {
+      const folder = 'courses'; // Specify the folder name
+      const uploadResult = await uploadSingleFileToCloudinary(file, folder);
+      course.file = uploadResult.secure_url; // Update the imageUrl
+    }
+
+    // Update other course fields
     Object.assign(course, updateCourseDto);
     return this.courseRepository.save(course);
   }

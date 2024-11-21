@@ -1,18 +1,23 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { Course } from './entities/course.entity';
 import { Student } from '../student/entities/student.entity';
 import { CourseEnrollment } from './courseEnrollment/entities/course-enrollment.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('course')
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   @Post('/create')
-  create(@Body() createCourseDto: CreateCourseDto): Promise<Course> {
-    return this.courseService.create(createCourseDto);
+  @UseInterceptors(FileInterceptor('file')) // Use FileInterceptor for file uploads
+  create(
+    @Body() createCourseDto: CreateCourseDto,
+    @UploadedFile() file: Express.Multer.File, // Accept the uploaded file
+  ): Promise<Course> {
+    return this.courseService.create(createCourseDto, file);
   }
 
   @Get()
@@ -25,12 +30,14 @@ export class CourseController {
     return this.courseService.findOne(courseId);
   }
 
-  @Put('/update/courseId')
+  @Put('/update/:courseId') 
+  @UseInterceptors(FileInterceptor('file')) 
   update(
     @Param('courseId') courseId: string,
     @Body() updateCourseDto: UpdateCourseDto,
+    @UploadedFile() file?: Express.Multer.File, 
   ): Promise<Course> {
-    return this.courseService.update(courseId, updateCourseDto);
+    return this.courseService.update(courseId, updateCourseDto, file);
   }
 
   @Delete('/delete/:courseId')

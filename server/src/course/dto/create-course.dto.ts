@@ -23,4 +23,7 @@ export class CreateCourseDto {
 
   @IsBoolean()
   isCurrent?: boolean;
+
+  @IsOptional()
+  file?: string;
 }
