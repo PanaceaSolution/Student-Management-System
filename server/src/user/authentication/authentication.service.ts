@@ -12,7 +12,7 @@ import {
 import { Response, Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
-import { Equal, Like, Not, Repository } from 'typeorm';
+import { Equal, ILike, Like, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RegisterUserDto } from './dto/register.dto';
 import { User } from './entities/authentication.entity';
@@ -864,52 +864,99 @@ export class AuthenticationService {
 
   async searchUser(
     searchTerm: string,
-    searchBy: 'name' | 'role' | 'email' | 'username',
+    searchBy: 'name' | 'role' | 'email' | 'username' | 'gender',
+    page: number = 1,
+    limit: number = 10,
+    role?: ROLE, 
   ) {
     try {
+      const skip = (page - 1) * limit;
       let whereClause;
-
+  
       switch (searchBy) {
         case 'name':
-          whereClause = [
-            { profile: { fname: Like(`${searchTerm}%`) } },
-            { profile: { lname: Like(`${searchTerm}%`) } },
-          ];
+          const [fname, lname] = searchTerm.split(' ');
+          if (lname) {
+            whereClause = {
+              profile: { fname: ILike(`%${fname}%`), lname: ILike(`%${lname}%`) },
+              ...(role && { role }), 
+            };
+          } else {
+            whereClause = [
+              { profile: { fname: ILike(`%${searchTerm}%`) }, ...(role && { role }) },
+              { profile: { lname: ILike(`%${searchTerm}%`) }, ...(role && { role }) },
+            ];
+          }
           break;
-
+  
+        case 'gender':
+          whereClause = { profile: { gender: searchTerm.toUpperCase() }, ...(role && { role }) };
+          break;
+  
         case 'role':
           whereClause = { role: searchTerm as ROLE };
           break;
-
+  
         case 'email':
-          whereClause = { email: Like(`%${searchTerm}%`) };
+          whereClause = { email: ILike(`%${searchTerm}%`) };
           break;
-
+  
         case 'username':
-          whereClause = { username: Like(`${searchTerm}%`) };
+          whereClause = { username: ILike(`%${searchTerm}%`) };
           break;
-
+  
         default:
           throw new BadRequestException('Invalid search criteria');
       }
-
-      const users = await this.userRepository.find({
+  
+      const [users, total] = await this.userRepository.findAndCount({
         where: whereClause,
         relations: ['profile', 'contact', 'address', 'document'],
         order: { createdAt: 'DESC' },
+        skip,
+        take: limit,
       });
-
-      const formattedUsers = users.map(this.formatUserResponse);
-
+  
+      const enrichedUsers = await Promise.all(
+        users.map(async (user) => {
+          let roleData = null;
+  
+          switch (user.role) {
+            case ROLE.STUDENT:
+              roleData = await this.studentRepository.findOne({ where: { user: { userId: user.userId } } });
+              break;
+            case ROLE.STAFF:
+              roleData = await this.staffRepository.findOne({ where: { user: { userId: user.userId } } });
+              break;
+            case ROLE.PARENT:
+              roleData = await this.parentRepository.findOne({ where: { user: { userId: user.userId } } });
+              break;
+            default:
+              break;
+          }
+  
+          return {
+            ...this.formatUserResponse(user),
+            roleData,
+          };
+        }),
+      );
+  
       return {
-        users: formattedUsers,
+        message: 'Users fetched successfully',
         status: 200,
         success: true,
+        data: enrichedUsers,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       };
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;
       } else {
+        console.error(error);
         throw new InternalServerErrorException({
           message: 'An unexpected error occurred during search',
           status: 500,
@@ -918,7 +965,7 @@ export class AuthenticationService {
       }
     }
   }
-
+  
   async deactivateUsers(userIds: UUID[]) {
     const results = [];
 
