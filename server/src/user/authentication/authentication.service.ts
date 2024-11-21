@@ -37,6 +37,7 @@ import {
 } from '../../utils/file-upload.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import * as moment from 'moment';
+import { v2 as Cloudinary } from 'cloudinary';
 import { STAFFROLE } from '../../utils/role.helper';
 import { Student } from 'src/student/entities/student.entity';
 import { Parent } from 'src/parent/entities/parent.entity';
@@ -106,7 +107,7 @@ export class AuthenticationService {
         role,
         staffRole,
       );
-      console.log('Generating username:', username);    
+
 
       const newUser = this.userRepository.create({
         email,
@@ -266,6 +267,7 @@ export class AuthenticationService {
       }
 
       const payload = this.fullAuthService.createPayload({
+        id: user.userId,
         username: user.username,
         role: user.role,
       });
@@ -297,10 +299,12 @@ export class AuthenticationService {
     }
   }
 
-  async logout(@Res() res: Response, refreshToken: string) {
+  async logout(@Res() res: Response, refreshToken: string): Promise<any> {
     try {
+
       await this.fullAuthService.invalidateRefreshToken(refreshToken);
   
+
       this.fullAuthService.clearCookies(res);
   
       return res.status(200).json({
@@ -308,6 +312,7 @@ export class AuthenticationService {
         success: true,
       });
     } catch (error) {
+      console.error('Error during logout:', error.message);
       return res.status(500).json({
         message: 'Internal server error',
         success: false,
@@ -315,9 +320,7 @@ export class AuthenticationService {
     }
   }
   
-  async refreshToken(@Req() req: Request, @Res() res: Response) {
-    return this.refreshTokenUtil.refreshToken(req, res);
-  }
+  
   async updateUser(
     id: UUID,
     updateData: Partial<RegisterUserDto>,
@@ -328,16 +331,16 @@ export class AuthenticationService {
   ) {
     try {
       const { email, profile, contact, document, address } = updateData;
-
+  
       const user = await this.userRepository.findOne({
         where: { userId: Equal(id.toString()) },
       });
       if (!user) {
         throw new NotFoundException('User not found');
       }
-
+  
       const updatedFields = {};
-
+  
       if (email !== undefined) {
         const emailInUse = await this.userRepository.findOne({
           where: { email, userId: Not(Equal(id.toString())) },
@@ -351,25 +354,19 @@ export class AuthenticationService {
         updatedFields['email'] = email;
       }
 
-      // if (role !== undefined) {
-      //   user.role = role;
-      //   updatedFields['role'] = role;
-      // }
       await this.userRepository.save(user);
-      // console.log('User base data updated:', {
-      //   email: user.email,
-      //   role: user.role,
-      // });
-
+  
       let profilePictureUrl: string | null = null;
+  
       if (profile) {
         profilePictureUrl = await this.handleProfilePictureUpdate(
           files.profilePicture,
           user.userId.toString(),
-          updatedFields,
+          this.profileRepository, 
         );
-      }
 
+      }
+  
       if (profile) {
         await this.updateUserProfile(
           profile,
@@ -378,7 +375,7 @@ export class AuthenticationService {
           updatedFields,
         );
       }
-
+  
       if (contact) {
         await this.updateUserContact(
           contact,
@@ -386,7 +383,7 @@ export class AuthenticationService {
           updatedFields,
         );
       }
-
+  
       if (address) {
         await this.updateUserAddress(
           address,
@@ -394,7 +391,7 @@ export class AuthenticationService {
           updatedFields,
         );
       }
-
+  
       if (document) {
         await this.updateUserDocuments(
           document,
@@ -404,12 +401,12 @@ export class AuthenticationService {
           files.documents && files.documents.length === 0 ? 'your-fallback-url' : undefined,
         );
       }
-
+  
       const updatedUser = await this.userRepository.findOne({
         where: { userId: Equal(id.toString()) },
         relations: ['profile', 'address', 'contact', 'document'],
       });
-
+  
       return {
         message: 'User updated successfully',
         status: 200,
@@ -425,39 +422,60 @@ export class AuthenticationService {
       throw error;
     }
   }
-
-  private async handleProfilePictureUpdate(
-    profilePictureFiles: Express.Multer.File[],
+  
+  async handleProfilePictureUpdate(
+    profilePictureFiles: Express.Multer.File[] | undefined,
     userId: string,
     updatedFields: Record<string, any>,
   ): Promise<string | null> {
-    let profilePictureUrl: string | null = null;
-
-    if (profilePictureFiles && profilePictureFiles.length > 0) {
-      const file = profilePictureFiles[0];
-      if (!file.mimetype.startsWith('image/')) {
-        throw new BadRequestException('Profile picture must be an image file');
-      }
-
-      const userProfile = await this.profileRepository.findOne({
-        where: { user: Equal(userId) },
-      });
-      if (userProfile?.profilePicture) {
-        const publicId = extractPublicIdFromUrl(userProfile.profilePicture);
-        await deleteFileFromCloudinary(publicId);
-      }
-
-      const [uploadedProfilePicture] = await uploadFilesToCloudinary(
-        [file.buffer],
-        'profile_pictures',
-      );
-      profilePictureUrl = uploadedProfilePicture;
-      updatedFields['profilePicture'] = profilePictureUrl;
+    if (!profilePictureFiles || profilePictureFiles.length === 0) {
+      return null;
     }
-
-    return profilePictureUrl;
+  
+    const profile = await this.profileRepository
+      .createQueryBuilder('profile')
+      .innerJoin('profile.user', 'user')
+      .where('user.userId = :userId', { userId })
+      .getOne();
+  
+    if (!profile) {
+      throw new NotFoundException('Profile not found for the user');
+    }
+  
+    const currentProfilePictureUrl = profile.profilePicture;
+    if (currentProfilePictureUrl) {
+      const publicId = extractPublicIdFromUrl(currentProfilePictureUrl);
+      try {
+        await deleteFileFromCloudinary(publicId);
+      } catch (error) {
+        throw new InternalServerErrorException('Failed to delete old profile picture');
+      }
+    }
+  
+    const newProfilePicture = profilePictureFiles[0];
+    const uploadResult = await new Promise((resolve, reject) => {
+      const stream = Cloudinary.uploader.upload_stream(
+        { folder: `user_profiles/${userId}`, resource_type: 'image' },
+        (error, result) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(result);
+        },
+      );
+      stream.end(newProfilePicture.buffer);
+    });
+  
+    const newProfilePictureUrl = (uploadResult as any).secure_url;
+    updatedFields['profilePicture'] = newProfilePictureUrl;
+  
+    profile.profilePicture = newProfilePictureUrl;
+    await this.profileRepository.save(profile);
+  
+    return newProfilePictureUrl;
   }
-
+  
+  
   private async updateUserProfile(
     profileData,
     userId: string,
@@ -508,7 +526,6 @@ export class AuthenticationService {
       contactUpdateData,
     );
     updatedFields['contact'] = contactUpdateData;
-    console.log('User contact updated:', contactUpdateData);
   }
 
   private async updateUserAddress(
@@ -521,7 +538,6 @@ export class AuthenticationService {
 
     if (Array.isArray(addressArray) && addressArray.length > 0) {
       await this.addressRepository.delete({ user: Equal(userId) });
-      console.log('Old addresses deleted');
 
       const newAddresses = addressArray.map((addr) =>
         this.addressRepository.create({
@@ -536,7 +552,6 @@ export class AuthenticationService {
 
       const savedAddresses = await this.addressRepository.save(newAddresses);
       updatedFields['address'] = savedAddresses;
-      console.log('New addresses saved:', savedAddresses);
     }
   }
 
@@ -551,6 +566,27 @@ export class AuthenticationService {
       typeof documentData === 'string' ? JSON.parse(documentData) : documentData;
   
     if (Array.isArray(documents) && documents.length > 0) {
+      const existingDocuments = await this.documentRepository.find({
+        where: { user: Equal(userId) },
+      });
+  
+      if (existingDocuments.length > 0) {
+        for (const existingDoc of existingDocuments) {
+          if (existingDoc.documentFile) {
+            const publicId = extractPublicIdFromUrl(existingDoc.documentFile);
+            try {
+              await deleteFileFromCloudinary(publicId);
+
+            } catch (error) {
+              console.error(
+                `Failed to delete old document from Cloudinary: ${existingDoc.documentFile}`,
+                error,
+              );
+            }
+          }
+        }
+      }
+  
       await this.documentRepository.delete({ user: Equal(userId) });
   
       const newDocuments = await Promise.all(
@@ -564,7 +600,7 @@ export class AuthenticationService {
             );
             documentFileUrl = uploadedDocumentUrl;
           }
-
+  
           if (!documentFileUrl && fallbackDocumentFile) {
             documentFileUrl = fallbackDocumentFile;
           }
