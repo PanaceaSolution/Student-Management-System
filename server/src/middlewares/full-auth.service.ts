@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
@@ -212,6 +212,14 @@ export class FullAuthService {
       const result = await this.refreshTokenRepository.delete({ expiresAt: LessThan(now) });
     } catch (error) {
       console.error('Error deleting expired tokens:', error.message);
+    }
+  }
+  async getRefreshTokenByUserId(userId: string): Promise<RefreshToken | null> {
+    try {
+      return await this.refreshTokenRepository.findOne({ where: { userId } });
+    } catch (error) {
+      console.error('Error fetching refresh token:', error.message);
+      throw new InternalServerErrorException('Failed to check existing refresh token');
     }
   }
   

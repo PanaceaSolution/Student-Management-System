@@ -244,37 +244,43 @@ export class AuthenticationService {
   async login(loginDto: LoginDto, res: Response) {
     try {
       const { username, password } = loginDto;
-
+  
       if (!username || !password) {
         throw new BadRequestException('Username and password are required');
       }
-
+  
       const user = await this.userRepository.findOne({
         where: { username },
         relations: ['profile'], 
       });
-
+  
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
-
+  
       if (!user.isActivated) {
         throw new UnauthorizedException('Account is deactivated');
       }
+  
       const decryptedPassword = decryptdPassword(user.password);
       if (password !== decryptedPassword) {
         throw new UnauthorizedException('Invalid credentials');
       }
-
+  
+      const existingToken = await this.fullAuthService.getRefreshTokenByUserId(user.userId.toString());
+      if (existingToken) {
+        throw new UnauthorizedException('You are already logged in. Please log out before logging in again.');
+      }
+  
       const payload = this.fullAuthService.createPayload({
         id: user.userId,
         username: user.username,
         role: user.role,
       });
-
+  
       const { accessToken, refreshToken } =
-        await this.fullAuthService.generateTokensAndAttachCookies(res, payload,user.userId.toString());
-
+        await this.fullAuthService.generateTokensAndAttachCookies(res, payload, user.userId.toString());
+  
       return res.status(200).json({
         message: 'Login successful',
         success: true,
@@ -291,13 +297,13 @@ export class AuthenticationService {
         },
       });
     } catch (error) {
-      console.error('Login error:', error.message);
       if (!(error instanceof UnauthorizedException || error instanceof BadRequestException)) {
         throw new InternalServerErrorException('Internal server error');
       }
       throw error;
     }
   }
+  
 
   async logout(@Res() res: Response, refreshToken: string): Promise<any> {
     try {
