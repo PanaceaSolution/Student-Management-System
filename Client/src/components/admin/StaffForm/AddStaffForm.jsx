@@ -31,6 +31,8 @@ const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, cu
       birthCertificate: null,
       citizenship: null,
    });
+   // console.log(selectedData);
+
 
    const {
       register,
@@ -51,9 +53,9 @@ const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, cu
          setValue("dob", selectedData.user_profile_dob);
          setProfilePic(selectedData.user_profile_profilePicture);
          setValue("email", selectedData.user_email);
-         setValue("staffRole", selectedData.staffRole);
-         setValue("salary", selectedData.salary);
-         setValue("hireDate", selectedData.hireDate);
+         setValue("staffRole", selectedData.user_staffRole);
+         setValue("salary", selectedData.user_salary);
+         setValue("hireDate", selectedData.user_hireDate);
          setValue("wardNumber", selectedData.user_address_0_wardNumber);
          setValue("municipality", selectedData.user_address_0_municipality);
          setValue("province", selectedData.user_address_0_province);
@@ -137,8 +139,8 @@ const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, cu
 
       try {
          if (selectedData) {
-            const res = await updateStaff(selectedData.staffId, formattedData);
-            if (res?.status === 200) {
+            const res = await updateStaff(selectedData.user_staffId, formattedData);
+            if (res.success) {
                setFormOpen(false);
                reset();
                setCurrentStep(0);

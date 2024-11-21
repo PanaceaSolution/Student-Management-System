@@ -235,7 +235,7 @@ const Students = () => {
             </div>
             <ActiveTab
               activeTab={activeTab}
-              staff={students}
+              user={students}
               handleTabClick={handleTabClick}
             />
 

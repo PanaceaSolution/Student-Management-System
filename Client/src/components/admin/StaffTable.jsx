@@ -11,11 +11,10 @@ import ResultShowing from "../common/ResultShowing";
 import { Button } from "../ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import Paginations from "../common/Paginations";
-import { flattenData } from "@/utilities/utilities";
 
 const ITEMS_PER_PAGE = 10;
 
-const StaffTable = ({ user, handleUserData, tableHead, tableFields, handleDelete, handleEdit, loading }) => {
+const StaffTable = ({ title, user, handleUserData, tableHead, tableFields, handleDelete, handleEdit, loading }) => {
    const [currentPage, setCurrentPage] = useState(1);
 
    const handleCheckboxChange = (data) => {
@@ -46,8 +45,8 @@ const StaffTable = ({ user, handleUserData, tableHead, tableFields, handleDelete
          <Table>
             <TableHeader>
                <TableRow>
-                  {tableHead.map((head) => (
-                     <TableHead key={head}>
+                  {tableHead.map((head, index) => (
+                     <TableHead key={`${head}-${index}`}>
                         {head}
                      </TableHead>
                   ))}
@@ -57,47 +56,40 @@ const StaffTable = ({ user, handleUserData, tableHead, tableFields, handleDelete
                {user.length === 0 ? (
                   <TableRow>
                      <TableCell colSpan={tableHead.length}>
-                        <div className="text-center py-4">No Staff Found</div>
+                        <div className="text-center py-4">No {title || "Records"} Found</div>
                      </TableCell>
                   </TableRow>
                ) : (
-                  currentPageData.map((user) => {
-                     return (
-                        <TableRow key={user.user_id} className="cursor-pointer" >
-                           <TableCell>
-                              <input
-                                 type="checkbox"
-                              />
+                  currentPageData.map((user, index) => (
+                     <TableRow key={user.user_id || `row-${index}`} className="cursor-pointer">
+                        <TableCell>
+                           <input type="checkbox" />
+                        </TableCell>
+                        {tableFields.map((field, fieldIndex) => (
+                           <TableCell key={`${user.user_id}-${fieldIndex}`} onClick={() => handleCheckboxChange(user)}>
+                              {user[field]}
                            </TableCell>
-                           {tableFields.map((field, index) => (
-                              <TableCell
-                                 key={index}
-                                 onClick={() => handleCheckboxChange(user)}
-                              >
-                                 {user[field]}
-                              </TableCell>
-                           ))}
-                           <TableCell className="flex justify-center gap-2">
-                              <Button
-                                 variant="edit"
-                                 size="icon"
-                                 className="mr-2"
-                                 onClick={() => handleEdit(user)}
-                              >
-                                 <Pencil />
-                              </Button>
-                              <Button
-                                 variant="destructive"
-                                 size="icon"
-                                 onClick={() => handleDelete(user.user_id)}
-                                 disabled={loading}
-                              >
-                                 <Trash2 />
-                              </Button>
-                           </TableCell>
-                        </TableRow>
-                     )
-                  })
+                        ))}
+                        <TableCell className="flex justify-center gap-2">
+                           <Button
+                              variant="edit"
+                              size="icon"
+                              className="mr-2"
+                              onClick={() => handleEdit(user)}
+                           >
+                              <Pencil />
+                           </Button>
+                           <Button
+                              variant="destructive"
+                              size="icon"
+                              onClick={() => handleDelete(user.user_id)}
+                              disabled={loading}
+                           >
+                              <Trash2 />
+                           </Button>
+                        </TableCell>
+                     </TableRow>
+                  ))
                )}
             </TableBody>
          </Table>

@@ -24,15 +24,18 @@ const useStaffStore = create(
                set({ isloading: true, error: null });
                try {
                   const res = await getAllUserService(role);
-                  if (res.status === 200) {
+                  if (res.success) {
                      set({
                         // staff: res.data.filter(staff => staff.staffRole !== "TEACHER"),
                         // teacher: res.data.filter(teacher => teacher.staffRole === "TEACHER"),
                         staff: flattenData(res.data),
                         totalUsers: res.total,
                         pages: res.totalPages,
+                        isloading: false
                      })
-                     set({ isloading: false });
+                  } else {
+                     set({ staff: [], loading: false });
+                     toast.error("Failed to fetch data");
                   }
                } catch (error) {
                   set({ error: error.message, isloading: false });
@@ -44,6 +47,8 @@ const useStaffStore = create(
                set({ isSubmitting: true, error: null });
                try {
                   const res = await createStaffService(staffData);
+                  console.log("Response:", res);
+
                   if (res.status === 201) {
                      const formattedStaff = flattenNestedData(formattedData(res));
                      set((state) => ({

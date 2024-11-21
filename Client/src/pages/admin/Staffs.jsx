@@ -38,7 +38,7 @@ const staffTableFields = [
   "user_profile_lname",
   "user_contact_phoneNumber",
   "user_profile_gender",
-  "staffRole",
+  "user_staffRole",
 ];
 
 const personalInfo = [
@@ -46,10 +46,10 @@ const personalInfo = [
   { label: "Last Name", key: "user_profile_lname" },
   { label: "Gender", key: "user_profile_gender" },
   { label: "Email", key: "user_email" },
-  { label: "Role", key: "staffRole" },
-  { label: "Salary", key: "salary" },
+  { label: "Role", key: "user_staffRole" },
+  { label: "Salary", key: "user_salary" },
   { label: "Date of Birth", key: "user_profile_dob" },
-  { label: "Enrollment Date", key: "hireDate" },
+  { label: "Enrollment Date", key: "user_hireDate" },
   { label: "Phone Number", key: "user_contact_phoneNumber" },
   { label: "Telephone Number", key: "user_contact_telephoneNumber" },
   { label: "Ward Number", key: "user_address_0_wardNumber" },
@@ -77,7 +77,7 @@ const Staffs = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
-  const { staff, getStaff, deleteStaff, loading } = useStaffStore()
+  const { staff, getStaff, deleteStaff, isSubmitting, isDeleting } = useStaffStore()
 
   useEffect(() => {
     getStaff("STAFF");
@@ -144,7 +144,7 @@ const Staffs = () => {
                   setSelectedData={setSelectedData}
                   currentStep={currentStep}
                   setCurrentStep={setCurrentStep}
-                  loading={loading}
+                  loading={isSubmitting}
                 />
               </div>
             </div>
@@ -178,7 +178,7 @@ const Staffs = () => {
             </div>
             <ActiveTab
               activeTab={activeTab}
-              staff={staff}
+              user={staff}
               handleTabClick={handleTabClick}
             />
             <div className="relative w-full overflow-x-auto shadow-md">
@@ -188,11 +188,9 @@ const Staffs = () => {
                 tableFields={staffTableFields}
                 user={staff}
                 handleUserData={handleUserData}
-                loading={loading}
-                setCardOpen={setCardOpen}
+                loading={isDeleting}
                 handleEdit={handleEdit}
                 handleDelete={handleDelete}
-                setFormOpen={setFormOpen}
               />
             </div>
           </div>
@@ -202,7 +200,6 @@ const Staffs = () => {
             <DetailsCard
               title="Staff"
               userDetails={selectedData}
-              loading={loading}
               cardOpen={cardOpen}
               setCardOpen={setCardOpen}
               personalInfo={personalInfo}
@@ -212,11 +209,11 @@ const Staffs = () => {
         </div>
       </div>
 
-      {loading === true && (
+      {/* {loading === true && (
         <div className="fixed top-0 left-0 w-full h-screen bg-black opacity-50 z-[500] flex justify-center items-center">
           <Spinner />
         </div>
-      )}
+      )} */}
     </section>
   );
 };
