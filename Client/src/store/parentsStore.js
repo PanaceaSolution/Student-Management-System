@@ -1,5 +1,6 @@
-import { createParentService, deleteParentService, getAllParentsService, getParentsByIdService, updateParentService } from "@/services/parentsServices";
-import { getAllUserService } from "@/services/userService";
+import { createParentService, updateParentService } from "@/services/parentsServices";
+import { deleteUserService, getAllUserService } from "@/services/userService";
+import { flattenData } from "@/utilities/utilities";
 import toast from "react-hot-toast";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
@@ -8,53 +9,58 @@ const useParentStore = create(
    devtools(
       persist(
          (set, get) => ({
-            loading: false,
+            isLoading: false,
+            isSubmitting: false,
+            isDeleting: false,
             error: null,
             parents: [],
-            parentById: {},
+            totalUsers: 0,
+            pages: 0,
 
             // Get all parents
             getAllParents: async (role) => {
-               set({ loading: true, error: null });
+               set({ isLoading: true, error: null });
                try {
                   const res = await getAllUserService(role);
                   if (res.success) {
                      set({
-                        parents: res.parents,
-                        loading: false
+                        parents: flattenData(res.data),
+                        isLoading: false
                      });
+                  } else {
+                     toast.error("Failed to get parents");
+                     set({ parents: [], isLoading: false });
                   }
-                  return data;
                } catch (error) {
-                  set({ error: error.message, loading: false });
+                  set({ error: error.message, isLoading: false });
                   return error;
                }
             },
 
             addParent: async (parentData) => {
-               set({ loading: true, error: null });
+               set({ isSubmitting: true, error: null });
                try {
-                  const data = await createParentService(parentData);
-                  if (data) {
+                  const res = await createParentService(parentData);
+                  console.log("Response:", res);
+                  if (res.success) {
                      toast.success(data.message);
                      set((state) => ({
                         parents: [...state.parents, data],
-                        loading: false,
+                        isSubmitting: false,
                      }));
-                     await get().getAllParents();
                   } else {
                      toast.error("Failed to add");
-                     set({ loading: false });
+                     set({ isSubmitting: false });
                   }
-                  return data;
+                  return res;
                } catch (error) {
-                  set({ error: error.message, loading: false });
+                  set({ error: error.message, isSubmitting: false });
                   return error;
                }
             },
 
             updateParent: async (parentId, updatedParentData) => {
-               set({ loading: true, error: null });
+               set({ isSubmitting: true, error: null });
                try {
                   const data = await updateParentService(parentId, updatedParentData);
                   if (data) {
@@ -63,38 +69,36 @@ const useParentStore = create(
                         parents: state.parents.map((parent) =>
                            parent.id === parentId ? { ...parent, ...updatedParentData } : parent
                         ),
-                        loading: false,
+                        isSubmitting: false,
                      }));
                      await get().getAllParents();
                   } else {
                      toast.error("Failed to update");
-                     set({ loading: false });
+                     set({ isSubmitting: false });
                   }
                   return data;
                } catch (error) {
-                  set({ error: error.message, loading: false });
+                  set({ error: error.message, isSubmitting: false });
                   return error;
                }
             },
 
             deleteParent: async (parentId) => {
-               set({ loading: true, error: null });
+               set({ isDeleting: true, error: null });
                try {
-                  const data = await deleteParentService(parentId);
-                  if (data) {
-                     toast.success(data.message);
+                  const res = await deleteUserService(parentId);
+                  if (res.success) {
                      set((state) => ({
-                        parents: state.parents.filter((parent) => parent.id !== parentId),
-                        loading: false,
+                        parents: state.parents.filter((parent) => parent.user_id !== parentId),
+                        isDeleting: false,
                      }));
-                     await get().getAllParents();
+                     toast.success('User deleted successfully');
                   } else {
                      toast.error("Failed to delete");
-                     set({ loading: false });
+                     set({ isDeleting: false });
                   }
-                  return data;
                } catch (error) {
-                  set({ error: error.message, loading: false });
+                  set({ error: error.message, isDeleting: false });
                   return error;
                }
             },
