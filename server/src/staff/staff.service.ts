@@ -163,8 +163,8 @@ export class StaffService {
       if (salary) staff.salary = salary;
       if (staffRole) staff.staffRole = staffRole.trim() as STAFFROLE;
 
-      const updatedStaff = this.staffRepository.save(staff);
-      console.log(updatedStaff);
+      const updatedStaff = await this.staffRepository.save(staff);
+      console.log("Updateed staff is:",updatedStaff);
 
       return {
         status: 201,
