@@ -36,15 +36,14 @@ export class CourseService {
       throw new NotFoundException(`Teacher with ID ${createCourseDto.teacherId} not found`);
     }
 
-    // Upload the file to Cloudinary
-    const folder = 'courses'; // Specify the folder name
+    const folder = 'courses'; 
     const uploadResult = await uploadSingleFileToCloudinary(file, folder);
 
-    // Create the course with the teacher entity and uploaded file URL
+  
     const course = this.courseRepository.create({
       ...createCourseDto,
       teacher,
-      file: uploadResult.secure_url, // Assuming you want to store the image URL
+      file: uploadResult.secure_url, 
     });
   
     return this.courseRepository.save(course);
@@ -66,14 +65,14 @@ export class CourseService {
   async update(courseId: string, updateCourseDto: UpdateCourseDto, file?: Express.Multer.File): Promise<Course> {
     const course = await this.findOne(courseId);
 
-    // If a file is provided, upload it and update the imageUrl
+    
     if (file) {
-      const folder = 'courses'; // Specify the folder name
+      const folder = 'courses'; 
       const uploadResult = await uploadSingleFileToCloudinary(file, folder);
-      course.file = uploadResult.secure_url; // Update the imageUrl
+      course.file = uploadResult.secure_url; 
     }
 
-    // Update other course fields
+   
     Object.assign(course, updateCourseDto);
     return this.courseRepository.save(course);
   }

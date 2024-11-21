@@ -12,10 +12,10 @@ export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   @Post('/create')
-  @UseInterceptors(FileInterceptor('file')) // Use FileInterceptor for file uploads
+  @UseInterceptors(FileInterceptor('file')) 
   create(
     @Body() createCourseDto: CreateCourseDto,
-    @UploadedFile() file: Express.Multer.File, // Accept the uploaded file
+    @UploadedFile() file: Express.Multer.File, 
   ): Promise<Course> {
     return this.courseService.create(createCourseDto, file);
   }
