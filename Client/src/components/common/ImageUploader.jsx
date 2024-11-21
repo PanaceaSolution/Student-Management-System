@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Upload, Trash } from "lucide-react";
 
 const ImageUploader = ({
@@ -7,12 +7,15 @@ const ImageUploader = ({
   defaultImage,
   clearErrors,
   name,
+  getValues,
 }) => {
-  const [image, setImage] = useState(defaultImage || null); 
+  const [image, setImage] = useState(defaultImage || null);
   const [loading, setLoading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [showRemove, setShowRemove] = useState(false);
-
+  useEffect(() => {
+    setImage(getValues(name));
+  }, [getValues]);
   const handleDragOver = (e) => {
     e.preventDefault();
     setDragging(true);
@@ -32,37 +35,36 @@ const ImageUploader = ({
     setLoading(true);
     const reader = new FileReader();
     reader.onload = () => {
-      setImage(reader.result); 
+      setImage(reader.result);
       setLoading(false);
     };
     reader.readAsDataURL(file);
   };
 
   const handleRemove = () => {
-    setImage(null); 
-    setShowRemove(false); 
+    setImage(null);
+    setShowRemove(false);
   };
 
   const handleMouseOver = () => {
-    setShowRemove(true); 
+    setShowRemove(true);
   };
 
   const handleMouseOut = () => {
-    setShowRemove(false); 
+    setShowRemove(false);
   };
 
   return (
     <>
-      <p className="text-gray-900 font-semibold:">Uploade {name}:</p>
+      <p className="text-gray-900 font-semibold">Upload {name}:</p>
       <div
-        className={`relative w-full  h-52 border-2 border-dashed rounded-sm border-black ${
+        className={`relative w-full h-52 border-2 border-dashed rounded-sm border-black ${
           dragging ? "bg-blue-100" : "bg-gray-300"
         } flex justify-center items-center`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-      
         {loading ? (
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
             <div className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full text-white" />
@@ -110,7 +112,6 @@ const ImageUploader = ({
             />
           </div>
         )}
-      
       </div>
       {errors && (
         <p className="text-red-500 text-sm">{errors[name]?.message}</p>

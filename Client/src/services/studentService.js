@@ -79,23 +79,34 @@ export const createStudentService = async (studentData) => {
   }
 };
 
-export const updateStudentService = async (id, updatedStudentData) => {
+export const updateStudentService = async ({ studentId, formData }) => {
   try {
-    const response = await fetch(`${URL}/student/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedStudentData),
+    const response = await fetch(`${URL}/student/update/${studentId}`, {
+      method: "PATCH",
+      body: formData, 
     });
+
+    if (!response.ok) {
+      let errorMessage = "An unknown error occurred.";
+      try {
+        const error = await response.json();
+        errorMessage = error.message || "Something went wrong.";
+      } catch (err) {
+        errorMessage = response.statusText || "Failed to update student.";
+      }
+
+      toast.error(errorMessage); 
+       return null; 
+    }
     const data = await response.json();
-    return data;
+    return data; 
   } catch (error) {
+    
     console.error("Error while updating student:", error);
+    toast.error("An error occurred while updating the student.");
     throw error;
   }
 };
-
 export const deleteStudentService = async (id) => {
   try {
     const response = await fetch(`${URL}/auth/delete`, {

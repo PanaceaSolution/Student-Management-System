@@ -7,13 +7,14 @@ import { RefreshToken } from 'src/user/userEntity/refresh-token.entity';
 import * as bcrypt from 'bcrypt';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
+
 @Injectable()
 export class FullAuthService {
   constructor(
     private readonly jwtService: JwtService,
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
-  ) {}
+  ) { }
 
 
   createPayload(user: {id:UUID; username: string; role: string }): object {
@@ -21,7 +22,7 @@ export class FullAuthService {
       id: user.id,
       username: user.username,
       role: user.role,
-    }; 
+    };
   }
 
   isTokenValid(token: string): any {
@@ -30,7 +31,7 @@ export class FullAuthService {
     } catch {
       throw new UnauthorizedException('Invalid token');
     }
-    
+
   }
 
   async generateTokensAndAttachCookies(
@@ -115,7 +116,7 @@ export class FullAuthService {
     }
 
     const now = new Date();
-    const cooldownPeriod = 60 * 1000; 
+    const cooldownPeriod = 60 * 1000;
     if (now.getTime() - storedToken.lastUsedAt.getTime() < cooldownPeriod) {
       return {
         message: 'Too many requests',
