@@ -300,7 +300,7 @@ export class AuthenticationService {
       if (!(error instanceof UnauthorizedException || error instanceof BadRequestException)) {
         throw new InternalServerErrorException('Internal server error');
       }
-      throw error;
+      throw error; 
     }
   }
   
