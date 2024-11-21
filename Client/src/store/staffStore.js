@@ -26,19 +26,18 @@ const useStaffStore = create(
                   const res = await getAllUserService(role);
                   if (res.success) {
                      set({
-                        // staff: res.data.filter(staff => staff.staffRole !== "TEACHER"),
-                        // teacher: res.data.filter(teacher => teacher.staffRole === "TEACHER"),
                         staff: flattenData(res.data),
                         totalUsers: res.total,
                         pages: res.totalPages,
-                        isloading: false
-                     })
+                        isloading: false,
+                     });
                   } else {
-                     set({ staff: [], loading: false });
-                     toast.error("Failed to fetch data");
+                     set({ staff: [], isloading: false });
+                     toast.error(res.message || "Failed to fetch data");
                   }
                } catch (error) {
                   set({ error: error.message, isloading: false });
+                  toast.error(error.message || "Failed to fetch staff data");
                }
             },
 
@@ -49,8 +48,8 @@ const useStaffStore = create(
                   const res = await createStaffService(staffData);
                   console.log("Response:", res);
 
-                  if (res.status === 201) {
-                     const formattedStaff = flattenNestedData(formattedData(res));
+                  if (res.success) {
+                     const formattedStaff = flattenNestedData(addedStaff(res));
                      set((state) => ({
                         staff: [formattedStaff, ...state.staff],
                         isSubmitting: false,
@@ -74,7 +73,9 @@ const useStaffStore = create(
                try {
                   const res = await updateStaffService(staffId, updatedStaffData);
                   if (res.success) {
-                     const formattedStaff = flattenData(res);
+                     const formattedStaff = flattenNestedData(updatedStaffFormattedData(res));
+                     console.log("Formatted Staff:", formattedStaff);
+
                      set((state) => ({
                         staff: state.staff.map((staff) =>
                            staff.staffId === staffId ? { ...staff, ...formattedStaff } : staff
@@ -86,6 +87,7 @@ const useStaffStore = create(
                      toast.error(res.message);
                      set({ isSubmitting: false });
                   }
+                  return res;
                } catch (error) {
                   set({ error: error.message, isSubmitting: false });
                   toast.error(error.message || "Failed to update staff");
@@ -118,43 +120,27 @@ const useStaffStore = create(
    )
 );
 
-const formattedData = (res) => {
+const addedStaff = (res) => {
    return {
       user: {
-         id: res.staff.user.userId,
-         email: res.staff.user.email,
-         username: res.staff.user.username,
-         role: res.staff.user.role,
-         isActivated: res.staff.user.isActivated,
-         createdAt: res.staff.user.createdAt,
-         profile: {
-            fname: res.user.user.profile.fname,
-            lname: res.user.user.profile.lname,
-            gender: res.user.user.profile.gender,
-            dob: res.user.user.profile.dob,
-            profilePicture: res.user.user.profile.profilePicture,
-         },
-         contact: {
-            phoneNumber: res.user.user.contact.phoneNumber,
-            alternatePhoneNumber: res.user.user.contact.alternatePhoneNumber,
-            telephoneNumber: res.user.user.contact.telephoneNumber,
-         },
-         address: res.user.user.address.map((address) => ({
-            addressType: address.addressType,
-            wardNumber: address.wardNumber,
-            municipality: address.municipality,
-            district: address.district,
-            province: address.province,
-         })),
-         documents: res.user.user.documents.map((doc) => ({
-            documentName: doc.documentName,
-            documentFile: doc.documentFile,
-         })),
+         ...res.staff.user,
+         staffId: res.staff.staffId,
+         hireDate: res.staff.hireDate,
+         salary: res.staff.salary,
+         staffRole: res.staff.staffRole,
       },
-      staffId: res.staff.staffId,
-      hireDate: res.staff.hireDate,
-      salary: res.staff.salary,
-      staffRole: res.staff.staffRole,
+
+   };
+}
+const updatedStaffFormattedData = (res) => {
+   return {
+      user: {
+         ...res.updateUser.user,
+         staffId: res.updatedStaff.staffId,
+         hireDate: res.updatedStaff.hireDate,
+         salary: res.updatedStaff.salary,
+         staffRole: res.updatedStaff.staffRole,
+      },
    };
 }
 

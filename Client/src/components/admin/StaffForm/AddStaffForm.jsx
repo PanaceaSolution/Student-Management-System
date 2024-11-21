@@ -16,7 +16,7 @@ import StaffInfo from './StaffInfo';
 import AddressInfo from '@/pages/admin/StudentForm/AddressInfo';
 import ProfilePicUpload from '@/components/common/profilePicUpload';
 import StaffDocumentUpload from './StaffDocumentUpload';
-import ImageUploader from '@/components/common/ImageUploader';
+import Spinner from '@/components/Loader/Spinner';
 
 const documentFields = [
    { name: "birthCertificate", label: "Birth Certificate (optional)" },
@@ -24,7 +24,7 @@ const documentFields = [
 ]
 
 const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, currentStep, setCurrentStep }) => {
-   const { addStaff, updateStaff, loading } = useStaffStore();
+   const { addStaff, updateStaff, isSubmitting } = useStaffStore();
    const steps = ["Personal Info", "Address Info", "Document Upload"];
    const [profilePic, setProfilePic] = useState('');
    const [documents, setDocuments] = useState({
@@ -118,28 +118,46 @@ const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, cu
          telephoneNumber: data.telephoneNumber,
       }));
 
-      // Document info
-      formattedData.append("document", JSON.stringify([
-         { documentName: "Birth Certificate" },
-         { documentName: "Citizenship" }
-      ]));
+      // Function to check if the value is a URL
+      const isUrl = (value) => {
+         try {
+            new URL(value);
+            return true;
+         } catch {
+            return false;
+         }
+      };
 
-      // Append the profile picture (if any)
-      if (profilePic) {
+      // Append the profile picture if not a URL
+      if (profilePic && !isUrl(profilePic)) {
          formattedData.append("profilePicture", profilePic);
       }
 
-      // Append documents (if any)
-      if (documents.birthCertificate) {
-         formattedData.append("documents", documents.birthCertificate);
-      }
-      if (documents.citizenship) {
-         formattedData.append("documents", documents.citizenship);
-      }
+      // Append documents info and files
+      const documentData = [];
+      documentFields.forEach((field) => {
+         const documentFile = documents[field.name];
+         const isDocumentUrl = isUrl(documentFile);
+
+         documentData.push({
+            documentName: field.label,
+            documentFile: isDocumentUrl ? documentFile : null,
+         });
+
+         // Append the file if it is not a URL
+         if (!isDocumentUrl && documentFile) {
+            formattedData.append("documents", documentFile);
+         }
+      });
+
+      // Append the document metadata
+      formattedData.append("document", JSON.stringify(documentData));
 
       try {
          if (selectedData) {
             const res = await updateStaff(selectedData.user_staffId, formattedData);
+            console.log(res);
+
             if (res.success) {
                setFormOpen(false);
                reset();
@@ -151,10 +169,9 @@ const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, cu
                   marksheet: null,
                })
             }
-
          } else {
             const res = await addStaff(formattedData);
-            if (res?.status === 201) {
+            if (res.success) {
                setFormOpen(false);
                reset();
                setCurrentStep(0);
@@ -265,10 +282,18 @@ const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, cu
                      <button
                         type="submit"
                         className="bg-blue-600 text-white py-2 px-4 rounded disabled:cursor-not-allowed disabled:bg-blue-300"
-                        disabled={loading}
+                        disabled={isSubmitting}
                         aria-label="Submit Form"
                      >
-                        Submit
+                        {isSubmitting
+                           ? (
+                              <div className='flex items-center gap-2'>
+                                 <Spinner />
+                                 <span>Submitting...</span>
+                              </div>
+                           )
+                           : "Submit"
+                        }
                      </button>
                   )}
                </div>
