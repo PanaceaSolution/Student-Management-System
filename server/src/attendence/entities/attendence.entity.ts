@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { Student } from 'src/student/entities/student.entity';
 import { Class } from 'src/classes/entities/class.entity';
+import { User } from 'src/user/authentication/entities/authentication.entity';
 
 @Entity()
 export class Attendence {
@@ -36,4 +37,8 @@ export class Attendence {
   })
   @JoinColumn({ name: 'classId' })
   class: Class;
+  
+  @ManyToOne(() => User, (user) => user.attendances)
+  @JoinColumn({ name: 'userId' })
+  user: User;
 }
