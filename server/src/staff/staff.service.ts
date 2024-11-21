@@ -43,7 +43,7 @@ export class StaffService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ): Promise<{ status: number; message: string; staff?: any; user?: any }> {
+  ){
     const {
       hireDate,
       salary,
@@ -132,6 +132,7 @@ export class StaffService {
 
     return {
       status: 201,
+      success:true,
       message: 'Staff created successfully',
       staff: { ...newStaff, user: createUserResponse.user },
       // user: createUserResponse,
