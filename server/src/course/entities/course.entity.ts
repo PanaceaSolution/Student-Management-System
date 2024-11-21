@@ -20,7 +20,7 @@ export class Course {
   @Column({ type: 'date' })
   endDate: Date;
 
-  @Column('text')
+  @Column({ nullable: true })
   file: string;
 
   @ManyToOne(() => Staff, (staff) => staff.courses, { nullable: false })
