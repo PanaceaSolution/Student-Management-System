@@ -141,7 +141,7 @@ export class AuthenticationService {
         fname: profile.fname,
         lname: profile.lname,
         gender: profile.gender,
-        dob: new Date(profile.dob),
+        dob: new Date(profile.dob).toISOString().split('T')[0],
         user: newUser,
       });
 
