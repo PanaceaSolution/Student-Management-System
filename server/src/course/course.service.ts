@@ -5,7 +5,7 @@ import { Course } from './entities/course.entity';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { Student } from '../student/entities/student.entity'; 
-import { CourseEnrollment } from '../course/course-enrollment/entities/course-enrollment.entity';
+import { CourseEnrollment } from './courseEnrollment/entities/course-enrollment.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
 
 @Injectable()

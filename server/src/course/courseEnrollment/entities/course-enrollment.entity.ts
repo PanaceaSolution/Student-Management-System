@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from 'typeorm';
 import { Course } from '../../entities/course.entity';
 import { Student } from '../../../student/entities/student.entity'; 
 
-@Entity('course_enrollment')
+@Entity('courseEnrollment')
 export class CourseEnrollment {
   @PrimaryGeneratedColumn('uuid')
   enrollmentId: string;

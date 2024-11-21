@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { AuthenticationService } from './authentication.service';
 import { AuthenticationController } from './authentication.controller';
@@ -13,7 +13,10 @@ import * as multer from 'multer';
 import { Student } from 'src/student/entities/student.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
 import { Parent } from 'src/parent/entities/parent.entity';
+import { RefreshToken } from '../userEntity/refresh-token.entity'; // Import RefreshToken entity
 import { StaffModule } from 'src/staff/staff.module';
+import { FullAuthService } from '../../middlewares/full-auth.service';
+import { RefreshTokenUtil } from '../../middlewares/refresh-token.util';
 
 @Module({
   imports: [
@@ -21,22 +24,33 @@ import { StaffModule } from 'src/staff/staff.module';
       User,
       UserAddress,
       UserContact,
-      UserProfile, 
+      UserProfile,
       UserDocuments,
       Student,
       Staff,
-      Parent
+      Parent,
+      RefreshToken, // Register the RefreshToken entity in TypeORM
     ]),
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
-    }), 
-    MulterModule.register({
-      storage: multer.memoryStorage(), 
+      secret: process.env.JWT_SECRET, // JWT secret from environment variables
+      signOptions: { expiresIn: process.env.JWT_LIFETIME }, // Token expiration from environment variables
     }),
-    forwardRef(() => StaffModule),
+    MulterModule.register({
+      storage: multer.memoryStorage(), // Configure in-memory storage for Multer
+    }),
+    forwardRef(() => StaffModule), // Forward reference to StaffModule for dependency resolution
   ],
   controllers: [AuthenticationController],
-  providers: [AuthenticationService],
-  exports: [JwtModule, AuthenticationService, TypeOrmModule],
+  providers: [
+    AuthenticationService, // Core service for authentication logic
+    FullAuthService, // Service for handling tokens and cookies
+    RefreshTokenUtil, // Utility for handling token refresh logic
+  ],
+  exports: [
+    AuthenticationService, // Allow other modules to use the authentication service
+    FullAuthService, // Allow other modules to use the full auth service
+    RefreshTokenUtil, // Export the RefreshTokenUtil for use elsewhere
+    JwtModule, // Export the JWT module for token-related functionalities
+  ],
 })
 export class AuthenticationModule {}

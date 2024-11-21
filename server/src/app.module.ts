@@ -1,9 +1,7 @@
-
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
-
 
 import { AssignmentModule } from './assignment/assignment.module';
 import { CourseModule } from './course/course.module';
@@ -16,9 +14,11 @@ import { CloudinaryProvider } from './uploads/cloudinary.provider';
 import { UploadController } from './uploads/upload.controller';
 import { StudentModule } from './student/student.module';
 import { ParentModule } from './parent/parent.module';
-// import { ParentModule } from './parent/parent.module';
 import { StaffModule } from './staff/staff.module';
 import { ClassModule } from './classes/classes.module';
+import { NoticeModule } from './notice/notice.module';
+
+import { AttendenceModule } from './attendence/attendence.module';
 
 @Module({
   imports: [
@@ -33,10 +33,10 @@ import { ClassModule } from './classes/classes.module';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
-        entities: [join(process.cwd(), 'dist/**/*.entity{.ts,.js}')],
+        entities: [join(process.cwd(), 'dist/**/*.entity{.ts,.js}')], 
         synchronize: true,
         ssl: {
-          rejectUnauthorized: false, // Disable strict SSL validation
+          rejectUnauthorized: false, 
         },
       }),
     }),
@@ -49,6 +49,8 @@ import { ClassModule } from './classes/classes.module';
     StaffModule,
     ParentModule,
     ClassModule,
+    NoticeModule,
+    AttendenceModule,
   ],
   controllers: [HealthController, UploadController],
   providers: [UploadService, CloudinaryProvider],

@@ -7,6 +7,7 @@ import {
   HttpException,
   NotFoundException,
   ForbiddenException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
@@ -28,6 +29,7 @@ import {
   encryptdPassword,
   decryptdPassword,
 } from '../../utils/utils';
+import { RefreshTokenUtil } from 'src/middlewares/refresh-token.util';
 import {
   deleteFileFromCloudinary,
   extractPublicIdFromUrl,
@@ -39,6 +41,7 @@ import { STAFFROLE } from '../../utils/role.helper';
 import { Student } from 'src/student/entities/student.entity';
 import { Parent } from 'src/parent/entities/parent.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
+import { FullAuthService } from 'src/middlewares/full-auth.service';
 
 @Injectable()
 export class AuthenticationService {
@@ -66,7 +69,8 @@ export class AuthenticationService {
     @InjectRepository(UserDocuments)
     private readonly documentRepository: Repository<UserDocuments>,
     private readonly staffService: StaffService,
-    private jwtService: JwtService,
+    private readonly fullAuthService: FullAuthService,
+    private readonly refreshTokenUtil: RefreshTokenUtil,
   ) {}
   async register(
     RegisterDto: RegisterUserDto,
@@ -102,7 +106,7 @@ export class AuthenticationService {
         role,
         staffRole,
       );
-      console.log('Generating username:', username);
+      console.log('Generating username:', username);    
 
       const newUser = this.userRepository.create({
         email,
@@ -236,79 +240,69 @@ export class AuthenticationService {
     }
   }
 
-  async login(loginDto: LoginDto, @Res() res: Response) {
+  async login(loginDto: LoginDto, res: Response) {
     try {
       const { username, password } = loginDto;
+
       if (!username || !password) {
-        return res.status(401).json({
-          message: 'Please fill both username and password',
-          success: false,
-        });
+        throw new BadRequestException('Username and password are required');
       }
+
       const user = await this.userRepository.findOne({
         where: { username },
+        relations: ['profile'], 
       });
 
       if (!user) {
-        return res.status(404).json({
-          message: 'User not found',
-          success: false,
-        });
+        throw new UnauthorizedException('User not found');
+      }
+
+      if (!user.isActivated) {
+        throw new UnauthorizedException('Account is deactivated');
       }
       const decryptedPassword = decryptdPassword(user.password);
-      let isPasswordValid = false;
-      if (user) {
-        isPasswordValid = password === decryptedPassword;
+      if (password !== decryptedPassword) {
+        throw new UnauthorizedException('Invalid credentials');
       }
 
-      if (!isPasswordValid) {
-        return res.status(401).json({
-          message: 'Invalid password',
-          success: false,
-        });
-      }
-      const payload = { username: user.username, role: user.role };
-      const AccessToken = this.jwtService.sign(payload, {
-        expiresIn: '1d',
-        secret: process.env.JWT_SECRET,
+      const payload = this.fullAuthService.createPayload({
+        username: user.username,
+        role: user.role,
       });
 
-      const RefreshToken = this.jwtService.sign(payload, {
-        expiresIn: '7d',
-        secret: process.env.JWT_SECRET,
-      });
-      res.cookie('accessToken', AccessToken, {
-        httpOnly: true,
-        sameSite: 'strict',
-      });
-      res.cookie('refreshToken', RefreshToken, {
-        httpOnly: true,
-        sameSite: 'strict',
-      });
+      const { accessToken, refreshToken } =
+        await this.fullAuthService.generateTokensAndAttachCookies(res, payload,user.userId.toString());
 
-      await this.userRepository.update(
-        { username: user.username },
-        { refreshToken: RefreshToken },
-      );
-
-      return res.status(200).json({ payload, success: true });
+      return res.status(200).json({
+        message: 'Login successful',
+        success: true,
+        user: {
+          username: user.username,
+          accessToken,
+          profile: user.profile
+            ? {
+                fname: user.profile.fname,
+                lname: user.profile.lname,
+                profilePicture: user.profile.profilePicture,
+              }
+            : null,
+        },
+      });
     } catch (error) {
-      console.error('Error during login:', error);
-      return res.status(500).json({
-        message: 'Internal server error',
-        success: false,
-      });
+      console.error('Login error:', error.message);
+      if (!(error instanceof UnauthorizedException || error instanceof BadRequestException)) {
+        throw new InternalServerErrorException('Internal server error');
+      }
+      throw error;
     }
   }
 
-  async logout(@Res() res: Response, userId: UUID) {
+  async logout(@Res() res: Response, refreshToken: string) {
     try {
-      await this.userRepository.update(
-        { userId: userId },
-        { refreshToken: null },
-      );
-      res.clearCookie('accessToken');
-      res.clearCookie('refreshToken');
+      await this.fullAuthService.invalidateRefreshToken(refreshToken);
+  
+      this.fullAuthService.clearCookies(res);
+  
       return res.status(200).json({
         message: 'Logout successful',
         success: true,
@@ -320,43 +314,9 @@ export class AuthenticationService {
       });
     }
   }
-
+  
   async refreshToken(@Req() req: Request, @Res() res: Response) {
-    const refreshToken = req.cookies.refreshToken;
-
-    if (!refreshToken) {
-      return res.status(403).json({
-        message: 'No refresh token is provided',
-        success: false,
-      });
-    }
-
-    try {
-      const decoded = this.jwtService.verify(refreshToken);
-
-      const payload = {
-        username: decoded.username,
-        role: decoded.role,
-      };
-
-      const newAccessToken = this.jwtService.sign(payload, {
-        expiresIn: '15m',
-      });
-      res.cookie('accessToken', newAccessToken, {
-        httpOnly: true,
-        sameSite: 'strict',
-      });
-
-      return res.status(200).json({
-        message: 'New access token generated',
-        success: true,
-      });
-    } catch (error) {
-      return res.status(401).json({
-        message: 'Invalid refresh token',
-        success: false,
-      });
-    }
+    return this.refreshTokenUtil.refreshToken(req, res);
   }
   async updateUser(
     id: UUID,
@@ -367,7 +327,7 @@ export class AuthenticationService {
     } = {},
   ) {
     try {
-      const { email, role, profile, contact, document, address } = updateData;
+      const { email, profile, contact, document, address } = updateData;
 
       const user = await this.userRepository.findOne({
         where: { userId: Equal(id.toString()) },
@@ -391,10 +351,10 @@ export class AuthenticationService {
         updatedFields['email'] = email;
       }
 
-      if (role !== undefined) {
-        user.role = role;
-        updatedFields['role'] = role;
-      }
+      // if (role !== undefined) {
+      //   user.role = role;
+      //   updatedFields['role'] = role;
+      // }
       await this.userRepository.save(user);
       // console.log('User base data updated:', {
       //   email: user.email,
@@ -441,6 +401,7 @@ export class AuthenticationService {
           files.documents,
           user.userId.toString(),
           updatedFields,
+          files.documents && files.documents.length === 0 ? 'your-fallback-url' : undefined,
         );
       }
 
@@ -484,7 +445,6 @@ export class AuthenticationService {
       if (userProfile?.profilePicture) {
         const publicId = extractPublicIdFromUrl(userProfile.profilePicture);
         await deleteFileFromCloudinary(publicId);
-        // console.log('Old profile picture deleted from Cloudinary');
       }
 
       const [uploadedProfilePicture] = await uploadFilesToCloudinary(
@@ -523,7 +483,6 @@ export class AuthenticationService {
       profileUpdateData,
     );
     updatedFields['profile'] = profileUpdateData;
-    // console.log('User profile updated:', profileUpdateData);
   }
 
   private async updateUserContact(
@@ -582,24 +541,22 @@ export class AuthenticationService {
   }
 
   private async updateUserDocuments(
-    documentData,
-    documentFiles: Express.Multer.File[],
+    documentData: any,
+    documentFiles: Express.Multer.File[] = [],
     userId: string,
     updatedFields: Record<string, any>,
+    fallbackDocumentFile?: string,
   ) {
     const documents =
-      typeof documentData === 'string'
-        ? JSON.parse(documentData)
-        : documentData;
-
+      typeof documentData === 'string' ? JSON.parse(documentData) : documentData;
+  
     if (Array.isArray(documents) && documents.length > 0) {
       await this.documentRepository.delete({ user: Equal(userId) });
-      console.log('Old documents deleted');
-
+  
       const newDocuments = await Promise.all(
         documents.map(async (doc, index) => {
-          let documentFileUrl = doc.documentFile;
-
+          let documentFileUrl = doc.documentFile || null;
+  
           if (documentFiles && documentFiles[index]) {
             const [uploadedDocumentUrl] = await uploadFilesToCloudinary(
               [documentFiles[index].buffer],
@@ -608,6 +565,15 @@ export class AuthenticationService {
             documentFileUrl = uploadedDocumentUrl;
           }
 
+          if (!documentFileUrl && fallbackDocumentFile) {
+            documentFileUrl = fallbackDocumentFile;
+          }
+          if (!documentFileUrl) {
+            throw new BadRequestException(
+              `Document file or URL is required for "${doc.documentName}"`,
+            );
+          }
+  
           return this.documentRepository.create({
             documentName: doc.documentName ?? `Document ${index + 1}`,
             documentFile: documentFileUrl,
@@ -615,13 +581,12 @@ export class AuthenticationService {
           });
         }),
       );
-
+  
       const savedDocuments = await this.documentRepository.save(newDocuments);
       updatedFields['documents'] = savedDocuments;
-      console.log('New documents saved:', savedDocuments);
     }
   }
-
+  
   private formatUserResponse(user: User) {
     return {
       id: user.userId,
@@ -786,7 +751,7 @@ export class AuthenticationService {
         const paginatedStaff = roleData.slice(skip, skip + limit);
 
         const formattedStaff = paginatedStaff.map((staff) => ({
-          user: this.formatUserResponse(staff.user), // Use the formatUserResponse function
+          user: this.formatUserResponse(staff.user), 
           staffId: staff.staffId,
           hireDate: staff.hireDate,
           salary: staff.salary,
@@ -1035,7 +1000,7 @@ export class AuthenticationService {
               status: 500,
               success: false,
             });
-          }
+          } 
         }
       }
 
@@ -1054,3 +1019,4 @@ export class AuthenticationService {
     }
   }
 }
+

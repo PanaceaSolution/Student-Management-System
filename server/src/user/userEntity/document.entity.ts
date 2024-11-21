@@ -19,7 +19,7 @@ export class UserDocuments {
   @Column({ type: 'text', nullable: false })
   documentName: string;
 
-  @Column({type: 'text', nullable: false })
+  @Column({type: 'text', nullable: true })
   documentFile: string;
   
   @Column({ type: 'boolean', nullable: true, default: true })
