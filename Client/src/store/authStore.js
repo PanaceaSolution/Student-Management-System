@@ -25,12 +25,10 @@ const useAuthStore = create(
                set({ loading: true });
                try {
                   const res = await loginService(userData);
-
                   if (res.success) {
                      // Set role based on username if role is 'STAFF'
                      const data = res.user;
                      const decodedData = jwtDecode(data.accessToken);
-                     console.log(data, decodedData);
 
                      const finalRole = decodedData.role === 'STAFF'
                         ? getRoleFromUsername(decodedData.username || userData.username)
@@ -46,6 +44,8 @@ const useAuthStore = create(
                         }
                      });
                      toast.success("Login successful");
+                  } else {
+                     toast.error(res.message);
                   }
                   return res;
                } catch (error) {
@@ -63,26 +63,41 @@ const useAuthStore = create(
                   if (res.success) {
                      set({
                         isAuthenticated: false,
-                        loggedInUser: null
+                        loggedInUser: null,
                      });
+                     localStorage.removeItem("auth");
                      toast.success("Logout successful");
                   }
                   return res;
                } catch (error) {
+                  console.error("Error during logout:", error);
                   toast.error(error.message);
-                  set({ loading: false });
                } finally {
-                  set({ loading: false })
+                  set({ loading: false });
                }
             },
+
+            // Refresh token action
             refresh: async () => {
                try {
                   const res = await refreshService();
-                  return res;
+                  if (res.success) {
+                     set({
+                        isAuthenticated: true,
+                     });
+                     toast.success("Session refreshed successfully");
+                     return res;
+                  }
                } catch (error) {
-                  console.error(error);
+                  console.error("Error during token refresh:", error);
+                  set({
+                     isAuthenticated: false,
+                     loggedInUser: null,
+                  });
+                  toast.error("Session expired. Please log in again.");
                }
-            }
+            },
+
          }),
          {
             name: 'auth',

@@ -35,8 +35,6 @@ const Login = () => {
 
     try {
       const res = await login(sanitizedData);
-      console.log(res);
-
       if (res.success) {
         navigate('/dashboard');
       }
