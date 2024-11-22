@@ -10,7 +10,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { Equal, ILike, Like, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
