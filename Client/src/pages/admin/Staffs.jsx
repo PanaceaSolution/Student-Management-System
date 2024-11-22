@@ -80,8 +80,10 @@ const Staffs = () => {
   const { staff, getStaff, deleteStaff, isSubmitting, isDeleting } = useStaffStore()
 
   useEffect(() => {
-    getStaff("STAFF");
+    getStaff("STAFF")
   }, []);
+
+
 
   // Handle format selection and trigger export
   const { exportToCSV, exportToPDF } = useExport()

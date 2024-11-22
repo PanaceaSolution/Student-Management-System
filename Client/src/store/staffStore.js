@@ -31,15 +31,30 @@ const useStaffStore = create(
                         pages: res.totalPages,
                         isloading: false,
                      });
-                  } else {
-                     set({ staff: [], isloading: false });
-                     toast.error(res.message || "Failed to fetch data");
                   }
                } catch (error) {
                   set({ error: error.message, isloading: false });
                   toast.error(error.message || "Failed to fetch staff data");
                }
             },
+
+            // getTeacher: async (query) => {
+            //    set({ isloading: true, error: null });
+            //    try {
+            //       const res = await getAllUserService(query);
+            //       if (res.success) {
+            //          set({
+            //             teacher: flattenData(res.data),
+            //             totalUsers: res.total,
+            //             pages: res.totalPages,
+            //             isloading: false,
+            //          });
+            //       }
+            //    } catch (error) {
+            //       set({ error: error.message, isloading: false });
+            //       toast.error(error.message || "Failed to fetch staff data");
+            //    }
+            // },
 
             // Add a new staff member
             addStaff: async (staffData) => {

@@ -26,6 +26,8 @@ const useStudentStore = create(
           set({ loading: true, error: null });
           try {
             const data = await getAllStudentsService(query);
+            console.log(data);
+
             if (data && data.data) {
               set({
                 students: data.data,

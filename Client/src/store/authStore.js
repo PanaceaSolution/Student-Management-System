@@ -85,7 +85,6 @@ const useAuthStore = create(
                      set({
                         isAuthenticated: true,
                      });
-                     toast.success("Session refreshed successfully");
                      return res;
                   }
                } catch (error) {
@@ -94,7 +93,6 @@ const useAuthStore = create(
                      isAuthenticated: false,
                      loggedInUser: null,
                   });
-                  toast.error("Session expired. Please log in again.");
                }
             },
 

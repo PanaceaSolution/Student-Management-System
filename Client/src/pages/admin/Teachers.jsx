@@ -1,7 +1,6 @@
 import { DateSelect } from '@/components/DateSelect';
 import SearchBox from '@/components/SearchBox';
 import Select from '@/components/Select';
-import { Button } from '@/components/ui/button';
 import useStaffStore from '@/store/staffStore';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import StaffTable from '@/components/admin/staffTable';
@@ -9,7 +8,6 @@ import DetailsCard from '@/components/admin/DetailsCard';
 import AddStaffForm from '@/components/admin/StaffForm/AddStaffForm';
 import useExport from '@/hooks/useExport';
 import ActiveTab from '@/components/common/activeTab';
-import useUserStore from '@/store/userStore';
 
 const Exports = [
   { value: "", label: "EXPORT" },
@@ -26,24 +24,30 @@ const Gender = [
 
 
 const teacherTableHead = ["", "First Name", "Last Name", "Phone Number", "Gender", "Actions"];
-const teacherTableFields = ["user.profile.fname", "user.profile.lname", "user.contact.phoneNumber", "user.profile.gender"];
+const teacherTableFields = ["user_profile_fname", "user_profile_lname", "user_contact_phoneNumber", "user_profile_gender"];
 
 const personalInfo = [
-  { label: "First Name", key: "user.profile.fname" },
-  { label: "Last Name", key: "user.profile.lname" },
-  { label: "Gender", key: "user.profile.gender" },
-  { label: "Email", key: "user.email" },
+  { label: "First Name", key: "user_profile_fname" },
+  { label: "Last Name", key: "user_profile_lname" },
+  { label: "Gender", key: "user_profile_gender" },
+  { label: "Email", key: "user_email" },
   { label: "Role", key: "staffRole" },
   { label: "Salary", key: "salary" },
-  { label: "Date of Birth", key: "user.profile.dob" },
+  { label: "Date of Birth", key: "user_profile_dob" },
   { label: "Enrollment Date", key: "hireDate" },
-  { label: "Phone Number", key: "user.contact.phoneNumber" },
-  { label: "Telephone Number", key: "user.contact.telephoneNumber" },
-  { label: "Ward Number", key: "user.address[0].wardNumber" },
-  { label: "Municipality", key: "user.address[0].municipality" },
-  { label: "District", key: "user.address[0].district" },
-  { label: "Province", key: "user.address[0].province" },
+  { label: "Phone Number", key: "user_contact_phoneNumber" },
+  { label: "Telephone Number", key: "user_contact_telephoneNumber" },
+  { label: "Ward Number", key: "user_address_0_wardNumber" },
+  { label: "Municipality", key: "user_address_0_municipality" },
+  { label: "District", key: "user_address_0_district" },
+  { label: "Province", key: "user_address_0_province" },
 ];
+
+const personalDocuments = [
+  { label: "CitizenShip", key: "user_documents_0_documentFile" },
+  { label: "Birth Certificate", key: "user_documents_1_documentFile" }
+]
+
 
 
 const Teachers = () => {
@@ -56,11 +60,12 @@ const Teachers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [cardOpen, setCardOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
 
-  const { staff, getStaff, deleteStaff, loading } = useStaffStore()
+  const { staff, getStaff, deleteStaff, isSubmitting, isDeleting } = useStaffStore()
 
   useEffect(() => {
-    getStaff("STAFF");
+    getStaff("STAFF")
   }, []);
 
   const teacher = useMemo(() => staff, [staff]);
@@ -82,15 +87,6 @@ const Teachers = () => {
     }
   };
 
-  const handleGenderChange = (event) => {
-    setSelectedGender(event.target.value);
-  };
-
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
-
   const handleDateChange = (selectedDate) => {
     setDate(selectedDate);
   };
@@ -101,18 +97,19 @@ const Teachers = () => {
 
   const handleUserData = (data) => {
     setSelectedData(data);
+    setCardOpen(true);
   };
 
   const handleEdit = (data) => {
+    setCurrentStep(0);
     setFormOpen(true);
     setSelectedData(data)
   }
 
-  const handleDelete = (id) => {
-    const res = deleteStaff(id);
-    if (res.status === 200) {
-      setSelectedData(null);
-    }
+  const handleDelete = async (id) => {
+    console.log(id);
+
+    await deleteStaff(id);
   };
 
   return (
@@ -129,7 +126,15 @@ const Teachers = () => {
                   className="w-32 bg-white"
                 />
 
-                <AddStaffForm formOpen={formOpen} setFormOpen={setFormOpen} selectedData={selectedData} />
+                <AddStaffForm
+                  formOpen={formOpen}
+                  setFormOpen={setFormOpen}
+                  selectedData={selectedData}
+                  setSelectedData={setSelectedData}
+                  currentStep={currentStep}
+                  setCurrentStep={setCurrentStep}
+                  loading={isSubmitting}
+                />
               </div>
             </div>
             <div className="border-b-2 p-2">
@@ -156,7 +161,7 @@ const Teachers = () => {
             </div>
             <ActiveTab
               activeTab={activeTab}
-              staff={teacher}
+              user={teacher}
               handleTabClick={handleTabClick}
             />
             <div className="relative w-full overflow-x-auto shadow-md">
@@ -166,11 +171,9 @@ const Teachers = () => {
                 tableFields={teacherTableFields}
                 user={teacher}
                 handleUserData={handleUserData}
-                loading={loading}
-                setCardOpen={setCardOpen}
+                loading={isDeleting}
                 handleEdit={handleEdit}
                 handleDelete={handleDelete}
-                setFormOpen={setFormOpen}
               />
             </div>
           </div>
@@ -181,10 +184,10 @@ const Teachers = () => {
               <DetailsCard
                 title="Teacher"
                 userDetails={selectedData}
-                loading={loading}
                 cardOpen={cardOpen}
                 setCardOpen={setCardOpen}
                 personalInfo={personalInfo}
+                personalDocuments={personalDocuments}
               />
             </div>
           )}
