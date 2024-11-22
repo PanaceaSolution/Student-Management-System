@@ -1,12 +1,6 @@
 
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaChalkboardTeacher, FaChartBar, FaNetworkWired, FaTasks, FaUserGraduate, FaUserTie, SiGoogleclassroom, SiGooglemessages, SiStorybook, IoLibrary, IoMdCalendar, GrResources, TbReportAnalytics, RiMoneyRupeeCircleLine, LuLogOut, MdDashboard, FaHouseUser } from '../components/Icons'
-import {
-   Tooltip,
-   TooltipTrigger,
-   TooltipContent,
-   TooltipProvider
-} from './ui/tooltip';
 import logo from '../assets/logo.png';
 import useAuthStore from '@/store/authStore';
 
@@ -29,12 +23,6 @@ const links = [
       name: 'Parents',
       href: '/parents',
       icon: <FaHouseUser className="h-6 w-6" />,
-      roles: ["ADMIN"],
-   },
-   {
-      name: 'Teachers',
-      href: '/teachers',
-      icon: <FaChalkboardTeacher className="h-6 w-6" />,
       roles: ["ADMIN"],
    },
    {
@@ -119,7 +107,6 @@ const links = [
 
 const Sidebar = () => {
    const location = useLocation();
-   const navigate = useNavigate();
    const { loggedInUser } = useAuthStore();
    const userRole = loggedInUser?.role;
 
