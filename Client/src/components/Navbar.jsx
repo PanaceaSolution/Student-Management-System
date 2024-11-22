@@ -17,6 +17,7 @@ import {
    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useNavigate } from "react-router-dom";
+import { useRefreshContext } from "@/context/RefreshProvider";
 
 
 const Navbar = () => {
@@ -24,6 +25,11 @@ const Navbar = () => {
    const { loggedInUser, logout } = useAuthStore();
    const [currentTime, setCurrentTime] = useState(dayjs());
    const [hasShadow, setHasShadow] = useState(false);
+   const { timeLeft } = useRefreshContext();
+   const minutes = Math.floor(timeLeft / 60);
+   const seconds = String(timeLeft % 60).padStart(2, "0");
+
+   const { refresh } = useAuthStore()
 
    useEffect(() => {
       // Update time every second
@@ -41,6 +47,11 @@ const Navbar = () => {
          window.removeEventListener("scroll", handleScroll);
       };
    }, []);
+
+   const handleRefresh = async () => {
+      // Refresh the session using the refresh token
+      await refresh();
+   }
 
 
    const logoutHandle = async () => {
@@ -79,6 +90,13 @@ const Navbar = () => {
                      "D MMM, YYYY"
                   )}`}
                </p>
+            </div>
+
+            <div>
+               <Button onClick={handleRefresh}>
+                  Refresh
+               </Button>
+               Refresh in: {minutes}:{seconds}
             </div>
 
             {/* Logout Button */}

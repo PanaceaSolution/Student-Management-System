@@ -12,7 +12,7 @@ export const RefreshProvider = ({ children }) => {
    const { refresh, isAuthenticated } = useAuthStore();
    const isRefreshing = useRef(false);
 
-   const REFRESH_INTERVAL = 13 * 60; // 13 minutes (in seconds)
+   const REFRESH_INTERVAL = 10 * 60; // 13 minutes (in seconds)
    const [timeLeft, setTimeLeft] = useState(() => {
       const savedTime = localStorage.getItem("refreshTimer");
       return savedTime ? parseInt(savedTime, 10) : REFRESH_INTERVAL;
