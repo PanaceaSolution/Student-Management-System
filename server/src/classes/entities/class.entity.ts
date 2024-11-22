@@ -31,7 +31,7 @@ export class Class {
   subjects: Course[];
   assignments: any;
 
-  @OneToMany(() => Attendence, (attendence) => attendence.class)
+  @OneToMany(() => Attendence, (attendence) => attendence.classId)
   @JoinTable()
   attendences: Attendence[];
 

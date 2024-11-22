@@ -61,6 +61,9 @@ export class Student {
   @Column({ type: 'text', nullable: true })
   transportationMode: TRANSPORTATION_MODE;
 
+  @Column({ type:"simple-array", nullable: true })
+  isPresent: boolean[];
+
   @OneToOne(() => User, (user) => user.student, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
@@ -74,7 +77,7 @@ export class Student {
   // @ManyToOne(() => Parent, (parent) => parent.students, { nullable: true })
   // @JoinColumn({ name: 'parentId' })
   // parent: Parent;
-  @OneToMany(() => Attendence, (attendence) => attendence.student)
+  @OneToMany(() => Attendence, (attendence) => attendence.classId)
   attendences: Attendence[];
 
   @ManyToOne(() => Parent, (parent) => parent.student, { nullable: true })
