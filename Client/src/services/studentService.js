@@ -10,6 +10,7 @@ export const getAllStudentsService = async (query) => {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
     });
     if (!response.ok) {
       let errorMessage = "An unknown error occurred.";
@@ -83,7 +84,7 @@ export const updateStudentService = async ({ studentId, formData }) => {
   try {
     const response = await fetch(`${URL}/student/update/${studentId}`, {
       method: "PATCH",
-      body: formData, 
+      body: formData,
     });
 
     if (!response.ok) {
@@ -95,13 +96,13 @@ export const updateStudentService = async ({ studentId, formData }) => {
         errorMessage = response.statusText || "Failed to update student.";
       }
 
-      toast.error(errorMessage); 
-       return null; 
+      toast.error(errorMessage);
+      return null;
     }
     const data = await response.json();
-    return data; 
+    return data;
   } catch (error) {
-    
+
     console.error("Error while updating student:", error);
     toast.error("An error occurred while updating the student.");
     throw error;
