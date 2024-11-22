@@ -10,6 +10,7 @@ import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Injectable()
 export class FullAuthService {
+
   constructor(
     private readonly jwtService: JwtService,
     @InjectRepository(RefreshToken)
@@ -44,39 +45,42 @@ export class FullAuthService {
       expiresIn: '15m',
       secret: process.env.JWT_SECRET,
     });
-
+  
     const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: '1d',
+      expiresIn: '7d',
       secret: process.env.JWT_SECRET,
     });
-
+  
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
-
+  
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-
+  
     const refreshTokenEntity = this.refreshTokenRepository.create({
       userId,
-      refreshToken: hashedRefreshToken,
+      refreshToken,
+      // : hashedRefreshToken, // Store the hashed token in the DB
       expiresAt,
       deviceInfo: deviceInfo || 'Unknown Device',
     });
     await this.refreshTokenRepository.save(refreshTokenEntity);
-
+  
+    // Send the plain refresh token in the cookie
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
     });
-
+  
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
     });
-
-    return { accessToken, refreshToken };
+  
+    return { accessToken, refreshToken }; // Return plain token
   }
+  
 
   clearCookies(res: Response): void {
     res.clearCookie('accessToken');
@@ -85,7 +89,7 @@ export class FullAuthService {
 
   async refreshTokens(req: Request, res: Response): Promise<any> {
     const refreshToken = req.cookies?.refreshToken;
-
+  
     if (!refreshToken) {
       return {
         message: 'No refresh token provided',
@@ -93,11 +97,11 @@ export class FullAuthService {
         status: 403,
       };
     }
-
+  
     const storedToken = await this.refreshTokenRepository.findOne({
-      where: { userId: req.body.userId },
+      where: { refreshToken }, // Compare directly with the plain token
     });
-
+  
     if (!storedToken) {
       return {
         message: 'Invalid refresh token',
@@ -105,47 +109,38 @@ export class FullAuthService {
         status: 401,
       };
     }
-
-    const isTokenValid = await bcrypt.compare(refreshToken, storedToken.refreshToken);
-    if (!isTokenValid) {
-      return {
-        message: 'Invalid refresh token',
-        success: false,
-        status: 401,
-      };
-    }
-
+  
     const now = new Date();
-    const cooldownPeriod = 60 * 1000;
-    if (now.getTime() - storedToken.lastUsedAt.getTime() < cooldownPeriod) {
+    const cooldownPeriod = 60 * 1000; // 1-minute cooldown
+    if (now.getTime() - storedToken.lastUsedAt?.getTime() < cooldownPeriod) {
       return {
         message: 'Too many requests',
         success: false,
         status: 429,
       };
     }
-
+  
     try {
       const decoded = this.jwtService.verify(refreshToken, {
         secret: process.env.JWT_SECRET,
       });
-
+  
       const payload = this.createPayload(decoded);
-
+  
       const newAccessToken = this.jwtService.sign(payload, {
         expiresIn: '15m',
         secret: process.env.JWT_SECRET,
       });
-
+  
       storedToken.lastUsedAt = now;
       await this.refreshTokenRepository.save(storedToken);
-
+  
       res.cookie('accessToken', newAccessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
       });
-
+  
       return {
         message: 'New access token generated',
         success: true,
@@ -165,23 +160,15 @@ export class FullAuthService {
       const decoded = this.jwtService.verify(refreshToken, { secret: process.env.JWT_SECRET });
       const userId = decoded.id;
   
-      const storedToken = await this.refreshTokenRepository.findOne({ where: { userId } });
+      const storedToken = await this.refreshTokenRepository.findOne({ where: { refreshToken } });
   
       if (!storedToken) {
         console.error('No refresh token found for userId:', userId);
         return;
       }
   
-      const isTokenValid = await bcrypt.compare(refreshToken, storedToken.refreshToken);
-      if (!isTokenValid) {
-        console.error('Refresh token mismatch. Skipping deletion.');
-        return;
-      }
-  
-      await this.refreshTokenRepository.delete({ userId });
-
+      await this.refreshTokenRepository.delete({ refreshToken });
     } catch (error) {
- 
       throw new Error('Failed to invalidate refresh token');
     }
   }
@@ -217,12 +204,14 @@ export class FullAuthService {
   }
   async getRefreshTokenByUserId(userId: string): Promise<RefreshToken | null> {
     try {
-      return await this.refreshTokenRepository.findOne({ where: { userId } });
+      return await this.refreshTokenRepository.findOne({
+        where: { userId },
+        select: ['refreshToken', 'expiresAt'], // Ensure the plain token is retrievable
+      });
     } catch (error) {
       console.error('Error fetching refresh token:', error.message);
-      throw new InternalServerErrorException('Failed to check existing refresh token');
+      throw new InternalServerErrorException('Failed to fetch refresh token');
     }
   }
-  
 }
 //csrf & xss protection left
