@@ -4,9 +4,9 @@ import Navbar from "./Navbar";
 
 const Layout = () => {
    return (
-      <div className="grid h-screen w-full md:grid-cols-[70px_1fr] lg:grid-cols-[280px_1fr] bg-background transition-all duration-300">
+      <div className="grid h-screen w-full lg:grid-cols-[280px_1fr] bg-background transition-all duration-300">
          {/* Left Sidebar */}
-         <div className="flex-1 hidden md:block ">
+         <div className="flex-1 hidden lg:block ">
             <Sidebar />
          </div>
 
@@ -16,7 +16,7 @@ const Layout = () => {
             <Navbar />
 
             {/* Main Content */}
-            <main className="flex-1 py-2 lg:py-4">
+            <main className="flex-1 py-2 lg:py-4 mr-4">
                <Outlet />
             </main>
          </div>

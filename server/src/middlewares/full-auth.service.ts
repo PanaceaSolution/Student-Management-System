@@ -1,10 +1,12 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 import { Response, Request } from 'express';
 import { RefreshToken } from 'src/user/userEntity/refresh-token.entity';
 import * as bcrypt from 'bcrypt';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
+
 
 @Injectable()
 export class FullAuthService {
@@ -12,14 +14,15 @@ export class FullAuthService {
     private readonly jwtService: JwtService,
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
-  ) {}
+  ) { }
 
 
-  createPayload(user: { username: string; role: string }): object {
+  createPayload(user: {id:UUID; username: string; role: string }): object {
     return {
+      id: user.id,
       username: user.username,
       role: user.role,
-    }; 
+    };
   }
 
   isTokenValid(token: string): any {
@@ -28,7 +31,7 @@ export class FullAuthService {
     } catch {
       throw new UnauthorizedException('Invalid token');
     }
-    
+
   }
 
   async generateTokensAndAttachCookies(
@@ -113,7 +116,7 @@ export class FullAuthService {
     }
 
     const now = new Date();
-    const cooldownPeriod = 60 * 1000; 
+    const cooldownPeriod = 60 * 1000;
     if (now.getTime() - storedToken.lastUsedAt.getTime() < cooldownPeriod) {
       return {
         message: 'Too many requests',
@@ -156,17 +159,33 @@ export class FullAuthService {
       };
     }
   }
-
+  
   async invalidateRefreshToken(refreshToken: string): Promise<void> {
-    const hashedTokens = await this.refreshTokenRepository.find();
-    for (const tokenEntity of hashedTokens) {
-      const isMatch = await bcrypt.compare(refreshToken, tokenEntity.refreshToken);
-      if (isMatch) {
-        await this.refreshTokenRepository.delete({ id: tokenEntity.id });
-        break;
+    try {
+      const decoded = this.jwtService.verify(refreshToken, { secret: process.env.JWT_SECRET });
+      const userId = decoded.id;
+  
+      const storedToken = await this.refreshTokenRepository.findOne({ where: { userId } });
+  
+      if (!storedToken) {
+        console.error('No refresh token found for userId:', userId);
+        return;
       }
+  
+      const isTokenValid = await bcrypt.compare(refreshToken, storedToken.refreshToken);
+      if (!isTokenValid) {
+        console.error('Refresh token mismatch. Skipping deletion.');
+        return;
+      }
+  
+      await this.refreshTokenRepository.delete({ userId });
+
+    } catch (error) {
+ 
+      throw new Error('Failed to invalidate refresh token');
     }
   }
+  
 
   async getUserSessions(userId: string) {
     const sessions = await this.refreshTokenRepository.find({
@@ -189,8 +208,21 @@ export class FullAuthService {
   }
 
   async deleteExpiredTokens(): Promise<void> {
-    const now = new Date();
-    await this.refreshTokenRepository.delete({ expiresAt: LessThan(now) });
+    try {
+      const now = new Date();
+      const result = await this.refreshTokenRepository.delete({ expiresAt: LessThan(now) });
+    } catch (error) {
+      console.error('Error deleting expired tokens:', error.message);
+    }
   }
+  async getRefreshTokenByUserId(userId: string): Promise<RefreshToken | null> {
+    try {
+      return await this.refreshTokenRepository.findOne({ where: { userId } });
+    } catch (error) {
+      console.error('Error fetching refresh token:', error.message);
+      throw new InternalServerErrorException('Failed to check existing refresh token');
+    }
+  }
+  
 }
 //csrf & xss protection left

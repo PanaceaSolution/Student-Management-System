@@ -24,11 +24,11 @@ export class JsonParserMiddleware implements NestMiddleware {
 
     jsonFields.forEach((field) => {
       if (req.body[field]) {
-        console.log(`Field: ${field}, Type: ${typeof req.body[field]}`);
+
       }
     });
 
-    console.log('After parsing:', req.body);
+;
     next();
   }
 }

@@ -33,11 +33,15 @@ const Login = () => {
       password: sanitizeInput(data.password)
     };
 
-    const res = await login(sanitizedData);
-    if (res.success === false) {
-      toast.error(res.message);
-    } else {
-      navigate('/dashboard');
+    try {
+      const res = await login(sanitizedData);
+      console.log(res);
+
+      if (res.success) {
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      toast.error(error.message)
     }
   };
 

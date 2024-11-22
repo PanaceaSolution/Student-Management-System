@@ -27,11 +27,12 @@ import {
 } from '@nestjs/platform-express';
 import { ROLE, STAFFROLE } from 'src/utils/role.helper';
 import { AuthGuard } from '../../middlewares/auth.guard';
-
+import { FullAuthService } from 'src/middlewares/full-auth.service';
+import { RefreshTokenUtil } from 'src/middlewares/refresh-token.util';
 
 @Controller('auth')
 export class AuthenticationController {
-  constructor(private authenticationService: AuthenticationService) {}
+  constructor(private authenticationService: AuthenticationService,private RefreshTokenUtil : RefreshTokenUtil ) {}
 
   @Post('register')
   @UseInterceptors(
@@ -46,7 +47,7 @@ export class AuthenticationController {
     files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
   ) {
     try {
-      // console.log('Parsed and Validated Register DTO:', body);
+ 
       return this.authenticationService.register(body, files);
     } catch (error) {
       console.error('Error parsing JSON strings in form-data:', error);
@@ -74,8 +75,9 @@ export class AuthenticationController {
 
   @Post('refresh-token')
   async refreshToken(@Req() req: Request, @Res() res: Response) {
-    return this.authenticationService.refreshToken(req, res);
+    return this.RefreshTokenUtil.refreshToken(req, res);
   }
+  
 
   @Patch('update/:id')
   @UseGuards(AuthGuard)

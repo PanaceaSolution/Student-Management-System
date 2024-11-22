@@ -10,21 +10,25 @@ function bufferToStream(buffer: Buffer): Readable {
   return readable;
 }
 
-export async function deleteFileFromCloudinary(
-  publicId: string,
-): Promise<void> {
-  // if (!publicId) {
-  //   throw new Error('No public_id provided for deletion');
-  // }
-  // return new Promise((resolve, reject) => {
-  //   Cloudinary.uploader.destroy(publicId, (error, result) => {
-  //     if (error) {
-  //       console.error('Error deleting file from Cloudinary:', error);
-  //       return reject(new Error('Failed to delete file from Cloudinary'));
-  //     }
-  //     resolve();
-  // });
-  // });
+export async function deleteFileFromCloudinary(publicId: string): Promise<void> {
+  if (!publicId) {
+    throw new Error('No public_id provided for deletion');
+  }
+
+  return new Promise((resolve, reject) => {
+    Cloudinary.uploader.destroy(publicId, (error, result) => {
+      if (error) {
+        console.error('Error deleting file from Cloudinary:', error);
+        return reject(new Error('Failed to delete file from Cloudinary'));
+      }
+      if (result.result === 'not found') {
+        console.warn('File not found in Cloudinary:', publicId);
+      } else {
+        console.log('Cloudinary deletion result:', result);
+      }
+      resolve();
+    });
+  });
 }
 
 export async function uploadSingleFileToCloudinary(
@@ -88,8 +92,10 @@ export async function uploadFilesToCloudinary(
 }
 export function extractPublicIdFromUrl(url: string): string {
   const parts = url.split('/');
-  const lastPart = parts[parts.length - 1];
-  return lastPart.split('.')[0];
+  const fileNameWithExtension = parts.pop() || ''; 
+  const folderPath = parts.slice(7).join('/');
+  const fileName = fileNameWithExtension.split('.')[0]; 
+  return `${folderPath}/${fileName}`;
 }
 
 interface ExcelSheetData {
