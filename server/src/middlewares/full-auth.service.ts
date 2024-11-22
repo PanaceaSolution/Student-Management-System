@@ -46,7 +46,7 @@ export class FullAuthService {
     });
 
     const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: '7d',
+      expiresIn: '1d',
       secret: process.env.JWT_SECRET,
     });
 
