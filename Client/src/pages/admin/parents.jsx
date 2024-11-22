@@ -15,6 +15,7 @@ import useParentStore from '@/store/parentsStore';
 import StaffTable from '@/components/admin/StaffTable';
 import useExport from '@/hooks/useExport';
 import ActiveTab from '@/components/common/activeTab';
+import useStudentStore from '@/store/studentStore';
 
 const Exports = [
    { value: "", label: "EXPORT" },
@@ -52,8 +53,8 @@ const Parents = () => {
    const { parents, getAllParents, deleteParent, isSubmitting, isDeleting } = useParentStore()
 
    useEffect(() => {
-      getAllParents("PARENT");
-   }, [])
+      getAllParents("PARENT")
+   }, []);
 
 
    const { exportToCSV, exportToPDF } = useExport()

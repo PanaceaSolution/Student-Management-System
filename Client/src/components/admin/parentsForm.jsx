@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import {
    Dialog,
@@ -25,11 +25,29 @@ import useParentStore from "@/store/parentsStore";
 import { flattenData } from "@/utilities/utilities";
 
 const ParentsForm = ({ title, selectedData, setSelectedData, formOpen, setFormOpen }) => {
-   const { students } = useStudentStore();
+   const { students, getAllStudents } = useStudentStore();
    const { updateParent, addParent } = useParentStore();
    const [profilePic, setProfilePic] = useState(null);
    const [selectedStudentIds, setSelectedStudentIds] = useState([]);
    const formattedStudent = flattenData(students);
+
+   const studentQuery = useMemo(() => {
+      const params = new URLSearchParams();
+      params.append("role", "STUDENT");
+      params.append("page", 1);
+      params.append("limit", 10);
+      return `${params.toString()}`;
+   }, [])
+
+   useEffect(() => {
+      const fetchData = async () => {
+         if (studentQuery) {
+            await getAllStudents(studentQuery);
+         }
+      }
+
+      fetchData();
+   }, [studentQuery]);
 
    const {
       register,
