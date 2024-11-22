@@ -6,6 +6,7 @@ import {
   JoinColumn,
   OneToMany,
   OneToOne,
+  Unique,
 } from 'typeorm';
 
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
@@ -16,9 +17,10 @@ import { Assignment } from 'src/assignment/entities/assignment.entity';
 import { Course } from 'src/course/entities/course.entity';
 import { Parent } from 'src/parent/entities/parent.entity';
 import { Attendence } from 'src/attendence/entities/attendence.entity';
-
+import { Class } from 'src/classes/entities/class.entity';
 
 @Entity({ name: 'Student' })
+@Unique(['studentClass', 'rollNumber'])
 export class Student {
   @PrimaryGeneratedColumn('uuid')
   studentId: UUID;
@@ -26,8 +28,8 @@ export class Student {
   @Column({ type: 'date', nullable: true })
   admissionDate: Date;
 
-  @Column({ type: 'text', default: 'defaultClass', nullable: false })
-  studentClass: string;
+  // @Column({ type: 'text', default: 'defaultClass', nullable: false })
+  // studentClass: string;
 
   @Column({ type: 'text', default: 'defaultSection', nullable: false })
   section: string;
@@ -78,4 +80,11 @@ export class Student {
   @ManyToOne(() => Parent, (parent) => parent.student, { nullable: true })
   @JoinColumn({ name: 'parentId' })
   parent: Parent;
+
+  @Column({ type: 'uuid' })
+  studentClassId: string;
+
+  @ManyToOne(() => Class, (studentClass) => studentClass.students)
+  @JoinColumn({ name: 'studentClassId' })
+  studentClass?: Class;
 }
