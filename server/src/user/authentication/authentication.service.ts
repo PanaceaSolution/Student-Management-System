@@ -250,7 +250,6 @@ export class AuthenticationService {
         throw new BadRequestException('Username and password are required');
       }
   
-
       const user = await this.userRepository.findOne({
         where: { username },
         relations: ['profile'],
@@ -263,13 +262,16 @@ export class AuthenticationService {
       if (!user.isActivated) {
         throw new UnauthorizedException('Account is deactivated');
       }
-
+  
       const decryptedPassword = decryptdPassword(user.password);
       if (password !== decryptedPassword) {
         throw new UnauthorizedException('Invalid credentials');
       }
   
-      const existingToken = await this.fullAuthService.getRefreshTokenByUserId(user.userId.toString());
+      // Check if a refresh token already exists in the database
+      const existingToken = await this.fullAuthService.getRefreshTokenByUserId(
+        user.userId.toString(),
+      );
   
       if (existingToken) {
         const now = new Date();
@@ -280,19 +282,20 @@ export class AuthenticationService {
             username: user.username,
             role: user.role,
           });
- 
+  
           const accessToken = this.jwtService.sign(payload, {
             expiresIn: '15m',
             secret: process.env.JWT_SECRET,
           });
   
+          // Send the same plain refresh token back in the cookie
           res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
           });
   
-          res.cookie('refreshToken', existingToken.refreshToken, {
+          res.cookie('refreshToken', decodeURIComponent(existingToken.refreshToken), {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
@@ -315,18 +318,21 @@ export class AuthenticationService {
           });
         }
       }
+  
+      // Generate new tokens if no valid refresh token exists
       const payload = this.fullAuthService.createPayload({
         id: user.userId,
         username: user.username,
         role: user.role,
       });
   
-      const { accessToken, refreshToken } = await this.fullAuthService.generateTokensAndAttachCookies(
-        res,
-        payload,
-        user.userId.toString(),
-        deviceInfo,
-      );
+      const { accessToken, refreshToken } =
+        await this.fullAuthService.generateTokensAndAttachCookies(
+          res,
+          payload,
+          user.userId.toString(),
+          deviceInfo,
+        );
   
       return res.status(200).json({
         message: 'Login successful',
