@@ -42,6 +42,7 @@ import { Student } from 'src/student/entities/student.entity';
 import { Parent } from 'src/parent/entities/parent.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
 import { FullAuthService } from 'src/middlewares/full-auth.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthenticationService {
@@ -71,6 +72,7 @@ export class AuthenticationService {
     private readonly staffService: StaffService,
     private readonly fullAuthService: FullAuthService,
     private readonly refreshTokenUtil: RefreshTokenUtil,
+    private readonly jwtService: JwtService,
   ) { }
   async register(
     RegisterDto: RegisterUserDto,
@@ -242,7 +244,7 @@ export class AuthenticationService {
 
   async login(loginDto: LoginDto, res: Response) {
     try {
-      const { username, password } = loginDto;
+      const { username, password, deviceInfo } = loginDto;
   
       if (!username || !password) {
         throw new BadRequestException('Username and password are required');
@@ -266,11 +268,58 @@ export class AuthenticationService {
         throw new UnauthorizedException('Invalid credentials');
       }
   
-      const existingToken = await this.fullAuthService.getRefreshTokenByUserId(user.userId.toString());
+      // Check if a refresh token already exists in the database
+      const existingToken = await this.fullAuthService.getRefreshTokenByUserId(
+        user.userId.toString(),
+      );
+  
       if (existingToken) {
-        throw new UnauthorizedException('You are already logged in. Please log out before logging in again.');
+        const now = new Date();
+  
+        if (existingToken.expiresAt > now) {
+          const payload = this.fullAuthService.createPayload({
+            id: user.userId,
+            username: user.username,
+            role: user.role,
+          });
+  
+          const accessToken = this.jwtService.sign(payload, {
+            expiresIn: '15m',
+            secret: process.env.JWT_SECRET,
+          });
+  
+          // Send the same plain refresh token back in the cookie
+          res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+          });
+  
+          res.cookie('refreshToken', decodeURIComponent(existingToken.refreshToken), {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+          });
+  
+          return res.status(200).json({
+            message: 'Login successful',
+            success: true,
+            user: {
+              username: user.username,
+              accessToken,
+              profile: user.profile
+                ? {
+                    fname: user.profile.fname,
+                    lname: user.profile.lname,
+                    profilePicture: user.profile.profilePicture,
+                  }
+                : null,
+            },
+          });
+        }
       }
   
+      // Generate new tokens if no valid refresh token exists
       const payload = this.fullAuthService.createPayload({
         id: user.userId,
         username: user.username,
@@ -278,7 +327,12 @@ export class AuthenticationService {
       });
   
       const { accessToken, refreshToken } =
-        await this.fullAuthService.generateTokensAndAttachCookies(res, payload, user.userId.toString());
+        await this.fullAuthService.generateTokensAndAttachCookies(
+          res,
+          payload,
+          user.userId.toString(),
+          deviceInfo,
+        );
   
       return res.status(200).json({
         message: 'Login successful',
@@ -288,10 +342,10 @@ export class AuthenticationService {
           accessToken,
           profile: user.profile
             ? {
-              fname: user.profile.fname,
-              lname: user.profile.lname,
-              profilePicture: user.profile.profilePicture,
-            }
+                fname: user.profile.fname,
+                lname: user.profile.lname,
+                profilePicture: user.profile.profilePicture,
+              }
             : null,
         },
       });
@@ -299,21 +353,38 @@ export class AuthenticationService {
       if (!(error instanceof UnauthorizedException || error instanceof BadRequestException)) {
         throw new InternalServerErrorException('Internal server error');
       }
-      throw error; 
+      throw error;
     }
   }
   
 
-  async logout(@Res() res: Response, refreshToken: string): Promise<any> {
+  async logout(
+    @Res() res: Response,
+    refreshToken: string,
+    logoutFromAll: boolean = false,
+  ): Promise<any> {
     try {
-
-      await this.fullAuthService.invalidateRefreshToken(refreshToken);
+      if (logoutFromAll) {
+        const decodedToken = this.fullAuthService.isTokenValid(refreshToken);
+        if (!decodedToken) {
+          return res.status(401).json({
+            message: 'Invalid refresh token',
+            success: false,
+          });
+        }
   
-
+        const userId = decodedToken.id;
+        await this.fullAuthService.terminateAllSessions(userId);
+      } else {
+        await this.fullAuthService.invalidateRefreshToken(refreshToken);
+      }
+  
       this.fullAuthService.clearCookies(res);
-
+  
       return res.status(200).json({
-        message: 'Logout successful',
+        message: logoutFromAll
+          ? 'Logged out from all devices successfully'
+          : 'Logout successful',
         success: true,
       });
     } catch (error) {
@@ -324,6 +395,7 @@ export class AuthenticationService {
       });
     }
   }
+  
   
   
   async updateUser(
