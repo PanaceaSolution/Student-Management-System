@@ -75,7 +75,7 @@ export class StudentService {
 
     //checking if student exists
     const studentExist = await this.studentRepository.findOne({
-      where: [{ registrationNumber }, { rollNumber }],
+      where: [{ registrationNumber }],
     });
     if (studentExist) {
       throw new BadRequestException('Student already exists in the database');
