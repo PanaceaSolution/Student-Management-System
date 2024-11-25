@@ -61,7 +61,7 @@ export class FullAuthService {
       refreshToken,
       // : hashedRefreshToken, // Store the hashed token in the DB
       expiresAt,
-      deviceInfo: deviceInfo || 'Unknown Device',
+      deviceInfo: deviceInfo && Array.isArray(deviceInfo) ? deviceInfo : ['Unknown Device'], 
     });
     await this.refreshTokenRepository.save(refreshTokenEntity);
   
