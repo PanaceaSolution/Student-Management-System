@@ -2,7 +2,7 @@ import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import Sidebar from "./Sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { FaHamburger } from "react-icons/fa";
+import { FaHamburger, FaSync } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import useAuthStore from "@/store/authStore";
@@ -83,6 +83,10 @@ const Navbar = () => {
             <p className="text-sm font-medium lg:text-right">
                {currentTime.format("HH:mm:ss A")} - {currentTime.format("D MMM, YYYY")}
             </p>
+            {/* Refresh Button */}
+            <Button onClick={handleRefresh} className="hidden md:block">
+               <FaSync className="w-6 h-6 text-primary" />
+            </Button>
 
             {/* User Avatar and Dropdown */}
             <DropdownMenu>

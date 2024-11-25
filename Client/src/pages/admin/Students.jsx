@@ -102,27 +102,21 @@ const Students = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
 
-  const query = useMemo(() => {
-    const params = new URLSearchParams();
-    if (selectedGender) params.append("gender", selectedGender);
-    if (selectedDepartment) params.append("Class", selectedDepartment);
-    if (debouncedSearchTerm) params.append("firstName", debouncedSearchTerm);
-    if (date) params.append("date", date);
-    params.append("page", currentPage);
-    params.append("role", "STUDENT");
-    params.append("limit", itemsPerPage);
-    return `${params.toString()}`;
-  }, [selectedGender, selectedDepartment, debouncedSearchTerm, date, currentPage]);
+  // const query = useMemo(() => {
+  //   const params = new URLSearchParams();
+  //   if (selectedGender) params.append("gender", selectedGender);
+  //   if (selectedDepartment) params.append("Class", selectedDepartment);
+  //   if (debouncedSearchTerm) params.append("firstName", debouncedSearchTerm);
+  //   if (date) params.append("date", date);
+  //   params.append("page", currentPage);
+  //   params.append("role", "STUDENT");
+  //   params.append("limit", itemsPerPage);
+  //   return `${params.toString()}`;
+  // }, [selectedGender, selectedDepartment, debouncedSearchTerm, date, currentPage]);
 
   useEffect(() => {
-    const fetchStudents = async () => {
-      if (query) {
-        await getAllStudents(query);
-      }
-    };
-
-    fetchStudents();
-  }, [query, getAllStudents]);
+    getAllStudents("STUDENT");
+  }, []);
 
   // Export function logic
   const { exportToCSV, exportToPDF } = useExport();

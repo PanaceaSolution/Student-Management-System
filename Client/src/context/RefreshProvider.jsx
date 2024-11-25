@@ -44,7 +44,7 @@ export const RefreshProvider = ({ children }) => {
             try {
                isRefreshing.current = true;
                await refresh();
-               setTimeLeft(REFRESH_INTERVAL); // Reset the timer after a successful refresh
+               setTimeLeft(REFRESH_INTERVAL);
                saveTimeToStorage(REFRESH_INTERVAL);
             } catch (error) {
                console.error("Error during token refresh:", error);

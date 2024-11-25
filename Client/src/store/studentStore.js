@@ -1,13 +1,11 @@
 import {
   createStudentService,
-  deleteStudentService,
-  getAllStudentsService,
-  getStudentByIdService,
   updateStudentService,
 } from "@/services/studentService";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import toast from "react-hot-toast";
+import { getAllUserService, deleteUserService } from "@/services/userService";
 
 const useStudentStore = create(
   devtools(
@@ -22,12 +20,10 @@ const useStudentStore = create(
         totalPages: 0,
 
         // Get all students
-        getAllStudents: async (query) => {
+        getAllStudents: async (role) => {
           set({ loading: true, error: null });
           try {
-            const data = await getAllStudentsService(query);
-            console.log(data);
-
+            const data = await getAllUserService(role);
             if (data && data.data) {
               set({
                 students: data.data,
@@ -39,20 +35,6 @@ const useStudentStore = create(
               set({ students: [], loading: false });
               toast.error("Failed to fetch data");
             }
-            return data;
-          } catch (error) {
-            set({ error: error?.message || "An error occurred", loading: false });
-            toast.error(error?.message || "An error occurred");
-            return error;
-          }
-        },
-
-        // Get student by ID
-        getStudentById: async (studentId) => {
-          set({ loading: true, error: null });
-          try {
-            const data = await getStudentByIdService(studentId);
-            set({ studentById: data, loading: false });
             return data;
           } catch (error) {
             set({ error: error?.message || "An error occurred", loading: false });
@@ -116,7 +98,7 @@ const useStudentStore = create(
         deleteStudent: async (studentId) => {
           set({ deleteLoading: true, error: null });
           try {
-            const data = await deleteStudentService(studentId);
+            const data = await deleteUserService(studentId);
             if (data) {
               toast.success(data.message || "Student deleted successfully");
               set((state) => ({
