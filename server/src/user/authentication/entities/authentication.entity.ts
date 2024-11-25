@@ -80,8 +80,7 @@ export class User {
   })
   student: Student;
 
-  @OneToMany(() => Attendence, (attendence) => attendence.user)
-  attendances: Attendence[];
+
 
   @OneToOne(() => Parent, (parent) => parent.user, {
     cascade: true,

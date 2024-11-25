@@ -78,8 +78,8 @@ export class CourseService {
       throw new NotFoundException(`Course with ID ${courseId} not found`);
     }
   }
+   
   
-
   // Enroll a student in a course
   async enrollStudent(courseId: string, studentId: string): Promise<CourseEnrollment> {
     const course = await this.findOne(courseId);

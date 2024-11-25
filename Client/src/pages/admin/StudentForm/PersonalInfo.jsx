@@ -1,6 +1,7 @@
 import React from "react";
 import ImageUploader from "@/components/common/ImageUploader";
-const PersonalInfo = ({ register, errors, clearErrors }) => {
+const PersonalInfo = ({ register, errors, clearErrors,getValues }) => {
+  
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-gray-800">Personal Info</h2>
@@ -129,6 +130,7 @@ const PersonalInfo = ({ register, errors, clearErrors }) => {
       </div>
       <ImageUploader
         name="profilePicture"
+        getValues={getValues}
         register={register}
         errors={errors}
         clearErrors={clearErrors}

@@ -35,7 +35,7 @@ export class StaffService {
     private readonly userService: AuthenticationService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async createStaff(
     createStaffDto: StaffDto,
@@ -43,7 +43,7 @@ export class StaffService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ): Promise<{ status: number; message: string; staff?: any; user?: any }> {
+  ){
     const {
       hireDate,
       salary,
@@ -132,6 +132,7 @@ export class StaffService {
 
     return {
       status: 201,
+      success:true,
       message: 'Staff created successfully',
       staff: { ...newStaff, user: createUserResponse.user },
       // user: createUserResponse,
@@ -163,12 +164,12 @@ export class StaffService {
       if (salary) staff.salary = salary;
       if (staffRole) staff.staffRole = staffRole.trim() as STAFFROLE;
 
-      const updatedStaff = this.staffRepository.save(staff);
-      console.log(updatedStaff);
+      const updatedStaff = await this.staffRepository.save(staff);
+      console.log("Updateed staff is:",updatedStaff);
 
       return {
         status: 201,
-        message: 'staff updated successfully',
+        message: 'Staff updated successfully',
         updateUser,
         updatedStaff,
         success: true,
@@ -187,16 +188,16 @@ export class StaffService {
   async findAllStaff(): Promise<{ status: number; message: string; data?: any }> {
     try {
       const staffMembers = await this.staffRepository.find({
-        relations: ['user','user.profile', 'user.address', 'user.contact', 'user.document'],
+        relations: ['user', 'user.profile', 'user.address', 'user.contact', 'user.document'],
       });
-  
+
       if (!staffMembers.length) {
         return {
           status: 404,
           message: 'No staff members found',
         };
       }
-  
+
       const formattedStaff = staffMembers.map((staff) => ({
         user: {
           id: staff.user.userId,
@@ -234,7 +235,7 @@ export class StaffService {
           staffRole: staff.staffRole,
         },
       }));
-  
+
       return {
         status: 200,
         message: 'Staff members retrieved successfully',
@@ -248,18 +249,18 @@ export class StaffService {
       };
     }
   }
-  
-  
+
+
   async findStaffById(id: string): Promise<any> {
     const staff = await this.staffRepository.findOne({
       where: { staffId: id },
-      relations: ['user', 'user.address', 'user.contact', 'user.document'], 
+      relations: ['user', 'user.address', 'user.contact', 'user.document'],
     });
-  
+
     if (!staff) {
       throw new NotFoundException(`Staff with ID ${id} not found`);
     }
-  
+
     const formattedStaff = {
       staffId: staff.staffId,
       hireDate: staff.hireDate,
@@ -297,17 +298,17 @@ export class StaffService {
         })),
       },
     };
-  
+
     return {
       status: 200,
       message: `Staff with ID ${id} retrieved successfully`,
       data: formattedStaff,
     };
   }
-  
+
 
   remove(id: number) {
     return `This action removes a #${id} staff`;
   }
-  
+
 }

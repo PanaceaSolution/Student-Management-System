@@ -1,5 +1,5 @@
 import { Button } from "./ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { Input } from "./ui/input";
 import Sidebar from "./Sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -7,9 +7,21 @@ import { FaHamburger } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import useAuthStore from "@/store/authStore";
+import { LucideLogOut } from "lucide-react";
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuLabel,
+   DropdownMenuSeparator,
+   DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useNavigate } from "react-router-dom";
+
 
 const Navbar = () => {
-   const { loggedInUser } = useAuthStore();
+   const navigate = useNavigate();
+   const { loggedInUser, logout } = useAuthStore();
    const [currentTime, setCurrentTime] = useState(dayjs());
    const [hasShadow, setHasShadow] = useState(false);
 
@@ -31,20 +43,28 @@ const Navbar = () => {
    }, []);
 
 
+   const logoutHandle = async () => {
+      const res = await logout()
+      if (res.success) navigate("/");
+   }
+
+
    return (
       <div className={`sticky top-0 bg-background z-50 ${hasShadow ? "shadow-lg border-b border-gray-300" : ""}`}>
          <header
-            className={`flex items-center justify-between gap-4 lg:gap-20 px-4 py-4 lg:px-6 transition-all duration-300`}
+            className={`flex items-center justify-between gap-4 lg:gap-20 px-4 py-4 lg:px-8 mr-6 transition-all duration-300 ease-in-out`}
          >
             {/* Drawer */}
             <Sheet>
                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="shrink-0 md:hidden">
+                  <Button variant="ghost" size="icon" className="shrink-0 lg:hidden">
                      <FaHamburger className="w-8 h-8 text-primary" />
                      <span className="sr-only">Toggle navigation menu</span>
                   </Button>
                </SheetTrigger>
-               <SheetContent side="left" className="md:hidden bg-primary">
+               <SheetContent side="left" className="lg:hidden bg-primary">
+                  <SheetTitle />
+                  <SheetDescription />
                   <Sidebar />
                </SheetContent>
             </Sheet>
@@ -52,7 +72,7 @@ const Navbar = () => {
             {/* User Information */}
             <div className="hidden md:flex flex-col items-start md:items-center">
                <h1 className="text-lg md:text-2xl font-bold">
-                  Welcome, {loggedInUser?.username}
+                  Welcome, {loggedInUser?.profile.fname} {loggedInUser?.profile.lname}
                </h1>
                <p className="text-sm font-medium lg:text-right lg:mt-0 mt-1">
                   {`${currentTime.format("HH:mm A")} - ${currentTime.format(
@@ -61,21 +81,40 @@ const Navbar = () => {
                </p>
             </div>
 
-            {/* Search Bar */}
-            {/* <form className="flex-1 md:flex-auto">
-               <Input
-                  type="search"
-                  placeholder="Search...."
-                  className="w-full border border-black pl-8 shadow-none md:w-2/3 xl:w-1/3"
-                  aria-label="Search"
-               />
-            </form> */}
+            {/* Logout Button */}
+            {/* <Button
+               variant="destructive"
+               // onClick={logoutHandle}
+               className="flex items-center justify-center gap-5 py-7 md:mx-2 lg:mx-4 mb-6 md:mb-0"
+            >
+               <LucideLogOut className="w-6 h-6" />
+               <span className="md:hidden lg:block font-semibold text-lg">Logout</span>
+            </Button> */}
 
             {/* User Avatar */}
-            <Avatar className="w-12 h-12">
-               <AvatarImage src="https://images.unsplash.com/photo-1726809448984-2e7f60cc6e97?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Admin Avatar" className="object-cover" />
-               <AvatarFallback>{loggedInUser?.username?.charAt(0)}</AvatarFallback>
-            </Avatar>
+            <DropdownMenu>
+               <DropdownMenuTrigger asChild>
+                  <Avatar className="w-10 h-10 border border-black shadow-md cursor-pointer">
+                     <AvatarImage src={loggedInUser?.profile.profilePicture} alt="Admin Avatar" className="object-cover" />
+                     <AvatarFallback className="text-3xl font-bold">{loggedInUser?.profile.fname?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+               </DropdownMenuTrigger>
+               <DropdownMenuContent>
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-primary" />
+                  <DropdownMenuItem>Profile</DropdownMenuItem>
+                  <DropdownMenuItem>
+                     <Button
+                        variant="destructive"
+                        onClick={logoutHandle}
+                        className="flex items-center justify-center gap-3 w-full"
+                     >
+                        <LucideLogOut />
+                        <span>Logout</span>
+                     </Button>
+                  </DropdownMenuItem>
+               </DropdownMenuContent>
+            </DropdownMenu>
          </header>
       </div>
    );

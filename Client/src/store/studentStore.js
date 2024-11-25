@@ -66,7 +66,7 @@ const useStudentStore = create(
             const data = await createStudentService(studentData);
             if (data) {
               set((state) => ({
-                students: [...state.students, data],
+                students: [...state.students, data.data],
                 loading: false,
               }));
               toast.success(data?.message || "Student added successfully");
@@ -84,10 +84,10 @@ const useStudentStore = create(
         },
 
         // Update an existing student
-        updateStudent: async (studentId, updatedStudentData) => {
+        updateStudent: async (studentId, formData) => {
           set({ loading: true, error: null });
           try {
-            const data = await updateStudentService(studentId, updatedStudentData);
+            const data = await updateStudentService(studentId, formData);
             if (data) {
               toast.success(data.message);
               set((state) => ({
@@ -119,7 +119,7 @@ const useStudentStore = create(
               toast.success(data.message || "Student deleted successfully");
               set((state) => ({
                 students: state.students.filter(
-                  (student) => student.id !== studentId
+                  (student) => student?.user?.id !== studentId
                 ),
                 deleteLoading: false,
               }));

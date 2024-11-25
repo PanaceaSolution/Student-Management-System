@@ -64,7 +64,7 @@ const EventCalendar = () => {
   };
 
   return (
-    <div className="bg-gray-100 p-1 rounded-sm shadow-md">
+    <div className="bg-gray-100 p-1 rounded-sm shadow-md z-10">
       <Calendar
         localizer={localizer}
         events={events}
@@ -73,7 +73,7 @@ const EventCalendar = () => {
         style={{ height: 400 }}
         dayPropGetter={dayPropGetter}
         eventPropGetter={eventPropGetter}
-        className="bg-white rounded-lg"
+        className="bg-white rounded-lg inset-0"
         popup
       />
     </div>

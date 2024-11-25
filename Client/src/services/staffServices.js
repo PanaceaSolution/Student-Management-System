@@ -12,12 +12,10 @@ export const createStaffService = async (staffData) => {
 }
 
 export const updateStaffService = async (id, staffData) => {
-   const response = await fetch(`${URL}/staff/${id}`, {
-      method: "PUT",
-      headers: {
-         "Content-Type": "application/json",
-      },
-      body: JSON.stringify(staffData),
+   const response = await fetch(`${URL}/staff/update/${id}`, {
+      method: "PATCH",
+      credentials: "include",
+      body: staffData,
    });
    if (!response.ok) throw new Error("Failed to update staff");
    return await response.json();
