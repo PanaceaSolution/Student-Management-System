@@ -14,17 +14,9 @@ export class Course {
   @Column('text')
   courseDescription: string;
 
-  @Column({ type: 'date' })
-  startDate: Date;
 
-  @Column({ type: 'date' })
-  endDate: Date;
-
-  @ManyToOne(() => Staff, (staff) => staff.courses, { nullable: false })
-  teacher: Staff;
-
-  @Column({ default: true })
-  isCurrent: boolean;
+  @Column({ nullable: true })
+  file: string; 
 
   @OneToMany(() => Class, (class_) => class_.classTeacher)
   classes: Class[];

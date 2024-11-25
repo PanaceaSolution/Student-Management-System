@@ -7,6 +7,7 @@ import { UpdateCourseDto } from './dto/update-course.dto';
 import { Student } from '../student/entities/student.entity'; 
 import { CourseEnrollment } from './courseEnrollment/entities/course-enrollment.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
+import { uploadSingleFileToCloudinary } from 'src/utils/file-upload.helper';
 
 @Injectable()
 export class CourseService {
@@ -26,27 +27,15 @@ export class CourseService {
 
 
 
-  async create(createCourseDto: CreateCourseDto): Promise<Course> {
-    
-    const teacher = await this.staffRepository.findOne({
-      where: { staffId: createCourseDto.teacherId },
-    });
-  
-    if (!teacher) {
-      throw new NotFoundException(`Teacher with ID ${createCourseDto.teacherId} not found`);
+  async create(createCourseDto: CreateCourseDto, file?: Express.Multer.File): Promise<Course> {
+    if (file) {
+      createCourseDto.file = file.path; 
     }
-  
-    // Create the course with the teacher entity
-    const course = this.courseRepository.create({
-      ...createCourseDto,
-      teacher,
-    });
-  
-    return this.courseRepository.save(course);
-  }
-
-  async findAll(): Promise<Course[]> {
-    return this.courseRepository.find();
+    const course = new Course();
+    course.courseName = createCourseDto.courseName;
+    course.courseDescription = createCourseDto.courseDescription;
+    course.file = createCourseDto.file;
+    return await this.courseRepository.save(course);
   }
 
   async findOne(courseId: string): Promise<Course> {
@@ -57,8 +46,22 @@ export class CourseService {
     return course;
   }
 
-  async update(courseId: string, updateCourseDto: UpdateCourseDto): Promise<Course> {
+  async findAll():Promise<Course[]>{
+    return this.courseRepository.find()
+
+  }
+
+  async update(courseId: string, updateCourseDto: UpdateCourseDto, file?: Express.Multer.File): Promise<Course> {
     const course = await this.findOne(courseId);
+
+    
+    if (file) {
+      const folder = 'courses'; 
+      const uploadResult = await uploadSingleFileToCloudinary(file, folder);
+      course.file = uploadResult.secure_url; 
+    }
+
+   
     Object.assign(course, updateCourseDto);
     return this.courseRepository.save(course);
   }

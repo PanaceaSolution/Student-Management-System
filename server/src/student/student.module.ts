@@ -6,11 +6,13 @@ import { AuthenticationModule } from '../user/authentication/authentication.modu
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Student } from './entities/student.entity';
 import { User } from '../user/authentication/entities/authentication.entity';
+import { Class } from 'src/classes/entities/class.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Student,
       User,
+      Class
     ]),
     AuthenticationModule,
   ],
