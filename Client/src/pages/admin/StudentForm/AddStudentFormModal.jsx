@@ -31,7 +31,7 @@ const AddStudentFormModal = ({
           <div className="p-2 md:w-[735px] ">
             <DialogPanel
               transition
-              className=" relative transform overflow-hidden rounded-lg  text-left shadow-xl transition-all  sm:my-8 sm:w-full sm:max-w-4xl"
+              className=" relative transform overflow-hidden rounded-lg  text-left shadow-xl transition-all  sm:my-8 sm:w-full sm:max-w-3xl"
             >
               <AddStudentForm studentId={studentId} initialData={initialData} />
 
@@ -40,7 +40,7 @@ const AddStudentFormModal = ({
                   type="button"
                   data-autofocus
                   onClick={handleClose}
-                  
+
                 >
                   <X className="animate-pulse bg-blue-700 rounded-full text-white  font-bold text-2xl" />
                 </button>

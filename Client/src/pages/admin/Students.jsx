@@ -2,17 +2,16 @@ import React, { useState, useMemo, useCallback, useEffect, } from "react";
 import Table from "@/components/common/Tables";
 import Select from "@/components/Select";
 import SearchBox from "@/components/SearchBox";
-import { Button } from "@/components/ui/button";
 import { DateSelect } from "@/components/DateSelect";
-import AddStudentFormModal from "./StudentForm/AddStudentFormModal";
 import useExport from "@/hooks/useExport";
 import useStudentStore from "@/store/studentStore";
 import { flattenData } from "@/utilities/utilities.js";
 import ActiveTab from "@/components/common/activeTab";
-import StaffTable from "@/components/admin/StaffTable";
+import StaffTable from "@/components/admin/AdminTable";
 import DetailsCard from "@/components/admin/DetailsCard";
 import ResultShowing from "@/components/common/ResultShowing";
 import Paginations from "@/components/common/Paginations";
+import AddStudentForm from "./StudentForm/AddStudentForm";
 
 // Custom hook for debouncing input value
 const useDebounce = (value, delay) => {
@@ -51,7 +50,7 @@ const Department = [
 ];
 
 const studentTableHead = ["", "First Name", "Last Name", "Gender", "Class", "Section", "Actions"];
-const studentTableFields = ["user.profile.fname", "user.profile.lname", "user.profile.gender", "studentClass", "section"];
+const studentTableFields = ["user_profile_fname", "user_profile_lname", "user_profile_gender", "studentClass", "section"];
 
 
 const personalInfo = [
@@ -90,29 +89,14 @@ const Students = () => {
   const [selectedGender, setSelectedGender] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [activeTab, setActiveTab] = useState("all");
-  const [studentInfo, setStudentInfo] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedData, setSelectedData] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [date, setDate] = useState(null);
   const [cardOpen, setCardOpen] = useState(false);
-  const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+
   const { getAllStudents, loading, error, students, totalPages, total } = useStudentStore();
-
-  const itemsPerPage = 8;
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
-
-
-  // const query = useMemo(() => {
-  //   const params = new URLSearchParams();
-  //   if (selectedGender) params.append("gender", selectedGender);
-  //   if (selectedDepartment) params.append("Class", selectedDepartment);
-  //   if (debouncedSearchTerm) params.append("firstName", debouncedSearchTerm);
-  //   if (date) params.append("date", date);
-  //   params.append("page", currentPage);
-  //   params.append("role", "STUDENT");
-  //   params.append("limit", itemsPerPage);
-  //   return `${params.toString()}`;
-  // }, [selectedGender, selectedDepartment, debouncedSearchTerm, date, currentPage]);
 
   useEffect(() => {
     getAllStudents("STUDENT");
@@ -171,13 +155,15 @@ const Students = () => {
   }, [date]);
 
   const handleUserData = (data) => {
-    setStudentInfo(data);
+    setSelectedData(data);
     setCardOpen(true)
   };
 
-  // Pagination logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const handleEdit = (data) => {
+    setCurrentStep(0);
+    setFormOpen(true);
+    setSelectedData(data)
+  }
 
   return (
     <section>
@@ -192,13 +178,14 @@ const Students = () => {
                   onChange={handleExportChange}
                   className="w-32 bg-white"
                 />
-                <Button
-                  type="create"
-                  className="uppercase"
-                  onClick={() => setShowAddStudentModal(true)}
-                >
-                  Add Student
-                </Button>
+                <AddStudentForm
+                  formOpen={formOpen}
+                  setFormOpen={setFormOpen}
+                  currentStep={currentStep}
+                  setCurrentStep={setCurrentStep}
+                  selectedData={selectedData}
+                  setSelectedData={setSelectedData}
+                />
               </div>
             </div>
             <div className="border-b-2 p-2">
@@ -232,39 +219,26 @@ const Students = () => {
               user={students}
               handleTabClick={handleTabClick}
             />
-
             <div className="relative w-full overflow-x-auto shadow-md">
-              <ResultShowing
-                start={indexOfFirstItem + 1}
-                end={indexOfLastItem}
-                total={total}
-              />
-              {error ? (
-                <div className="text-red-500">Error: {error}</div>
-              ) : (
-                <Table
-                  handleUserData={handleUserData}
-                  items={students}
-                  loading={loading}
-                  setCardOpen={setCardOpen}
-                />
-              )}
-              <Paginations
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
+              <StaffTable
+                title="Students"
+                tableHead={studentTableHead}
+                tableFields={studentTableFields}
+                handleUserData={handleUserData}
+                user={students}
+                loading={loading}
+                handleDelete={() => { }}
+                handleEdit={handleEdit}
               />
             </div>
-
           </div>
-
         </div>
       </div>
 
-      {studentInfo &&
+      {selectedData &&
         <DetailsCard
           title="Student"
-          userDetails={studentInfo}
+          userDetails={selectedData}
           loading={loading}
           cardOpen={cardOpen}
           setCardOpen={setCardOpen}
@@ -272,11 +246,6 @@ const Students = () => {
           personalDocuments={personalDocuments}
         />
       }
-
-      <AddStudentFormModal
-        cancelOption={() => setShowAddStudentModal(false)}
-        showModal={showAddStudentModal}
-      />
     </section>
   );
 };
