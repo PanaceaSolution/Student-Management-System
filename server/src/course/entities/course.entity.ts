@@ -23,8 +23,7 @@ export class Course {
   @Column({ nullable: true })
   file: string;
 
-  @ManyToOne(() => Staff, (staff) => staff.courses, { nullable: false })
-  teacher: Staff;
+  
 
   @Column({ default: true })
   isCurrent: boolean;

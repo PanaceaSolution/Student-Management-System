@@ -28,13 +28,9 @@ export class CourseService {
 
 
   async create(createCourseDto: CreateCourseDto, file: Express.Multer.File): Promise<Course> {
-    const teacher = await this.staffRepository.findOne({
-      where: { staffId: createCourseDto.teacherId },
-    });
+   
   
-    if (!teacher) {
-      throw new NotFoundException(`Teacher with ID ${createCourseDto.teacherId} not found`);
-    }
+    
 
     const folder = 'courses'; 
     const uploadResult = await uploadSingleFileToCloudinary(file, folder);
@@ -42,7 +38,6 @@ export class CourseService {
   
     const course = this.courseRepository.create({
       ...createCourseDto,
-      teacher,
       file: uploadResult.secure_url, 
     });
   
