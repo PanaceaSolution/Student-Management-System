@@ -26,54 +26,70 @@ export class AttendenceService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async saveAttendence(createAttendenceDto: CreateAttendanceDto[]) {
-    try {
-      const todayDate = new Date().toLocaleDateString();
-      const classIds = [];
-      const classDetails = [];
-      for (const createAttendanceDto of createAttendenceDto) {
-        const { className, section } = createAttendanceDto;
+async saveAttendence(createAttendenceDto: CreateAttendanceDto[]) {
+  try {
+    const todayDate = new Date().toLocaleDateString();
+    const classIds = [];
+    const classDetails = [];
 
-        const classData = await this.classRepository.findOne({
-          where: { className, section },
-        });
-        if (!classData) {
-          return ResponseModel.error(
-            'Class not found for attendance',
-            'Maybe Invalid class that you entered, Check Again',
-          );
-        }
-        if (!classData) {
-          return ResponseModel.error(
-            'Class not found for attendence',
-            'May be Invalid class that you entered, Check Again',
-          );
-        }
+    for (const createAttendanceDto of createAttendenceDto) {
+      const { className, section } = createAttendanceDto;
 
-        const { classId } = classData;
-        classIds.push(classId);
-        classDetails.push({ className, section });
+      const classData = await this.classRepository.findOne({
+        where: { className, section },
+      });
 
-        const attendance = this.attendenceRepository.create({
-          classId: classIds,
-          date: todayDate,
-        });
-        const savedAttendence = await this.attendenceRepository.save(
-          attendance,
-        );
-        const response = {
-          ...savedAttendence,
-          className,
-          section,
-        };
-        return ResponseModel.success(
-          'Attendance saved at attendance table successfully',
-          response,
+      if (!classData) {
+        return ResponseModel.error(
+          'Class not found for attendance',
+          'Maybe Invalid class that you entered, Check Again',
         );
       }
-    } catch (error) {
-      throw ResponseModel.error('Error while saving attendence', error);
+
+      const { classId } = classData;
+      classIds.push(classId);
+      classDetails.push({ className, section });
     }
+
+    // const attendance = this.attendenceRepository.create({
+    //   classId: classIds,
+    //   date: todayDate,
+    // });
+   let attendance = await this.attendenceRepository.findOne({
+    where:{
+      date: new Date(todayDate)
+    }
+   })
+
+   if(attendance){
+     if (attendance.classId.includes(classIds.join())) {
+       return ResponseModel.error(
+         'Attendance already recorded for this class today',
+         'You can only record attendance for a class once per day',
+       );
+     }
+    attendance.classId = [...new Set([...attendance.classId, ...classIds])]
+   }else{
+    attendance = this.attendenceRepository.create({
+      classId: classIds,
+        date: todayDate,
+    });
+   }
+    const savedAttendence = await this.attendenceRepository.save(attendance);
+
+    const response = {
+      ...savedAttendence,
+      classe: classDetails,
+    };
+
+    return ResponseModel.success(
+      'Attendance saved at attendance table successfully',
+      response,
+    );
+  } catch (error) {
+    throw ResponseModel.error('Error while saving attendance', error);
+  }
+
 
     //   const classData = await this.classRepository.findOne({
     //     where: {
