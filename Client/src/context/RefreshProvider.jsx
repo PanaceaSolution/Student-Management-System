@@ -12,11 +12,14 @@ export const RefreshProvider = ({ children }) => {
    const { refresh, isAuthenticated } = useAuthStore();
    const isRefreshing = useRef(false);
 
-   const REFRESH_INTERVAL = 10 * 60; // 13 minutes (in seconds)
+   const REFRESH_INTERVAL = 10 * 60; // 10 minutes (in seconds)
    const [timeLeft, setTimeLeft] = useState(() => {
       const savedTime = localStorage.getItem("refreshTimer");
       return savedTime ? parseInt(savedTime, 10) : REFRESH_INTERVAL;
    });
+
+   const MAX_RETRIES = 3; // Max number of retry attempts
+   const RETRY_DELAY = 30; // Retry delay in seconds
 
    useEffect(() => {
       const saveTimeToStorage = (time) => {
@@ -39,15 +42,33 @@ export const RefreshProvider = ({ children }) => {
          return countdown;
       };
 
-      const triggerRefresh = async () => {
+      const triggerRefresh = async (retryCount = 0) => {
          if (isAuthenticated && !isRefreshing.current) {
             try {
                isRefreshing.current = true;
-               await refresh();
-               setTimeLeft(REFRESH_INTERVAL);
-               saveTimeToStorage(REFRESH_INTERVAL);
+               const res = await refresh();
+
+               if (res.success) {
+                  setTimeLeft(REFRESH_INTERVAL);
+                  saveTimeToStorage(REFRESH_INTERVAL);
+               } else if (retryCount < MAX_RETRIES) {
+                  console.log(`Retrying refresh in ${RETRY_DELAY} seconds... Attempt #${retryCount + 1}`);
+                  setTimeout(() => {
+                     triggerRefresh(retryCount + 1);
+                  }, RETRY_DELAY * 1000);
+               } else {
+                  console.error("Max retry attempts reached. Refresh failed.");
+               }
             } catch (error) {
                console.error("Error during token refresh:", error);
+               if (retryCount < MAX_RETRIES) {
+                  console.log(`Retrying refresh in ${RETRY_DELAY} seconds... Attempt #${retryCount + 1}`);
+                  setTimeout(() => {
+                     triggerRefresh(retryCount + 1);
+                  }, RETRY_DELAY * 1000);
+               } else {
+                  console.error("Max retry attempts reached. Refresh failed.");
+               }
             } finally {
                isRefreshing.current = false;
             }
