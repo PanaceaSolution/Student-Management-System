@@ -55,7 +55,6 @@ export class FullAuthService {
     expiresAt.setDate(expiresAt.getDate() + 7);
   
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-  
     const refreshTokenEntity = this.refreshTokenRepository.create({
       userId,
       refreshToken,
