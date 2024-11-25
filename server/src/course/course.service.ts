@@ -27,21 +27,15 @@ export class CourseService {
 
 
 
-  async create(createCourseDto: CreateCourseDto, file: Express.Multer.File): Promise<Course> {
-   
-  
-    
-
-    const folder = 'courses'; 
-    const uploadResult = await uploadSingleFileToCloudinary(file, folder);
-
-  
-    const course = this.courseRepository.create({
-      ...createCourseDto,
-      file: uploadResult.secure_url, 
-    });
-  
-    return this.courseRepository.save(course);
+  async create(createCourseDto: CreateCourseDto, file?: Express.Multer.File): Promise<Course> {
+    if (file) {
+      createCourseDto.file = file.path; 
+    }
+    const course = new Course();
+    course.courseName = createCourseDto.courseName;
+    course.courseDescription = createCourseDto.courseDescription;
+    course.file = createCourseDto.file;
+    return await this.courseRepository.save(course);
   }
 
   async findOne(courseId: string): Promise<Course> {
