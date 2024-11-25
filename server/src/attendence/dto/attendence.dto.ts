@@ -11,23 +11,26 @@ import {
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 export class AttendenceRecordDto {
-  @IsUUID()
-  studentId: string;
-
-  @IsUUID()
-  @IsOptional()
-  userId: string;
-
-  @IsBoolean()
-  isPresent: boolean;
+  // @IsString()
+  // className:string;
+  // @IsString()
+  // section:string;
 }
 
 export class CreateAttendanceDto {
-  @IsUUID()
-  classId: string;
+  @IsOptional()
+  @IsDateString()
+  date?: Date;
 
+  @IsOptional()
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => AttendenceRecordDto)
-  attendances: AttendenceRecordDto[];
+  classId?: string[];
+
+  @IsOptional()
+  @IsString()
+  className: string;
+
+  @IsOptional()
+  @IsString()
+  section: string;
 }

@@ -20,8 +20,10 @@ export class Course {
   @Column({ type: 'date' })
   endDate: Date;
 
-  @ManyToOne(() => Staff, (staff) => staff.courses, { nullable: false })
-  teacher: Staff;
+  @Column({ nullable: true })
+  file: string;
+
+
 
   @Column({ default: true })
   isCurrent: boolean;

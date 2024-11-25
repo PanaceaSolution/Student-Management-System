@@ -24,10 +24,9 @@ export class CreateCourseDto {
   @IsString()
   endDate: string;
 
-  @IsOptional()
-  @IsUUID()
-  teacherId: string;
-
   @IsBoolean()
   isCurrent?: boolean;
+
+  @IsOptional()
+  file?: string;
 }

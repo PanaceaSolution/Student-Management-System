@@ -12,6 +12,7 @@ import { Student } from 'src/student/entities/student.entity';
 import { User } from 'src/user/authentication/entities/authentication.entity';
 import { generateAndUploadExcelSheet } from 'src/utils/file-upload.helper';
 
+import ResponseModel from 'src/utils/utils';
 @Injectable()
 export class AttendenceService {
   constructor(
@@ -25,145 +26,192 @@ export class AttendenceService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  // async createAttendence(createAttendenceDto: CreateAttendanceDto) {
-  //   // const { classId, attendances } = createAttendenceDto;
+  async saveAttendence(createAttendenceDto: CreateAttendanceDto[]) {
+    try {
+      const todayDate = new Date().toLocaleDateString();
+      const classIds = [];
+      const classDetails = [];
+      for (const createAttendanceDto of createAttendenceDto) {
+        const { className, section } = createAttendanceDto;
 
-  //   // const classData = await this.classRepository.findOne({
-  //   //   where: {
-  //   //     classId,
-  //   //   },
-  //   // });
-  //   // if (!classData) {
-  //   //   throw new BadRequestException('Class not found');
-  //   // }
-  //   // const { section, className } = classData;
+        const classData = await this.classRepository.findOne({
+          where: { className, section },
+        });
+        if (!classData) {
+          return ResponseModel.error(
+            'Class not found for attendance',
+            'Maybe Invalid class that you entered, Check Again',
+          );
+        }
+        if (!classData) {
+          return ResponseModel.error(
+            'Class not found for attendence',
+            'May be Invalid class that you entered, Check Again',
+          );
+        }
 
-  //   const today = new Date();
-  //   const formattedToday = today.toLocaleDateString('en-US', {
-  //     month: '2-digit',
-  //     day: '2-digit',
-  //     year: 'numeric',
-  //   });
+        const { classId } = classData;
+        classIds.push(classId);
+        classDetails.push({ className, section });
 
-  //   // const newAttendances = [];
-  //   // for (const attendanceRecord of attendances) {
-  //   //   const { studentId, isPresent, userId } = attendanceRecord;
+        const attendance = this.attendenceRepository.create({
+          classId: classIds,
+          date: todayDate,
+        });
+        const savedAttendence = await this.attendenceRepository.save(
+          attendance,
+        );
+        const response = {
+          ...savedAttendence,
+          className,
+          section,
+        };
+        return ResponseModel.success(
+          'Attendance saved at attendance table successfully',
+          response,
+        );
+      }
+    } catch (error) {
+      throw ResponseModel.error('Error while saving attendence', error);
+    }
 
-  //   //   const userData = await this.userRepository.findOne({
-  //   //     where: {
-  //   //       userId: Equal(userId),
-  //   //     },
-  //   //     relations: ['profile'],
-  //   //   });
+    //   const classData = await this.classRepository.findOne({
+    //     where: {
+    //       classId,
+    //     },
+    //   });
+    //   if (!classData) {
+    //     throw new BadRequestException('Class not found');
+    //   }
+    //   const { section, className } = classData;
 
-  //   //   if (!userData || !userData.profile) {
-  //   //     throw new BadRequestException('User or user profile not found');
-  //   //   }
+    //   const today = new Date();
+    //   const formattedToday = today.toLocaleDateString('en-US', {
+    //     month: '2-digit',
+    //     day: '2-digit',
+    //     year: 'numeric',
+    //   });
 
-  //   //   const {
-  //   //     profile: { fname, lname },
-  //   //   } = userData;
+    //   const newAttendances = [];
+    //   for (const attendanceRecord of attendances) {
+    //     const { studentId, isPresent, userId } = attendanceRecord;
 
-  //   //   const studentData = await this.studentRepository.findOne({
-  //   //     where: {
-  //   //       studentId: Equal(studentId.toString()),
-  //   //     },
-  //   //   });
-  //   //   if (!studentData) {
-  //   //     throw new BadRequestException('Student not available to do attendance');
-  //   //   }
+    //     const userData = await this.userRepository.findOne({
+    //       where: {
+    //         userId: Equal(userId),
+    //       },
+    //       relations: ['profile'],
+    //     });
 
-  //   //   const existingAttendenceForToday =
-  //   //     await this.attendenceRepository.findOne({
-  //   //       where: {
-  //   //         date: today,
-  //   //       },
-  //   //     });
-  //   //   if (existingAttendenceForToday) {
-  //   //     throw new BadRequestException(
-  //   //       'You cannot create an attendance twice a day.',
-  //   //     );
-  //   //   }
+    //     if (!userData || !userData.profile) {
+    //       throw new BadRequestException('User or user profile not found');
+    //     }
 
-  //     const attendence = this.attendenceRepository.create({
-  //       student: { studentId } as any,
-  //       section: section.toString(),
-  //       className: className.toString(),
-  //       user: { userId } as any,
-  //       class: { classId } as any,
-  //       date: today,
-  //       isPresent,
-  //     } as DeepPartial<Attendence>);
-  //     newAttendances.push(attendence);
-  //   }
-  //   await this.attendenceRepository.save(newAttendances);
+    //     const {
+    //       profile: { fname, lname },
+    //     } = userData;
 
-  //   async function createAttendanceExcel(attendances: any[], fileName: string) {
-  //     const headers = [
-  //       'Roll Number',
-  //       'First Name',
-  //       'Last Name',
-  //       // 'Is Present',
-  //       `${formattedToday}`,
-  //     ];
-  //     const topHeaders = [
-  //       { key: 'Class', value: `Class-${classData.className}` },
-  //       { key: 'Section', value: `Class-${classData.section}` },
-  //     ];
-  //     const topHeaderValues = topHeaders.map((header) => header.value);
+    //     const studentData = await this.studentRepository.findOne({
+    //       where: {
+    //         studentId: Equal(studentId.toString()),
+    //       },
+    //     });
+    //     if (!studentData) {
+    //       throw new BadRequestException('Student not available to do attendance');
+    //     }
 
-  //     const data = attendances.map((att) => [
-  //       att.rollNumber,
-  //       att.firstName,
-  //       att.lastName,
-  //       att.isPresent ? 'P' : 'A',
-  //     ]);
+    //     const existingAttendenceForToday =
+    //       await this.attendenceRepository.findOne({
+    //         where: {
+    //           date: today,
+    //         },
+    //       });
+    //     if (existingAttendenceForToday) {
+    //       throw new BadRequestException(
+    //         'You cannot create an attendance twice a day.',
+    //       );
+    //     }
 
-  //     return await generateAndUploadExcelSheet(
-  //       [{ sheetName: 'Attendance', topHeaderValues, headers, data }],
-  //       fileName,
-  //     );
-  //   }
+    //     const attendence = this.attendenceRepository.create({
+    //       student: { studentId } as any,
+    //       section: section.toString(),
+    //       className: className.toString(),
+    //       user: { userId } as any,
+    //       class: { classId } as any,
+    //       date: today,
+    //       isPresent,
+    //     } as DeepPartial<Attendence>);
+    //     newAttendances.push(attendence);
+    //   }
+    //   await this.attendenceRepository.save(newAttendances);
 
-  //   const attendancesWithProfile = await this.attendenceRepository.find({
-  //     where: {
-  //       date: today,
-  //       class: { classId },
-  //     },
-  //     relations: ['user', 'user.profile', 'student'],
-  //   });
+    //   async function createAttendanceExcel(attendances: any[], fileName: string) {
+    //     const headers = [
+    //       'Roll Number',
+    //       'First Name',
+    //       'Last Name',
+    //       // 'Is Present',
+    //       `${formattedToday}`,
+    //     ];
+    //     const topHeaders = [
+    //       { key: 'Class', value: `Class-${classData.className}` },
+    //       { key: 'Section', value: `Class-${classData.section}` },
+    //     ];
+    //     const topHeaderValues = topHeaders.map((header) => header.value);
 
-  //   const attendanceData = attendancesWithProfile.map((att) => ({
-  //     rollNumber: att.student.rollNumber,
-  //     firstName: att.user.profile.fname,
-  //     lastName: att.user.profile.lname,
-  //     isPresent: att.isPresent,
-  //     date: new Date(att.date).toISOString().split('T')[0],
-  //     class: classData.className,
-  //     section: classData.section,
-  //   }));
+    //     const data = attendances.map((att) => [
+    //       att.rollNumber,
+    //       att.firstName,
+    //       att.lastName,
+    //       att.isPresent ? 'P' : 'A',
+    //     ]);
 
-  //   const fileUrl = await createAttendanceExcel(
-  //     attendanceData,
-  //     'Attendance.xlsx',
-  //   );
+    //     return await generateAndUploadExcelSheet(
+    //       [{ sheetName: 'Attendance', topHeaderValues, headers, data }],
+    //       fileName,
+    //     );
+    //   }
 
-  //   return {
-  //     status: 201,
-  //     message: 'Attendance created successfully',
-  //     date: formattedToday,
-  //     class: className,
-  //     section: section,
-  //     newAttendances: attendancesWithProfile.map((att) => ({
-  //       attendanceId: att.attendanceId,
-  //       studentId: att.student.studentId,
-  //       rollNumber: att.student.rollNumber,
-  //       firstName: att.user.profile.fname,
-  //       lastName: att.user.profile.lname,
-  //       isPresent: att.isPresent,
-  //     })),
-  //     success: true,
-  //     fileUrl: fileUrl,
-  //   };
-  // }
+    //   const attendancesWithProfile = await this.attendenceRepository.find({
+    //     where: {
+    //       date: today,
+    //       class: { classId },
+    //     },
+    //     relations: ['user', 'user.profile', 'student'],
+    //   });
+
+    //   const attendanceData = attendancesWithProfile.map((att) => ({
+    //     rollNumber: att.student.rollNumber,
+    //     firstName: att.user.profile.fname,
+    //     lastName: att.user.profile.lname,
+    //     isPresent: att.isPresent,
+    //     date: new Date(att.date).toISOString().split('T')[0],
+    //     class: classData.className,
+    //     section: classData.section,
+    //   }));
+
+    //   const fileUrl = await createAttendanceExcel(
+    //     attendanceData,
+    //     'Attendance.xlsx',
+    //   );
+
+    //   return {
+    //     status: 201,
+    //     message: 'Attendance created successfully',
+    //     date: formattedToday,
+    //     class: className,
+    //     section: section,
+    //     newAttendances: attendancesWithProfile.map((att) => ({
+    //       attendanceId: att.attendanceId,
+    //       studentId: att.student.studentId,
+    //       rollNumber: att.student.rollNumber,
+    //       firstName: att.user.profile.fname,
+    //       lastName: att.user.profile.lname,
+    //       isPresent: att.isPresent,
+    //     })),
+    //     success: true,
+    //     fileUrl: fileUrl,
+    //   };
+    // }
+  }
 }

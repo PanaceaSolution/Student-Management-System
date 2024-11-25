@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -11,7 +11,11 @@ export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   @Post('/create')
-  create(@Body() createCourseDto: CreateCourseDto): Promise<Course> {
+  @UseInterceptors(FileInterceptor('file'))
+  create(
+    @Body() createCourseDto: CreateCourseDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ): Promise<Course> {
     return this.courseService.create(createCourseDto);
   }
 
