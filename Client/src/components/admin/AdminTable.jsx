@@ -15,7 +15,7 @@ import Spinner from "../Loader/Spinner";
 
 const ITEMS_PER_PAGE = 10;
 
-const StaffTable = ({ title, user, handleUserData, tableHead, tableFields, handleDelete, handleEdit, loading }) => {
+const AdminTable = ({ title, user, handleUserData, tableHead, tableFields, handleDelete, handleEdit, loading }) => {
    const [currentPage, setCurrentPage] = useState(1);
 
    const handleCheckboxChange = (data) => {
@@ -62,12 +62,15 @@ const StaffTable = ({ title, user, handleUserData, tableHead, tableFields, handl
                   </TableRow>
                ) : (
                   currentPageData.map((user, index) => (
-                     <TableRow key={user.user_id || `row-${index}`} className="cursor-pointer">
+                     <TableRow key={user.user_id || `row-${index}`} className="cursor-pointer capitalize">
                         <TableCell>
                            <input type="checkbox" />
                         </TableCell>
                         {tableFields.map((field, fieldIndex) => (
-                           <TableCell key={`${user.user_id}-${fieldIndex}`} onClick={() => handleCheckboxChange(user)}>
+                           <TableCell
+                              key={`${user.user_id}-${fieldIndex}`}
+                              onClick={() => handleCheckboxChange(user)}
+                           >
                               {user[field]}
                            </TableCell>
                         ))}
@@ -105,4 +108,4 @@ const StaffTable = ({ title, user, handleUserData, tableHead, tableFields, handl
    );
 };
 
-export default StaffTable;
+export default AdminTable;
