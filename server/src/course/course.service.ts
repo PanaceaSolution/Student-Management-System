@@ -7,6 +7,7 @@ import { Student } from '../student/entities/student.entity';
 import { CourseEnrollment } from './courseEnrollment/entities/course-enrollment.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
 import { uploadSingleFileToCloudinary } from 'src/utils/file-upload.helper';
+import { Course } from './entities/course.entity';
 
 @Injectable()
 export class CourseService {
