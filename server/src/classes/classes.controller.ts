@@ -1,8 +1,9 @@
 import { Controller, Get, Post, Body, Param, Put, Delete, UploadedFile, UseInterceptors, Patch } from '@nestjs/common';
 import { ClassService } from './classes.service';
-import { CreateClassDto} from './dto/create-class.dto';
+import { CreateClassDto } from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import ResponseModel from 'src/utils/utils';
 
 @Controller('class')
 export class ClassController {
@@ -14,14 +15,20 @@ export class ClassController {
     @Body() createClassDto: CreateClassDto,
     @UploadedFile() routineFile: Express.Multer.File,
   ) {
-    if (typeof createClassDto.subjects === 'string') {
-      createClassDto.subjects = JSON.parse(createClassDto.subjects);
-    }
+    try {
+      if (typeof createClassDto.subjects === 'string') {
+        createClassDto.subjects = JSON.parse(createClassDto.subjects);
+      }
 
-    return this.classService.create({
-      ...createClassDto,
-      routineFile,
-    });
+      const classData = await this.classService.create({
+        ...createClassDto,
+        routineFile,
+      });
+
+      return ResponseModel.success('Class created successfully', classData); 
+    } catch (error) {
+      return ResponseModel.error('Failed to create class', error.message); 
+    }
   }
 
   @Patch(':id')
@@ -31,28 +38,48 @@ export class ClassController {
     @Body() updateClassDto: UpdateClassDto,
     @UploadedFile() routineFile: Express.Multer.File,
   ) {
-    if (typeof updateClassDto.subjects === 'string') {
-      updateClassDto.subjects = JSON.parse(updateClassDto.subjects);
-    }
+    try {
+      if (typeof updateClassDto.subjects === 'string') {
+        updateClassDto.subjects = JSON.parse(updateClassDto.subjects);
+      }
 
-    return this.classService.update(id, {
-      ...updateClassDto,
-      routineFile,
-    });
+      const updatedClass = await this.classService.update(id, {
+        ...updateClassDto,
+        routineFile,
+      });
+
+      return ResponseModel.success('Class updated successfully', updatedClass);
+    } catch (error) {
+      return ResponseModel.error('Failed to update class', error.message); 
+    }
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    return this.classService.remove(id);
+    try {
+      await this.classService.remove(id);
+      return ResponseModel.success('Class removed successfully', null); 
+    } catch (error) {
+      return ResponseModel.error('Failed to remove class', error.message); 
+    }
   }
 
   @Get()
   async findAll() {
-    return this.classService.findAll();
-  }
+    try {
+      const classes = await this.classService.findAll();
+      return ResponseModel.success('Classes retrieved successfully', classes); 
+    } catch (error) {
+      return ResponseModel.error('Failed to retrieve classes', error.message); 
+  }}
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return this.classService.findOne(id);
+    try {
+      const classData = await this.classService.findOne(id);
+      return ResponseModel.success('Class retrieved successfully', classData); 
+    } catch (error) {
+      return ResponseModel.error('Failed to retrieve class', error.message); 
+    }
   }
 }

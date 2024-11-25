@@ -16,6 +16,7 @@ import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 import { Assignment } from './entities/assignment.entity';
 import { Express } from 'express';
 import { uploadSingleFileToCloudinary } from 'src/utils/file-upload.helper';
+import ResponseModel from 'src/utils/utils';
 
 @Controller('assignments')
 export class AssignmentController {
@@ -29,22 +30,33 @@ export class AssignmentController {
   ) {
     try {
       createAssignmentDto.teacherFile = file;
-      return this.assignmentService.create(createAssignmentDto);
+      const assignment = await this.assignmentService.create(createAssignmentDto);
+      return ResponseModel.success('Assignment created successfully', assignment); 
     } catch (error) {
-      throw new Error(error.message);
+      return ResponseModel.error('Failed to create assignment', error.message); 
     }
   }
 
   @Get()
-  async findAll(): Promise<Assignment[]> {
-    return this.assignmentService.findAll();
+  async findAll(): Promise<ResponseModel<Assignment[]>> {
+    try {
+      const assignments = await this.assignmentService.findAll();
+      return ResponseModel.success('Assignments retrieved successfully', assignments); 
+    } catch (error) {
+      return ResponseModel.error('Failed to retrieve assignments', error.message);
+    }
   }
 
   @Get(':assignmentId')
   async findOne(
     @Param('assignmentId') assignmentId: string,
-  ): Promise<Assignment> {
-    return this.assignmentService.findOne(assignmentId);
+  ): Promise<ResponseModel<Assignment>> {
+    try {
+      const assignment = await this.assignmentService.findOne(assignmentId);
+      return ResponseModel.success('Assignment retrieved successfully', assignment); 
+    } catch (error) {
+      return ResponseModel.error('Failed to retrieve assignment', error.message); 
+    }
   }
 
   @Put('/update/:assignmentId')
@@ -53,7 +65,7 @@ export class AssignmentController {
     @Param('assignmentId') assignmentId: string,
     @Body() updateAssignmentDto: UpdateAssignmentDto,
     @UploadedFile() file?: Express.Multer.File,
-  ): Promise<Assignment> {
+  ): Promise<ResponseModel<Assignment>> {
     try {
       if (file) {
         const uploadResult = await uploadSingleFileToCloudinary(
@@ -62,15 +74,21 @@ export class AssignmentController {
         );
         updateAssignmentDto.teacherFile = uploadResult.secure_url;
       }
-      return this.assignmentService.update(assignmentId, updateAssignmentDto);
+      const updatedAssignment = await this.assignmentService.update(assignmentId, updateAssignmentDto);
+      return ResponseModel.success('Assignment updated successfully', updatedAssignment); 
     } catch (error) {
-      throw new Error(error.message);
+      return ResponseModel.error('Failed to update assignment', error.message); 
     }
   }
 
   @Delete(':assignmentId')
-  async remove(@Param('assignmentId') assignmentId: string): Promise<void> {
-    return this.assignmentService.remove(assignmentId);
+  async remove(@Param('assignmentId') assignmentId: string): Promise<ResponseModel<void>> {
+    try {
+      await this.assignmentService.remove(assignmentId);
+      return ResponseModel.success('Assignment removed successfully', null); 
+    } catch (error) {
+      return ResponseModel.error('Failed to remove assignment', error.message); 
+    }
   }
 
   @Post(':assignmentId/submit')
@@ -78,7 +96,7 @@ export class AssignmentController {
   async submitAssignment(
     @Param('assignmentId') assignmentId: string,
     @UploadedFile() file: Express.Multer.File,
-  ): Promise<Assignment> {
+  ): Promise<ResponseModel<Assignment>> {
     try {
       const uploadResult = await uploadSingleFileToCloudinary(
         file,
@@ -86,9 +104,10 @@ export class AssignmentController {
       );
       const updateDto = new UpdateAssignmentDto();
       updateDto.studentFilePath = uploadResult.secure_url;
-      return this.assignmentService.update(assignmentId, updateDto);
+      const updatedAssignment = await this.assignmentService.update(assignmentId, updateDto);
+      return ResponseModel.success('Assignment submitted successfully', updatedAssignment); 
     } catch (error) {
-      throw new Error(error.message);
+      return ResponseModel.error('Failed to submit assignment', error.message); 
     }
   }
 }
