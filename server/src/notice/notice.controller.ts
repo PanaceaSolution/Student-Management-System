@@ -4,6 +4,7 @@ import { CreateNoticeDto } from './dto/create-notice.dto';
 import { UpdateNoticeDto } from './dto/update-notice.dto';
 import { Notice } from './entities/notice.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
+import ResponseModel from 'src/utils/utils'; 
 
 @Controller('notices')
 export class NoticeController {
@@ -11,18 +12,36 @@ export class NoticeController {
 
     @Post('/create')
     @UseInterceptors(FileInterceptor('file'))
-    async create(@Body() createNoticeDto: CreateNoticeDto, @UploadedFile() file: Express.Multer.File): Promise<Notice> {
-        return this.noticeService.create(createNoticeDto, file);
+    async create(
+        @Body() createNoticeDto: CreateNoticeDto,
+        @UploadedFile() file: Express.Multer.File
+    ) {
+        try {
+            const notice = await this.noticeService.create(createNoticeDto, file);
+            return ResponseModel.success('Notice created successfully', notice); 
+        } catch (error) {
+            return ResponseModel.error('Failed to create notice', error.message); 
+        }
     }
 
     @Get()
-    async findAll(): Promise<Notice[]> {
-        return this.noticeService.findAll();
+    async findAll() {
+        try {
+            const notices = await this.noticeService.findAll();
+            return ResponseModel.success('Notices retrieved successfully', notices); 
+        } catch (error) {
+            return ResponseModel.error('Failed to retrieve notices', error.message); 
+        }
     }
 
     @Get(':id')
-    async findOne(@Param('id') noticeID: string): Promise<Notice> {
-        return this.noticeService.findOne(noticeID);
+    async findOne(@Param('id') noticeID: string) {
+        try {
+            const notice = await this.noticeService.findOne(noticeID);
+            return ResponseModel.success('Notice retrieved successfully', notice); 
+        } catch (error) {
+            return ResponseModel.error('Failed to retrieve notice', error.message); 
+        }
     }
 
     @Put(':id')
@@ -31,12 +50,22 @@ export class NoticeController {
         @Param('id') noticeID: string,
         @Body() updateNoticeDto: UpdateNoticeDto,
         @UploadedFile() file: Express.Multer.File
-    ): Promise<Notice> {
-        return this.noticeService.update(noticeID, updateNoticeDto, file);
+    ) {
+        try {
+            const updatedNotice = await this.noticeService.update(noticeID, updateNoticeDto, file);
+            return ResponseModel.success('Notice updated successfully', updatedNotice); 
+        } catch (error) {
+            return ResponseModel.error('Failed to update notice', error.message); 
+        }
     }
 
     @Delete(':id')
-    async remove(@Param('id') noticeID: string): Promise<{message:string}> {
-        return this.noticeService.remove(noticeID);
+    async remove(@Param('id') noticeID: string) {
+        try {
+            await this.noticeService.remove(noticeID);
+            return ResponseModel.success('Notice removed successfully', null); 
+        } catch (error) {
+            return ResponseModel.error('Failed to remove notice', error.message); 
+        }
     }
 }
