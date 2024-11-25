@@ -16,16 +16,15 @@ import { GENDER } from '../../utils/role.helper';
 import { TRANSPORTATION_MODE } from '../../utils/role.helper';
 import { User } from '../../user/authentication/entities/authentication.entity';
 import { RegisterUserDto } from '../../user/authentication/dto/register.dto';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 
 
 export class StudentDto extends RegisterUserDto {
-  @IsString()
-  @IsNotEmpty()
-  studentClass: string;
+  
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   section: string;
 
   @IsString()
@@ -74,6 +73,8 @@ export class StudentDto extends RegisterUserDto {
   admissionDate?: Date;
 
   userId?: string;
+
+  studentClassId?: string;
 
   @Transform(({ value }) => {
     return value ? new Date(value).toISOString().split('T')[0] : undefined;

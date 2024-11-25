@@ -1,18 +1,14 @@
 
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-
 import { FaChalkboardTeacher, FaChartBar, FaNetworkWired, FaTasks, FaUserGraduate, FaUserTie, SiGoogleclassroom, SiGooglemessages, SiStorybook, IoLibrary, IoMdCalendar, GrResources, TbReportAnalytics, RiMoneyRupeeCircleLine, LuLogOut, MdDashboard, FaHouseUser } from '../components/Icons'
-
 import {
    Tooltip,
    TooltipTrigger,
    TooltipContent,
    TooltipProvider
 } from './ui/tooltip';
-
 import logo from '../assets/logo.png';
 import useAuthStore from '@/store/authStore';
-import { Button } from './ui/button';
 
 
 // Sidebar Links Configuration
@@ -124,20 +120,15 @@ const links = [
 const Sidebar = () => {
    const location = useLocation();
    const navigate = useNavigate();
-   const { loggedInUser, logout } = useAuthStore();
+   const { loggedInUser } = useAuthStore();
    const userRole = loggedInUser?.role;
 
    const isActive = (path) => location.pathname === path;
 
    const filteredLinks = links.filter(link => link.roles.includes(userRole));
 
-   const logoutHandle = async () => {
-      await logout()
-      navigate('/');
-   }
-
    return (
-      <aside className="sticky top-0 md:border-r bg-primary text-white lg:rounded-tr-lg lg:rounded-br-lg h-screen overflow-y-auto scrollbar-none">
+      <aside className="sticky top-0 bg-primary text-white lg:rounded-tr-lg lg:rounded-br-lg h-screen overflow-y-auto scrollbar-none">
          <div className="flex flex-col h-screen justify-between pb-2">
 
             <div className="flex flex-col">
@@ -147,47 +138,27 @@ const Sidebar = () => {
                </div>
 
                {/* Sidebar Content */}
-               <TooltipProvider>
-                  <nav className="flex flex-col justify-center gap-2 text-sm font-medium px-2 lg:px-4" role="navigation">
-                     {filteredLinks.map((link, index) => (
-                        <Link
-                           key={index}
-                           to={link.href}
-                           aria-current={isActive(link.href) ? 'page' : undefined}
-                           aria-label={link.name}
-                           className={`flex items-center gap-8 rounded-lg p-[12px] 2xl:p-4 transition-all hover:bg-background hover:text-primary 
+               <nav className="flex flex-col justify-center gap-2 text-sm font-medium px-2 lg:px-4 mb-2" role="navigation">
+                  {filteredLinks.map((link, index) => (
+                     <Link
+                        key={index}
+                        to={link.href}
+                        aria-current={isActive(link.href) ? 'page' : undefined}
+                        aria-label={link.name}
+                        className={`flex items-center gap-8 rounded-lg p-[12px]  2xl:p-4 transition-all hover:bg-background hover:text-primary 
                                  ${isActive(link.href)
-                                 ? 'bg-background text-primary'
-                                 : 'text-white'
-                              }
+                              ? 'bg-background text-primary'
+                              : 'text-white'
+                           }
                               `}
-                        >
-                           <Tooltip className="flex flex-row">
-                              <TooltipTrigger className="md:block">
-                                 <span className="flex items-center">{link.icon}</span>
-                              </TooltipTrigger>
-                              <TooltipContent className="hidden md:block lg:hidden">
-                                 <p>{link.name}</p>
-                              </TooltipContent>
-                           </Tooltip>
+                     >
+                        <span className="flex items-center">{link.icon}</span>
+                        <span className="font-semibold text-lg">{link.name}</span>
+                     </Link>
+                  ))}
+               </nav>
 
-                           <span className="font-semibold text-lg">{link.name}</span>
-                        </Link>
-                     ))}
-                  </nav>
-               </TooltipProvider>
             </div>
-
-
-            {/* Logout Button */}
-            <Button
-               variant="destructive"
-               onClick={logoutHandle}
-               className="flex items-center justify-center gap-5 py-7 md:mx-2 lg:mx-4 mb-6 md:mb-0"
-            >
-               <LuLogOut className="w-6 h-6" />
-               <span className="md:hidden lg:block font-semibold text-lg">Logout</span>
-            </Button>
          </div>
       </aside>
    );

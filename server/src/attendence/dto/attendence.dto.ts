@@ -1,22 +1,33 @@
 import { Type } from 'class-transformer';
-import { IsUUID, IsDateString, IsBoolean, ValidateNested, IsArray, IsString } from 'class-validator';
+import {
+  IsUUID,
+  IsDateString,
+  IsBoolean,
+  ValidateNested,
+  IsArray,
+  IsString,
+  IsOptional,
+} from 'class-validator';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 export class AttendenceRecordDto {
   @IsUUID()
-  studentId:string;
+  studentId: string;
+
+  @IsUUID()
+  @IsOptional()
+  userId: string;
 
   @IsBoolean()
-  isPresent:boolean;
+  isPresent: boolean;
 }
 
 export class CreateAttendanceDto {
-  
   @IsUUID()
   classId: string;
 
-
   @IsArray()
-  @ValidateNested({each:true})
-  @Type(()=>AttendenceRecordDto)
-  attendances:AttendenceRecordDto[];
+  @ValidateNested({ each: true })
+  @Type(() => AttendenceRecordDto)
+  attendances: AttendenceRecordDto[];
 }

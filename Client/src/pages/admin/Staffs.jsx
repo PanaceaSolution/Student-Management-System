@@ -33,24 +33,35 @@ const Role = [
 ];
 
 const staffTableHead = ["", "First Name", "Last Name", "Phone Number", "Gender", "Role", "Actions"];
-const staffTableFields = ["user.profile.fname", "user.profile.lname", "user.contact.phoneNumber", "user.profile.gender", "staffRole"];
+const staffTableFields = [
+  "user_profile_fname",
+  "user_profile_lname",
+  "user_contact_phoneNumber",
+  "user_profile_gender",
+  "user_staffRole",
+];
 
 const personalInfo = [
-  { label: "First Name", key: "user.profile.fname" },
-  { label: "Last Name", key: "user.profile.lname" },
-  { label: "Gender", key: "user.profile.gender" },
-  { label: "Email", key: "user.email" },
-  { label: "Role", key: "staffRole" },
-  { label: "Salary", key: "salary" },
-  { label: "Date of Birth", key: "user.profile.dob" },
-  { label: "Enrollment Date", key: "hireDate" },
-  { label: "Phone Number", key: "user.contact.phoneNumber" },
-  { label: "Telephone Number", key: "user.contact.telephoneNumber" },
-  { label: "Ward Number", key: "user.address[0].wardNumber" },
-  { label: "Municipality", key: "user.address[0].municipality" },
-  { label: "District", key: "user.address[0].district" },
-  { label: "Province", key: "user.address[0].province" },
+  { label: "First Name", key: "user_profile_fname" },
+  { label: "Last Name", key: "user_profile_lname" },
+  { label: "Gender", key: "user_profile_gender" },
+  { label: "Email", key: "user_email" },
+  { label: "Role", key: "user_staffRole" },
+  { label: "Salary", key: "user_salary" },
+  { label: "Date of Birth", key: "user_profile_dob" },
+  { label: "Enrollment Date", key: "user_hireDate" },
+  { label: "Phone Number", key: "user_contact_phoneNumber" },
+  { label: "Telephone Number", key: "user_contact_telephoneNumber" },
+  { label: "Ward Number", key: "user_address_0_wardNumber" },
+  { label: "Municipality", key: "user_address_0_municipality" },
+  { label: "District", key: "user_address_0_district" },
+  { label: "Province", key: "user_address_0_province" },
 ];
+
+const personalDocuments = [
+  { label: "CitizenShip", key: "user_documents_0_documentFile" },
+  { label: "Birth Certificate", key: "user_documents_1_documentFile" }
+]
 
 
 const Staffs = () => {
@@ -64,16 +75,13 @@ const Staffs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [cardOpen, setCardOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
 
-  const { staff, getStaff, deleteStaff, loading } = useStaffStore()
+  const { staff, getStaff, deleteStaff, isSubmitting, isDeleting } = useStaffStore()
 
   useEffect(() => {
     getStaff("STAFF");
   }, []);
-
-
-
-  // const staff = useMemo(() => allUsers, [allUsers]);
 
   // Handle format selection and trigger export
   const { exportToCSV, exportToPDF } = useExport()
@@ -103,18 +111,17 @@ const Staffs = () => {
 
   const handleUserData = (data) => {
     setSelectedData(data);
+    setCardOpen(true)
   };
 
   const handleEdit = (data) => {
+    setCurrentStep(0);
     setFormOpen(true);
     setSelectedData(data)
   }
 
-  const handleDelete = (id) => {
-    const res = deleteStaff(id);
-    if (res.status === 200) {
-      setSelectedData(null);
-    }
+  const handleDelete = async (id) => {
+    await deleteStaff(id);
   };
 
   return (
@@ -130,7 +137,15 @@ const Staffs = () => {
                   onChange={handleExportChange}
                   className="w-32 bg-white"
                 />
-                <AddStaffForm formOpen={formOpen} setFormOpen={setFormOpen} selectedData={selectedData} />
+                <AddStaffForm
+                  formOpen={formOpen}
+                  setFormOpen={setFormOpen}
+                  selectedData={selectedData}
+                  setSelectedData={setSelectedData}
+                  currentStep={currentStep}
+                  setCurrentStep={setCurrentStep}
+                  loading={isSubmitting}
+                />
               </div>
             </div>
             <div className="border-b-2 p-2">
@@ -163,7 +178,7 @@ const Staffs = () => {
             </div>
             <ActiveTab
               activeTab={activeTab}
-              staff={staff}
+              user={staff}
               handleTabClick={handleTabClick}
             />
             <div className="relative w-full overflow-x-auto shadow-md">
@@ -173,36 +188,32 @@ const Staffs = () => {
                 tableFields={staffTableFields}
                 user={staff}
                 handleUserData={handleUserData}
-                loading={loading}
-                setCardOpen={setCardOpen}
+                loading={isDeleting}
                 handleEdit={handleEdit}
                 handleDelete={handleDelete}
-                setFormOpen={setFormOpen}
               />
             </div>
           </div>
 
           {/* Conditionally show the DetailsCard */}
           {selectedData && (
-            <div className="lg:col-span-2 2xl:col-span-1 px-3 lg:pr-4">
-              <DetailsCard
-                title="Staff"
-                userDetails={selectedData}
-                loading={loading}
-                cardOpen={cardOpen}
-                setCardOpen={setCardOpen}
-                personalInfo={personalInfo}
-              />
-            </div>
+            <DetailsCard
+              title="Staff"
+              userDetails={selectedData}
+              cardOpen={cardOpen}
+              setCardOpen={setCardOpen}
+              personalInfo={personalInfo}
+              personalDocuments={personalDocuments}
+            />
           )}
         </div>
       </div>
 
-      {loading === true && (
+      {/* {loading === true && (
         <div className="fixed top-0 left-0 w-full h-screen bg-black opacity-50 z-[500] flex justify-center items-center">
           <Spinner />
         </div>
-      )}
+      )} */}
     </section>
   );
 };

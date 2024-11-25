@@ -49,7 +49,7 @@ export class StudentService {
       rollNumber,
       registrationNumber,
       section,
-      studentClass,
+      studentClassId,
       email,
       role,
       profile,
@@ -143,7 +143,7 @@ export class StudentService {
       rollNumber,
       previousSchool,
       section,
-      studentClass,
+      studentClassId,
       transportationMode,
     });
 
@@ -180,7 +180,7 @@ export class StudentService {
         transportationMode,
         previousSchool,
         section,
-        studentClass,
+        studentClassId,
       } = updateStudentDto;
 
       // find student
@@ -222,8 +222,8 @@ export class StudentService {
       if (guardianName !== undefined) {
         student.guardianName = guardianName;
       }
-      if (studentClass !== undefined) {
-        student.studentClass = studentClass;
+      if (studentClassId !== undefined) {
+        student.studentClassId = studentClassId;
       }
       if (previousSchool !== undefined) {
         student.previousSchool = previousSchool;
