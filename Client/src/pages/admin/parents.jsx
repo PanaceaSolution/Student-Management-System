@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import ParentsForm from '@/components/admin/ParentsForm';
 import useParentStore from '@/store/parentsStore';
-import StaffTable from '@/components/admin/StaffTable';
+import StaffTable from '@/components/admin/AdminTable';
 import useExport from '@/hooks/useExport';
 import ActiveTab from '@/components/common/activeTab';
 import useStudentStore from '@/store/studentStore';

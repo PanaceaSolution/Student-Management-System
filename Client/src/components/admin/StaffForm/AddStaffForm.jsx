@@ -31,7 +31,6 @@ const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, cu
       birthCertificate: null,
       citizenship: null,
    });
-   // console.log(selectedData);
 
 
    const {
@@ -154,36 +153,22 @@ const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, cu
       formattedData.append("document", JSON.stringify(documentData));
 
       try {
-         if (selectedData) {
-            const res = await updateStaff(selectedData.user_staffId, formattedData);
+         const res = selectedData
+            ? await updateStaff(selectedData.user_staffId, formattedData)
+            : await addStaff(formattedData);
+
+         if (res.success) {
             console.log(res);
-
-            if (res.success) {
-               setFormOpen(false);
-               reset();
-               setCurrentStep(0);
-               setProfilePic(null);
-               setDocuments({
-                  birthCertificate: null,
-                  citizenship: null,
-                  marksheet: null,
-               })
-            }
-         } else {
-            const res = await addStaff(formattedData);
-            if (res.success) {
-               setFormOpen(false);
-               reset();
-               setCurrentStep(0);
-               setProfilePic(null);
-               setDocuments({
-                  birthCertificate: null,
-                  citizenship: null,
-                  marksheet: null,
-               })
-            }
+            setFormOpen(false);
+            reset();
+            setCurrentStep(0);
+            setProfilePic(null);
+            setDocuments({
+               birthCertificate: null,
+               citizenship: null,
+               marksheet: null,
+            });
          }
-
       } catch (error) {
          console.error("Error adding staff:", error);
       }
@@ -233,8 +218,6 @@ const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, cu
                      <StaffInfo
                         register={register}
                         errors={errors}
-                        profilePic={profilePic}
-                        setProfilePic={setProfilePic}
                         clearErrors={clearErrors}
                      />
                      <ProfilePicUpload

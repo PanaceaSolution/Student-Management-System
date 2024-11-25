@@ -3,7 +3,7 @@ import SearchBox from '@/components/SearchBox';
 import Select from '@/components/Select';
 import useStaffStore from '@/store/staffStore';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import StaffTable from '@/components/admin/staffTable';
+import StaffTable from '@/components/admin/AdminTable';
 import DetailsCard from '@/components/admin/DetailsCard';
 import AddStaffForm from '@/components/admin/StaffForm/AddStaffForm';
 import useExport from '@/hooks/useExport';
