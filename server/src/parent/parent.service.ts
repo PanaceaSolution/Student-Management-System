@@ -15,6 +15,7 @@ import { decryptdPassword, generateRandomPassword } from 'src/utils/utils';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { Student } from 'src/student/entities/student.entity';
+import ResponseModel from 'src/utils/utils';
 
 @Injectable()
 export class ParentService {
@@ -33,13 +34,7 @@ export class ParentService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ): Promise<{
-    status: number;
-    message: string;
-    parent?: any;
-    user?: any;
-    plainPassword?: any;
-  }> {
+  ) {
     const {
       childNames,
       email,
@@ -127,9 +122,8 @@ export class ParentService {
     }
 
     const newParent = this.parentRepository.create({
-      childNames,
-      // user: userReference,
       student: students,
+      childNames
     });
 
     const parentCreated = await this.parentRepository.save(newParent);
@@ -158,16 +152,12 @@ export class ParentService {
       });
       console.log(finalUser);
       let plainPassword = decryptdPassword(userReference.password);
-      return {
-        status: 201,
-        message: 'Parent created successfully',
-        parent: {
-          ...newParent,
-          documents: documentUrls,
-        },
+      //
+      return new ResponseModel('Parent created successfully', true, {
+        parent: { documents: documentUrls, ...newParent },
         user: createUserResponse.user,
-        plainPassword: plainPassword,
-      };
+        plainPassword,
+      });
     }
   }
 
@@ -195,30 +185,29 @@ export class ParentService {
       if (!parent.user) {
         throw new NotFoundException('User associated with parent not found');
       }
-      // if (!parent.student) {
-      //   throw new NotFoundException('Student associated with user not found');
-      // }
+      if (!parent.student) {
+        throw new NotFoundException('Student associated with user not found');
+      }
       const userUpdateResult = await this.userService.updateUser(
         parent.user.userId,
         updateParentDto,
         files,
       );
-      if (childNames !== undefined) {
-        parent.childNames = childNames;
-      }
+      // if (childNames !== undefined) {
+      //   parent.childNames = childNames;
+      // }
       await this.parentRepository.save(parent);
 
-      return {
+      return new ResponseModel('Parent updated successfully', true, {
         ...userUpdateResult.user.address,
         ...userUpdateResult.user.contact,
         ...userUpdateResult.user.documents,
         ...userUpdateResult.user.profile,
         parent,
-        message: 'Parent Updated successfully',
-      };
+      });
+
     } catch (error) {
-      console.error('Error occur', error);
-      throw new Error('Internal server problem');
+      return new ResponseModel('Error updating parent', false, error)
     }
   }
 }

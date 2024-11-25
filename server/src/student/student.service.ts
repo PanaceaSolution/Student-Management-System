@@ -11,15 +11,22 @@ import { Student } from './entities/student.entity';
 import { Equal, Not, Repository } from 'typeorm';
 import { User } from '../user/authentication/entities/authentication.entity';
 import { AuthenticationService } from '../user/authentication/authentication.service';
-import { decryptdPassword, generateRandomPassword, generateUsername } from 'src/utils/utils';
+import ResponseModel, {
+  decryptdPassword,
+  generateRandomPassword,
+  generateUsername,
+} from 'src/utils/utils';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
+import { Class } from 'src/classes/entities/class.entity';
 
 @Injectable()
 export class StudentService {
   constructor(
     @InjectRepository(Student)
     private readonly studentRepository: Repository<Student>,
+    @InjectRepository(Class)
+    private readonly classRepository: Repository<Class>,
     private readonly userService: AuthenticationService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -30,13 +37,7 @@ export class StudentService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ): Promise<{
-    status: number;
-    message: string;
-    student?: any;
-    user?: any;
-    plainPassword?: any;
-  }> {
+  ) {
     const {
       fatherName,
       motherName,
@@ -49,27 +50,30 @@ export class StudentService {
       rollNumber,
       registrationNumber,
       section,
-      studentClassId,
       email,
       role,
       profile,
       address,
       contact,
       document,
+      className,
     } = createStudentDto;
 
+    // checking the required fields
     if (!profile || !profile.fname || !profile.lname) {
       throw new BadRequestException(
         'Profile information (fname and lname) is required.',
       );
     }
 
+    // admission date to YYYY-MM-DD format
     const AD = moment(admissionDate, 'YYYY-MM-DD');
     if (!AD.isValid()) {
       throw new BadRequestException('Invalid date format for Admission Date');
     }
     const AdmissionIsoString = AD.toISOString();
 
+    //checking if student exists
     const studentExist = await this.studentRepository.findOne({
       where: [{ registrationNumber }, { rollNumber }],
     });
@@ -77,18 +81,16 @@ export class StudentService {
       throw new BadRequestException('Student already exists in the database');
     }
 
+    // image && file handling
     const profilePictureUrl: string | null = null;
-
     const documentMetadata = document || [];
     const documentUrls = [];
-
     if (files.documents && files.documents.length > 0) {
       const documentBuffers = files.documents.map((doc) => doc.buffer);
       const uploadedDocumentUrls = await uploadFilesToCloudinary(
         documentBuffers,
         'documents',
       );
-
       documentUrls.push(
         ...uploadedDocumentUrls.map((url, index) => ({
           documentName:
@@ -98,44 +100,24 @@ export class StudentService {
       );
     }
 
-    const registerDto = {
-      email,
-      role,
-      profile,
-      address,
-      contact,
-      document: documentUrls,
-      username: generateUsername(profile.fname, profile.lname, role),
-      password: generateRandomPassword(),
-      createdAt: new Date().toISOString(),
-      refreshToken: null,
-      profilePicture: profilePictureUrl,
-    };
-
-    const createUserResponse = await this.userService.register(
-      registerDto,
-      files,
-    );
-
-    if (!createUserResponse || !createUserResponse.user) {
-      throw new InternalServerErrorException(
-        'Error occurs while creating user',
-      );
-    }
-
-    const userReference = await this.userRepository.findOne({
-      where: { userId: createUserResponse.user.id },
+    // find classId from given class fields
+    const studentClass = await this.classRepository.findOne({
+      where: {
+        className: className,
+        section: section,
+      },
+      select: ['classId'],
     });
-
-    if (!userReference) {
-      return { status: 500, message: 'Error finding user after creation' };
+    if (!studentClass) {
+      throw new NotFoundException('class not found');
     }
 
+    // create new student
     const newStudent = this.studentRepository.create({
       fatherName,
       motherName,
       guardianName,
-      user: userReference,
+      // user: userReference,
       religion,
       bloodType,
       admissionDate: AdmissionIsoString,
@@ -143,21 +125,58 @@ export class StudentService {
       rollNumber,
       previousSchool,
       section,
-      studentClassId,
+      studentClassId: studentClass.classId,
       transportationMode,
     });
 
-    await this.studentRepository.save(newStudent);
-    let plainPassword = decryptdPassword(newStudent.user.password);
-    console.log('Student password is', plainPassword);
+    const studentCreated = await this.studentRepository.save(newStudent);
+    if (studentCreated) {
+      // creating user
+      const registerDto = {
+        email,
+        role,
+        profile,
+        address,
+        contact,
+        document: documentUrls,
+        username: generateUsername(profile.fname, profile.lname, role),
+        password: generateRandomPassword(),
+        createdAt: new Date().toISOString(),
+        refreshToken: null,
+        profilePicture: profilePictureUrl,
+      };
 
-    return {
-      status: 201,
-      message: 'Student created successfully',
-      student: newStudent,
-      user: createUserResponse.user,
-      plainPassword: plainPassword,
-    };
+      // creating user
+      const createUserResponse = await this.userService.register(
+        registerDto,
+        files,
+      );
+      if (!createUserResponse || !createUserResponse.user) {
+        throw new InternalServerErrorException(
+          'Error occurs while creating user',
+        );
+      }
+      const userReference = await this.userRepository.findOne({
+        where: { userId: createUserResponse.user.id },
+      });
+      if (!userReference) {
+        return { status: 500, message: 'Error finding user after creation' };
+      }
+
+      console.log('createUserResponse', createUserResponse.user);
+      console.log('userReference', userReference);
+      await this.studentRepository.save({
+        ...newStudent,
+        user: userReference,
+      });
+
+      let plainPassword = decryptdPassword(userReference.password);
+      return new ResponseModel('Student created successfully', false, {
+        student: newStudent,
+        user: createUserResponse.user,
+        password: plainPassword,
+      });
+    }
   }
 
   async updateStudent(
@@ -180,7 +199,6 @@ export class StudentService {
         transportationMode,
         previousSchool,
         section,
-        studentClassId,
       } = updateStudentDto;
 
       // find student
@@ -190,7 +208,6 @@ export class StudentService {
         },
         relations: ['user'],
       });
-      // console.log('student is', student);
 
       if (!student) {
         throw new NotFoundException('Student not found');
@@ -222,9 +239,6 @@ export class StudentService {
       if (guardianName !== undefined) {
         student.guardianName = guardianName;
       }
-      if (studentClassId !== undefined) {
-        student.studentClassId = studentClassId;
-      }
       if (previousSchool !== undefined) {
         student.previousSchool = previousSchool;
       }
@@ -239,16 +253,15 @@ export class StudentService {
       }
 
       await this.studentRepository.save(student);
-      return {
+      return new ResponseModel('Student updated successfully', true, {
         ...userUpdateResult.user.address,
         ...userUpdateResult.user.contact,
         ...userUpdateResult.user.documents,
         ...userUpdateResult.user.profile,
         student,
-        message: 'Student updated successfully',
-      };
+      });
     } catch (error) {
-      throw new Error('Internal server problem');
+      return new ResponseModel('Error updating student', false, error);
     }
   }
 
@@ -290,24 +303,15 @@ export class StudentService {
           },
         }));
 
-      return {
-        message: 'Students fetched successfully',
-        status: 200,
-        success: true,
+      return new ResponseModel('Students fetched successfully', true, {
         data: formattedStudents,
         total,
         page,
         limit,
         totalPages: Math.ceil(total / limit),
-      };
-    } catch (error) {
-      console.error('Error fetching students:', error);
-      throw new InternalServerErrorException({
-        message: 'Failed to fetch students',
-        status: 500,
-        success: false,
       });
+    } catch (error) {
+      return new ResponseModel('Error fetching students', false, error);
     }
   }
 }
-

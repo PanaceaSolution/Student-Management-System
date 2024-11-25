@@ -205,6 +205,7 @@ export class AuthenticationService {
           username: newUser.username,
           role: newUser.role,
           isActivated: newUser.isActivated,
+          password: newUser.password,
           createdAt: newUser.createdAt,
           profile: {
             fname: userProfile.fname,

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Equal, Repository } from 'typeorm';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { Student } from '../student/entities/student.entity'; 
+import { Student } from '../student/entities/student.entity';
 import { CourseEnrollment } from './courseEnrollment/entities/course-enrollment.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
 import { uploadSingleFileToCloudinary } from 'src/utils/file-upload.helper';
@@ -25,11 +25,12 @@ export class CourseService {
     private readonly staffRepository: Repository<Staff>,
   ) {}
 
-
-
-  async create(createCourseDto: CreateCourseDto, file?: Express.Multer.File): Promise<Course> {
+  async create(
+    createCourseDto: CreateCourseDto,
+    file?: Express.Multer.File,
+  ): Promise<Course> {
     if (file) {
-      createCourseDto.file = file.path; 
+      createCourseDto.file = file.path;
     }
     const course = new Course();
     course.courseName = createCourseDto.courseName;
@@ -46,22 +47,23 @@ export class CourseService {
     return course;
   }
 
-  async findAll():Promise<Course[]>{
-    return this.courseRepository.find()
-
+  async findAll(): Promise<Course[]> {
+    return this.courseRepository.find();
   }
 
-  async update(courseId: string, updateCourseDto: UpdateCourseDto, file?: Express.Multer.File): Promise<Course> {
+  async update(
+    courseId: string,
+    updateCourseDto: UpdateCourseDto,
+    file?: Express.Multer.File,
+  ): Promise<Course> {
     const course = await this.findOne(courseId);
 
-    
     if (file) {
-      const folder = 'courses'; 
+      const folder = 'courses';
       const uploadResult = await uploadSingleFileToCloudinary(file, folder);
-      course.file = uploadResult.secure_url; 
+      course.file = uploadResult.secure_url;
     }
 
-   
     Object.assign(course, updateCourseDto);
     return this.courseRepository.save(course);
   }
