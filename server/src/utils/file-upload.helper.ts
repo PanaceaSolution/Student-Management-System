@@ -1,5 +1,6 @@
 import { v2 as Cloudinary } from 'cloudinary';
 import { Readable } from 'stream';
+import * as XLSX from 'xlsx';
 
 function bufferToStream(buffer: Buffer): Readable {
   const readable = new Readable();
@@ -74,9 +75,7 @@ export async function uploadFilesToCloudinary(
           Cloudinary.uploader.upload_stream(uploadOptions, (error, result) => {
             if (error) {
               console.error('Error uploading buffer to Cloudinary:', error);
-              return reject(
-                new Error('Failed to upload buffer to Cloudinary'),
-              );
+              return reject(new Error('Failed to upload buffer to Cloudinary'));
             }
             if (!result) {
               return reject(
@@ -99,3 +98,39 @@ export function extractPublicIdFromUrl(url: string): string {
   return `${folderPath}/${fileName}`;
 }
 
+interface ExcelSheetData {
+  sheetName: string;
+  topHeaderValues: string[];
+  headers: string[];
+  data: any[][];
+}
+
+export async function generateAndUploadExcelSheet(
+  sheetData: ExcelSheetData[],
+  fileName: string,
+) {
+  const workbook = XLSX.utils.book_new();
+  sheetData.forEach((sheet) => {
+    const worksheetData = [sheet.topHeaderValues ,sheet.headers, ...sheet.data];
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheet.sheetName);
+  });
+
+  const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+  const stream = bufferToStream(buffer);
+
+  const uploadResult = await new Promise((resolve, reject) => {
+    const uploadStream = Cloudinary.uploader.upload_stream(
+      {
+        resource_type: 'raw',
+        public_id: fileName,
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      },
+    );
+    stream.pipe(uploadStream);
+  });
+  return (uploadResult as any).secure_url;
+}

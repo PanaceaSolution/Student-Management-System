@@ -15,8 +15,8 @@ import { CreateAttendanceDto } from './dto/attendence.dto';
 export class AttendenceController {
   constructor(private readonly attendenceService: AttendenceService) {}
 
-  @Post('create')
-  async createAttendence(@Body() createAttendenceDto: CreateAttendanceDto) {
-    return this.attendenceService.createAttendence(createAttendenceDto);
-  }
+  //   @Post('create')
+  //   async createAttendence(@Body() createAttendenceDto: CreateAttendanceDto) {
+  //     return this.attendenceService.createAttendence(createAttendenceDto);
+  //   }
 }

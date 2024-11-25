@@ -55,13 +55,12 @@ export class FullAuthService {
     expiresAt.setDate(expiresAt.getDate() + 7);
   
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-  
     const refreshTokenEntity = this.refreshTokenRepository.create({
       userId,
       refreshToken,
       // : hashedRefreshToken, // Store the hashed token in the DB
       expiresAt,
-      deviceInfo: deviceInfo || 'Unknown Device',
+      deviceInfo: deviceInfo && Array.isArray(deviceInfo) ? deviceInfo : ['Unknown Device'], 
     });
     await this.refreshTokenRepository.save(refreshTokenEntity);
   

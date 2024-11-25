@@ -33,7 +33,7 @@ export class RegisterUserDto {
 
   @ValidateNested()
   @Type(() => UserContactDto)
-  @Transform(({ value }) => (typeof value === 'string' ? JSON.parse(value) : value), { toClassOnly: true })
+  @Transform(({ value }) => (typeof value === 'string' ? JSON.parse(value) : value), { toClassOnly: true }) 
   contact: UserContactDto;
 
   @ValidateNested({ each: true })

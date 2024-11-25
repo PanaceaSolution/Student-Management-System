@@ -43,7 +43,7 @@ export class StaffService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ) {
+  ){
     const {
       hireDate,
       salary,
@@ -132,7 +132,7 @@ export class StaffService {
 
     return {
       status: 201,
-      success: true,
+      success:true,
       message: 'Staff created successfully',
       staff: { ...newStaff, user: createUserResponse.user },
       // user: createUserResponse,
@@ -165,7 +165,7 @@ export class StaffService {
       if (staffRole) staff.staffRole = staffRole.trim() as STAFFROLE;
 
       const updatedStaff = await this.staffRepository.save(staff);
-      console.log(updatedStaff);
+      console.log("Updateed staff is:",updatedStaff);
 
       return {
         status: 201,
