@@ -6,6 +6,7 @@ import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import toast from "react-hot-toast";
 import { getAllUserService, deleteUserService } from "@/services/userService";
+import { flattenData } from "@/utilities/utilities";
 
 const useStudentStore = create(
   devtools(
@@ -26,7 +27,7 @@ const useStudentStore = create(
             const data = await getAllUserService(role);
             if (data && data.data) {
               set({
-                students: data.data,
+                students: flattenData(data.data),
                 total: data.total,
                 totalPages: data.totalPages,
                 loading: false,
