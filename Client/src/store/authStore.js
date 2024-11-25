@@ -85,8 +85,8 @@ const useAuthStore = create(
                      set({
                         isAuthenticated: true,
                      });
-                     return res;
                   }
+                  return res;
                } catch (error) {
                   console.error("Error during token refresh:", error);
                   set({
