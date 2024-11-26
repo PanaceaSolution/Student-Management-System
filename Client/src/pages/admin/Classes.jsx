@@ -6,33 +6,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import TableWithActions from '@/components/admin/tableWithActions';
 
 
-const classTableHead = ["Teacher Name", "Gender", "Subject", "Class", "Action",];
-
-const classData = [{
-  id: 1,
-  teacherName: "John Doe",
-  gender: "Male",
-  subject: "Mathematics",
-  class: " 1",
-},
-{
-  id: 2,
-  teacherName: "Jane Smith",
-  gender: "Female",
-  subject: "Science",
-  class: " 2",
-},
-{
-  id: 3,
-  teacherName: "David Johnson",
-  gender: "Male",
-  subject: "English",
-  class: "3",
-}
-
-];
-
-
+const classTableHead = ["Class Name", "Section", "Subject", "Class", "Action",];
+const classTableField = ["teacherName", "gender", "subject", "class"];
 
 
 const Exports = [
@@ -40,27 +15,13 @@ const Exports = [
   { value: "CSV", label: "CSV" },
   { value: "PDF", label: "PDF" },
 ];
-const Gender = [
-  { value: "", label: "Gender" },
-  { value: "Male", label: "Male" },
-  { value: "Female", label: "Female" },
-  { value: "Others", label: "Others" },
-];
 
 
 
 const Class = () => {
-
-
   const [selectedExport, setSelectedExport] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
-
-
   const [searchTerm, setSearchTerm] = useState("");
-
-
-
-
 
   // Handle format selection and trigger export
   const handleExportChange = (event) => {
@@ -73,19 +34,9 @@ const Class = () => {
     }
   };
 
-  const handleGenderChange = (event) => {
-    setSelectedGender(event.target.value);
-  };
-
-
-
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
-
-
-
-
 
   return (
     <section>
@@ -102,8 +53,6 @@ const Class = () => {
                 onChange={handleExportChange}
                 className="w-32 bg-white"
               />
-
-
             </div>
           </div>
           <div className="border-b-2 p-2">
@@ -113,14 +62,6 @@ const Class = () => {
                   placeholder="Search for something..."
                   onChange={handleSearchChange}
                   className="mb-4"
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                <Select
-                  options={Gender}
-                  selectedValue={selectedGender}
-                  onChange={handleGenderChange}
-                  className="w-full bg-white"
                 />
               </div>
             </div>
