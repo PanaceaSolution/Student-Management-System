@@ -21,4 +21,8 @@ export class CreateClassDto {
   @IsArray()
   @IsUUID("all", { each: true })
   subjects: string[];
+
+  @IsArray()
+  @IsOptional()
+  subject: string[];
 }
