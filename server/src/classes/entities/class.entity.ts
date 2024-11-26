@@ -16,6 +16,11 @@ export class Class {
   @Column('text')
   section: string;
 
+  
+@Column('simple-array', { nullable: true })
+  subject: string[];
+  
+
   @Column('text', { nullable: true })
   routineFile: string;
 
