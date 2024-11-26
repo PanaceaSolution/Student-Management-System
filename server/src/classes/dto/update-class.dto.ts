@@ -7,7 +7,7 @@ export class UpdateClassDto {
 
   @IsString()
   section: string;
-  
+
   @IsArray()
   @IsOptional()
   subject: string[];
@@ -23,9 +23,7 @@ export class UpdateClassDto {
   staffRole: STAFFROLE = STAFFROLE.TEACHER;
 
   @IsArray()
+  @IsOptional()
   @IsUUID('all', { each: true })
   subjects: string[];
-
-  @IsArray()
-  subject: string[];
 }

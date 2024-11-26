@@ -16,10 +16,10 @@ export class Class {
   @Column('text')
   section: string;
 
-  
-@Column('simple-array', { nullable: true })
+
+  @Column('simple-array', { nullable: true })
   subject: string[];
-  
+
 
   @Column('text', { nullable: true })
   routineFile: string;
@@ -40,10 +40,7 @@ export class Class {
   @JoinTable()
   attendences: Attendence[];
 
-  @OneToMany(()=>Student, (student)=>student.studentClass)
+  @OneToMany(() => Student, (student) => student.studentClass)
   // @JoinTable()
   students: Student[];
-
-  @Column('array', { nullable: true })
-  subject: string;
 }

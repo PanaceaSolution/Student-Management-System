@@ -11,7 +11,7 @@ export class CreateClassDto {
   @IsOptional()
   @IsString()
   routineFile?: Express.Multer.File;
-  
+
   @IsArray()
   @IsOptional()
   subject: string[];
@@ -23,10 +23,7 @@ export class CreateClassDto {
   staffRole: STAFFROLE = STAFFROLE.TEACHER;
 
   @IsArray()
+  @IsOptional()
   @IsUUID('all', { each: true })
   subjects: string[];
-
-  @IsArray()
-  @IsOptional()
-  subject: string[];
 }
