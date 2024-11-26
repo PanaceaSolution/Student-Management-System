@@ -16,10 +16,12 @@ import {
    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
+import { useRefresh } from "@/context/RefreshProvider";
 
 const Navbar = () => {
    const navigate = useNavigate();
-   const { loggedInUser, logout, refresh } = useAuthStore();
+   const { loggedInUser, logout } = useAuthStore();
+   const { refreshWithRetry } = useRefresh()
    const [currentTime, setCurrentTime] = useState(dayjs());
    const [hasShadow, setHasShadow] = useState(false);
 
@@ -36,14 +38,6 @@ const Navbar = () => {
          window.removeEventListener("scroll", handleScroll);
       };
    }, []);
-
-   const handleRefresh = async () => {
-      try {
-         await refresh();
-      } catch (error) {
-         console.error("Error refreshing session:", error);
-      }
-   };
 
    const logoutHandle = async () => {
       try {
@@ -84,7 +78,7 @@ const Navbar = () => {
                {currentTime.format("HH:mm:ss A")} - {currentTime.format("D MMM, YYYY")}
             </p>
             {/* Refresh Button */}
-            <Button onClick={handleRefresh} className="hidden md:block">
+            <Button onClick={refreshWithRetry} className="hidden md:block">
                <FaSync className="w-6 h-6 text-primary" />
             </Button>
 
