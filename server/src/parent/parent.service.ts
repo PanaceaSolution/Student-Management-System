@@ -1,4 +1,4 @@
-import { User } from '../user/authentication/entities/authentication.entity';
+//package imports
 import {
   Injectable,
   BadRequestException,
@@ -7,13 +7,16 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Equal, In, Repository } from 'typeorm';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
+
+//file imports
+import { User } from '../user/authentication/entities/authentication.entity';
 import { Parent } from './entities/parent.entity';
 import { ParentDto } from './dto/parent.dto';
 import { ROLE } from '../utils/role.helper';
 import { AuthenticationService } from 'src/user/authentication/authentication.service';
 import { decryptdPassword, generateRandomPassword } from 'src/utils/utils';
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
-import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { Student } from 'src/student/entities/student.entity';
 import ResponseModel from 'src/utils/utils';
 
