@@ -18,6 +18,9 @@ export class Course {
   @Column({ nullable: true })
   file: string; 
 
+  // @Column({ type:"simple-array",nullable: true })
+  // teachers: Array<string>;
+
   @OneToMany(() => Class, (class_) => class_.classTeacher)
   classes: Class[];
 

@@ -28,7 +28,7 @@ export class Class {
   @JoinColumn({ name: 'classTeacherStaffId' })
   classTeacher: Staff;
 
-  @Column()
+  @Column('text', { nullable: true })
   classTeacherStaffId: string;
 
   @ManyToMany(() => Course, (course) => course.classes, { eager: true })

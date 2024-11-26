@@ -13,7 +13,7 @@ import ResponseModel from 'src/utils/utils';
     TypeOrmModule.forFeature([
       Parent,
       User,
-      Student, // Include Student if Parent has a relation with Student
+      Student, 
     ]),
     AuthenticationModule,
     ResponseModel

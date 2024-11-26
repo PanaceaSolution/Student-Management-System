@@ -37,7 +37,12 @@ export class ParentService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ) {
+  ): Promise<{
+    parent: Parent;
+    user: User;
+    plainPassword: string;
+    success: boolean;
+  }> {
     const {
       childNames,
       email,
@@ -48,121 +53,104 @@ export class ParentService {
       document,
       studentId,
     } = createdParentDto;
-
+  
     if (!profile || !profile.fname || !profile.lname) {
-      throw new BadRequestException(
-        'Profile information (fname and lname) is required.',
-      );
+      throw new BadRequestException('Profile information (fname and lname) is required.');
     }
-
+  
     const existingUser = await this.userRepository.findOne({
       where: { email },
     });
     if (existingUser) {
       throw new BadRequestException('Parent with this email already exists.');
     }
-
-    let profilePictureUrl: string | null = null;
+  
     const documentUrls = [];
-
-    if (files.profilePicture && files.profilePicture.length > 0) {
-      try {
-        const profilePictureBuffer = files.profilePicture[0].buffer;
-        const profilePictureUrls = await uploadFilesToCloudinary(
-          [profilePictureBuffer],
-          'profile_pictures',
-        );
-        profilePictureUrl = profilePictureUrls[0];
-      } catch (error) {
-        throw new InternalServerErrorException(
-          'Failed to upload profile picture',
-        );
-      }
-    }
-
     if (files.documents && files.documents.length > 0) {
-      try {
-        const documentBuffers = files.documents.map((doc) => doc.buffer);
-        const uploadedDocumentUrls = await uploadFilesToCloudinary(
-          documentBuffers,
-          'documents',
-        );
-
-        documentUrls.push(
-          ...uploadedDocumentUrls.map((url, index) => ({
-            documentName:
-              document[index]?.documentName || `Document ${index + 1}`,
-            documentFile: url,
-          })),
-        );
-      } catch (error) {
-        throw new InternalServerErrorException('Failed to upload documents');
-      }
+      const documentBuffers = files.documents.map((doc) => doc.buffer);
+      const uploadedDocumentUrls = await uploadFilesToCloudinary(documentBuffers, 'documents');
+      documentUrls.push(
+        ...uploadedDocumentUrls.map((url, index) => ({
+          documentName: document[index]?.documentName || `Document ${index + 1}`,
+          documentFile: url,
+        })),
+      );
     }
-
+  
+    const students = studentId
+      ? await this.studentRepository.find({
+          where: { studentId: In(studentId) },
+          relations: ['user', 'user.address', 'user.contact', 'user.document'],
+        })
+      : [];
+  
+    if (studentId && students.length !== studentId.length) {
+      throw new NotFoundException('One or more student IDs are invalid.');
+    }
+  
+    const parentAddress = students[0]?.user.address || address;
+    const parentContact = students[0]?.user.contact || contact;
+    const parentDocuments = students[0]?.user.document || documentUrls;
+  
     const registerDto = {
       email,
       role,
       profile,
-      address,
-      contact,
-      document: documentUrls,
+      address: Array.isArray(parentAddress) ? parentAddress : [parentAddress],
+      contact: parentContact,
+      document: Array.isArray(parentDocuments)
+        ? parentDocuments.map((doc) => ({
+            documentName: doc.documentName || 'Unknown',
+            documentFile: doc.documentFile || '',
+          }))
+        : [],
       password: generateRandomPassword(),
       createdAt: new Date().toISOString(),
-      refreshToken: null,
     };
-
-    //linking student
-    let students = [];
-    if (studentId && studentId.length > 0) {
-      students = await this.studentRepository.find({
-        where: { studentId: In(studentId) },
-      });
-
-      if (students.length !== studentId.length) {
-        throw new NotFoundException('One or more student IDs are invalid.');
-      }
-    }
-
+  
     const newParent = this.parentRepository.create({
       student: students,
-      childNames
+      childNames,
     });
-
+  
     const parentCreated = await this.parentRepository.save(newParent);
+  
     if (parentCreated) {
-      const createUserResponse = await this.userService.register(
-        registerDto,
-        files,
-      );
+      const createUserResponse = await this.userService.register(registerDto, files);
+  
       if (!createUserResponse || !createUserResponse.user) {
-        throw new InternalServerErrorException(
-          'Error occurred while creating user',
-        );
+        throw new InternalServerErrorException('Error occurred while creating user');
       }
-
+  
       const userReference = await this.userRepository.findOne({
-        where: { userId: createUserResponse.user.id },
+        where: { email: registerDto.email },
+        relations: ['address', 'contact', 'document'],
       });
-      console.log(userReference);
-
+  
       if (!userReference) {
-        return { status: 500, message: 'Error finding user after creation' };
+        throw new InternalServerErrorException('Error finding user after creation');
       }
-      const finalUser = await this.parentRepository.save({
+  
+      const finalParent = await this.parentRepository.save({
         ...newParent,
         user: userReference,
       });
-      console.log(finalUser);
-      let plainPassword = decryptdPassword(userReference.password);
-      //
-      return new ResponseModel('Parent created successfully', true, {
-        parent: { documents: documentUrls, ...newParent },
-        user: createUserResponse.user,
+  
+      const plainPassword = decryptdPassword(userReference.password);
+  
+      return {
+        success: true,
+        parent: finalParent,
+        user: userReference,
         plainPassword,
-      });
+      };
     }
+  
+    throw new InternalServerErrorException('Error creating parent');
   }
+  
+  
+  
 
   async updateParent(
     id: UUID,
