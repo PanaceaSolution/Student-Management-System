@@ -6,25 +6,27 @@ import { devtools, persist } from 'zustand/middleware'
 const useSubjectStore = create(
    devtools(
       persist(
-         (set, get) => ({
-            loading: false,
+         (set) => ({
+            isSubmitting: false,
+            isDeleting: false,
+            isLoading: false,
             error: null,
             subjects: [],
 
             // Get all subjects
             getAllSubjects: async () => {
-               set({ loading: true, error: null })
+               set({ isLoading: true, error: null })
                try {
                   const res = await getAllSubjectsService()
                   if (res.success) {
                      set({
                         subjects: res.data,
-                        loading: false
+                        isLoading: false
                      })
                   }
                   return res;
                } catch (error) {
-                  set({ error: error.message, loading: false })
+                  set({ error: error.message, isLoading: false })
                   return error
                }
             },
@@ -32,30 +34,26 @@ const useSubjectStore = create(
 
             // Add a new subject
             addSubject: async (subjectData) => {
-               set({ loading: true, error: null })
+               set({ isSubmitting: true, error: null })
                try {
                   const res = await createSubjectService(subjectData)
-                  console.log("Subject", subjectData);
-
-                  console.log("Response:", res);
-
                   if (res.success) {
                      toast.success(res.message)
                      set((state) => ({
                         subjects: [...state.subjects, res.data],
-                        loading: false
+                        isSubmitting: false
                      }))
                   }
                   return res
                } catch (error) {
-                  set({ error: error.message, loading: false })
+                  set({ error: error.message, isSubmitting: false })
                   return error
                }
             },
 
             // Update an existing subject
             updateSubject: async (subjectId, updatedSubjectData) => {
-               set({ loading: true, error: null });
+               set({ isSubmitting: true, error: null });
 
                try {
                   const data = await updateSubjectService(subjectId, updatedSubjectData);
@@ -66,18 +64,16 @@ const useSubjectStore = create(
                         subjects: state.subjects.map((subject) =>
                            subject.id === subjectId ? { ...subject, ...updatedSubjectData } : subject
                         ),
-                        loading: false,
+                        isSubmitting: false,
                      }));
-
-                     await get().getAllSubjects();
                   } else {
                      toast.error('Failed to update');
-                     set({ loading: false });
+                     set({ isSubmitting: false });
                   }
 
                   return data;
                } catch (error) {
-                  set({ error: error.message, loading: false });
+                  set({ error: error.message, isSubmitting: false });
                   toast.error(`Error: ${error.message}`); // Show error message to user
                   return error; // Consider returning an object instead for better error handling
                }
@@ -103,7 +99,10 @@ const useSubjectStore = create(
                }
             }
          }),
-         { name: 'subjects' }
+         {
+            name: 'subjects',
+            partialize: (state) => ({ subjects: state.subjects }),
+         }
       )
    )
 )

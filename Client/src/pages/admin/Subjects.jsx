@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import useExport from '@/hooks/useExport';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pencil, Trash2 } from 'lucide-react';
+import AdminTable from '@/components/admin/AdminTable';
 
 
 const Exports = [
@@ -15,8 +16,8 @@ const Exports = [
    { value: "PDF", label: "PDF" },
 ];
 
-const subjectsTableHead = ["Id", "Subject Name", "Class", "Section", "Actions"];
-const subjectTableField = ["id", "subjectName", "class", "section"];
+const subjectsTableHead = ["", "Subject Name", "Description", "Actions"];
+const subjectTableField = ["courseName", "courseDescription", "class", "section"];
 
 const Subjects = () => {
    const [selectedExport, setSelectedExport] = useState("");
@@ -70,7 +71,6 @@ const Subjects = () => {
       handleExport();
    };
 
-
    const handleSearchChange = (event) => {
       setSearchTerm(event.target.value);
    };
@@ -78,14 +78,6 @@ const Subjects = () => {
    const handleClassChange = (event) => {
       setSelectedClass(event.target.value);
    };
-
-   // const filteredSubjects = useMemo(() => {
-   //    return subjects.filter(subject => {
-   //       const matchesSearchTerm = subject.subjectName.toLowerCase().includes(searchTerm.toLowerCase());
-   //       const matchesClass = selectedClass ? subject.class === selectedClass : true;
-   //       return matchesSearchTerm && matchesClass;
-   //    });
-   // }, [sortedSubjects, searchTerm, selectedClass]);
 
 
    return (
@@ -100,14 +92,17 @@ const Subjects = () => {
                         onChange={handleExportChange}
                         className="w-32 bg-white"
                      />
-                     <SubjectForm
-                        isModalOpen={isModalOpen}
-                        setIsModalOpen={setIsModalOpen}
-                        id={selectedId}
-                        setId={setSelectedId}
-                        isUpdating={isUpdating}
-                        setIsUpdating={setIsUpdating}
-                     />
+                     <Button
+                        variant="create"
+                        className="uppercase"
+                        onClick={() => {
+                           setIsUpdating(false);
+                           setIsModalOpen(true);
+                           setSelectedId(null);
+                        }}
+                     >
+                        Add Subjects
+                     </Button>
                   </div>
                </div>
                <div className="border-b-2 p-2">
@@ -121,17 +116,18 @@ const Subjects = () => {
                      </div>
                   </div>
                </div>
-               {/* <div className="relative w-full overflow-x-auto shadow-md">
-                  <TableWithActions
+               <div className="relative w-full overflow-x-auto shadow-md">
+                  <AdminTable
+                     title="Subjects"
                      tableHead={subjectsTableHead}
-                     tableBody={filteredSubjects}
                      tableFields={subjectTableField}
-                     noDataMessage="No subjects found"
+                     user={subjects}
+                     handleUserData={handleEdit}
                      handleEdit={handleEdit}
                      handleDelete={handleDelete}
                   />
-               </div> */}
-               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+               </div>
+               {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
                   {subjects.map((subject) =>
                      <Card key={subject.courseId} className="shadow-lg">
                         <CardHeader>
@@ -158,9 +154,17 @@ const Subjects = () => {
                         </CardFooter>
                      </Card>
                   )}
-               </div>
+               </div> */}
             </div>
          </div>
+         <SubjectForm
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+            id={selectedId}
+            setId={setSelectedId}
+            isUpdating={isUpdating}
+            setIsUpdating={setIsUpdating}
+         />
       </section>
    );
 };

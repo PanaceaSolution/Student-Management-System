@@ -40,7 +40,7 @@ const SubjectForm = ({
    setIsUpdating
 }) => {
 
-   const { addSubject, updateSubject } = useSubjectStore()
+   const { addSubject, updateSubject, isSubmitting } = useSubjectStore()
 
    // useEffect(() => {
    //    if (id) {
@@ -60,11 +60,8 @@ const SubjectForm = ({
       const res = isUpdating
          ? await updateSubject(id, formData)
          : await addSubject(formData);
-      console.log("Response:", res);
-
 
       if (res.success) {
-         toast.success(res.message);
          reset()
          setIsModalOpen(false);
          setId(null);
@@ -73,22 +70,6 @@ const SubjectForm = ({
 
    return (
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-         <DialogTrigger asChild>
-            <Button
-               variant="create"
-               className="uppercase"
-               onClick={() => {
-                  reset({
-                     name: "",
-                  });
-                  setIsUpdating(false);
-                  setIsModalOpen(true);
-                  setId(null);
-               }}
-            >
-               Add Subjects
-            </Button>
-         </DialogTrigger>
          <DialogContent className="sm:max-w-[425px] bg-white">
             <DialogHeader>
                <DialogTitle className="text-xl font-bold text-center uppercase">
@@ -128,8 +109,20 @@ const SubjectForm = ({
                   ))}
                </div>
                <div className="flex justify-end mt-4">
-                  <Button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white">
-                     Submit
+                  <Button
+                     type="submit"
+                     className="bg-blue-500 hover:bg-blue-600 text-white"
+                     disabled={isSubmitting}
+                  >
+                     {isSubmitting
+                        ? (
+                           <div className='flex items-center gap-2'>
+                              <Spinner />
+                              <span>Submitting...</span>
+                           </div>
+                        )
+                        : "Submit"
+                     }
                   </Button>
                </div>
             </form>
