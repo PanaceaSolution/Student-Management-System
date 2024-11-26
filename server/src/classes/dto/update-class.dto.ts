@@ -21,4 +21,7 @@ export class UpdateClassDto {
   @IsArray()
   @IsUUID("all", { each: true })
   subjects: string[];
+
+  @IsArray()
+  subject: string[];
 }

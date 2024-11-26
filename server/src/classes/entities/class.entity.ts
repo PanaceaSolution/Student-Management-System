@@ -38,4 +38,7 @@ export class Class {
   @OneToMany(()=>Student, (student)=>student.studentClass)
   // @JoinTable()
   students: Student[];
+
+  @Column('array', { nullable: true })
+  subject: string;
 }
