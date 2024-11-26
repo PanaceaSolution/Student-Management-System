@@ -7,6 +7,10 @@ export class UpdateClassDto {
 
   @IsString()
   section: string;
+  
+  @IsArray()
+  @IsOptional()
+  subject: string[];
 
   @IsOptional()
   @IsString()
@@ -16,10 +20,10 @@ export class UpdateClassDto {
   classTeacherId: string;
 
   @IsEnum(STAFFROLE)
-  staffRole: STAFFROLE = STAFFROLE.TEACHER; 
+  staffRole: STAFFROLE = STAFFROLE.TEACHER;
 
   @IsArray()
-  @IsUUID("all", { each: true })
+  @IsUUID('all', { each: true })
   subjects: string[];
 
   @IsArray()
