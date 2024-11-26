@@ -7,14 +7,15 @@ const useUserStore = create(
    devtools(
       persist(
          (set) => ({
-            loading: false,
+            isLoading: false,
+            isDeleting: false,
             error: null,
             allUsers: [],
             totalUsers: 0,
             pages: 0,
 
             getAllUser: async (role) => {
-               set({ loading: true, error: null });
+               set({ isLoading: true, error: null });
                try {
                   const data = await getAllUserService(role);
                   if (data.status === 200) {
@@ -22,38 +23,43 @@ const useUserStore = create(
                         allUsers: data.data,
                         totalUsers: data.total,
                         pages: data.totalPages,
-                        loading: false
+                        isLoading: false
                      })
                   } else {
-                     set({ loading: false })
+                     set({ isLoading: false })
                   }
                } catch (error) {
-                  set({ error: error.message, loading: false })
+                  set({ error: error.message, isLoading: false })
                }
             },
 
             deleteUser: async (id) => {
-               set({ loading: true, error: null });
+               set({ isDeleting: true, error: null });
                try {
                   const data = await deleteUserService(id);
                   if (data.status === 200) {
                      set((state) => ({
                         allUsers: state.allUsers.filter((user) => user.id !== id),
-                        loading: false
+                        isDeleting: false
                      }));
                      toast.success('User deleted successfully')
                   } else {
                      toast.error('Failed to delete user')
-                     set({ loading: false })
+                     set({ isDeleting: false })
                   }
                } catch (error) {
-                  set({ error: error.message, loading: false });
+                  set({ error: error.message, isDeleting: false });
                   return false;
                }
             },
          }),
          {
-            name: "users"
+            name: "users",
+            partialize: (state) => ({
+               allUsers: state.allUsers,
+               pages: state.pages,
+               totalUsers: state.totalUsers
+            })
          }
       )
    )
