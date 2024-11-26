@@ -23,13 +23,13 @@ const Logistics = lazy(() => import("./pages/admin/Logistics"));
 const Portfolio = lazy(() => import("./pages/users/Portfolio"));
 const Routine = lazy(() => import("./pages/users/Routine"));
 const Resources = lazy(() => import("./pages/users/Resources"));
-const Tasks = lazy(() => import("./pages/users/Tasks"));
-const TaskDetails = lazy(() => import("./pages/users/TaskDetails"));
+const Tasks = lazy(() => import("./pages/users/tasks/Tasks"));
+const TaskDetails = lazy(() => import("./pages/users/tasks/TaskDetails"));
 const Message = lazy(() => import("./pages/users/Message"));
 const Report = lazy(() => import("./pages/users/Report"));
 const Fees = lazy(() => import("./pages/users/Fees"));
-const AttendanceDashboard = lazy(()=>import('./pages/attendence/attendenceDashboard'))
-const AttendanceTable = lazy(()=>import('./pages/attendence/attendenceTable'))
+const AttendanceDashboard = lazy(() => import('./pages/attendence/attendenceDashboard'))
+const AttendanceTable = lazy(() => import('./pages/attendence/attendenceTable'))
 
 // Define route configuration
 const routeConfig = [
@@ -170,6 +170,7 @@ const App = () => {
         </Routes>
       </Suspense>
     </Router>
+
   );
 };
 
