@@ -16,24 +16,25 @@ const useAuthStore = create(
    devtools(
       persist(
          (set) => ({
-            isLoading: false,
-            // isAuthenticated: false,
-            // loggedInUser: null,
-            isAuthenticated: true,
-            loggedInUser: {
-               profile: {
-                  profilePicture: '',
-                  fname: 'Aayush',
-                  lname: 'Ghimire',
-               },
-               role: 'STUDENT',
-               id: 0,
-               username: ''
-            },
+            isLoggingIn: false,
+            isLoggingOut: false,
+            isAuthenticated: false,
+            loggedInUser: null,
+            // isAuthenticated: true,
+            // loggedInUser: {
+            //    profile: {
+            //       profilePicture: '',
+            //       fname: 'Aayush',
+            //       lname: 'Ghimire',
+            //    },
+            //    role: 'STUDENT',
+            //    id: 0,
+            //    username: ''
+            // },
 
             // Login action
             login: async (userData) => {
-               set({ isLoading: true });
+               set({ isLoggingIn: true });
                try {
                   const res = await loginService(userData);
                   if (res.success) {
@@ -63,12 +64,12 @@ const useAuthStore = create(
                   set({ isAuthenticated: false, loggedInUser: null });
                   toast.error(error.message);
                } finally {
-                  set({ isLoading: false });
+                  set({ isLoggingIn: false });
                }
             },
 
             logout: async () => {
-               set({ isLoading: true });
+               set({ isLoggingOut: true });
                try {
                   const res = await logoutService();
                   if (res.success) {
@@ -84,7 +85,7 @@ const useAuthStore = create(
                   console.error("Error during logout:", error);
                   toast.error(error.message);
                } finally {
-                  set({ isLoading: false });
+                  set({ isLoggingOut: false });
                }
             },
 
