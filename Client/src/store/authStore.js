@@ -16,13 +16,24 @@ const useAuthStore = create(
    devtools(
       persist(
          (set) => ({
-            loading: false,
-            isAuthenticated: false,
-            loggedInUser: null,
+            isLoading: false,
+            // isAuthenticated: false,
+            // loggedInUser: null,
+            isAuthenticated: true,
+            loggedInUser: {
+               profile: {
+                  profilePicture: '',
+                  fname: 'Aayush',
+                  lname: 'Ghimire',
+               },
+               role: 'STUDENT',
+               id: 0,
+               username: ''
+            },
 
             // Login action
             login: async (userData) => {
-               set({ loading: true });
+               set({ isLoading: true });
                try {
                   const res = await loginService(userData);
                   if (res.success) {
@@ -41,7 +52,7 @@ const useAuthStore = create(
                            role: finalRole,
                            id: decodedData.id,
                            username: decodedData.username
-                        }
+                        },
                      });
                      toast.success("Login successful");
                   } else {
@@ -52,12 +63,12 @@ const useAuthStore = create(
                   set({ isAuthenticated: false, loggedInUser: null });
                   toast.error(error.message);
                } finally {
-                  set({ loading: false });
+                  set({ isLoading: false });
                }
             },
 
             logout: async () => {
-               set({ loading: true });
+               set({ isLoading: true });
                try {
                   const res = await logoutService();
                   if (res.success) {
@@ -73,7 +84,7 @@ const useAuthStore = create(
                   console.error("Error during logout:", error);
                   toast.error(error.message);
                } finally {
-                  set({ loading: false });
+                  set({ isLoading: false });
                }
             },
 
