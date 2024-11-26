@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import useStudentStore from "@/store/studentStore";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import ProfilePicUpload from "@/components/common/profilePicUpload";
+import ProfilePicUpload from "@/components/common/ImageUpload";
 import StaffDocumentUpload from "@/components/admin/StaffForm/StaffDocumentUpload";
 
 const documentFields = [

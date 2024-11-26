@@ -14,7 +14,7 @@ import StepIndicator from '@/pages/admin/StudentForm/StepIndicator';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import StaffInfo from './StaffInfo';
 import AddressInfo from '@/pages/admin/StudentForm/AddressInfo';
-import ProfilePicUpload from '@/components/common/profilePicUpload';
+import ImageUpload from '@/components/common/ImageUpload';
 import StaffDocumentUpload from './StaffDocumentUpload';
 import Spinner from '@/components/Loader/Spinner';
 
@@ -220,9 +220,10 @@ const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, cu
                         errors={errors}
                         clearErrors={clearErrors}
                      />
-                     <ProfilePicUpload
-                        profilePic={profilePic}
-                        setProfilePic={setProfilePic}
+                     <ImageUpload
+                        label="Profile Picture"
+                        image={profilePic}
+                        setImage={setProfilePic}
                         clearErrors={clearErrors}
                         errors={errors}
                      />
@@ -237,7 +238,6 @@ const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, cu
                )}
                {currentStep === 2 && (
                   <StaffDocumentUpload
-                     register={register}
                      setDocuments={setDocuments}
                      documents={documents}
                      errors={errors}

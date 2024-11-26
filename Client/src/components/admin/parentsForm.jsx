@@ -20,7 +20,7 @@ import {
    MultiSelectorList,
    MultiSelectorItem,
 } from "@/components/ui/multi-select";
-import ProfilePicUpload from "../common/profilePicUpload";
+import ProfilePicUpload from "../common/ImageUpload";
 import useParentStore from "@/store/parentsStore";
 import { flattenData } from "@/utilities/utilities";
 
