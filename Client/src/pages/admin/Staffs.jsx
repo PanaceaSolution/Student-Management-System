@@ -142,7 +142,6 @@ const Staffs = () => {
                   setSelectedData={setSelectedData}
                   currentStep={currentStep}
                   setCurrentStep={setCurrentStep}
-                  loading={isSubmitting}
                 />
               </div>
             </div>

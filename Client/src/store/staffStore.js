@@ -130,7 +130,14 @@ const useStaffStore = create(
                }
             },
          }),
-         { name: "staffs" }
+         {
+            name: "staffs",
+            partialize: (state) => ({
+               staff: state.staff,
+               pages: state.pages,
+               totalUsers: state.totalUsers
+            }),
+         }
       )
    )
 );
