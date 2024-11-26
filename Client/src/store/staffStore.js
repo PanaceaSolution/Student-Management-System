@@ -66,7 +66,7 @@ const useStaffStore = create(
                   if (res.success) {
                      const formattedStaff = flattenNestedData(addedStaff(res));
                      set((state) => ({
-                        staff: [formattedStaff, ...state.staff],
+                        staff: [...state.staff, formattedStaff],
                         isSubmitting: false,
                      }));
                      toast.success(res.message);
@@ -93,7 +93,7 @@ const useStaffStore = create(
 
                      set((state) => ({
                         staff: state.staff.map((staff) =>
-                           staff.staffId === staffId ? { ...staff, ...formattedStaff } : staff
+                           staff.user_staffId === staffId ? { ...staff, formattedStaff } : staff
                         ),
                         isSubmitting: false,
                      }));

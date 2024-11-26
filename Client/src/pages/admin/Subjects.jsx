@@ -17,7 +17,7 @@ const Exports = [
 ];
 
 const subjectsTableHead = ["", "Subject Name", "Description", "Actions"];
-const subjectTableField = ["courseName", "courseDescription", "class", "section"];
+const subjectTableField = ["courseName", "courseDescription"];
 
 const Subjects = () => {
    const [selectedExport, setSelectedExport] = useState("");

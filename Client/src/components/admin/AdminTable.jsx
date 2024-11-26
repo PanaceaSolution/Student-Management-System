@@ -86,7 +86,7 @@ const AdminTable = ({ title, user, handleUserData, tableHead, tableFields, handl
                            <Button
                               variant="destructive"
                               size="icon"
-                              onClick={() => handleDelete(user.user_id)}
+                              onClick={() => handleDelete(user)}
                               disabled={loading}
                            >
                               {loading ? <Spinner /> : <Trash2 />}

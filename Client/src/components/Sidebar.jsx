@@ -49,12 +49,12 @@ const links = [
       icon: <FaHouseUser className="h-6 w-6" />,
       roles: ["ADMIN"],
    },
-   {
-      name: "Teachers",
-      href: "/teachers",
-      icon: <FaChalkboardTeacher className="h-6 w-6" />,
-      roles: ["ADMIN"],
-   },
+   // {
+   //    name: "Teachers",
+   //    href: "/teachers",
+   //    icon: <FaChalkboardTeacher className="h-6 w-6" />,
+   //    roles: ["ADMIN"],
+   // },
    {
       name: "Staff",
       href: "/staffs",
@@ -72,6 +72,12 @@ const links = [
       href: "/classes",
       icon: <SiGoogleclassroom className="h-6 w-6" />,
       roles: ["ADMIN"],
+   },
+   {
+      name: "Attendence",
+      href: "/attendence",
+      icon: <IoPeople className="h-6 w-6" />,
+      roles: ["TEACHER", "ADMIN"],
    },
    {
       name: "Logistics",
@@ -102,12 +108,6 @@ const links = [
       href: "/resources",
       icon: <GrResources className="h-6 w-6" />,
       roles: ["TEACHER", "STUDENT"],
-   },
-   {
-      name: "Attendence",
-      href: "/attendence",
-      icon: <IoPeople className="h-6 w-6" />,
-      roles: ["TEACHER", "ADMIN"],
    },
    {
       name: "Tasks",

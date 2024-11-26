@@ -118,8 +118,8 @@ const Staffs = () => {
     setSelectedData(data)
   }
 
-  const handleDelete = async (id) => {
-    await deleteStaff(id);
+  const handleDelete = async (data) => {
+    await deleteStaff(data.user_id);
   };
 
   return (
