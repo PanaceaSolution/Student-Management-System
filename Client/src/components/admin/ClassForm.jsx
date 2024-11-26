@@ -11,6 +11,8 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import useClassStore from "@/store/classStore";
 import Spinner from "../Loader/Spinner";
+import { useState } from "react";
+import ImageUpload from "../common/ImageUpload";
 
 const formFields = [
    {
@@ -29,15 +31,17 @@ const formFields = [
    },
 
 ]
-const ClassForm = ({ isOpen, setIsOpen }) => {
+const ClassForm = ({ isOpen, setIsOpen, selectedData }) => {
 
+   const [routine, setRoutine] = useState('');
    const { addClass, isSubmitting } = useClassStore();
 
    const {
       control,
       handleSubmit,
       formState: { errors },
-      reset
+      reset,
+      clearErrors
    } = useForm();
 
    const onSubmit = async (data) => {
@@ -55,15 +59,16 @@ const ClassForm = ({ isOpen, setIsOpen }) => {
 
    return (
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-         <DialogContent className="sm:max-w-[425px] bg-white">
+         <DialogContent className="bg-white overflow-y-auto sm:w-full sm:max-w-3xl">
             <DialogHeader>
                <DialogTitle className="text-xl font-bold text-center uppercase">
                   Add Class
                </DialogTitle>
                <DialogDescription />
             </DialogHeader>
+            <hr />
             <form onSubmit={handleSubmit(onSubmit)}>
-               <div className="grid gap-4 mb-4">
+               <div className="grid grid-cols-2 gap-4 mb-4">
                   {formFields.map(({ name, label, required, placeholder }) => (
                      <div key={name} className="grid items-center gap-2">
                         <Label htmlFor={name}>{label}</Label>
@@ -90,7 +95,14 @@ const ClassForm = ({ isOpen, setIsOpen }) => {
                      </div>
                   ))}
                </div>
-               <div className="flex justify-end mt-4">
+               <ImageUpload
+                  label="Routine(Optional)"
+                  image={routine}
+                  setImage={setRoutine}
+                  errors={errors}
+                  clearErrors={clearErrors}
+               />
+               <div className="flex justify-end mt-6">
                   <Button
                      type="submit"
                      className="bg-blue-500 hover:bg-blue-600 text-white"

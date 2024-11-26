@@ -27,7 +27,7 @@ const Class = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
 
-  const { classes, getAllClasses, isDeleting } = useClassStore();
+  const { classes, getAllClasses, deleteClass, isDeleting } = useClassStore();
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -70,8 +70,8 @@ const Class = () => {
     setSelectedData(data);
   }
 
-  const handleDelete = async (id) => {
-    await deleteClass(id);
+  const handleDelete = async (data) => {
+    await deleteClass(data.classId);
   }
 
   return (
@@ -123,6 +123,7 @@ const Class = () => {
       <ClassForm
         isOpen={isFormOpen}
         setIsOpen={setIsFormOpen}
+        selectedData={selectedData}
       />
     </section>
   );
