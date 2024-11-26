@@ -17,7 +17,6 @@ export class Attendence {
   @Column({ type: Date, nullable: true })
   date: Date;
 
-  @Column({ type: "simple-array", nullable: true })
-  classId: Array<string>;
-
+  @Column({ type: 'simple-json', nullable: true })
+  classId: string[];
 }

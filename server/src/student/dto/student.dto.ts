@@ -21,11 +21,13 @@ import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 
 export class StudentDto extends RegisterUserDto {
-  
+  @IsString()
+  @IsOptional()
+  section?: string;
 
   @IsString()
   @IsOptional()
-  section: string;
+  className?: string;
 
   @IsString()
   @IsOptional()
@@ -73,8 +75,6 @@ export class StudentDto extends RegisterUserDto {
   admissionDate?: Date;
 
   userId?: string;
-
-  studentClassId?: string;
 
   @Transform(({ value }) => {
     return value ? new Date(value).toISOString().split('T')[0] : undefined;

@@ -16,18 +16,6 @@ export class CreateCourseDto {
   @IsString()
   courseDescription: string;
 
-  @IsNotEmpty()
-  @IsString()
-  startDate: string;
-
-  @IsNotEmpty()
-  @IsString()
-  endDate: string;
-
   @IsOptional()
-  @IsUUID()
-  teacherId: string;
-
-  @IsBoolean()
-  isCurrent?: boolean;
+  file?: string;
 }

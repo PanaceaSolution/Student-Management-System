@@ -7,6 +7,7 @@ import { UpdateClassDto } from './dto/update-class.dto';
 import { Course } from 'src/course/entities/course.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
 import { deleteFileFromCloudinary, extractPublicIdFromUrl, uploadSingleFileToCloudinary } from 'src/utils/file-upload.helper';
+import ResponseModel from 'src/utils/utils';
 
 @Injectable()
 export class ClassService {

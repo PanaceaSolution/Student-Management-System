@@ -34,7 +34,7 @@ export class Staff {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @OneToMany(() => Course, (course) => course.teacher)
+  @OneToMany(() => Course, (course) => course)
   courses: Course[];
 
   @OneToMany(() => Class, (class_) => class_.classTeacher)

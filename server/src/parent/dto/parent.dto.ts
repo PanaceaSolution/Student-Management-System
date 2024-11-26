@@ -11,7 +11,6 @@ import { RegisterUserDto } from 'src/user/authentication/dto/register.dto';
 
 export class ParentDto extends RegisterUserDto {
   @IsArray()
-  @IsString({ each: true })
   @IsOptional()
   @Transform(
     ({ value }) => (typeof value === 'string' ? JSON.parse(value) : value),
