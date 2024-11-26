@@ -5,6 +5,7 @@ import {
   IsDate,
   IsBoolean,
   IsOptional,
+  isString,
 } from 'class-validator';
 
 export class CreateCourseDto {
@@ -18,4 +19,13 @@ export class CreateCourseDto {
 
   @IsOptional()
   file?: string;
+
+  @IsString()
+  fname:string;
+
+  @IsString()
+  lname:string;
+
+
+
 }

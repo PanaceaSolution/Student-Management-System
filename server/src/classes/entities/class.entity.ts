@@ -40,5 +40,5 @@ export class Class {
   students: Student[];
 
   @Column('simple-array', { nullable: true })
-  subject: string[];
+  subject: Array<string>;
 }

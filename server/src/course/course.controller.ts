@@ -4,6 +4,7 @@ import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import ResponseModel from 'src/utils/utils'; 
+
 @Controller('course')
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
@@ -15,12 +16,15 @@ export class CourseController {
     @UploadedFile() file?: Express.Multer.File, 
   ) {
     try {
-      
       if (file) {
         createCourseDto.file = file.path; 
       }
       const course = await this.courseService.create(createCourseDto);
-      return ResponseModel.success('Course created successfully', course); 
+      return ResponseModel.success('Course created successfully', {
+        ...course,
+        fname: createCourseDto.fname, // Include fname
+        lname: createCourseDto.lname, // Include lname
+      }); 
     } catch (error) {
       return ResponseModel.error('Failed to create course', error.message); 
     }
@@ -54,7 +58,6 @@ export class CourseController {
     @UploadedFile() file?: Express.Multer.File, 
   ) {
     try {
-      
       if (file) {
         updateCourseDto.file = file.path; 
       }
