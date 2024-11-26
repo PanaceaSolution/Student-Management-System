@@ -1,10 +1,10 @@
+import useAuthStore from "@/store/authStore";
 import React, { createContext, useContext, useEffect, useCallback } from "react";
-import { useStore } from "zustand";
 
 const RefreshContext = createContext();
 
 export const RefreshProvider = ({ children }) => {
-   const refresh = useStore((state) => state.refresh);
+   const refresh = useAuthStore((state) => state.refresh);
 
    const refreshWithRetry = useCallback(() => {
       let retryCount = 0;

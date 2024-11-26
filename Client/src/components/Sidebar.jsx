@@ -31,12 +31,12 @@ const links = [
       icon: <FaUserTie className="h-6 w-6" />,
       roles: ["ADMIN"],
    },
-   {
-      name: 'Subjects',
-      href: '/subjects',
-      icon: <SiStorybook className="h-6 w-6" />,
-      roles: ["ADMIN"],
-   },
+   // {
+   //    name: 'Subjects',
+   //    href: '/subjects',
+   //    icon: <SiStorybook className="h-6 w-6" />,
+   //    roles: ["ADMIN"],
+   // },
    {
       name: 'Classes',
       href: '/classes',

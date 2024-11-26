@@ -12,9 +12,26 @@ import { Input } from "../ui/input";
 import { Controller, useForm } from "react-hook-form";
 import useSubjectStore from "@/store/subjectStore";
 import { useEffect } from "react";
+import toast from "react-hot-toast";
+
+const formFields = [
+   {
+      name: "courseName",
+      label: "Course Name",
+      required: "Course Name is required",
+      placeholder: "Enter Course Name",
+      type: "text",
+   },
+   {
+      name: "courseDescription",
+      label: "Course Description",
+      required: "Course Description is required",
+      placeholder: "Enter Course Description",
+      type: "text",
+   }
+];
 
 const SubjectForm = ({
-   formFields,
    setIsModalOpen,
    isModalOpen,
    id,
@@ -23,27 +40,35 @@ const SubjectForm = ({
    setIsUpdating
 }) => {
 
-   const { addSubject, updateSubject, getSubjectById } = useSubjectStore()
+   const { addSubject, updateSubject } = useSubjectStore()
 
-   useEffect(() => {
-      if (id) {
-         getSubjectById(id).
-            then(data => reset(data));
-      }
-   }, [id]);
+   // useEffect(() => {
+   //    if (id) {
+   //       getSubjectById(id).
+   //          then(data => reset(data));
+   //    }
+   // }, [id]);
 
    const { control, handleSubmit, formState: { errors }, reset } = useForm({});
 
 
    const onSubmit = async (data) => {
-      if (isUpdating) {
-         await updateSubject(id, data);
-      } else {
-         await addSubject(data);
+      const formData = new FormData();
+      formData.append("courseName", data.courseName);
+      formData.append("courseDescription", data.courseDescription);
+
+      const res = isUpdating
+         ? await updateSubject(id, formData)
+         : await addSubject(formData);
+      console.log("Response:", res);
+
+
+      if (res.success) {
+         toast.success(res.message);
+         reset()
+         setIsModalOpen(false);
+         setId(null);
       }
-      reset();
-      setIsModalOpen(false);
-      setId(null);
    };
 
    return (

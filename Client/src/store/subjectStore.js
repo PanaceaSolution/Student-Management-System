@@ -1,4 +1,4 @@
-import { createSubjectService, deleteSubjectService, getAllSubjectsService, getSubjectByIdService, updateSubjectService } from '@/services/subjectServices'
+import { createSubjectService, deleteSubjectService, getAllSubjectsService, updateSubjectService } from '@/services/subjectServices'
 import toast from 'react-hot-toast'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
@@ -15,50 +15,38 @@ const useSubjectStore = create(
             getAllSubjects: async () => {
                set({ loading: true, error: null })
                try {
-                  const data = await getAllSubjectsService()
-                  if (data) {
-                     set({ subjects: data, loading: false })
-                  } else {
-                     set({ subjects: [], loading: false })
-                     toast.error('Failed to fetch data')
+                  const res = await getAllSubjectsService()
+                  if (res.success) {
+                     set({
+                        subjects: res.data,
+                        loading: false
+                     })
                   }
-                  return data
+                  return res;
                } catch (error) {
                   set({ error: error.message, loading: false })
                   return error
                }
             },
 
-            // Get subject by ID
-            getSubjectById: async (subjectId) => {
-               set({ loading: true, error: null })
-               try {
-                  const data = await getSubjectByIdService(subjectId)
-                  set({ loading: false })
-                  return data
-               } catch (error) {
-                  set({ error: error.message, loading: false })
-                  return error
-               }
-            },
 
             // Add a new subject
             addSubject: async (subjectData) => {
                set({ loading: true, error: null })
                try {
-                  const data = await createSubjectService(subjectData)
-                  if (data) {
-                     toast.success(data.message)
+                  const res = await createSubjectService(subjectData)
+                  console.log("Subject", subjectData);
+
+                  console.log("Response:", res);
+
+                  if (res.success) {
+                     toast.success(res.message)
                      set((state) => ({
-                        subjects: [...state.subjects, data],
+                        subjects: [...state.subjects, res.data],
                         loading: false
                      }))
-                     await get().getAllSubjects()
-                  } else {
-                     toast.error('Failed to add')
-                     set({ loading: false })
                   }
-                  return data
+                  return res
                } catch (error) {
                   set({ error: error.message, loading: false })
                   return error
@@ -100,19 +88,15 @@ const useSubjectStore = create(
             deleteSubject: async (subjectId) => {
                set({ loading: true, error: null })
                try {
-                  const data = await deleteSubjectService(subjectId)
-                  if (200) {
-                     toast.success(data.message)
+                  const res = await deleteSubjectService(subjectId)
+                  if (res.success) {
+                     toast.success(res.message)
                      set((state) => ({
-                        subjects: state.subjects.filter((subject) => subject.id !== subjectId),
+                        subjects: state.subjects.filter((subject) => subject.courseId !== subjectId),
                         loading: false
                      }))
-                     await get().getAllSubjects()
-                     return data
-                  } else {
-                     toast.error('Failed to delete')
-                     set({ loading: false })
                   }
+                  return res
                } catch (error) {
                   set({ error: error.message, loading: false })
                   return error
