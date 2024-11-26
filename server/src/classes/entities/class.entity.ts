@@ -23,7 +23,7 @@ export class Class {
   @JoinColumn({ name: 'classTeacherStaffId' })
   classTeacher: Staff;
 
-  @Column()
+  @Column({nullable: true})
   classTeacherStaffId: string;
 
   @ManyToMany(() => Course, (course) => course.classes, { eager: true })
@@ -39,6 +39,6 @@ export class Class {
   // @JoinTable()
   students: Student[];
 
-  @Column('array', { nullable: true })
-  subject: string;
+  @Column('simple-array', { nullable: true })
+  subject: string[];
 }
