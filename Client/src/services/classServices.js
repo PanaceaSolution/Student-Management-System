@@ -30,7 +30,7 @@ export const updateClassService = async (id, updatedClassData) => {
 };
 
 export const deleteClassService = async (id) => {
-   const response = await fetch(`${URL}/class/delete/${id}`, {
+   const response = await fetch(`${URL}/class/${id}`, {
       method: "DELETE",
       headers: {
          "Content-Type": "application/json",
