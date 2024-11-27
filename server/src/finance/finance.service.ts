@@ -64,7 +64,6 @@ export class FinanceService {
   async findAll(): Promise<Finance[]> {
     return await this.financeRepository.find();
   }
-
   async findOne(id: string): Promise<Finance> {
     const finance = await this.financeRepository.findOne({ where: { id } });
     if (!finance)
