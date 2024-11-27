@@ -1154,5 +1154,45 @@ export class AuthenticationService {
       throw new InternalServerError(`Unable to delete user data: ${error.message}`);
     }
   }
+  async getUserStatistics() {
+    try {
+      const totalUsers = await this.userRepository.count();
+      const totalStudents = await this.studentRepository.count();
+      const totalParents = await this.parentRepository.count();
+      const totalStaff = await this.staffRepository.count();
+      const totalTeachers = await this.staffRepository.count({
+        where: { staffRole: STAFFROLE.TEACHER },
+      });
+      const totalAccountants = await this.staffRepository.count({
+        where: { staffRole: STAFFROLE.ACCOUNTANT },
+      });
+      const totalLibrarians = await this.staffRepository.count({
+        where: { staffRole: STAFFROLE.LIBRARIAN },
+      });
+      return {
+        message: 'User statistics fetched successfully',
+        status: 200,
+        success: true,
+        data: {
+          totalUsers,
+          totalStudents,
+          totalParents,
+          totalStaff,
+          staffRoles: {
+            totalTeachers,
+            totalAccountants,
+            totalLibrarians,
+          },
+        },
+      };
+    } catch (error) {
+      throw new InternalServerError(
+        'Error occurred while fetching user statistics',
+        error,
+      );
+    }
+  }
+  
+  
   
 }

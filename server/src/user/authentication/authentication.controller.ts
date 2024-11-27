@@ -177,4 +177,11 @@ export class AuthenticationController {
     }
     return await this.authenticationService.deactivateUsers(userIds);
   }
+
+  @Get('/user-statistics')
+async getUserStatistics(@Res() res: Response) {
+  const statistics = await this.authenticationService.getUserStatistics();
+  return res.status(200).json(statistics);
+}
+
 }
