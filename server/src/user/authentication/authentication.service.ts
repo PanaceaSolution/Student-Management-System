@@ -1153,7 +1153,6 @@ export class AuthenticationService {
         results,
       };
     } catch (error) {
-      // Catch unexpected errors during the deletion process
       throw new InternalServerErrorException({
         message: `Unable to delete user data: ${error.message}`,
         status: 500,
