@@ -17,7 +17,7 @@ export function calculateFees(params: CalculateFeesParams) {
     examinationFee,
     admissionFee,
     securityDeposite,
-    otherCharges,
+    otherCharges, 
     tax,
     extraCharges = '0',
     discount = '0',
