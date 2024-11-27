@@ -1,11 +1,10 @@
 import React from "react";
-import Info from "./Info";
-import Notice from "./Notice";
-import RecentActivity from "./RecentActivity";
-import EventCalender from "./EventCalender";
-import ExpenseChart from "./ExpenseChart";
-import InfoChart from "./InfoChart";
+import Info from "../components/admin/AdminDashboard/Info";
+import EventCalender from "../components/admin/AdminDashboard/EventCalender";
+import ExpenseChart from "../components/admin/AdminDashboard/ExpenseChart";
+import InfoChart from "../components/admin/AdminDashboard/InfoChart";
 import useAuthStore from "@/store/authStore";
+import Notice from "@/components/admin/AdminDashboard/Notice";
 
 const Dashboard = () => {
   const { loggedInUser } = useAuthStore();
@@ -21,7 +20,7 @@ const Dashboard = () => {
         {/* Event Calendar */}
         <EventCalender />
         {/* Notice Section */}
-        <Notice />
+        <Notice role={role} />
       </div>
 
       {/* Charts Section (Admin Only) */}

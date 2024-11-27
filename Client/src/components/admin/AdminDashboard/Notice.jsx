@@ -1,8 +1,8 @@
-import { Plus, RefreshCcw, X } from "lucide-react";
+import { Plus, } from "lucide-react";
 import React, { useState } from "react";
-import NoticeForm from "./NoticeForm";
+import NoticeForm from "../NoticeForm";
 
-// List of Tailwind CSS text color classes
+
 const tailwindColors = [
   "text-red-700",
   "text-blue-700",
@@ -19,34 +19,24 @@ const getRandomColorClass = () => {
   return tailwindColors[randomIndex];
 };
 
+const notices = [
+  {
+    id: 1,
+    title: "Notice 1",
+    description: "Description of Notice 1",
+    createdAt: "2023-08-01",
+  },
+  {
+    id: 2,
+    title: "Notice 2",
+    description: "Description of Notice 2",
+    createdAt: "2023-08-02",
+  },
+]
+
+
 const Notice = () => {
-  const [showModal, setShowModal] = useState(false);
-  const [editNotice, setEditNotice] = useState(null);
-  const [notices, setNotices] = useState([]);
-
-  const handleEditNotice = (notice) => {
-    setEditNotice(notice);
-    setShowModal(true);
-  };
-
-  const handleCreateNotice = () => {
-    setEditNotice(null);
-    setShowModal(true);
-  };
-
-  const handleSubmit = (data) => {
-    if (editNotice) {
-      e
-      const updatedNotices = notices.map((notice) =>
-        notice.id === editNotice.id ? { ...notice, ...data } : notice
-      );
-      setNotices(updatedNotices);
-    } else {
-      const newNotice = { ...data, id: notices.length + 1, createdAt: new Date().toDateString() };
-      setNotices([...notices, newNotice]);
-    }
-    setShowModal(false);
-  };
+  const [formOpen, setFormOpen] = useState(false);
 
   return (
     <>
@@ -55,7 +45,7 @@ const Notice = () => {
         <div className="flex justify-between px-4 p-2 border-b-2">
           <p className="text-lg text-black font-semibold">Notice Board</p>
           <div className="flex space-x-2 cursor-pointer">
-            <Plus size={20} className="cursor-pointer" onClick={handleCreateNotice} />
+            <Plus size={20} className="cursor-pointer" onClick={() => setFormOpen(true)} />
           </div>
         </div>
         <div className="max-h-80 overflow-y-auto scrollbar-thumb-gray-300 scrollbar-thin">
@@ -68,7 +58,6 @@ const Notice = () => {
               <span className="text-xs font-semibold">{notice.createdAt}</span>
               <p className="text-sm flex gap-2">
                 <span className={getRandomColorClass()}>{notice.title}</span>
-                <span>5 min ago</span>
               </p>
               <p>{notice.description}</p>
             </div>
@@ -76,14 +65,7 @@ const Notice = () => {
         </div>
       </div>
 
-      {/* Notice Form Modal */}
-      {showModal && (
-        <NoticeForm
-          notice={editNotice}
-          onSubmit={handleSubmit}
-          onClose={() => setShowModal(false)}
-        />
-      )}
+      <NoticeForm formOpen={formOpen} setFormOpen={setFormOpen} />
     </>
   );
 };
