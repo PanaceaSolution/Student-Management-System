@@ -39,8 +39,7 @@ export class StudentService {
     private readonly parentRepository: Repository<Parent>,
     private readonly parentService: ParentService,
     private readonly  authenticationService: AuthenticationService,
-  ) {}
-  async createStudent(
+  ) {}async createStudent(
     createStudentDto: StudentDto,
     files: {
       profilePicture?: Express.Multer.File[];
@@ -104,7 +103,7 @@ export class StudentService {
   
     const studentClass = await this.classRepository.findOne({
       where: { className, section },
-      select: ['classId'],
+      select: ['classId', 'className'], // Ensure className is included
     });
     if (!studentClass) {
       throw new NotFoundException('Class not found');
@@ -168,7 +167,7 @@ export class StudentService {
   
           const existingParentUser = await this.userRepository.findOne({
             where: { email: parentEmail },
-            relations: ['profile', 'parent'], // Include related entities
+            relations: ['profile', 'parent'],
           });
   
           if (
@@ -184,7 +183,7 @@ export class StudentService {
               parentData.student.push(newStudent);
               await this.parentRepository.save(parentData);
               return new ResponseModel('Student linked to existing parent successfully', true, {
-                student: newStudent,
+                student: { ...newStudent, className: studentClass.className }, // Add className
                 parent: {
                   parent: parentData,
                 },
@@ -219,7 +218,7 @@ export class StudentService {
             }
   
             return new ResponseModel('Student and Parent created successfully', true, {
-              student: newStudent,
+              student: { ...newStudent, className: studentClass.className }, // Add className
               password: decryptdPassword(userReference.password),
               parent: {
                 parent: createParentResponse.parent,
@@ -228,13 +227,13 @@ export class StudentService {
             });
           } catch (parentError) {
             console.error('Error during parent creation. Rolling back student...', parentError);
-            await this.authenticationService.deleteUsers([userReference?.userId]); // Add null check
+            await this.authenticationService.deleteUsers([userReference?.userId]);
             throw new InternalServerErrorException('Failed to create parent. Student has been rolled back.');
           }
         }
   
         return new ResponseModel('Student created successfully', true, {
-          student: newStudent,
+          student: { ...newStudent, className: studentClass.className }, // Add className
           user: createUserResponse.user,
           password: decryptdPassword(userReference.password),
         });

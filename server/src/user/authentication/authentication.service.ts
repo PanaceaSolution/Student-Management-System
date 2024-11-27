@@ -782,11 +782,11 @@ export class AuthenticationService {
   ) {
     try {
       const skip = (page - 1) * limit;
-
+  
       if (![ROLE.ADMIN, ROLE.STUDENT, ROLE.STAFF, ROLE.PARENT].includes(role)) {
         throw new NotFoundError(`${role} not found`);
       }
-
+  
       if (role === ROLE.STAFF) {
         if (!staffRole) {
           const allStaffResponse = await this.staffService.findAllStaff();
@@ -802,13 +802,13 @@ export class AuthenticationService {
               totalPages: 0,
             };
           }
-
+  
           const total = allStaffResponse.data.length;
           const paginatedStaff = allStaffResponse.data.slice(
             skip,
             skip + limit,
           );
-
+  
           return {
             message: 'Staff members fetched successfully',
             status: 200,
@@ -820,7 +820,7 @@ export class AuthenticationService {
             totalPages: Math.ceil(total / limit),
           };
         }
-
+  
         const roleData = await this.staffRepository.find({
           where: { staffRole: staffRole },
           relations: [
@@ -831,10 +831,10 @@ export class AuthenticationService {
             'user.document',
           ],
         });
-
+  
         const total = roleData.length;
         const paginatedStaff = roleData.slice(skip, skip + limit);
-
+  
         const formattedStaff = paginatedStaff.map((staff) => ({
           user: this.formatUserResponse(staff.user),
           staffId: staff.staffId,
@@ -853,11 +853,13 @@ export class AuthenticationService {
           totalPages: Math.ceil(total / limit),
         };
       }
-
+  
       let roleData;
       switch (role) {
         case ROLE.STUDENT:
-          roleData = await this.studentRepository.find({});
+          roleData = await this.studentRepository.find({
+            relations: ['studentClass'],
+          });
           break;
         case ROLE.PARENT:
           roleData = await this.parentRepository.find({});
@@ -865,7 +867,7 @@ export class AuthenticationService {
         default:
           break;
       }
-
+  
       const whereClause = { role } as any;
       const [users, total] = await this.userRepository.findAndCount({
         where: whereClause,
@@ -874,18 +876,27 @@ export class AuthenticationService {
         skip,
         take: limit,
       });
-
+  
       const formattedUsers = users.map(this.formatUserResponse);
-
-      const finalData = formattedUsers.map((user, index) =>
-        roleData && roleData[index] ? { user, ...roleData[index] } : null,
-      );
-
+  
+      const finalData = formattedUsers.map((user, index) => {
+        if (roleData && roleData[index]) {
+          const student = roleData[index];
+          const className = student.studentClass?.className || null; 
+          return {
+            user,
+            ...student,
+            className, 
+          };
+        }
+        return null;
+      });
+  
       return {
         message: 'Users fetched successfully',
         status: 200,
         success: true,
-        data: finalData,
+        data: finalData.filter((item) => item !== null), 
         total,
         page,
         limit,
@@ -895,6 +906,7 @@ export class AuthenticationService {
       throw new InternalServerError('Error fetching users by role', error);
     }
   }
+  
 
   async searchUser(
     searchTerm: string,
