@@ -24,6 +24,7 @@ import { GENDER, ROLE } from 'src/utils/role.helper';
 import { ParentService } from 'src/parent/parent.service';
 import { Parent } from 'src/parent/entities/parent.entity';
 
+
 @Injectable()
 export class StudentService {
   constructor(
@@ -35,6 +36,7 @@ export class StudentService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly parentService: ParentService,
+    private readonly  authenticationService: AuthenticationService,
   ) {}
   async createStudent(
     createStudentDto: StudentDto,
@@ -63,7 +65,7 @@ export class StudentService {
       contact,
       document,
       className,
-      parentEmail, // New field for parent email
+      parentEmail,
     } = createStudentDto;
   
     console.log('createParent:', createParent);
@@ -121,91 +123,106 @@ export class StudentService {
       transportationMode,
     });
   
-    const studentCreated = await this.studentRepository.save(newStudent);
+    try {
+      const studentCreated = await this.studentRepository.save(newStudent);
   
-    if (studentCreated) {
-      const registerDto = {
-        email,
-        role,
-        profile,
-        address,
-        contact,
-        document: documentUrls,
-        username: generateUsername(profile.fname, profile.lname, role),
-        password: generateRandomPassword(),
-        createdAt: new Date().toISOString(),
-        refreshToken: null,
-      };
-  
-      const createUserResponse = await this.userService.register(registerDto, files);
-  
-      if (!createUserResponse || !createUserResponse.user) {
-        throw new InternalServerErrorException('Error occurs while creating user');
-      }
-  
-      const userReference = await this.userRepository.findOne({
-        where: { userId: createUserResponse.user.id },
-      });
-  
-      if (!userReference) {
-        throw new InternalServerErrorException('Error finding user after creation');
-      }
-  
-      await this.studentRepository.save({
-        ...newStudent,
-        user: userReference,
-      });
-  
-      if (createParent) {
-        if (!parentEmail) {
-          throw new BadRequestException('Parent email is required when createParent is true.');
-        }
-  
-        const parentDto: ParentDto = {
-          childNames: [`${profile.fname} ${profile.lname}`],
-          email: parentEmail, // Use provided parent email
-          role: ROLE.PARENT,
-          profile: {
-            fname: fatherName || 'Parent',
-            lname: motherName || 'Unknown',
-            gender: profile.gender,
-            dob: profile.dob,
-            profilePicture: profile.profilePicture,
-          },
-          contact,
+      if (studentCreated) {
+        const registerDto = {
+          email,
+          role,
+          profile,
           address,
+          contact,
           document: documentUrls,
-          studentId: [studentCreated.studentId.toString()],
-          createdAt: new Date().toISOString(),
+          username: generateUsername(profile.fname, profile.lname, role),
           password: generateRandomPassword(),
+          createdAt: new Date().toISOString(),
+          refreshToken: null,
         };
   
-        const createParentResponse: {
-          parent: Parent;
-          user: User;
-          plainPassword: string;
-        } = await this.parentService.createParent(parentDto, files);
+        const createUserResponse = await this.userService.register(registerDto, files);
   
-        return new ResponseModel('Student and Parent created successfully', true, {
+        if (!createUserResponse || !createUserResponse.user) {
+          throw new InternalServerErrorException('Error occurs while creating user');
+        }
+  
+        const userReference = await this.userRepository.findOne({
+          where: { userId: createUserResponse.user.id },
+        });
+  
+        if (!userReference) {
+          throw new InternalServerErrorException('Error finding user after creation');
+        }
+  
+        await this.studentRepository.save({
+          ...newStudent,
+          user: userReference,
+        });
+  
+        if (createParent) {
+          if (!parentEmail) {
+            throw new BadRequestException('Parent email is required when createParent is true.');
+          }
+          const parentDto: ParentDto = {
+            childNames: [`${profile.fname} ${profile.lname}`],
+            email: parentEmail,
+            role: ROLE.PARENT,
+            profile: {
+              fname: fatherName || 'Parent',
+              lname: motherName || 'Unknown',
+              gender: profile.gender,
+              dob: profile.dob,
+              profilePicture: profile.profilePicture,
+            },
+            contact,
+            address,
+            document: documentUrls,
+            studentId: [studentCreated.studentId.toString()],
+            createdAt: new Date().toISOString(),
+            password: generateRandomPassword(),
+          };
+  
+          try {
+            const createParentResponse = await this.parentService.createParent(parentDto, files);
+  
+            if (!createParentResponse.plainPassword) {
+              throw new InternalServerErrorException('Error occurs while creating parent');
+            }
+  
+            return new ResponseModel('Student and Parent created successfully', true, {
+              student: newStudent,
+              password: decryptdPassword(userReference.password),
+              parent: {
+                parent: createParentResponse.parent,
+                plainPassword: createParentResponse.plainPassword,
+              },
+            });
+          } catch (parentError) {
+            console.error('Error during parent creation. Rolling back student...', parentError);
+            await this.authenticationService.deleteUsers([userReference.userId]); 
+            throw new InternalServerErrorException('Failed to create parent. Student has been rolled back.');
+          }
+        }
+  
+        return new ResponseModel('Student created successfully', true, {
           student: newStudent,
           user: createUserResponse.user,
           password: decryptdPassword(userReference.password),
-          parent: {
-            parent: createParentResponse.parent,
-            user: createParentResponse.user,
-            plainPassword: createParentResponse.plainPassword,
-          },
-
         });
       }
+    } catch (studentError) {
+      console.error('Error during createStudent. Rolling back...', studentError);
   
-      return new ResponseModel('Student created successfully', true, {
-        student: newStudent,
-        user: createUserResponse.user,
-        password: decryptdPassword(userReference.password),
-      });
+      // Ensure rollback of the student creation
+      if (newStudent && newStudent.studentId) {
+        await this.authenticationService.deleteUsers([newStudent.user?.userId]);
+      }
+  
+      throw new InternalServerErrorException('Failed to create student due to an error.');
     }
   }
+  
+  
   
 
   async updateStudent(
