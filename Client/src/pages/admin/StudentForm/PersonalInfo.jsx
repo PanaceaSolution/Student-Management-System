@@ -86,22 +86,6 @@ const PersonalInfo = ({ register, errors, clearErrors }) => {
       icon: <SquareUser size={20} />
     },
     {
-      name: "rollNumber",
-      label: "Roll-Number*",
-      required: "Roll-Number is required",
-      placeholder: "Enter Roll-Number",
-      type: "text",
-      icon: <CircleDollarSign size={20} />
-    },
-    {
-      name: "email",
-      label: "Email*",
-      required: "Email is required",
-      placeholder: "Enter Email",
-      type: "email",
-      icon: <AtSign size={20} />
-    },
-    {
       name: "studentClass",
       label: "Class*",
       required: "Class is required",
@@ -117,6 +101,22 @@ const PersonalInfo = ({ register, errors, clearErrors }) => {
       placeholder: "Select Section",
       type: "select",
       options: ["A", "B", "C"],
+    },
+    {
+      name: "rollNumber",
+      label: "Roll-Number*",
+      required: "Roll-Number is required",
+      placeholder: "Enter Roll-Number",
+      type: "text",
+      icon: <CircleDollarSign size={20} />
+    },
+    {
+      name: "email",
+      label: "Email*",
+      required: "Email is required",
+      placeholder: "Enter Email",
+      type: "email",
+      icon: <AtSign size={20} />
     },
     {
       name: "phoneNumber",

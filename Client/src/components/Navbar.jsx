@@ -74,7 +74,7 @@ const Navbar = () => {
             </div>
 
             {/* Current Date and Time */}
-            <p className="text-sm font-medium lg:text-right">
+            <p className="hidden md:block text-sm font-medium lg:text-right">
                {currentTime.format("HH:mm:ss A")} - {currentTime.format("D MMM, YYYY")}
             </p>
             {/* Refresh Button */}
