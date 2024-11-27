@@ -211,12 +211,5 @@ export class ParentService {
     }
   }
 
-  async getParentsNumber() {
-    const parentsNumber = await this.studentRepository.count();
-    return new ResponseModel(
-      'Parents fetched successfully',
-      true,
-      parentsNumber,
-    );
-  }
+
 }

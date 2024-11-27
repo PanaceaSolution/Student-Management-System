@@ -19,10 +19,7 @@ import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 export class ParentController {
   constructor(private readonly parentService: ParentService) {}
 
-  @Get('number')
-  async getStudents() {
-    return this.parentService.getParentsNumber();
-  }
+
 
   @Post('/create')
   @UseInterceptors(

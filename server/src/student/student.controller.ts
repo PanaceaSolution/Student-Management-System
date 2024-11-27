@@ -22,10 +22,6 @@ import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 export class StudentController {
   constructor(private readonly studentService: StudentService) {}
 
-  @Get('number')
-  async getStudents() {
-    return this.studentService.getStudentsNumber();
-  }
   
   @Post('create')
   @UseInterceptors(

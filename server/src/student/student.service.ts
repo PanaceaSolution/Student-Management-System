@@ -39,7 +39,8 @@ export class StudentService {
     private readonly parentRepository: Repository<Parent>,
     private readonly parentService: ParentService,
     private readonly  authenticationService: AuthenticationService,
-  ) {}async createStudent(
+  ) {}
+  async createStudent(
     createStudentDto: StudentDto,
     files: {
       profilePicture?: Express.Multer.File[];
@@ -444,8 +445,5 @@ export class StudentService {
     }
   }
 
-  async getStudentsNumber(){
-    const studentsNumber = await this.studentRepository.count()
-    return new ResponseModel('Students fetched successfully', true, studentsNumber)
-  }
+
 }

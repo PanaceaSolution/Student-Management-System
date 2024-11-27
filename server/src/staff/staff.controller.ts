@@ -61,18 +61,7 @@ export class StaffController {
   async getAllStaff() {
     return this.staffService.findAllStaff();
   }
-  
 
-
-  @Get('number')
-  async getStaffs() {
-    return this.staffService.getStaffsNumber();
-  }
-
-  @Get('teacher/number')
-  async getTeachers() {
-    return this.staffService.getTeachersNumber();
-  }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
