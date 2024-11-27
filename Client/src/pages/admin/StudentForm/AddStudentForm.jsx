@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from "@/components/ui/button";
 import ProfilePicUpload from "@/components/common/ImageUpload";
 import StaffDocumentUpload from "@/components/admin/StaffForm/StaffDocumentUpload";
+import Spinner from "@/components/Loader/Spinner";
 
 const documentFields = [
   { name: "marksheet", label: "Marksheet (optional)" },
@@ -18,7 +19,7 @@ const documentFields = [
 
 const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, currentStep, setCurrentStep }) => {
   const steps = ["Personal Info", "Address Info", "Document Upload"];
-  const { addStudent, updateStudent, loading } = useStudentStore();
+  const { addStudent, updateStudent, isSubmitting } = useStudentStore();
   const [profilePic, setProfilePic] = useState('');
   const [documents, setDocuments] = useState({
     birthCertificate: null,
@@ -269,8 +270,17 @@ const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, 
               <button
                 type="submit"
                 className="bg-blue-600 text-white py-2 px-4 rounded"
+                disabled={isSubmitting}
               >
-                {selectedData ? "Update" : "Submit"}
+                {isSubmitting
+                  ? (
+                    <div className='flex items-center gap-2'>
+                      <Spinner />
+                      <span>Submitting...</span>
+                    </div>
+                  )
+                  : "Submit"
+                }
               </button>
             )}
           </div>

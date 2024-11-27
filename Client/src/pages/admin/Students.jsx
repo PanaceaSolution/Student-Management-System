@@ -7,11 +7,9 @@ import useExport from "@/hooks/useExport";
 import useStudentStore from "@/store/studentStore";
 import { flattenData } from "@/utilities/utilities.js";
 import ActiveTab from "@/components/common/activeTab";
-import StaffTable from "@/components/admin/AdminTable";
 import DetailsCard from "@/components/admin/DetailsCard";
-import ResultShowing from "@/components/common/ResultShowing";
-import Paginations from "@/components/common/Paginations";
 import AddStudentForm from "./StudentForm/AddStudentForm";
+import AdminTable from "@/components/admin/AdminTable";
 
 // Custom hook for debouncing input value
 const useDebounce = (value, delay) => {
@@ -96,7 +94,7 @@ const Students = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
-  const { getAllStudents, loading, error, students, totalPages, total } = useStudentStore();
+  const { getAllStudents, deleteStudent, isDeleting, error, students, totalPages, total } = useStudentStore();
 
   useEffect(() => {
     getAllStudents("STUDENT");
@@ -165,6 +163,10 @@ const Students = () => {
     setSelectedData(data)
   }
 
+  const handleDelete = async (data) => {
+    await deleteStudent(data.user_id);
+  }
+
   return (
     <section>
       <div className="max-w-full mx-auto p-2">
@@ -220,14 +222,14 @@ const Students = () => {
               handleTabClick={handleTabClick}
             />
             <div className="relative w-full overflow-x-auto shadow-md">
-              <StaffTable
+              <AdminTable
                 title="Students"
                 tableHead={studentTableHead}
                 tableFields={studentTableFields}
                 handleUserData={handleUserData}
                 user={students}
-                loading={loading}
-                handleDelete={() => { }}
+                loading={isDeleting}
+                handleDelete={handleDelete}
                 handleEdit={handleEdit}
               />
             </div>
@@ -239,7 +241,6 @@ const Students = () => {
         <DetailsCard
           title="Student"
           userDetails={selectedData}
-          loading={loading}
           cardOpen={cardOpen}
           setCardOpen={setCardOpen}
           personalInfo={personalInfo}
