@@ -17,6 +17,8 @@ import { RefreshToken } from '../userEntity/refresh-token.entity'; // Import Ref
 import { StaffModule } from 'src/staff/staff.module';
 import { FullAuthService } from '../../middlewares/full-auth.service';
 import { RefreshTokenUtil } from '../../middlewares/refresh-token.util';
+import { BadRequestError, InternalServerError, UnauthenticatedError, UnauthorizedError } from 'src/utils/custom-errors';
+import { NotFoundError } from 'rxjs';
 
 @Module({
   imports: [
@@ -30,6 +32,11 @@ import { RefreshTokenUtil } from '../../middlewares/refresh-token.util';
       Staff,
       Parent,
       RefreshToken, // Register the RefreshToken entity in TypeORM
+      BadRequestError,
+      NotFoundError,
+      InternalServerError,
+      UnauthenticatedError,
+      UnauthorizedError
     ]),
     JwtModule.register({
       secret: process.env.JWT_SECRET, // JWT secret from environment variables
