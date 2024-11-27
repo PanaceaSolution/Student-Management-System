@@ -48,6 +48,33 @@ export const getStudentByIdService = async (id) => {
   }
 };
 
+export const getStudentsByClassAndSectionService = async (
+  className,
+  section,
+) => {
+  try {
+    const response = await fetch(
+      `${URL}/student/by-class?className=${encodeURIComponent(
+        className
+      )}&section=${encodeURIComponent(section)}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const data = await response.json();
+    console.log("data", data);
+    return data;
+
+  } catch (error) {
+  
+    console.error("Error while getting students by class and section:", error);
+    throw error;
+  }
+};
+
 export const createStudentService = async (studentData) => {
   try {
     const response = await fetch(`${URL}/student/create`, {

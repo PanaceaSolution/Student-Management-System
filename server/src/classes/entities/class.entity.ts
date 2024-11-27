@@ -1,4 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable, JoinColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  ManyToMany,
+  JoinTable,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import { Staff } from '../../staff/entities/staff.entity';
 import { Course } from '../../course/entities/course.entity';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,10 +25,8 @@ export class Class {
   @Column('text')
   section: string;
 
-  
-@Column('simple-array', { nullable: true })
+  @Column('simple-array', { nullable: true })
   subject: string[];
-  
 
   @Column('text', { nullable: true })
   routineFile: string;
@@ -40,7 +47,7 @@ export class Class {
   @JoinTable()
   attendences: Attendence[];
 
-  @OneToMany(()=>Student, (student)=>student.studentClass)
+  @OneToMany(() => Student, (student) => student.studentClass)
   // @JoinTable()
   students: Student[];
 }

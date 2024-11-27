@@ -8,29 +8,30 @@ import {
   IsString,
   IsOptional,
 } from 'class-validator';
-import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
-export class AttendenceRecordDto {
-  // @IsString()
-  // className:string;
-  // @IsString()
-  // section:string;
+export class StudentAttendanceDto {
+  @IsString()
+  rollNumber: string;
+
+  @IsString()
+  fname: string;
+
+  @IsString()
+  lname: string;
+
+  @IsString()
+  isPresent: string[];
 }
 
 export class CreateAttendanceDto {
-  @IsOptional()
-  @IsDateString()
-  date?: Date;
-
-  @IsOptional()
-  @IsArray()
-  classId?: string[];
-
-  @IsOptional()
   @IsString()
   className: string;
 
-  @IsOptional()
   @IsString()
   section: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => StudentAttendanceDto)
+  students: StudentAttendanceDto[];
 }

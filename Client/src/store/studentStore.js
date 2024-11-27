@@ -4,6 +4,7 @@ import {
   getAllStudentsService,
   getStudentByIdService,
   updateStudentService,
+  getStudentsByClassAndSectionService,
 } from "@/services/studentService";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
@@ -17,6 +18,7 @@ const useStudentStore = create(
         error: null,
         students: [],
         studentById: {},
+        studentByClassAndSection: [],
         deleteLoading: false,
         total: 0,
         totalPages: 0,
@@ -39,7 +41,10 @@ const useStudentStore = create(
             }
             return data;
           } catch (error) {
-            set({ error: error?.message || "An error occurred", loading: false });
+            set({
+              error: error?.message || "An error occurred",
+              loading: false,
+            });
             toast.error(error?.message || "An error occurred");
             return error;
           }
@@ -53,7 +58,38 @@ const useStudentStore = create(
             set({ studentById: data, loading: false });
             return data;
           } catch (error) {
-            set({ error: error?.message || "An error occurred", loading: false });
+            set({
+              error: error?.message || "An error occurred",
+              loading: false,
+            });
+            toast.error(error?.message || "An error occurred");
+            return error;
+          }
+        },
+
+        getStudentsByClassAndSection: async (
+          className,
+          section,
+         
+        ) => {
+          set({ loading: true, error: null });
+          try {
+            const data = await getStudentsByClassAndSectionService(
+              className,
+              section,
+           
+            );
+            set({
+              studentByClassAndSection: data.students,
+              total: data.total,
+              loading: false,
+            });
+            return data;
+          } catch (error) {
+            set({
+              error: error?.message || "An error occurred",
+              loading: false,
+            });
             toast.error(error?.message || "An error occurred");
             return error;
           }
@@ -76,7 +112,8 @@ const useStudentStore = create(
             }
             return data;
           } catch (error) {
-            const errorMessage = error?.message || "An error occurred while adding the student";
+            const errorMessage =
+              error?.message || "An error occurred while adding the student";
             set({ error: errorMessage, loading: false });
             toast.error(errorMessage);
             return error;
@@ -105,7 +142,10 @@ const useStudentStore = create(
             }
             return data;
           } catch (error) {
-            set({ error: error?.message || "An error occurred", loading: false });
+            set({
+              error: error?.message || "An error occurred",
+              loading: false,
+            });
             return error;
           }
         },
@@ -129,7 +169,10 @@ const useStudentStore = create(
             }
             return data;
           } catch (error) {
-            set({ error: error?.message || "An error occurred", deleteLoading: false });
+            set({
+              error: error?.message || "An error occurred",
+              deleteLoading: false,
+            });
             return error;
           }
         },
