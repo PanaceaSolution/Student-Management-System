@@ -1,13 +1,9 @@
 import {
   BadRequestException,
   Injectable,
-  Req,
   Res,
   InternalServerErrorException,
-  HttpException,
   NotFoundException,
-  ForbiddenException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { Equal, ILike, Like, Not, Repository } from 'typeorm';
@@ -1023,7 +1019,7 @@ export class AuthenticationService {
         totalPages: Math.ceil(total / limit),
       };
     } catch (error) {
-      throw new InternalServerError('Error searching user', error)
+      throw new InternalServerError('Error searching user', error);
     }
   }
 
@@ -1085,12 +1081,7 @@ export class AuthenticationService {
             success: true,
           });
         } catch (error) {
-          results.push({
-            userId,
-            message: 'Failed to deactivate user and related data',
-            status: 500,
-            success: false,
-          });
+          throw new InternalServerError('Failed to deactivate user', error);
         }
       }
 
@@ -1101,11 +1092,10 @@ export class AuthenticationService {
         results,
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: 'An unexpected error occurred during batch deactivation',
-        status: 500,
-        success: false,
-      });
+      throw new InternalServerErrorException(
+        'error occured during user deletation',
+        error,
+      );
     }
   }
   async deleteUsers(userIds: UUID[]) {
@@ -1135,22 +1125,7 @@ export class AuthenticationService {
             success: true,
           });
         } catch (error) {
-          if (error.code === '23503') {
-            results.push({
-              userId,
-              message:
-                'Cannot delete user because it is referenced by other records',
-              status: 400,
-              success: false,
-            });
-          } else {
-            results.push({
-              userId,
-              message: 'Failed to delete user and related data',
-              status: 500,
-              success: false,
-            });
-          }
+          throw new InternalServerError('Unable to delete user data', error);
         }
       }
 
@@ -1161,11 +1136,7 @@ export class AuthenticationService {
         results,
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: 'An unexpected error occurred during batch deletion',
-        status: 500,
-        success: false,
-      });
+      throw new InternalServerError(`Unable to delete user data ${error}`);
     }
   }
 }
