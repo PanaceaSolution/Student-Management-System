@@ -1,25 +1,15 @@
-import {
-  BadRequestException,
-  Injectable,
-  Res,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+//pacakge import
+import { v2 as Cloudinary } from 'cloudinary';
+import { JwtService } from '@nestjs/jwt';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
+import {Injectable,Res} from '@nestjs/common';
 import { Response, Request } from 'express';
 import { Equal, ILike, Like, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-// error imports form file
-import {
-  BadRequestError,
-  NotFoundError,
-  CloudinaryError,
-  InternalServerError,
-  UnauthenticatedError,
-  UnauthorizedError,
-} from '../../utils/custom-errors';
+//local import
 
-// file imports
+import {BadRequestError,NotFoundError,CloudinaryError,InternalServerError,UnauthorizedError} from '../../utils/custom-errors';
 import { LoginDto } from './dto/login.dto';
 import { RegisterUserDto } from './dto/register.dto';
 import { User } from './entities/authentication.entity';
@@ -41,15 +31,11 @@ import {
   extractPublicIdFromUrl,
   uploadFilesToCloudinary,
 } from '../../utils/file-upload.helper';
-import { UUID } from 'typeorm/driver/mongodb/bson.typings';
-import * as moment from 'moment';
-import { v2 as Cloudinary } from 'cloudinary';
 import { STAFFROLE } from '../../utils/role.helper';
 import { Student } from 'src/student/entities/student.entity';
 import { Parent } from 'src/parent/entities/parent.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
 import { FullAuthService } from 'src/middlewares/full-auth.service';
-import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthenticationService {
@@ -774,7 +760,7 @@ export class AuthenticationService {
       });
 
       if (!user) {
-        throw new NotFoundException(`Error fetching user, ${user}`);
+        throw new NotFoundError(`Error fetching user, ${user}`);
       }
 
       return {
@@ -966,7 +952,7 @@ export class AuthenticationService {
           break;
 
         default:
-          throw new BadRequestException('Invalid search criteria');
+          throw new BadRequestError('Invalid search criteria');
       }
 
       const [users, total] = await this.userRepository.findAndCount({
@@ -1092,7 +1078,7 @@ export class AuthenticationService {
         results,
       };
     } catch (error) {
-      throw new InternalServerErrorException(
+      throw new InternalServerError(
         'error occured during user deletation',
         error,
       );
@@ -1153,11 +1139,7 @@ export class AuthenticationService {
         results,
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: `Unable to delete user data: ${error.message}`,
-        status: 500,
-        success: false,
-      });
+      throw new InternalServerError(`Unable to delete user data: ${error.message}`);
     }
   }
   
