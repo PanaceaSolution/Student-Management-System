@@ -314,4 +314,62 @@ export class StudentService {
       return new ResponseModel('Error fetching students', false, error);
     }
   }
+
+  async getStudentsByClassAndSection(
+    className: string,
+    section: string,
+    
+  ) {
+    try {
+     
+
+      const [students, total] = await this.studentRepository.findAndCount({
+        relations: [
+          'user',
+          'user.profile',
+          'user.contact',
+          'user.address',
+          'user.document',
+          'studentClass',
+        ],
+        where: {
+          studentClass: {
+            className: className,
+            section: section,
+          },
+        },
+      });
+
+      if (total === 0) {
+        return new ResponseModel(
+          `No students to fetch in class ${className} and section ${section}`,
+          true,
+          {
+            className,
+            section,
+            students: [],
+            total,
+            totalPages: 0,
+          },
+        );
+      }
+
+      const formattedStudents = students
+        .filter((student) => student.user !== null)
+        .map((student) => ({
+          rollNumber: student.rollNumber,
+          firstName: student.user.profile.fname,
+          lastName: student.user.profile.lname,
+        }));
+
+      return new ResponseModel('Students fetched successfully', true, {
+        className,
+        section,
+        students: formattedStudents,
+        total,
+      });
+    } catch (error) {
+      return new ResponseModel('Error fetching students', false, error);
+    }
+  }
 }
