@@ -1,52 +1,44 @@
-import React, { Component } from "react";
-import CanvasJSReact from "@canvasjs/react-charts";
-import { RefreshCcw, X } from "lucide-react";
+import React from "react";
+import { Chart } from "react-google-charts";
 
-var CanvasJS = CanvasJSReact.CanvasJS;
-var CanvasJSChart = CanvasJSReact.CanvasJSChart;
+const InfoChart = () => {
+  const data = [
+    ["Users", "Total"],
+    ["Students", 11],
+    ["Parents", 2],
+    ["Teachers", 2],
+    ["Staffs", 2],
+  ];
 
-class InfoChart extends Component {
-  render() {
-    const options = {
-      animationEnabled: true,
-      exportEnabled: true,
-      theme: "dark2", // "light1", "dark1", "dark2"
-      title: {
-        text: "Distribution of Students, Teachers, and Staff",
+  const options = {
+    pieHole: 0.4,
+    is3D: true,
+    pieStartAngle: 100,
+    sliceVisibilityThreshold: 0.02,
+    legend: {
+      position: "top",
+      alignment: "center",
+      textStyle: {
+        color: "#233238",
+        fontSize: 18,
       },
-      data: [
-        {
-          type: "pie",
-          indexLabel: "{label}: {y}%",
-          startAngle: -90,
-          dataPoints: [
-            { y: 50, label: "Students" }, // Example data
-            { y: 30, label: "Teachers" }, // Example data
-            { y: 15, label: "Staff" }, // Example data
-            { y: 5, label: "Others" }, // Example data
-          ],
-        },
-      ],
-    };
-
-    return (
-      <div>
-        <div className="flex  sticky top-0 justify-between px-4 p-2 border-b-2 ">
-        <p className="text-lg text-black font-semibold">Info</p>
-          <div className="flex space-x-2 cursor-pointer">
-            <RefreshCcw size={20} className="text-green-600" />
-
-            <X size={20} className="text-red-700" />
-          </div>
-        </div>
-        <CanvasJSChart
-          options={options}
-          /* onRef={ref => this.chart = ref} */
-        />
-        {/*You can get reference to the chart instance as shown above using onRef. This allows you to access all chart properties and methods*/}
+    },
+    colors: ["#8AD1C2", "#9F8AD1", "#D18A99", "#BCD18A"],
+  };
+  return (
+    <div className="bg-white p-4 rounded-lg shadow-md">
+      <div className="flex sticky top-0 justify-between px-4 p-2 border-b-2">
+        <p className="text-lg font-semibold">Info Chart</p>
       </div>
-    );
-  }
-}
+      <Chart
+        chartType="PieChart"
+        data={data}
+        options={options}
+        width={"100%"}
+        height={"400px"}
+      />
+    </div>
+  );
+};
 
 export default InfoChart;

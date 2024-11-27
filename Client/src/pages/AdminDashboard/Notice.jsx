@@ -20,22 +20,23 @@ const getRandomColorClass = () => {
 };
 
 const Notice = () => {
-  const [showModal, setShowModal] = useState(false); 
-  const [editNotice, setEditNotice] = useState(null); 
+  const [showModal, setShowModal] = useState(false);
+  const [editNotice, setEditNotice] = useState(null);
   const [notices, setNotices] = useState([]);
 
   const handleEditNotice = (notice) => {
-    setEditNotice(notice); 
-    setShowModal(true); 
-    };
+    setEditNotice(notice);
+    setShowModal(true);
+  };
 
   const handleCreateNotice = () => {
-    setEditNotice(null); 
-    setShowModal(true); 
+    setEditNotice(null);
+    setShowModal(true);
   };
 
   const handleSubmit = (data) => {
-    if (editNotice) {e
+    if (editNotice) {
+      e
       const updatedNotices = notices.map((notice) =>
         notice.id === editNotice.id ? { ...notice, ...data } : notice
       );
@@ -44,19 +45,17 @@ const Notice = () => {
       const newNotice = { ...data, id: notices.length + 1, createdAt: new Date().toDateString() };
       setNotices([...notices, newNotice]);
     }
-    setShowModal(false); 
+    setShowModal(false);
   };
 
   return (
     <>
       {/* Notice Board */}
-      <div className="relative h-96 bg-white">
+      <div className="relative h-full bg-white p-4 rounded-lg shadow-md border lg:col-span-2">
         <div className="flex justify-between px-4 p-2 border-b-2">
           <p className="text-lg text-black font-semibold">Notice Board</p>
           <div className="flex space-x-2 cursor-pointer">
             <Plus size={20} className="cursor-pointer" onClick={handleCreateNotice} />
-            <RefreshCcw size={20} className="text-green-600" />
-            <X size={20} className="text-red-700" />
           </div>
         </div>
         <div className="max-h-80 overflow-y-auto scrollbar-thumb-gray-300 scrollbar-thin">
