@@ -24,7 +24,7 @@ export class ParentController {
   @Post('/create')
   @UseInterceptors(
     FileFieldsInterceptor([
-      { name: 'profilePicture', maxCount: 1 },
+      { name: 'profilePicture', maxCount: 1 }, 
       { name: 'documents', maxCount: 10 },
     ]),
   )
