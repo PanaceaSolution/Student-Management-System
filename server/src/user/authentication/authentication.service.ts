@@ -1100,12 +1100,23 @@ export class AuthenticationService {
   }
   async deleteUsers(userIds: UUID[]) {
     const results = [];
-
+  
     try {
       for (const userId of userIds) {
+        if (!userId) {
+          // Skip undefined or null userIds
+          results.push({
+            userId,
+            message: 'Invalid userId: undefined or null',
+            status: 400,
+            success: false,
+          });
+          continue;
+        }
+  
         try {
           const user = await this.userRepository.findOne({ where: { userId } });
-
+  
           if (!user) {
             results.push({
               userId,
@@ -1115,9 +1126,9 @@ export class AuthenticationService {
             });
             continue;
           }
-
+  
           await this.userRepository.delete(userId.toString());
-
+  
           results.push({
             userId,
             message: 'User and all related data deleted successfully',
@@ -1125,10 +1136,16 @@ export class AuthenticationService {
             success: true,
           });
         } catch (error) {
-          throw new InternalServerError('Unable to delete user data', error);
+          // Catch and report individual deletion errors
+          results.push({
+            userId,
+            message: `Failed to delete user and related data: ${error.message}`,
+            status: 500,
+            success: false,
+          });
         }
       }
-
+  
       return {
         message: 'Batch deletion completed',
         status: 200,
@@ -1136,7 +1153,13 @@ export class AuthenticationService {
         results,
       };
     } catch (error) {
-      throw new InternalServerError(`Unable to delete user data ${error}`);
+      // Catch unexpected errors during the deletion process
+      throw new InternalServerErrorException({
+        message: `Unable to delete user data: ${error.message}`,
+        status: 500,
+        success: false,
+      });
     }
   }
+  
 }

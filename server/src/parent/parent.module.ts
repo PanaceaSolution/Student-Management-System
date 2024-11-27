@@ -21,6 +21,6 @@ import ResponseModel from 'src/utils/utils';
   ],
   controllers: [ParentController],
   providers: [ParentService],
-  exports: [ParentService], 
+  exports: [ParentService ,  TypeOrmModule], 
 })
 export class ParentModule {}
