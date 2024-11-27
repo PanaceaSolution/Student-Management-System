@@ -1,4 +1,14 @@
-import { Controller, Post, Body, Param, Get, UseInterceptors, BadRequestException, UploadedFiles, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Get,
+  UseInterceptors,
+  BadRequestException,
+  UploadedFiles,
+  Patch,
+} from '@nestjs/common';
 import { ParentService } from './parent.service';
 import { ParentDto } from './dto/parent.dto';
 import { Parent } from './entities/parent.entity';
@@ -8,6 +18,11 @@ import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 @Controller('parent')
 export class ParentController {
   constructor(private readonly parentService: ParentService) {}
+
+  @Get('number')
+  async getStudents() {
+    return this.parentService.getParentsNumber();
+  }
 
   @Post('/create')
   @UseInterceptors(
@@ -55,9 +70,4 @@ export class ParentController {
       );
     }
   }
-
-  // @Get(':id')
-  // async getParentDetails(@Param('id') id: string): Promise<Parent> {
-  //   return this.parentService.findOne(id);
-  // }
 }
