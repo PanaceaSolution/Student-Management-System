@@ -76,6 +76,7 @@ export class StudentDto extends RegisterUserDto {
 
   userId?: string;
 
+  parentEmail : string;
   @Transform(({ value }) => {
     return value ? new Date(value).toISOString().split('T')[0] : undefined;
   })

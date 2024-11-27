@@ -19,6 +19,11 @@ import ResponseModel, {
 import { uploadFilesToCloudinary } from 'src/utils/file-upload.helper';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { Class } from 'src/classes/entities/class.entity';
+import { ParentDto } from 'src/parent/dto/parent.dto';
+import { GENDER, ROLE } from 'src/utils/role.helper';
+import { ParentService } from 'src/parent/parent.service';
+import { Parent } from 'src/parent/entities/parent.entity';
+
 
 @Injectable()
 export class StudentService {
@@ -30,6 +35,8 @@ export class StudentService {
     private readonly userService: AuthenticationService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly parentService: ParentService,
+    private readonly  authenticationService: AuthenticationService,
   ) {}
   async createStudent(
     createStudentDto: StudentDto,
@@ -37,6 +44,7 @@ export class StudentService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
+    createParent: boolean = true,
   ) {
     const {
       fatherName,
@@ -57,67 +65,53 @@ export class StudentService {
       contact,
       document,
       className,
+      parentEmail,
     } = createStudentDto;
-
-    // checking the required fields
+  
+    console.log('createParent:', createParent);
+  
     if (!profile || !profile.fname || !profile.lname) {
-      throw new BadRequestException(
-        'Profile information (fname and lname) is required.',
-      );
+      throw new BadRequestException('Profile information (fname and lname) is required.');
     }
-
-    // admission date to YYYY-MM-DD format
+  
     const AD = moment(admissionDate, 'YYYY-MM-DD');
     if (!AD.isValid()) {
       throw new BadRequestException('Invalid date format for Admission Date');
     }
     const AdmissionIsoString = AD.toISOString();
-
-    //checking if student exists
+  
     const studentExist = await this.studentRepository.findOne({
       where: [{ registrationNumber }],
     });
     if (studentExist) {
       throw new BadRequestException('Student already exists in the database');
     }
-
-    // image && file handling
-    const profilePictureUrl: string | null = null;
+  
     const documentMetadata = document || [];
     const documentUrls = [];
     if (files.documents && files.documents.length > 0) {
       const documentBuffers = files.documents.map((doc) => doc.buffer);
-      const uploadedDocumentUrls = await uploadFilesToCloudinary(
-        documentBuffers,
-        'documents',
-      );
+      const uploadedDocumentUrls = await uploadFilesToCloudinary(documentBuffers, 'documents');
       documentUrls.push(
         ...uploadedDocumentUrls.map((url, index) => ({
-          documentName:
-            documentMetadata[index]?.documentName || `Document ${index + 1}`,
+          documentName: documentMetadata[index]?.documentName || `Document ${index + 1}`,
           documentFile: url,
         })),
       );
     }
-
-    // find classId from given class fields
+  
     const studentClass = await this.classRepository.findOne({
-      where: {
-        className: className,
-        section: section,
-      },
+      where: { className, section },
       select: ['classId'],
     });
     if (!studentClass) {
-      throw new NotFoundException('class not found');
+      throw new NotFoundException('Class not found');
     }
-
-    // create new student
+  
     const newStudent = this.studentRepository.create({
       fatherName,
       motherName,
       guardianName,
-      // user: userReference,
       religion,
       bloodType,
       admissionDate: AdmissionIsoString,
@@ -128,56 +122,108 @@ export class StudentService {
       studentClassId: studentClass.classId,
       transportationMode,
     });
-
-    const studentCreated = await this.studentRepository.save(newStudent);
-    if (studentCreated) {
-      // creating user
-      const registerDto = {
-        email,
-        role,
-        profile,
-        address,
-        contact,
-        document: documentUrls,
-        username: generateUsername(profile.fname, profile.lname, role),
-        password: generateRandomPassword(),
-        createdAt: new Date().toISOString(),
-        refreshToken: null,
-        profilePicture: profilePictureUrl,
-      };
-
-      // creating user
-      const createUserResponse = await this.userService.register(
-        registerDto,
-        files,
-      );
-      if (!createUserResponse || !createUserResponse.user) {
-        throw new InternalServerErrorException(
-          'Error occurs while creating user',
-        );
+  
+    try {
+      const studentCreated = await this.studentRepository.save(newStudent);
+  
+      if (studentCreated) {
+        const registerDto = {
+          email,
+          role,
+          profile,
+          address,
+          contact,
+          document: documentUrls,
+          username: generateUsername(profile.fname, profile.lname, role),
+          password: generateRandomPassword(),
+          createdAt: new Date().toISOString(),
+          refreshToken: null,
+        };
+  
+        const createUserResponse = await this.userService.register(registerDto, files);
+  
+        if (!createUserResponse || !createUserResponse.user) {
+          throw new InternalServerErrorException('Error occurs while creating user');
+        }
+  
+        const userReference = await this.userRepository.findOne({
+          where: { userId: createUserResponse.user.id },
+        });
+  
+        if (!userReference) {
+          throw new InternalServerErrorException('Error finding user after creation');
+        }
+  
+        await this.studentRepository.save({
+          ...newStudent,
+          user: userReference,
+        });
+  
+        if (createParent) {
+          if (!parentEmail) {
+            throw new BadRequestException('Parent email is required when createParent is true.');
+          }
+          const parentDto: ParentDto = {
+            childNames: [`${profile.fname} ${profile.lname}`],
+            email: parentEmail,
+            role: ROLE.PARENT,
+            profile: {
+              fname: fatherName || 'Parent',
+              lname: motherName || 'Unknown',
+              gender: profile.gender,
+              dob: profile.dob,
+              profilePicture: profile.profilePicture,
+            },
+            contact,
+            address,
+            document: documentUrls,
+            studentId: [studentCreated.studentId.toString()],
+            createdAt: new Date().toISOString(),
+            password: generateRandomPassword(),
+          };
+  
+          try {
+            const createParentResponse = await this.parentService.createParent(parentDto, files);
+  
+            if (!createParentResponse.plainPassword) {
+              throw new InternalServerErrorException('Error occurs while creating parent');
+            }
+  
+            return new ResponseModel('Student and Parent created successfully', true, {
+              student: newStudent,
+              password: decryptdPassword(userReference.password),
+              parent: {
+                parent: createParentResponse.parent,
+                plainPassword: createParentResponse.plainPassword,
+              },
+            });
+          } catch (parentError) {
+            console.error('Error during parent creation. Rolling back student...', parentError);
+            await this.authenticationService.deleteUsers([userReference.userId]); 
+            throw new InternalServerErrorException('Failed to create parent. Student has been rolled back.');
+          }
+        }
+  
+        return new ResponseModel('Student created successfully', true, {
+          student: newStudent,
+          user: createUserResponse.user,
+          password: decryptdPassword(userReference.password),
+        });
       }
-      const userReference = await this.userRepository.findOne({
-        where: { userId: createUserResponse.user.id },
-      });
-      if (!userReference) {
-        return { status: 500, message: 'Error finding user after creation' };
+    } catch (studentError) {
+      console.error('Error during createStudent. Rolling back...', studentError);
+  
+      // Ensure rollback of the student creation
+      if (newStudent && newStudent.studentId) {
+        await this.authenticationService.deleteUsers([newStudent.user?.userId]);
       }
-
-      console.log('createUserResponse', createUserResponse.user);
-      console.log('userReference', userReference);
-      await this.studentRepository.save({
-        ...newStudent,
-        user: userReference,
-      });
-
-      let plainPassword = decryptdPassword(userReference.password);
-      return new ResponseModel('Student created successfully', false, {
-        student: newStudent,
-        user: createUserResponse.user,
-        password: plainPassword,
-      });
+  
+      throw new InternalServerErrorException('Failed to create student due to an error.');
     }
   }
+  
+  
+  
 
   async updateStudent(
     id: UUID,
@@ -309,6 +355,64 @@ export class StudentService {
         page,
         limit,
         totalPages: Math.ceil(total / limit),
+      });
+    } catch (error) {
+      return new ResponseModel('Error fetching students', false, error);
+    }
+  }
+
+  async getStudentsByClassAndSection(
+    className: string,
+    section: string,
+    
+  ) {
+    try {
+     
+
+      const [students, total] = await this.studentRepository.findAndCount({
+        relations: [
+          'user',
+          'user.profile',
+          'user.contact',
+          'user.address',
+          'user.document',
+          'studentClass',
+        ],
+        where: {
+          studentClass: {
+            className: className,
+            section: section,
+          },
+        },
+      });
+
+      if (total === 0) {
+        return new ResponseModel(
+          `No students to fetch in class ${className} and section ${section}`,
+          true,
+          {
+            className,
+            section,
+            students: [],
+            total,
+            totalPages: 0,
+          },
+        );
+      }
+
+      const formattedStudents = students
+        .filter((student) => student.user !== null)
+        .map((student) => ({
+          rollNumber: student.rollNumber,
+          firstName: student.user.profile.fname,
+          lastName: student.user.profile.lname,
+        }));
+
+      return new ResponseModel('Students fetched successfully', true, {
+        className,
+        section,
+        students: formattedStudents,
+        total,
       });
     } catch (error) {
       return new ResponseModel('Error fetching students', false, error);
