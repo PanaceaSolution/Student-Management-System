@@ -15,7 +15,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
-// import { isUUID } from 'class-validator';
+
 
 @Injectable()
 export class FinanceService {
