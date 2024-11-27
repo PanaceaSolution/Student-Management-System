@@ -64,17 +64,15 @@ export class StaffController {
   
 
 
-  // @Get('all-staff')
-  // async getStaffs(@Query('page') page: string, @Query('limit') limit: string) {
-  //   const pageNumber = parseInt(page) || 1; 
-  //   const pageSize = parseInt(limit) || 8; 
-  //   return this.staffService.getAllStaff(pageNumber, pageSize);
-  // }
+  @Get('number')
+  async getStaffs() {
+    return this.staffService.getStaffsNumber();
+  }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.staffService.findOne(+id);
-  // }
+  @Get('teacher/number')
+  async getTeachers() {
+    return this.staffService.getTeachersNumber();
+  }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

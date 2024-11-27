@@ -13,7 +13,7 @@ import { Staff } from './entities/staff.entity';
 import { StaffDto } from './dto/staff.dto';
 import { AuthenticationService } from '../user/authentication/authentication.service';
 import { User } from '../user/authentication/entities/authentication.entity';
-import {
+import ResponseModel, {
   decryptdPassword,
   generateRandomPassword,
   generateUsername,
@@ -35,7 +35,7 @@ export class StaffService {
     private readonly userService: AuthenticationService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) { }
+  ) {}
 
   async createStaff(
     createStaffDto: StaffDto,
@@ -43,7 +43,7 @@ export class StaffService {
       profilePicture?: Express.Multer.File[];
       documents?: Express.Multer.File[];
     },
-  ){
+  ) {
     const {
       hireDate,
       salary,
@@ -104,7 +104,6 @@ export class StaffService {
       files,
       staffRole,
     );
-    // console.log('createuserResponse', createUserResponse);
 
     if (!createUserResponse || !createUserResponse.user) {
       throw new InternalServerErrorException(
@@ -132,7 +131,7 @@ export class StaffService {
 
     return {
       status: 201,
-      success:true,
+      success: true,
       message: 'Staff created successfully',
       staff: { ...newStaff, user: createUserResponse.user },
       // user: createUserResponse,
@@ -165,7 +164,7 @@ export class StaffService {
       if (staffRole) staff.staffRole = staffRole.trim() as STAFFROLE;
 
       const updatedStaff = await this.staffRepository.save(staff);
-      console.log("Updateed staff is:",updatedStaff);
+      console.log('Updateed staff is:', updatedStaff);
 
       return {
         status: 201,
@@ -185,10 +184,20 @@ export class StaffService {
     }
   }
 
-  async findAllStaff(): Promise<{ status: number; message: string; data?: any }> {
+  async findAllStaff(): Promise<{
+    status: number;
+    message: string;
+    data?: any;
+  }> {
     try {
       const staffMembers = await this.staffRepository.find({
-        relations: ['user', 'user.profile', 'user.address', 'user.contact', 'user.document'],
+        relations: [
+          'user',
+          'user.profile',
+          'user.address',
+          'user.contact',
+          'user.document',
+        ],
       });
 
       if (!staffMembers.length) {
@@ -250,7 +259,6 @@ export class StaffService {
     }
   }
 
-
   async findStaffById(id: string): Promise<any> {
     const staff = await this.staffRepository.findOne({
       where: { staffId: id },
@@ -306,9 +314,25 @@ export class StaffService {
     };
   }
 
-
   remove(id: number) {
     return `This action removes a #${id} staff`;
   }
 
+  async getStaffsNumber() {
+    const staffNumber = await this.staffRepository.count();
+    return new ResponseModel('Staffs fetched successfully', true, staffNumber);
+  }
+
+  async getTeachersNumber() {
+    const teacherNumber = await this.staffRepository.count({
+      where: {
+        staffRole: STAFFROLE.TEACHER,
+      },
+    });
+    return new ResponseModel(
+      'Teachers fetched successfully',
+      true,
+      teacherNumber,
+    );
+  }
 }

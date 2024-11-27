@@ -222,9 +222,6 @@ export class StudentService {
     }
   }
   
-  
-  
-
   async updateStudent(
     id: UUID,
     updateStudentDto: Partial<StudentDto>,
@@ -417,5 +414,10 @@ export class StudentService {
     } catch (error) {
       return new ResponseModel('Error fetching students', false, error);
     }
+  }
+
+  async getStudentsNumber(){
+    const studentsNumber = await this.studentRepository.count()
+    return new ResponseModel('Students fetched successfully', true, studentsNumber)
   }
 }
