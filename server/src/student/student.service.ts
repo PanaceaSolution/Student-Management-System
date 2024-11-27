@@ -35,6 +35,8 @@ export class StudentService {
     private readonly userService: AuthenticationService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Parent)
+    private readonly parentRepository: Repository<Parent>,
     private readonly parentService: ParentService,
     private readonly  authenticationService: AuthenticationService,
   ) {}
@@ -163,6 +165,33 @@ export class StudentService {
           if (!parentEmail) {
             throw new BadRequestException('Parent email is required when createParent is true.');
           }
+  
+          const existingParentUser = await this.userRepository.findOne({
+            where: { email: parentEmail },
+            relations: ['profile', 'parent'], // Include related entities
+          });
+  
+          if (
+            existingParentUser?.profile &&
+            (existingParentUser.profile.fname === fatherName || existingParentUser.profile.fname === motherName)
+          ) {
+            const parentData = await this.parentRepository.findOne({
+              where: { user: { userId: existingParentUser.userId } },
+              relations: ['student'],
+            });
+  
+            if (parentData) {
+              parentData.student.push(newStudent);
+              await this.parentRepository.save(parentData);
+              return new ResponseModel('Student linked to existing parent successfully', true, {
+                student: newStudent,
+                parent: {
+                  parent: parentData,
+                },
+              });
+            }
+          }
+  
           const parentDto: ParentDto = {
             childNames: [`${profile.fname} ${profile.lname}`],
             email: parentEmail,
@@ -199,7 +228,7 @@ export class StudentService {
             });
           } catch (parentError) {
             console.error('Error during parent creation. Rolling back student...', parentError);
-            await this.authenticationService.deleteUsers([userReference.userId]); 
+            await this.authenticationService.deleteUsers([userReference?.userId]); // Add null check
             throw new InternalServerErrorException('Failed to create parent. Student has been rolled back.');
           }
         }
@@ -213,14 +242,14 @@ export class StudentService {
     } catch (studentError) {
       console.error('Error during createStudent. Rolling back...', studentError);
   
-      // Ensure rollback of the student creation
-      if (newStudent && newStudent.studentId) {
-        await this.authenticationService.deleteUsers([newStudent.user?.userId]);
+      if (newStudent?.user?.userId) {
+        await this.authenticationService.deleteUsers([newStudent.user.userId]);
       }
   
       throw new InternalServerErrorException('Failed to create student due to an error.');
     }
   }
+  
   
   async updateStudent(
     id: UUID,
