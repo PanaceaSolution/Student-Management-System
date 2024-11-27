@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
    Dialog,
@@ -14,23 +14,24 @@ import StepIndicator from '@/pages/admin/StudentForm/StepIndicator';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import StaffInfo from './StaffInfo';
 import AddressInfo from '@/pages/admin/StudentForm/AddressInfo';
-import ProfilePicUpload from '@/components/common/profilePicUpload';
+import ImageUpload from '@/components/common/ImageUpload';
 import StaffDocumentUpload from './StaffDocumentUpload';
+import Spinner from '@/components/Loader/Spinner';
 
 const documentFields = [
-   { name: "birthCertificate", label: "Birth Certificate (optional)" },
+   { name: "cv", label: "CV (optional)" },
    { name: "citizenship", label: "Citizenship Document (optional)" },
-]
+];
 
-const AddStaffForm = ({ formOpen, setFormOpen }) => {
-   const { addStaff, loading } = useStaffStore();
+const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, currentStep, setCurrentStep }) => {
+   const { addStaff, updateStaff, isSubmitting } = useStaffStore();
    const steps = ["Personal Info", "Address Info", "Document Upload"];
-   const [currentStep, setCurrentStep] = useState(0);
    const [profilePic, setProfilePic] = useState('');
    const [documents, setDocuments] = useState({
-      birthCertificate: null,
+      cv: null,
       citizenship: null,
    });
+
 
    const {
       register,
@@ -38,15 +39,54 @@ const AddStaffForm = ({ formOpen, setFormOpen }) => {
       formState: { errors },
       trigger,
       clearErrors,
-      reset
-   } = useForm({});
+      reset,
+      setValue,
+   } = useForm({
+   });
+
+   useEffect(() => {
+      if (selectedData) {
+         setValue("fname", selectedData.user_profile_fname);
+         setValue("lname", selectedData.user_profile_lname);
+         setValue("gender", selectedData.user_profile_gender);
+         setValue("dob", selectedData.user_profile_dob);
+         setProfilePic(selectedData.user_profile_profilePicture);
+         setValue("email", selectedData.user_email);
+         setValue("staffRole", selectedData.user_staffRole);
+         setValue("salary", selectedData.user_salary);
+         setValue("hireDate", selectedData.user_hireDate);
+         setValue("wardNumber", selectedData.user_address_0_wardNumber);
+         setValue("municipality", selectedData.user_address_0_municipality);
+         setValue("province", selectedData.user_address_0_province);
+         setValue("district", selectedData.user_address_0_district);
+         setValue("phoneNumber", selectedData.user_contact_phoneNumber);
+         setValue("alternatePhoneNumber", selectedData.user_contact_alternatePhoneNumber);
+         setValue("telephoneNumber", selectedData.user_contact_telephoneNumber);
+         setDocuments({
+            cv: selectedData.user_documents_0_documentFile,
+            citizenship: selectedData.user_documents_1_documentFile,
+         })
+      }
+   }, [selectedData, setValue])
+
+   const resetFormState = () => {
+      reset({});
+      setProfilePic(null);
+      setDocuments({ cv: null, citizenship: null });
+   };
+
+   const handleAddForm = () => {
+      resetFormState();
+      setCurrentStep(0);
+      setSelectedData(null);
+      setFormOpen(true);
+   };
 
    const onSubmit = async (data) => {
       const formattedData = new FormData();
 
       // Append the fields to FormData
       formattedData.append("email", data.email);
-      formattedData.append("password", data.password || 'ijijisj');
       formattedData.append("role", "STAFF");
       formattedData.append("staffRole", data.staffRole);
       formattedData.append("salary", data.salary);
@@ -77,37 +117,56 @@ const AddStaffForm = ({ formOpen, setFormOpen }) => {
          telephoneNumber: data.telephoneNumber,
       }));
 
-      // Document info
-      formattedData.append("document", JSON.stringify([
-         { documentName: "Birth Certificate" },
-         { documentName: "Citizenship" }
-      ]));
+      // Function to check if the value is a URL
+      const isUrl = (value) => {
+         try {
+            new URL(value);
+            return true;
+         } catch {
+            return false;
+         }
+      };
 
-      // Append the profile picture (if any)
-      if (profilePic) {
+      // Append the profile picture if not a URL
+      if (profilePic && !isUrl(profilePic)) {
          formattedData.append("profilePicture", profilePic);
       }
 
-      // Append documents (if any)
-      if (documents.birthCertificate) {
-         formattedData.append("documents", documents.birthCertificate);
-      }
-      if (documents.citizenship) {
-         formattedData.append("documents", documents.citizenship);
-      }
+      // Append documents info and files
+      const documentData = [];
+      documentFields.forEach((field) => {
+         const documentFile = documents[field.name];
+         const isDocumentUrl = isUrl(documentFile);
+
+         documentData.push({
+            documentName: field.label,
+            documentFile: isDocumentUrl ? documentFile : null,
+         });
+
+         // Append the file if it is not a URL
+         if (!isDocumentUrl && documentFile) {
+            formattedData.append("documents", documentFile);
+         }
+      });
+
+      // Append the document metadata
+      formattedData.append("document", JSON.stringify(documentData));
 
       try {
-         const res = await addStaff(formattedData);
-         if (res.status === 201) {
+         const res = selectedData
+            ? await updateStaff(selectedData.user_staffId, formattedData)
+            : await addStaff(formattedData);
+
+         if (res.success) {
+            console.log(res);
             setFormOpen(false);
             reset();
             setCurrentStep(0);
             setProfilePic(null);
             setDocuments({
-               birthCertificate: null,
+               cv: null,
                citizenship: null,
-               marksheet: null,
-            })
+            });
          }
       } catch (error) {
          console.error("Error adding staff:", error);
@@ -131,6 +190,7 @@ const AddStaffForm = ({ formOpen, setFormOpen }) => {
             <Button
                variant="create"
                className="uppercase"
+               onClick={() => handleAddForm()}
             >
                Add Staff
             </Button>
@@ -157,13 +217,12 @@ const AddStaffForm = ({ formOpen, setFormOpen }) => {
                      <StaffInfo
                         register={register}
                         errors={errors}
-                        profilePic={profilePic}
-                        setProfilePic={setProfilePic}
                         clearErrors={clearErrors}
                      />
-                     <ProfilePicUpload
-                        profilePic={profilePic}
-                        setProfilePic={setProfilePic}
+                     <ImageUpload
+                        label="Profile Picture"
+                        image={profilePic}
+                        setImage={setProfilePic}
                         clearErrors={clearErrors}
                         errors={errors}
                      />
@@ -177,14 +236,20 @@ const AddStaffForm = ({ formOpen, setFormOpen }) => {
                   />
                )}
                {currentStep === 2 && (
-                  <StaffDocumentUpload
-                     register={register}
-                     setDocuments={setDocuments}
-                     documents={documents}
-                     errors={errors}
-                     clearErrors={clearErrors}
-                     documentFields={documentFields}
-                  />
+                  <div className='grid gap-4'>
+                     {documentFields.map((field, index) => (
+                        <ImageUpload
+                           key={index}
+                           label={field.label}
+                           image={documents[field.name]}
+                           setImage={(image) =>
+                              setDocuments((prev) => ({ ...prev, [field.name]: image }))
+                           }
+                           clearErrors={clearErrors}
+                           errors={errors}
+                        />
+                     ))}
+                  </div>
                )}
                <div className="mt-6 flex justify-between">
                   {currentStep > 0 && (
@@ -206,10 +271,18 @@ const AddStaffForm = ({ formOpen, setFormOpen }) => {
                      <button
                         type="submit"
                         className="bg-blue-600 text-white py-2 px-4 rounded disabled:cursor-not-allowed disabled:bg-blue-300"
-                        disabled={loading}
+                        disabled={isSubmitting}
                         aria-label="Submit Form"
                      >
-                        Submit
+                        {isSubmitting
+                           ? (
+                              <div className='flex items-center gap-2'>
+                                 <Spinner />
+                                 <span>Submitting...</span>
+                              </div>
+                           )
+                           : "Submit"
+                        }
                      </button>
                   )}
                </div>

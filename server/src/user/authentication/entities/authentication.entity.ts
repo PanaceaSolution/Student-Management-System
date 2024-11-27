@@ -17,13 +17,15 @@ import { UserAddress } from '../../userEntity/address.entity';
 import { UserDocuments } from '../../userEntity/document.entity';
 import { UserContact } from '../../userEntity/contact.entity';
 import { Staff } from '../../../staff/entities/staff.entity';
+import { RefreshToken } from 'src/user/userEntity/refresh-token.entity';
+import { Attendence } from 'src/attendence/entities/attendence.entity';
 
 @Entity({ name: 'User' })
 export class User {
   @PrimaryGeneratedColumn('uuid')
   userId: UUID;
 
-  @Column({ type: 'text', nullable: true, unique: true })
+  @Column({ type: 'text', nullable: true })
   email: string;
 
   @Column({ type: 'text', nullable: true, unique: true })
@@ -40,7 +42,7 @@ export class User {
 
   @Column({ type: 'boolean', nullable: true, default: true })
   isActivated: boolean;
-  
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -76,18 +78,21 @@ export class User {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
   student: Student;
-  @OneToMany(() => Parent, (parent) => parent.user, {
+
+
+
+  @OneToOne(() => Parent, (parent) => parent.user, {
     cascade: true,
     onDelete: 'CASCADE',
   })
-  parent: Parent[];
+  parent: Parent;
+
   @OneToOne(() => Staff, (staff) => staff.user, {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'staffId' })
   staff: Staff;
- 
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
+  refreshTokens: RefreshToken[];
 }

@@ -16,10 +16,10 @@ export class UserProfileDto {
   lname: string;
 
   @IsEnum(GENDER)
-  @IsNotEmpty({ message: 'Gender is required' })
+  // @IsNotEmpty({ message: 'Gender is required' })
   gender: GENDER;
 
-  @IsNotEmpty({ message: 'Date of birth is required' })
+  // @IsNotEmpty({ message: 'Date of birth is required' })
   @Transform(({ value }) => {
     const date = value ? new Date(value) : new Date();
     return date.toISOString().split('T')[0];
@@ -69,5 +69,5 @@ export class UserDocumentsDto {
   documentName: string;
 
   @IsNotEmpty({ message: 'Document file is required' })
-  documentFile: string ; // Allows file or URL as a string
+  documentFile: string ; 
 }

@@ -1,34 +1,37 @@
 import {
   createStudentService,
-  deleteStudentService,
-  getAllStudentsService,
-  getStudentByIdService,
   updateStudentService,
+  getStudentsByClassAndSectionService,
 } from "@/services/studentService";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import toast from "react-hot-toast";
+import { getAllUserService, deleteUserService } from "@/services/userService";
+import { flattenData } from "@/utilities/utilities";
 
 const useStudentStore = create(
   devtools(
     persist(
       (set, get) => ({
         loading: false,
+        isSubmitting: false,
+        isDeleting: false,
         error: null,
         students: [],
         studentById: {},
+        studentByClassAndSection: [],
         deleteLoading: false,
         total: 0,
         totalPages: 0,
 
         // Get all students
-        getAllStudents: async (query) => {
+        getAllStudents: async (role) => {
           set({ loading: true, error: null });
           try {
-            const data = await getAllStudentsService(query);
+            const data = await getAllUserService(role);
             if (data && data.data) {
               set({
-                students: data.data,
+                students: flattenData(data.data),
                 total: data.total,
                 totalPages: data.totalPages,
                 loading: false,
@@ -39,7 +42,10 @@ const useStudentStore = create(
             }
             return data;
           } catch (error) {
-            set({ error: error?.message || "An error occurred", loading: false });
+            set({
+              error: error?.message || "An error occurred",
+              loading: false,
+            });
             toast.error(error?.message || "An error occurred");
             return error;
           }
@@ -53,7 +59,38 @@ const useStudentStore = create(
             set({ studentById: data, loading: false });
             return data;
           } catch (error) {
-            set({ error: error?.message || "An error occurred", loading: false });
+            set({
+              error: error?.message || "An error occurred",
+              loading: false,
+            });
+            toast.error(error?.message || "An error occurred");
+            return error;
+          }
+        },
+
+        getStudentsByClassAndSection: async (
+          className,
+          section,
+
+        ) => {
+          set({ loading: true, error: null });
+          try {
+            const data = await getStudentsByClassAndSectionService(
+              className,
+              section,
+
+            );
+            set({
+              studentByClassAndSection: data.students,
+              total: data.total,
+              loading: false,
+            });
+            return data;
+          } catch (error) {
+            set({
+              error: error?.message || "An error occurred",
+              loading: false,
+            });
             toast.error(error?.message || "An error occurred");
             return error;
           }
@@ -61,22 +98,23 @@ const useStudentStore = create(
 
         // Add a new student
         addStudent: async (studentData) => {
-          set({ loading: true, error: null });
+          set({ isSubmitting: true, error: null });
           try {
-            const data = await createStudentService(studentData);
-            if (data) {
+            const res = await createStudentService(studentData);
+            if (res.success) {
               set((state) => ({
-                students: [...state.students, data],
-                loading: false,
+                students: [...state.students, res.data],
+                isSubmitting: false,
               }));
-              toast.success(data?.message || "Student added successfully");
+              toast.success(res?.message || "Student added successfully");
             } else {
-              set({ loading: false });
+              set({ isSubmitting: false });
               toast.error("Failed to add student");
             }
-            return data;
+            return res;
           } catch (error) {
-            const errorMessage = error?.message || "An error occurred while adding the student";
+            const errorMessage =
+              error?.message || "An error occurred while adding the student";
             set({ error: errorMessage, loading: false });
             toast.error(errorMessage);
             return error;
@@ -84,52 +122,57 @@ const useStudentStore = create(
         },
 
         // Update an existing student
-        updateStudent: async (studentId, updatedStudentData) => {
-          set({ loading: true, error: null });
+        updateStudent: async (studentId, formData) => {
+          set({ isSubmitting: true, error: null });
           try {
-            const data = await updateStudentService(studentId, updatedStudentData);
-            if (data) {
-              toast.success(data.message);
+            const res = await updateStudentService(studentId, formData);
+            if (res.success) {
+              toast.success(res.message);
               set((state) => ({
                 students: state.students.map((student) =>
                   student.id === studentId
                     ? { ...student, ...updatedStudentData }
                     : student
                 ),
-                loading: false,
+                isSubmitting: false,
               }));
-              await get().getAllStudents();
             } else {
               toast.error("Failed to update student");
-              set({ loading: false });
+              set({ isSubmitting: false });
             }
-            return data;
+            return res;
           } catch (error) {
-            set({ error: error?.message || "An error occurred", loading: false });
+            set({
+              error: error?.message || "An error occurred",
+              loading: false,
+            });
             return error;
           }
         },
 
         // Delete an existing student
         deleteStudent: async (studentId) => {
-          set({ deleteLoading: true, error: null });
+          set({ isDeleting: true, error: null });
           try {
-            const data = await deleteStudentService(studentId);
-            if (data) {
-              toast.success(data.message || "Student deleted successfully");
+            const res = await deleteUserService(studentId);
+            if (res.success) {
+              toast.success("Student deleted successfully");
               set((state) => ({
                 students: state.students.filter(
-                  (student) => student.id !== studentId
+                  (student) => student?.user_id !== studentId
                 ),
-                deleteLoading: false,
+                isDeleting: false,
               }));
             } else {
               toast.error("Failed to delete student");
-              set({ deleteLoading: false });
+              set({ isDeleting: false });
             }
-            return data;
+            return res;
           } catch (error) {
-            set({ error: error?.message || "An error occurred", deleteLoading: false });
+            set({
+              error: error?.message || "An error occurred",
+              deleteLoading: false,
+            });
             return error;
           }
         },

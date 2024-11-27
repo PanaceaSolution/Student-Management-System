@@ -8,6 +8,7 @@ import {
   IsNotEmpty,
   ValidateNested,
   IsUUID,
+  IsArray,
   
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
@@ -15,17 +16,18 @@ import { GENDER } from '../../utils/role.helper';
 import { TRANSPORTATION_MODE } from '../../utils/role.helper';
 import { User } from '../../user/authentication/entities/authentication.entity';
 import { RegisterUserDto } from '../../user/authentication/dto/register.dto';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 
 
 export class StudentDto extends RegisterUserDto {
   @IsString()
-  @IsNotEmpty()
-  studentClass: string;
+  @IsOptional()
+  section?: string;
 
   @IsString()
-  @IsNotEmpty()
-  section: string;
+  @IsOptional()
+  className?: string;
 
   @IsString()
   @IsOptional()
@@ -74,6 +76,7 @@ export class StudentDto extends RegisterUserDto {
 
   userId?: string;
 
+  parentEmail : string;
   @Transform(({ value }) => {
     return value ? new Date(value).toISOString().split('T')[0] : undefined;
   })

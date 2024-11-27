@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { login as loginService } from '@/services/authServices';
+import { login as loginService, logout as logoutService, refreshService } from '@/services/authServices';
+import toast from 'react-hot-toast';
+import { jwtDecode } from 'jwt-decode';
 
 // Utility function to determine role based on username
 const getRoleFromUsername = (username) => {
@@ -14,36 +16,98 @@ const useAuthStore = create(
    devtools(
       persist(
          (set) => ({
-            loading: false,
+            isLoggingIn: false,
+            isLoggingOut: false,
             isAuthenticated: false,
             loggedInUser: null,
+            // isAuthenticated: true,
+            // loggedInUser: {
+            //    profile: {
+            //       profilePicture: '',
+            //       fname: 'Aayush',
+            //       lname: 'Ghimire',
+            //    },
+            //    role: 'STUDENT',
+            //    id: 0,
+            //    username: ''
+            // },
 
             // Login action
             login: async (userData) => {
-               set({ loading: true });
+               set({ isLoggingIn: true });
                try {
-                  const data = await loginService(userData);
+                  const res = await loginService(userData);
+                  if (res.success) {
+                     // Set role based on username if role is 'STAFF'
+                     const data = res.user;
+                     const decodedData = jwtDecode(data.accessToken);
 
-                  // Set role based on username if role is 'STAFF'
-                  const { username, role } = data.payload;
-                  const finalRole = role === 'STAFF' ? getRoleFromUsername(username) : role;
+                     const finalRole = decodedData.role === 'STAFF'
+                        ? getRoleFromUsername(decodedData.username || userData.username)
+                        : decodedData.role;
 
-                  set({
-                     isAuthenticated: data.success,
-                     loggedInUser: { ...data.payload, role: finalRole }
-                  });
-                  return data;
+                     set({
+                        isAuthenticated: res.success,
+                        loggedInUser: {
+                           profile: data.profile,
+                           role: finalRole,
+                           id: decodedData.id,
+                           username: decodedData.username
+                        },
+                     });
+                     toast.success("Login successful");
+                  } else {
+                     toast.error(res.message);
+                  }
+                  return res;
                } catch (error) {
                   set({ isAuthenticated: false, loggedInUser: null });
+                  toast.error(error.message);
                } finally {
-                  set({ loading: false });
+                  set({ isLoggingIn: false });
                }
             },
 
-            logout: () => {
-               set({ loggedInUser: null, isAuthenticated: false });
-               localStorage.removeItem('auth');
+            logout: async () => {
+               set({ isLoggingOut: true });
+               try {
+                  const res = await logoutService();
+                  if (res.success) {
+                     set({
+                        isAuthenticated: false,
+                        loggedInUser: null,
+                     });
+                     localStorage.removeItem("auth");
+                     toast.success("Logout successful");
+                  }
+                  return res;
+               } catch (error) {
+                  console.error("Error during logout:", error);
+                  toast.error(error.message);
+               } finally {
+                  set({ isLoggingOut: false });
+               }
             },
+
+            // Refresh token action
+            refresh: async () => {
+               try {
+                  const res = await refreshService();
+                  if (res.success) {
+                     set({
+                        isAuthenticated: true,
+                     });
+                  }
+                  return res;
+               } catch (error) {
+                  console.error("Error during token refresh:", error);
+                  set({
+                     isAuthenticated: false,
+                     loggedInUser: null,
+                  });
+               }
+            },
+
          }),
          {
             name: 'auth',

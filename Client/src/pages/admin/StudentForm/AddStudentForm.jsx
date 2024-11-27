@@ -3,13 +3,29 @@ import { useForm } from "react-hook-form";
 import StepIndicator from "./StepIndicator";
 import PersonalInfo from "./PersonalInfo";
 import AddressInfo from "./AddressInfo";
-import DocumentUpload from "./DocumentUpload";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import useStudentStore from "@/store/studentStore";
-import Loader from "@/components/common/Loader";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import ProfilePicUpload from "@/components/common/ImageUpload";
+import StaffDocumentUpload from "@/components/admin/StaffForm/StaffDocumentUpload";
+import Spinner from "@/components/Loader/Spinner";
 
-const AddStudentForm = ({ studentId, initialData }) => {
+const documentFields = [
+  { name: "marksheet", label: "Marksheet (optional)" },
+  { name: "birthCertificate", label: "Birth Certificate (optional)" },
+  { name: "citizenship", label: "Citizenship Document (optional)" },
+]
+
+const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, currentStep, setCurrentStep }) => {
   const steps = ["Personal Info", "Address Info", "Document Upload"];
+  const { addStudent, updateStudent, isSubmitting } = useStudentStore();
+  const [profilePic, setProfilePic] = useState('');
+  const [documents, setDocuments] = useState({
+    birthCertificate: null,
+    marksheet: null,
+    citizenship: null,
+  });
   const {
     register,
     handleSubmit,
@@ -18,84 +34,141 @@ const AddStudentForm = ({ studentId, initialData }) => {
     reset,
     clearErrors,
     setValue,
+    getValues,
   } = useForm();
 
-  const [currentStep, setCurrentStep] = useState(0);
-  const { addStudent, loading } = useStudentStore();
+  const resetFormState = () => {
+    reset({});
+    setProfilePic(null);
+    setDocuments({ birthCertificate: null, citizenship: null });
+  };
+
+  const handleAddForm = () => {
+    resetFormState();
+    setSelectedData(null);
+    setCurrentStep(0);
+    setFormOpen(true);
+  };
+
   // Initialize form values with initialData if provided
   useEffect(() => {
-    if (initialData) {
-      // Use setValue to populate fields, handle nested objects (like address, contact)
-      if (initialData.email) setValue("email", initialData.email);
-      if (initialData.password) setValue("password", initialData.password);
-      if (initialData.role) setValue("role", initialData.role);
-      if (initialData.studentClass)
-        setValue("studentClass", initialData.studentClass);
-      if (initialData.section) setValue("section", initialData.section);
-      if (initialData.rollNumber)
-        setValue("rollNumber", initialData.rollNumber);
-      if (initialData.fatherName)
-        setValue("fatherName", initialData.fatherName);
-      if (initialData.motherName)
-        setValue("motherName", initialData.motherName);
-      if (initialData.guardianName)
-        setValue("guardianName", initialData.guardianName);
-      if (initialData.religion) setValue("religion", initialData.religion);
-      if (initialData.bloodType) setValue("bloodType", initialData.bloodType);
-      if (initialData.transportationMode)
-        setValue("transportationMode", initialData.transportationMode);
-      if (initialData.admissionDate)
-        setValue("admissionDate", initialData.admissionDate);
-      if (initialData.registrationNumber)
-        setValue("registrationNumber", initialData.registrationNumber);
-      if (initialData.previousSchool)
-        setValue("previousSchool", initialData.previousSchool);
-      if (initialData.profilePicture)
-        setValue("profilePicture", initialData.profilePicture);
-
-      // Handle nested objects (e.g., address, contact, documents)
-      if (initialData.address) {
-        const address = JSON.parse(initialData.address); // Assuming it's a stringified array
-        if (address && address[0]) {
-          setValue("permanentAddress", address[0].permanentAddress);
-          setValue("temporaryAddress", address[0].temporaryAddress);
-          setValue("villageName", address[0].villageName);
-          setValue("nationality", address[0].nationality);
-          setValue("province", address[0].province);
-          setValue("district", address[0].district);
-          setValue("municipality", address[0].municipality);
-        }
-      }
-
-      if (initialData.contact) {
-        const contact = JSON.parse(initialData.contact);
-        if (contact) {
-          setValue("phoneNumber", contact.phoneNumber);
-          setValue("alternatePhoneNumber", contact.alternatePhoneNumber);
-          setValue("telephoneNumber", contact.telephoneNumber);
-        }
-      }
-
-      // Handle documents (if needed, based on uploaded document names)
-      if (initialData.document) {
-        const documentList = JSON.parse(initialData.document);
-        documentList.forEach((doc) => {
-          if (doc.documentName === "Birth Certificate") {
-            setDocuments((prevState) => ({
-              ...prevState,
-              birthCertificate: true,
-            }));
-          }
-          if (doc.documentName === "Citizenship") {
-            setDocuments((prevState) => ({ ...prevState, citizenship: true }));
-          }
-          if (doc.documentName === "Marksheet") {
-            setDocuments((prevState) => ({ ...prevState, marksheet: true }));
-          }
-        });
-      }
+    if (selectedData) {
+      setValue("fname", selectedData.user_profile_fname);
+      setValue("lname", selectedData.user_profile_lname);
+      setValue("fatherName", selectedData.user_fatherName);
+      setValue("motherName", selectedData.user_motherName);
+      setValue("guardianName", selectedData.user_guardianName);
+      setValue("gender", selectedData.user_profile_gender);
+      setValue("dob", selectedData.user_profile_dob);
+      setValue("rollNumber", selectedData.user_rollNumber);
+      setValue("class", selectedData.user_class);
+      setValue("section", selectedData.user_section);
+      setValue("admissionDate", selectedData.user_profile_admissionDate);
+      setValue("registrationNumber", selectedData.user_registrationNumber)
+      setProfilePic(selectedData.user_profile_profilePicture);
+      setValue("email", selectedData.user_email);
+      setValue("phoneNumber", selectedData.user_contact_phoneNumber);
+      setValue("alternatePhoneNumber", selectedData.user_contact_alternatePhoneNumber);
+      setValue("telephoneNumber", selectedData.user_contact_telephoneNumber);
+      setValue("wardNumber", selectedData.user_address_wardNumber);
+      setValue("municipality", selectedData.user_address_municipality);
+      setValue("province", selectedData.user_address_province);
+      setValue("district", selectedData.user_address_district);
     }
-  }, [initialData, setValue]);
+  }, [selectedData, setValue]);
+
+
+  const onSubmit = async (data) => {
+    const formData = new FormData();
+    formData.append("email", data.email);
+    formData.append("role", "STUDENT");
+    formData.append("fatherName", data.fatherName);
+    formData.append("motherName", data.motherName);
+    formData.append("guardianName", data.guardianName);
+    formData.append("rollNumber", data.rollNumber);
+    formData.append("class", data.class);
+    formData.append("section", data.section);
+    formData.append("admissionDate", data.admissionDate);
+    formData.append("religion", data.religion);
+    formData.append("bloodType", data.bloodType);
+    formData.append("transportationMode", data.transportationMode);
+    formData.append("registrationNumber", data.registrationNumber);
+    formData.append("previousSchool", data.previousSchool);
+
+    //Profile info
+    formData.append("profile", JSON.stringify({
+      fname: data.fname,
+      lname: data.lname,
+      gender: data.gender,
+      dob: data.dob,
+    }));
+
+    //Contact info
+    formData.append("contact", JSON.stringify({
+      phoneNumber: data.phoneNumber,
+      alternatePhoneNumber: data.alternatePhoneNumber,
+      telephoneNumber: data.telephoneNumber,
+    }));
+
+    // Address info
+    formData.append("address", JSON.stringify([
+      {
+        wardNumber: data.wardNumber,
+        municipality: data.municipality,
+        province: data.province,
+        district: data.district,
+      }
+    ]));
+    // Function to check if the value is a URL
+    const isUrl = (value) => {
+      try {
+        new URL(value);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    // Append the profile picture if not a URL
+    if (profilePic && !isUrl(profilePic)) {
+      formData.append("profilePicture", profilePic);
+    }
+
+    // Append documents info and files
+    const documentData = [];
+    documentFields.forEach((field) => {
+      const documentFile = documents[field.name];
+      const isDocumentUrl = isUrl(documentFile);
+
+      documentData.push({
+        documentName: field.label,
+        documentFile: isDocumentUrl ? documentFile : null,
+      });
+
+      // Append the file if it is not a URL
+      if (!isDocumentUrl && documentFile) {
+        formData.append("documents", documentFile);
+      }
+    });
+
+    // Append the document metadata
+    formData.append("document", JSON.stringify(documentData));
+
+    try {
+      const res = selectedData
+        ? await updateStudent(selectedData.studentId, formData)
+        : await addStudent(formData);
+
+      if (res.success) {
+        resetFormState();
+        toast.success(res.message);
+        setFormOpen(false);
+      }
+    } catch (error) {
+      console.error("Error submitting data:", error);
+    }
+  };
+
   // Handle Next Step
   const handleNext = async () => {
     const isValid = await trigger();
@@ -108,168 +181,112 @@ const AddStudentForm = ({ studentId, initialData }) => {
     setCurrentStep((prevStep) => Math.max(prevStep - 1, 0));
   };
 
-  const onSubmit = async (data) => {
-    console.log(data)
-    const formData = new FormData();
-    const newData = { ...data };
-    // **Profile Information**
-    const profileInfo = {
-      fname: newData.fname,
-      lname: newData.lname,
-      dob: newData.dob,
-      gender: newData.gender,
-    };
-    formData.append("profile", JSON.stringify(profileInfo));
-    delete newData["fname"];
-    delete newData["lname"];
-    delete newData["dob"];
-    delete newData["gender"];
-    // **Address Information**
-    const addressObj = {
-      wardNumber: newData.wardNumber,
-      municipality: newData.municipality,
-      province: newData.province,
-      district: newData.district,
-    };
-    formData.append("address", JSON.stringify([addressObj]));
-    delete newData["wardNumber"];
-    delete newData["municipality"];
-    delete newData["province"];
-    delete newData["district"];
-    delete newData["permanentAddress"];
-    delete newData["temporaryAddress"];
-    delete newData["villageName"];
-    // **Contact Information**
-    const contactObj = {
-      phoneNumber: newData.phoneNumber,
-      alternatePhoneNumber: newData.alternatePhoneNumber,
-      telephoneNumber: newData.telephoneNumber,
-    };
-    formData.append("contact", JSON.stringify(contactObj));
-    // Remove contact fields after appending
-    delete newData["phoneNumber"];
-    delete newData["alternatePhoneNumber"];
-    delete newData["telephoneNumber"];
-    // **Documents**
-    const documentArray = [];
-    if (newData.birthCertificate) {
-      documentArray.push({ documentName: "Birth Certificate" });
-    }
-    if (newData.citizenship) {
-      documentArray.push({ documentName: "Citizenship" });
-    }
-    if (newData.marksheet) {
-      documentArray.push({ documentName: "Marksheet" });
-    }
-    if (newData.profilePicture) {
-      formData.append("profilePicture", newData?.profilePicture[0]);
-    }
-    formData.append("document", JSON.stringify(documentArray));
-    // Check if there are document files to append
-    if (newData.birthCertificate || newData.citizenship || newData.marksheet) {
-      formData.append("documents", newData.birthCertificate[0]);
-      formData.append("documents", newData.citizenship[0]);
-      formData.append("documents", newData.marksheet[0]);
-    }
-    // Remove document fields after appending
-    delete newData["birthCertificate"];
-    delete newData["citizenship"];
-    delete newData["marksheet"];
-    // **Remaining Data**
-    for (let key in newData) {
-      formData.append(key, newData[key]);
-    }
-    formData.append("password", "Password@123");
-    formData.append("role", "STUDENT");
-    try {
-      if (studentId) {
-        console.log("Edit student logic");
-      } else {
-        await addStudent(formData);
-      }
-    } catch (error) {
-      console.error("Error submitting data: ", error);
-    }
-  };
-
   return (
-    <section className="max-w-7xl mx-auto">
-      <form
-        encType="multipart/form-data"
-        className="bg-white shadow-md py-5 p-4"
-        onSubmit={
-          currentStep === steps.length - 1
-            ? handleSubmit(onSubmit)
-            : (e) => e.preventDefault()
-        }
-      >
-        <h1 className="text-xl font-bold mb-4 text-center uppercase">
-          {studentId ? "Edit Student" : "Student Registration"}
-        </h1>
-        <StepIndicator steps={steps} currentStep={currentStep} />
+    <Dialog open={formOpen} onOpenChange={setFormOpen}>
+      <DialogTrigger asChild>
+        <Button
+          variant="create"
+          className="uppercase"
+          onClick={() => handleAddForm()}
+        >
+          Add Student
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="bg-white overflow-y-auto sm:w-full sm:max-w-3xl max-h-[95vh]">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold text-center uppercase">
+            {selectedData ? "Edit Student" : "Student Registration"}
+          </DialogTitle>
+          <DialogDescription>
+            <StepIndicator steps={steps} currentStep={currentStep} />
+          </DialogDescription>
+        </DialogHeader>
+        <form
+          encType="multipart/form-data"
+          onSubmit={
+            currentStep === steps.length - 1
+              ? handleSubmit(onSubmit)
+              : (e) => e.preventDefault()
+          }
+        >
+          {/* Step 1 - Personal Info */}
+          {currentStep === 0 && (
+            <div>
+              <PersonalInfo
+                register={register}
+                errors={errors}
+                clearErrors={clearErrors}
+              />
+              <ProfilePicUpload
+                profilePic={profilePic}
+                setProfilePic={setProfilePic}
+                clearErrors={clearErrors}
+                errors={errors}
+              />
+            </div>
+          )}
 
-        {/* Step 1 - Personal Info */}
-        {currentStep === 0 && (
-          <div>
-            <PersonalInfo
+          {/* Step 2 - Address Info */}
+          {currentStep === 1 && (
+            <AddressInfo
               register={register}
               errors={errors}
               clearErrors={clearErrors}
             />
+          )}
+
+          {/* Step 3 - Document Upload */}
+          {currentStep === 2 && (
+            <StaffDocumentUpload
+              register={register}
+              setDocuments={setDocuments}
+              documents={documents}
+              errors={errors}
+              clearErrors={clearErrors}
+              documentFields={documentFields}
+            />
+          )}
+
+          <div className="mt-6 flex justify-between">
+            {/* Back button */}
+            {currentStep > 0 && (
+              <div
+                onClick={handlePrevious}
+                className="bg-gray-300 cursor-pointer text-black py-2 px-4 rounded flex gap-1 justify-center items-center"
+              >
+                <ChevronLeft /> Back
+              </div>
+            )}
+
+            {/* Next button or Submit button */}
+            {currentStep < steps.length - 1 ? (
+              <div
+                onClick={handleNext}
+                className="bg-blue-600 cursor-pointer text-white py-2 px-4 rounded flex gap-1 justify-center items-center"
+              >
+                Next <ChevronRight />
+              </div>
+            ) : (
+              <button
+                type="submit"
+                className="bg-blue-600 text-white py-2 px-4 rounded"
+                disabled={isSubmitting}
+              >
+                {isSubmitting
+                  ? (
+                    <div className='flex items-center gap-2'>
+                      <Spinner />
+                      <span>Submitting...</span>
+                    </div>
+                  )
+                  : "Submit"
+                }
+              </button>
+            )}
           </div>
-        )}
-
-        {/* Step 2 - Address Info */}
-        {currentStep === 1 && (
-          <AddressInfo
-            register={register}
-            errors={errors}
-            clearErrors={clearErrors}
-          />
-        )}
-
-        {/* Step 3 - Document Upload */}
-        {currentStep === 2 && (
-          <DocumentUpload
-            register={register}
-            errors={errors}
-            clearErrors={clearErrors}
-          />
-        )}
-
-        <div className="mt-6 flex justify-between">
-          {/* Back button */}
-          {currentStep > 0 && (
-            <div
-              onClick={handlePrevious}
-              className="bg-gray-300 cursor-pointer text-black py-2 px-4 rounded flex gap-1 justify-center items-center"
-            >
-              <ChevronLeft /> Back
-            </div>
-          )}
-
-          {/* Next button or Submit button */}
-          {currentStep < steps.length - 1 ? (
-            <div
-              onClick={handleNext}
-              className="bg-blue-600 cursor-pointer text-white py-2 px-4 rounded flex gap-1 justify-center items-center"
-            >
-              Next <ChevronRight />
-            </div>
-          ) : (
-            <button
-              type="submit"
-              className="bg-blue-600 text-white py-2 px-4 rounded"
-            >
-              {studentId ? "Update" : "Submit"}
-            </button>
-          )}
-        </div>
-      </form>
-
-      {/* Loading state */}
-      {loading && <Loader />}
-    </section>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

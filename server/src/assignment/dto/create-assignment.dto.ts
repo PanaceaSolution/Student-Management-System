@@ -1,4 +1,10 @@
-import { IsUUID, IsString, IsDate, IsOptional, IsBoolean } from 'class-validator';
+import {
+  IsUUID,
+  IsString,
+  IsDate,
+  IsOptional,
+  IsBoolean,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateAssignmentDto {
@@ -12,8 +18,15 @@ export class CreateAssignmentDto {
   @Type(() => Date)
   dueDate: Date;
 
+  @IsDate()
+  @Type(() => Date)
+  startDate: Date;
+
   @IsUUID()
   courseId: string;
+
+  @IsUUID()
+  classId: string;
 
   @IsUUID()
   teacherId: string;
@@ -38,5 +51,4 @@ export class CreateAssignmentDto {
   @IsOptional()
   @IsString()
   studentId?: string;
-  
 }

@@ -1,12 +1,9 @@
-import { Button } from "../ui/button";
-import EditStaffForm from "./StaffForm/EditStaffForm";
 import {
    Dialog,
    DialogContent,
    DialogDescription,
    DialogHeader,
    DialogTitle,
-   DialogTrigger,
 } from "@/components/ui/dialog"
 import {
    Accordion,
@@ -18,13 +15,11 @@ import {
 const DetailsCard = ({
    title,
    personalInfo,
+   personalDocuments,
    userDetails,
    cardOpen,
    setCardOpen,
 }) => {
-
-   const getNestedValue = (obj, path) =>
-      path.split('.').reduce((acc, part) => acc && acc[part], obj) || "N/A";
 
    const renderDocument = (url, label) => {
       const isImage = /\.(jpg|jpeg|png|gif|bmp)$/i.test(url);
@@ -45,7 +40,7 @@ const DetailsCard = ({
 
    return (
       <Dialog open={cardOpen} onOpenChange={setCardOpen}>
-         <DialogContent className="sm:max-w-2xl">
+         <DialogContent className="sm:max-w-2xl max-h-[90vh]">
             <DialogHeader>
                <DialogTitle className="text-2xl font-bold text-primary">
                   {title} Details
@@ -54,60 +49,63 @@ const DetailsCard = ({
                <hr className="border-black" />
             </DialogHeader>
             <img
-               src={userDetails.user.profile?.profilePicture || '/default-profile.png'}
+               src={userDetails?.user_profile_profilePicture}
                alt={`${title}'s profile picture`}
                className="w-36 h-36 rounded-xl border-2 border-gray-300"
             />
 
             {/* Personal Info Accordion */}
-            <Accordion type="single" collapsible>
+            <Accordion type="multiple" collapsible="true">
                <AccordionItem value="personal-info">
                   <AccordionTrigger>Personal Info</AccordionTrigger>
-                  <AccordionContent className="grid grid-cols-2 gap-2">
-                     {personalInfo.map((field, index) => (
-                        <div key={index} className="mb-4">
-                           <p className="text-xs uppercase text-gray-500">{field.label}</p>
-                           <p className="text-lg font-medium text-gray-800">
-                              {getNestedValue(userDetails, field.key)}
-                           </p>
-                        </div>
-                     ))}
+                  <AccordionContent>
+                     <div className="grid grid-cols-2 gap-4">
+                        {personalInfo.map(({ label, key }, index) => (
+                           <div key={index} className="space-y-1">
+                              <p className="text-xs uppercase text-gray-500">{label}</p>
+                              <p className="text-base font-medium text-gray-800">
+                                 {userDetails?.[key] || "N/A"}
+                              </p>
+                           </div>
+                        ))}
+                     </div>
                   </AccordionContent>
                </AccordionItem>
             </Accordion>
 
+
             {/* Documents Accordion */}
-            <Accordion type="single" collapsible>
+            <Accordion type="single" collapsible="true">
                <AccordionItem value="documents">
                   <AccordionTrigger>Documents</AccordionTrigger>
                   <AccordionContent className="grid grid-cols-2 gap-2">
-                     {userDetails.user.documents.map((field, index) => (
-                        <div key={index} className="mb-4">
-                           <p className="text-xs uppercase text-gray-500">{field.documentName}</p>
+                     {personalDocuments.map((field, index) =>
+                        <div className="mb-4" key={index}>
+                           <p className="text-xs uppercase text-gray-500">{field.label}</p>
                            <div className="mt-2">
-                              {renderDocument(field.documentFile, field.documentName)}
+                              {renderDocument(userDetails?.[field.key], field.label)}
                            </div>
                         </div>
-                     ))}
+                     )}
                   </AccordionContent>
                </AccordionItem>
             </Accordion>
 
             {/* Login Credentials Accordion */}
-            <Accordion type="single" collapsible>
+            <Accordion type="single" collapsible="true">
                <AccordionItem value="login-credentials">
                   <AccordionTrigger>Login Credentials</AccordionTrigger>
                   <AccordionContent>
                      <div className="mb-4">
                         <p className="text-xs uppercase text-gray-500">Username</p>
-                        <p className="text-lg font-medium text-gray-800">
-                           {userDetails.user?.username || "N/A"}
+                        <p className="text-base font-medium text-gray-800">
+                           {userDetails.user_username || "N/A"}
                         </p>
                      </div>
                      <div className="mb-4">
                         <p className="text-xs uppercase text-gray-500">Password</p>
-                        <p className="text-lg font-medium text-gray-800">
-                           {userDetails.user?.password ? "******" : "Not available"}
+                        <p className="text-base font-medium text-gray-800">
+                           {userDetails.user_password ? "******" : "Not available"}
                         </p>
                      </div>
                   </AccordionContent>

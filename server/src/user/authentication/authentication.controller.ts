@@ -8,6 +8,7 @@ import {
   Param,
   Req,
   Res,
+  UseGuards,
   Patch,
   BadRequestException,
   UploadedFiles,
@@ -25,11 +26,13 @@ import {
   FileFieldsInterceptor,
 } from '@nestjs/platform-express';
 import { ROLE, STAFFROLE } from 'src/utils/role.helper';
-
+import { AuthGuard } from '../../middlewares/auth.guard';
+import { FullAuthService } from 'src/middlewares/full-auth.service';
+import { RefreshTokenUtil } from 'src/middlewares/refresh-token.util';
 
 @Controller('auth')
 export class AuthenticationController {
-  constructor(private authenticationService: AuthenticationService) {}
+  constructor(private authenticationService: AuthenticationService,private RefreshTokenUtil : RefreshTokenUtil ) {}
 
   @Post('register')
   @UseInterceptors(
@@ -44,7 +47,7 @@ export class AuthenticationController {
     files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
   ) {
     try {
-      // console.log('Parsed and Validated Register DTO:', body);
+ 
       return this.authenticationService.register(body, files);
     } catch (error) {
       console.error('Error parsing JSON strings in form-data:', error);
@@ -56,17 +59,28 @@ export class AuthenticationController {
     return this.authenticationService.login(loginDto, res);
   }
 
+ 
   @Post('logout')
-  async logout(@Req() request: Request, @Body('userId') userId: UUID, @Res() res: Response) {
-    return this.authenticationService.logout(res, userId);
+  @UseGuards(AuthGuard)
+  async logout(@Req() req: Request, @Res() res: Response) {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+      return res.status(400).json({
+        message: 'No refresh token provided',
+        success: false,
+      });
+    }
+    return this.authenticationService.logout(res, refreshToken);
   }
 
   @Post('refresh-token')
   async refreshToken(@Req() req: Request, @Res() res: Response) {
-    return this.authenticationService.refreshToken(req, res);
+    return this.RefreshTokenUtil.refreshToken(req, res);
   }
+  
 
   @Patch('update/:id')
+  @UseGuards(AuthGuard)
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'profilePicture', maxCount: 1 },
@@ -80,8 +94,6 @@ export class AuthenticationController {
     files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] } = {},
   ) {
     try {
-      // console.log('UpdateUser DTO:', updateUserDto);
-      // console.log('Received files for update:', files);
       return this.authenticationService.updateUser(id, updateUserDto, files);
     } catch (error) {
       console.error('Error updating user:', error);
@@ -90,6 +102,7 @@ export class AuthenticationController {
   }
 
   @Get('all')
+  @UseGuards(AuthGuard)
   async getAllUsers(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
@@ -101,6 +114,7 @@ export class AuthenticationController {
   }
 
   @Get('search')
+  @UseGuards(AuthGuard)
   async searchUser(
     @Query('search') searchTerm: string,
     @Query('searchBy') searchBy: 'name' | 'role' | 'email' | 'username',
@@ -116,6 +130,7 @@ export class AuthenticationController {
     return await this.authenticationService.deleteUsers(userIds);
   }
   @Get('user/:id')
+  @UseGuards(AuthGuard)
   async getSingleUser(@Param('id') id: UUID) {
     try {
       return await this.authenticationService.getSingleUser(id);
@@ -133,6 +148,7 @@ export class AuthenticationController {
     }
   }
     @Get('users/role')
+    @UseGuards(AuthGuard)
   async getUsersByRole(
     @Query('role') role: ROLE,
     @Query('staffRole') staffRole?: STAFFROLE,
@@ -154,6 +170,7 @@ export class AuthenticationController {
     }
   }
   @Patch('deactivate')
+  @UseGuards(AuthGuard)
   async deactivateUsers(@Body('userIds') userIds: UUID[]) {
     if (!Array.isArray(userIds) || userIds.length === 0) {
       throw new BadRequestException('userIds must be a non-empty array');

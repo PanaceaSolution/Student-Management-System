@@ -23,104 +23,123 @@ const Logistics = lazy(() => import("./pages/admin/Logistics"));
 const Portfolio = lazy(() => import("./pages/users/Portfolio"));
 const Routine = lazy(() => import("./pages/users/Routine"));
 const Resources = lazy(() => import("./pages/users/Resources"));
-const Tasks = lazy(() => import("./pages/users/Tasks"));
-const TaskDetails = lazy(() => import("./pages/users/TaskDetails"));
+const Tasks = lazy(() => import("./pages/users/tasks/Tasks"));
+const TaskDetails = lazy(() => import("./pages/users/tasks/TaskDetails"));
 const Message = lazy(() => import("./pages/users/Message"));
 const Report = lazy(() => import("./pages/users/Report"));
 const Fees = lazy(() => import("./pages/users/Fees"));
+const AttendanceDashboard = lazy(() => import('./pages/attendence/attendenceDashboard'))
+const AttendanceTable = lazy(() => import('./pages/attendence/attendenceTable'))
 
 // Define route configuration
 const routeConfig = [
   {
     path: "/dashboard",
     element: <Dashboard />,
-    allowedRoles: ['ADMIN', 'TEACHER', 'STUDENT', 'PARENT', 'ACCOUNTANT', 'LIBRARIAN']
+    allowedRoles: [
+      "ADMIN",
+      "TEACHER",
+      "STUDENT",
+      "PARENT",
+      "ACCOUNTANT",
+      "LIBRARIAN",
+    ],
+  },
+  {
+    path: "/attendence",
+    element: <AttendanceDashboard />,
+    allowedRoles: ["ADMIN", "TEACHER"],
+  },
+  {
+    path: `/attendence/:className/:section`,
+    element: <AttendanceTable />,
+    allowedRoles: ["ADMIN", "TEACHER"],
   },
   {
     path: "/portfolio",
     element: <Portfolio />,
-    allowedRoles: ['TEACHER', 'STUDENT', 'PARENT', 'ACCOUNTANT', 'LIBRARIAN']
+    allowedRoles: ["TEACHER", "STUDENT", "PARENT", "ACCOUNTANT", "LIBRARIAN"],
   },
   {
     path: "/finance",
     element: <Finance />,
-    allowedRoles: ['ADMIN', 'ACCOUNTANT']
+    allowedRoles: ["ADMIN", "ACCOUNTANT"],
   },
   {
     path: "/library",
     element: <Library />,
-    allowedRoles: ['ADMIN', 'LIBRARIAN', 'STUDENT', 'TEACHER']
+    allowedRoles: ["ADMIN", "LIBRARIAN", "STUDENT", "TEACHER"],
   },
   {
     path: "/message",
     element: <Message />,
-    allowedRoles: ['TEACHER', 'PARENT']
+    allowedRoles: ["TEACHER", "PARENT"],
   },
   {
     path: "/teachers",
     element: <Teachers />,
-    allowedRoles: ['ADMIN']
+    allowedRoles: ["ADMIN"],
   },
   {
     path: "/students",
     element: <Students />,
-    allowedRoles: ['ADMIN']
+    allowedRoles: ["ADMIN"],
   },
   {
-    path: '/parents',
+    path: "/parents",
     element: <Parents />,
-    allowedRoles: ['ADMIN']
+    allowedRoles: ["ADMIN"],
   },
   {
     path: "/staffs",
     element: <Staffs />,
-    allowedRoles: ['ADMIN']
+    allowedRoles: ["ADMIN"],
   },
   {
     path: "/subjects",
     element: <Subjects />,
-    allowedRoles: ['ADMIN']
+    allowedRoles: ["ADMIN"],
   },
   {
     path: "/classes",
     element: <Classes />,
-    allowedRoles: ['ADMIN']
+    allowedRoles: ["ADMIN"],
   },
   {
     path: "/logistics",
     element: <Logistics />,
-    allowedRoles: ['ADMIN']
+    allowedRoles: ["ADMIN"],
   },
   {
     path: "/routine",
     element: <Routine />,
-    allowedRoles: ['STUDENT', 'TEACHER']
+    allowedRoles: ["STUDENT", "TEACHER"],
   },
   {
     path: "/resources",
     element: <Resources />,
-    allowedRoles: ['STUDENT', 'TEACHER']
+    allowedRoles: ["STUDENT", "TEACHER"],
   },
   {
     path: "/tasks",
     element: <Tasks />,
-    allowedRoles: ['STUDENT', 'TEACHER']
+    allowedRoles: ["STUDENT", "TEACHER"],
   },
   {
     path: "/task/:taskId",
     element: <TaskDetails />,
-    allowedRoles: ['STUDENT', 'TEACHER']
+    allowedRoles: ["STUDENT", "TEACHER"],
   },
   {
     path: "/report",
     element: <Report />,
-    allowedRoles: ['PARENT']
+    allowedRoles: ["PARENT"],
   },
   {
     path: "/fees",
     element: <Fees />,
-    allowedRoles: ['PARENT']
-  }
+    allowedRoles: ["PARENT"],
+  },
 ];
 
 const App = () => {
@@ -151,6 +170,7 @@ const App = () => {
         </Routes>
       </Suspense>
     </Router>
+
   );
 };
 

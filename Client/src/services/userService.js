@@ -8,7 +8,6 @@ export const getAllUserService = async (role) => {
       },
       credentials: "include",
    });
-   if (!response.ok) throw new Error("Failed to fetch staff data");
    return await response.json();
 }
 

@@ -73,3 +73,26 @@ export function decryptdPassword(encryptedPassword: string): string {
   );
   return decrypted.toString('utf-8');
 }
+
+export default class ResponseModel<T> {
+  message: string;
+  success: boolean;
+  // statusCodes?: number;
+  data?: T;
+  error?: string;
+
+  constructor(message: string, success: boolean, data?: T, error?: string) {
+    this.message = message;
+    this.success = success;
+    this.data = data;
+    this.error = error;
+  }
+
+  static success<T>(message: string, data: T): ResponseModel<T> {
+    return new ResponseModel<T>(message, true, data);
+  }
+
+  static error<T>(message: string, error: string): ResponseModel<T> {
+    return new ResponseModel<T>(message, false, undefined, error);
+  }
+}

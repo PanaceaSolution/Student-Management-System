@@ -67,7 +67,7 @@ const StaffInfo = ({
          label: "Phone*",
          required: "Phone is required",
          placeholder: "Enter Phone",
-         type: "number",
+         type: "text",
          condition: true,
          icon: <Smartphone size={20} />
       },
@@ -75,7 +75,7 @@ const StaffInfo = ({
          name: "alternatePhoneNumber",
          label: "Alternate Phone Number",
          placeholder: "Enter Alternate Phone Number",
-         type: "number",
+         type: "text",
          condition: true,
          icon: <Smartphone size={20} />
       },
@@ -83,7 +83,7 @@ const StaffInfo = ({
          name: 'telephoneNumber',
          label: 'Telephone Number',
          placeholder: 'Enter Telephone Number',
-         type: 'number',
+         type: 'text',
          condition: true,
          icon: <Phone size={20} />
       },

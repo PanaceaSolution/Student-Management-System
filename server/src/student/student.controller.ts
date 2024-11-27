@@ -20,22 +20,27 @@ import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 @Controller('student')
 export class StudentController {
-  constructor(private readonly studentService: StudentService) { }
+  constructor(private readonly studentService: StudentService) {}
 
-  // @Get('all-students')
-  // async getStudents() {
-  //   return this.studentService.GetAllStudents();
-  // }
+  @Get('number')
+  async getStudents() {
+    return this.studentService.getStudentsNumber();
+  }
+  
   @Post('create')
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'profilePicture', maxCount: 1 },
       { name: 'documents', maxCount: 10 },
-    ])
+    ]),
   )
   async createStudent(
     @Body() createStudentDto: StudentDto,
-    @UploadedFiles() files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
+    @UploadedFiles()
+    files: {
+      profilePicture?: Express.Multer.File[];
+      documents?: Express.Multer.File[];
+    },
   ) {
     // console.log('Received files:', files);
     // console.log('Received body:', createStudentDto);
@@ -48,7 +53,7 @@ export class StudentController {
   ) {
     return this.studentService.getAllStudents(page, limit);
   }
-  
+
   @Patch('update/:id')
   @UseInterceptors(
     FileFieldsInterceptor([
@@ -72,6 +77,19 @@ export class StudentController {
         'Invalid data for updating students. Enter valid data',
       );
     }
+  }
+
+  @Get('by-class')
+  async getStudentsByClassAndSection(
+    @Query('className') className: string,
+    @Query('section') section: string,
+   
+  ) {
+    return this.studentService.getStudentsByClassAndSection(
+      className,
+      section,
+     
+    );
   }
 
   // @Get('/:studentId')

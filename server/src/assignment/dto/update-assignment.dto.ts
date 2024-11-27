@@ -37,5 +37,5 @@ export class UpdateAssignmentDto {
 
   @IsOptional()
   @IsString()
-  studentFile?: string;
+  studentFilePath?: string;
 }

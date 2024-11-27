@@ -1,57 +1,26 @@
-// const URL = import.meta.env.VITE_API_URL;
-const URL = "http://localhost:8080";
+const URL = import.meta.env.VITE_API_URL;
+// const URL = "http://localhost:8080";
 
 export const getAllSubjectsService = async () => {
-   try {
-      const response = await fetch(`${URL}/subjects`, {
-         method: "GET",
-         headers: {
-            "Content-Type": "application/json",
-         },
-      });
-      const data = await response.json();
-      return data;
-   } catch (error) {
-      console.error("Error while getting all subjects:", error);
-      throw error;
-   }
+   const response = await fetch(`${URL}/course`, {
+      method: "GET",
+      headers: {
+         "Content-Type": "application/json",
+      },
+      credentials: "include",
+   });
+   return response.json();
 }
 
-
-export const getSubjectByIdService = async (id) => {
-   try {
-      const response = await fetch(`${URL}/subjects/${id}`, {
-         method: "GET",
-         headers: {
-            "Content-Type": "application/json",
-         },
-      });
-
-      const data = await response.json();
-      return data;
-   } catch (error) {
-      console.error("Error while getting subject by id:", error);
-      throw error;
-   }
-}
 
 
 export const createSubjectService = async (subjectData) => {
-   try {
-      const response = await fetch(`${URL}/subjects`, {
-         method: "POST",
-         headers: {
-            "Content-Type": "application/json",
-         },
-         body: JSON.stringify(subjectData),
-      });
-
-      const data = await response.json();
-      return data;
-   } catch (error) {
-      console.error("Error while creating subject:", error);
-      throw error;
-   }
+   const response = await fetch(`${URL}/course/create`, {
+      method: "POST",
+      body: subjectData,
+      credentials: "include",
+   });
+   return response.json();
 }
 
 
@@ -75,18 +44,13 @@ export const updateSubjectService = async (id, updatedSubjectData) => {
 
 
 export const deleteSubjectService = async (id) => {
-   try {
-      const response = await fetch(`${URL}/subjects/${id}`, {
-         method: "DELETE",
-         headers: {
-            "Content-Type": "application/json",
-         },
-      });
+   const response = await fetch(`${URL}/course/delete/${id}`, {
+      method: "DELETE",
+      headers: {
+         "Content-Type": "application/json",
+      },
+      credentials: "include",
+   });
+   return response.json();
 
-      const data = await response.json();
-      return data;
-   } catch (error) {
-      console.error("Error while deleting subject:", error);
-      throw error;
-   }
 }

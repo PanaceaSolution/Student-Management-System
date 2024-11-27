@@ -14,17 +14,12 @@ export class Course {
   @Column('text')
   courseDescription: string;
 
-  @Column({ type: 'date' })
-  startDate: Date;
 
-  @Column({ type: 'date' })
-  endDate: Date;
+  @Column({ nullable: true })
+  file: string; 
 
-  @ManyToOne(() => Staff, (staff) => staff.courses, { nullable: false })
-  teacher: Staff;
-
-  @Column({ default: true })
-  isCurrent: boolean;
+  // @Column({ type:"simple-array",nullable: true })
+  // teachers: Array<string>;
 
   @OneToMany(() => Class, (class_) => class_.classTeacher)
   classes: Class[];

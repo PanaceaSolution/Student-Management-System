@@ -11,10 +11,11 @@ import useAuthStore from '@/store/authStore';
 import logo from '../assets/logo.png';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import Spinner from '@/components/Loader/Spinner';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const { login, loading } = useAuthStore();
+  const { login, isLoggingIn } = useAuthStore();
   const navigate = useNavigate();
 
   const {
@@ -33,11 +34,13 @@ const Login = () => {
       password: sanitizeInput(data.password)
     };
 
-    const res = await login(sanitizedData);
-    if (res.success === false) {
-      toast.error(res.message);
-    } else {
-      navigate('/dashboard');
+    try {
+      const res = await login(sanitizedData);
+      if (res.success) {
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      toast.error(error.message)
     }
   };
 
@@ -105,10 +108,17 @@ const Login = () => {
             </div>
             <Button
               type="submit"
-              className="mx-auto w-1/2 hover:bg-primary text-lg font-semibold disabled:cursor-not-allowed"
-              disabled={loading}
+              className="mx-auto w-full hover:bg-primary text-lg font-semibold disabled:cursor-not-allowed"
+              disabled={isLoggingIn}
             >
-              {loading ? 'Logging in...' : 'Login'}
+              {isLoggingIn
+                ? (
+                  <div className="flex gap-2 items-center">
+                    <Spinner />
+                    <span className="ml-2">Logging in...</span>
+                  </div>
+                )
+                : 'Login'}
             </Button>
           </form>
         </CardContent>

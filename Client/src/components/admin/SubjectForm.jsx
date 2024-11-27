@@ -12,9 +12,26 @@ import { Input } from "../ui/input";
 import { Controller, useForm } from "react-hook-form";
 import useSubjectStore from "@/store/subjectStore";
 import { useEffect } from "react";
+import toast from "react-hot-toast";
+
+const formFields = [
+   {
+      name: "courseName",
+      label: "Course Name",
+      required: "Course Name is required",
+      placeholder: "Enter Course Name",
+      type: "text",
+   },
+   {
+      name: "courseDescription",
+      label: "Course Description",
+      required: "Course Description is required",
+      placeholder: "Enter Course Description",
+      type: "text",
+   }
+];
 
 const SubjectForm = ({
-   formFields,
    setIsModalOpen,
    isModalOpen,
    id,
@@ -23,47 +40,36 @@ const SubjectForm = ({
    setIsUpdating
 }) => {
 
-   const { addSubject, updateSubject, getSubjectById } = useSubjectStore()
+   const { addSubject, updateSubject, isSubmitting } = useSubjectStore()
 
-   useEffect(() => {
-      if (id) {
-         getSubjectById(id).
-            then(data => reset(data));
-      }
-   }, [id]);
+   // useEffect(() => {
+   //    if (id) {
+   //       getSubjectById(id).
+   //          then(data => reset(data));
+   //    }
+   // }, [id]);
 
    const { control, handleSubmit, formState: { errors }, reset } = useForm({});
 
 
    const onSubmit = async (data) => {
-      if (isUpdating) {
-         await updateSubject(id, data);
-      } else {
-         await addSubject(data);
+      const formData = new FormData();
+      formData.append("courseName", data.courseName);
+      formData.append("courseDescription", data.courseDescription);
+
+      const res = isUpdating
+         ? await updateSubject(id, formData)
+         : await addSubject(formData);
+
+      if (res.success) {
+         reset()
+         setIsModalOpen(false);
+         setId(null);
       }
-      reset();
-      setIsModalOpen(false);
-      setId(null);
    };
 
    return (
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-         <DialogTrigger asChild>
-            <Button
-               variant="create"
-               className="uppercase"
-               onClick={() => {
-                  reset({
-                     name: "",
-                  });
-                  setIsUpdating(false);
-                  setIsModalOpen(true);
-                  setId(null);
-               }}
-            >
-               Add Subjects
-            </Button>
-         </DialogTrigger>
          <DialogContent className="sm:max-w-[425px] bg-white">
             <DialogHeader>
                <DialogTitle className="text-xl font-bold text-center uppercase">
@@ -103,8 +109,20 @@ const SubjectForm = ({
                   ))}
                </div>
                <div className="flex justify-end mt-4">
-                  <Button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white">
-                     Submit
+                  <Button
+                     type="submit"
+                     className="bg-blue-500 hover:bg-blue-600 text-white"
+                     disabled={isSubmitting}
+                  >
+                     {isSubmitting
+                        ? (
+                           <div className='flex items-center gap-2'>
+                              <Spinner />
+                              <span>Submitting...</span>
+                           </div>
+                        )
+                        : "Submit"
+                     }
                   </Button>
                </div>
             </form>

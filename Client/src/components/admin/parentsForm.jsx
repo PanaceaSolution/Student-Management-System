@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import {
    Dialog,
@@ -20,16 +20,34 @@ import {
    MultiSelectorList,
    MultiSelectorItem,
 } from "@/components/ui/multi-select";
-import ProfilePicUpload from "../common/profilePicUpload";
+import ProfilePicUpload from "../common/ImageUpload";
 import useParentStore from "@/store/parentsStore";
+import { flattenData } from "@/utilities/utilities";
 
-const ParentsForm = ({ title, data }) => {
+const ParentsForm = ({ title, selectedData, setSelectedData, formOpen, setFormOpen }) => {
    const { students, getAllStudents } = useStudentStore();
    const { updateParent, addParent } = useParentStore();
-
-   const [isOpen, setIsOpen] = useState(false);
    const [profilePic, setProfilePic] = useState(null);
    const [selectedStudentIds, setSelectedStudentIds] = useState([]);
+   const formattedStudent = flattenData(students);
+
+   const studentQuery = useMemo(() => {
+      const params = new URLSearchParams();
+      params.append("role", "STUDENT");
+      params.append("page", 1);
+      params.append("limit", 10);
+      return `${params.toString()}`;
+   }, [])
+
+   useEffect(() => {
+      const fetchData = async () => {
+         if (studentQuery) {
+            await getAllStudents(studentQuery);
+         }
+      }
+
+      fetchData();
+   }, [studentQuery]);
 
    const {
       register,
@@ -37,51 +55,78 @@ const ParentsForm = ({ title, data }) => {
       setValue,
       formState: { errors },
       clearErrors,
-   } = useForm({
-      defaultValues: {
-         firstName: data?.firstName || "",
-         lastName: data?.lastName || "",
-         email: data?.email || "",
-         studentId: data?.studentId || [],
-      },
-   });
+      reset
+   } = useForm({});
 
    useEffect(() => {
-      getAllStudents();
-   }, [getAllStudents]);
-
-   useEffect(() => {
-      if (data) {
-         setProfilePic(data.profilePic || null);
-         setValue("firstName", data.firstName);
-         setValue("lastName", data.lastName);
-         setValue("email", data.email);
-         setSelectedStudentIds(data.studentId || []);
+      if (selectedData) {
+         setProfilePic(selectedData.profilePic || null);
+         setValue("firstName", selectedData.firstName);
+         setValue("lastName", selectedData.lastName);
+         setValue("email", selectedData.email);
+         setSelectedStudentIds(selectedData.studentId || []);
       }
-   }, [data, setValue]);
+   }, [selectedData, setValue]);
 
-   const onSubmit = async (formData) => {
-      const formattedData = {
-         ...formData,
-         profilePic: profilePic,
-         studentId: selectedStudentIds,
-      };
-      console.log(formattedData);
+   const resetFormState = () => {
+      reset({});
+      setProfilePic(null);
+   };
 
-      if (data) {
-         await updateParent(data.id, formattedData);
+   const handleAddForm = () => {
+      resetFormState();
+      setSelectedData(null);
+      setFormOpen(true);
+   };
+
+   const onSubmit = async (data) => {
+      // const formattedData = {
+      //    ...formData,
+      //    profilePic: profilePic,
+      //    studentId: selectedStudentIds,
+      // };
+      const formData = new FormData();
+      formData.append("email", data.email);
+      formData.append("role", "PARENT");
+      formData.append("profile", JSON.stringify({
+         fname: data.fname,
+         lname: data.lname,
+         gender: data.gender || "MALE",
+      }));
+      formData.append("contact", JSON.stringify({
+         phoneNumber: data.phoneNumber,
+      }));
+      if (profilePic) {
+         formData.append("profilePicture", profilePic);
+      }
+      console.log("Formatted data: ", formData);
+
+      if (selectedData) {
+         await updateParent(selectedData.id, formData);
       } else {
-         await addParent(formattedData);
+         await addParent(formData);
       }
       setIsOpen(false);
       clearErrors();
       setSelectedStudentIds([]);
    };
 
+   const previewImage = (profilePic, id) => {
+      if (profilePic) {
+         return (
+            <img key={id} src={profilePic} alt="Profile Pic" className="w-8 h-8 rounded-full object-cover" />
+         )
+      }
+   }
+
    return (
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={formOpen} onOpenChange={setFormOpen}>
          <DialogTrigger asChild>
-            <Button variant="create" className="uppercase">
+            <Button
+               variant="create"
+               className="uppercase"
+               onClick={() => handleAddForm()}
+            >
                {title}
             </Button>
          </DialogTrigger>
@@ -95,49 +140,47 @@ const ParentsForm = ({ title, data }) => {
                </DialogDescription>
             </DialogHeader>
             <hr />
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                     <Label htmlFor="firstName" className="block text-sm font-medium text-gray-900">
-                        First Name
-                     </Label>
-                     <Input
-                        id="firstName"
-                        type="text"
-                        {...register("firstName", { required: "First Name is required" })}
-                        className={`w - full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${errors.firstName ? "border-red-500" : ""}`}
-                        placeholder="Enter First Name"
-                     />
-                     {errors.firstName && <p className="text-red-600 text-sm">{errors.firstName.message}</p>}
-                  </div>
-                  <div>
-                     <Label htmlFor="lastName" className="block text-sm font-medium text-gray-900">
-                        Last Name
-                     </Label>
-                     <Input
-                        id="lastName"
-                        type="text"
-                        {...register("lastName", { required: "Last Name is required" })}
-                        className={`w - full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${errors.lastName ? "border-red-500" : ""}`}
-                        placeholder="Enter Last Name"
-                     />
-                     {errors.lastName && <p className="text-red-600 text-sm">{errors.lastName.message}</p>}
-                  </div>
+                  <FormInput
+                     id="fname"
+                     label="First Name"
+                     register={register("fname", { required: "First Name is required" })}
+                     error={errors.fname}
+                     placeholder="Enter First Name"
+                  />
+                  <FormInput
+                     id="lname"
+                     label="Last Name"
+                     register={register("lname", { required: "Last Name is required" })}
+                     error={errors.lname}
+                     placeholder="Enter Last Name"
+                  />
                </div>
-               <div className="py-4">
-                  <Label htmlFor="email" className="block text-sm font-medium text-gray-900">
-                     Email
-                  </Label>
-                  <Input
+               <div className="grid grid-cols-2 gap-4">
+                  <FormInput
                      id="email"
-                     type="email"
-                     {...register("email", { required: "Email is required" })}
-                     className={`w - full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${errors.email ? "border-red-500" : ""}`}
+                     label="Email"
+                     register={register("email", { required: "Email is required" })}
+                     error={errors.email}
                      placeholder="Enter Email"
                   />
-                  {errors.email && <p className="text-red-600 text-sm">{errors.email.message}</p>}
+                  <FormInput
+                     id="phoneNumber"
+                     label="Phone Number"
+                     register={register("phoneNumber", { required: "Phone Number is required" })}
+                     error={errors.phoneNumber}
+                     placeholder="Enter Phone Number"
+                  />
                </div>
-               <div className="mb-4">
+               {/* <FormInput
+                  id="email"
+                  label="Email"
+                  register={register("email", { required: "Email is required" })}
+                  error={errors.email}
+                  placeholder="Enter Email"
+               /> */}
+               <div>
                   <Label htmlFor="studentId" className="block text-sm font-medium text-gray-900">
                      Student(s)
                   </Label>
@@ -150,10 +193,19 @@ const ParentsForm = ({ title, data }) => {
                         <MultiSelectorInput placeholder="Select Student(s)" />
                      </MultiSelectorTrigger>
                      <MultiSelectorContent>
-                        <MultiSelectorList className="bg-white border border-gray-300 focus:outline-none">
-                           {students.map((s) => (
-                              <MultiSelectorItem key={s.id} value={s.id}>
-                                 {s.firstName} {s.lastName}
+                        <MultiSelectorList className="bg-white h-60 border border-gray-300 focus:outline-none">
+                           {formattedStudent.map((s) => (
+                              <MultiSelectorItem
+                                 key={s.studentId}
+                                 value={previewImage(s.user_profile_profilePicture, s.studentId)}
+                                 className="flex items-center space-x-2"
+                              >
+                                 <img
+                                    src={s.user_profile_profilePicture || "/default-avatar.png"}
+                                    alt={`${s.user_profile_fname} ${s.user_profile_lname}`}
+                                    className="w-8 h-8 rounded-full object-cover"
+                                 />
+                                 <span>{s.user_profile_fname} {s.user_profile_lname}</span>
                               </MultiSelectorItem>
                            ))}
                         </MultiSelectorList>
@@ -175,5 +227,22 @@ const ParentsForm = ({ title, data }) => {
       </Dialog>
    );
 };
+
+const FormInput = ({ id, label, register, error, ...props }) => (
+   <div>
+      <Label htmlFor={id} className="block text-sm font-medium text-gray-900">
+         {label}
+      </Label>
+      <Input
+         id={id}
+         {...register}
+         {...props}
+         className={`w-full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${error ? "border-red-500" : ""
+            }`}
+      />
+      {error && <p className="text-red-600 text-sm">{error.message}</p>}
+   </div>
+);
+
 
 export default ParentsForm;

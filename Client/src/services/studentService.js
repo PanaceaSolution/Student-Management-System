@@ -48,14 +48,39 @@ export const getStudentByIdService = async (id) => {
   }
 };
 
+export const getStudentsByClassAndSectionService = async (
+  className,
+  section,
+) => {
+  try {
+    const response = await fetch(
+      `${URL}/student/by-class?className=${encodeURIComponent(
+        className
+      )}&section=${encodeURIComponent(section)}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const data = await response.json();
+    console.log("data", data);
+    return data;
+
+  } catch (error) {
+
+    console.error("Error while getting students by class and section:", error);
+    throw error;
+  }
+};
+
 export const createStudentService = async (studentData) => {
   try {
     const response = await fetch(`${URL}/student/create`, {
       method: "POST",
-      headers: {
-        // "Content-Type": "multipart/form-data",
-      },
       body: studentData,
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -79,49 +104,32 @@ export const createStudentService = async (studentData) => {
   }
 };
 
-export const updateStudentService = async (id, updatedStudentData) => {
+export const updateStudentService = async ({ studentId, formData }) => {
   try {
-    const response = await fetch(`${URL}/student/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedStudentData),
+    const response = await fetch(`${URL}/student/update/${studentId}`, {
+      method: "PATCH",
+      body: formData,
+      credentials: "include",
     });
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error while updating student:", error);
-    throw error;
-  }
-};
 
-export const deleteStudentService = async (id) => {
-  try {
-    const response = await fetch(`${URL}/auth/delete`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userIds: [`${id}`] }),
-    });
     if (!response.ok) {
       let errorMessage = "An unknown error occurred.";
       try {
         const error = await response.json();
         errorMessage = error.message || "Something went wrong.";
       } catch (err) {
-        errorMessage = response.statusText || "Failed to Delete student.";
+        errorMessage = response.statusText || "Failed to update student.";
       }
+
       toast.error(errorMessage);
       return null;
     }
-
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error while creating student:", error);
-    toast.error("An error occurred while creating the student.");
+
+    console.error("Error while updating student:", error);
+    toast.error("An error occurred while updating the student.");
     throw error;
   }
 };

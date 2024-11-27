@@ -1,16 +1,15 @@
 import React, { useState, useMemo, useCallback, useEffect, } from "react";
-import Paginations from "@/components/common/Paginations";
 import Table from "@/components/common/Tables";
-import ResultShowing from "@/components/common/ResultShowing";
-import ProfileCard from "@/components/ProfileCard";
 import Select from "@/components/Select";
 import SearchBox from "@/components/SearchBox";
-import { Button } from "@/components/ui/button";
 import { DateSelect } from "@/components/DateSelect";
-import AddStudentFormModal from "./StudentForm/AddStudentFormModal";
 import useExport from "@/hooks/useExport";
 import useStudentStore from "@/store/studentStore";
 import { flattenData } from "@/utilities/utilities.js";
+import ActiveTab from "@/components/common/activeTab";
+import DetailsCard from "@/components/admin/DetailsCard";
+import AddStudentForm from "./StudentForm/AddStudentForm";
+import AdminTable from "@/components/admin/AdminTable";
 
 // Custom hook for debouncing input value
 const useDebounce = (value, delay) => {
@@ -48,43 +47,58 @@ const Department = [
   { value: "BIM", label: "BIM" },
 ];
 
+const studentTableHead = ["", "First Name", "Last Name", "Gender", "Class", "Section", "Actions"];
+const studentTableFields = ["user_profile_fname", "user_profile_lname", "user_profile_gender", "studentClass", "section"];
+
+
+const personalInfo = [
+  { label: "First Name", key: "user_profile_fname" },
+  { label: "Last Name", key: "user_profile_lname" },
+  { label: "Father Name", key: "fatherName" },
+  { label: "Mother Name", key: "motherName" },
+  { label: "Guardian Name", key: "guardianName" },
+  { label: "Date of Birth", key: "user_profile_dob" },
+  { label: "Gender", key: "user_profile_gender" },
+  { label: "Blood Group", key: "bloodType" },
+  { label: "Religion", key: "religion" },
+  { label: "Class", key: "studentClass" },
+  { label: "Section", key: "section" },
+  { label: "Roll Number", key: "rollNumber" },
+  { label: "Registration Number", key: "registrationNumber" },
+  { label: "Previous School", key: "previousSchool" },
+  { label: "Date of Admission", key: "admissionDate" },
+  { label: "Email", key: "user_email" },
+  { label: "Phone Number", key: "user_contact_phoneNumber" },
+  { label: "Telephone Number", key: "user_contact_telephoneNumber" },
+  { label: "Ward Number", key: "user_address_0_wardNumber" },
+  { label: "Municipality", key: "user_address_0_municipality" },
+  { label: "District", key: "user_address_0_district" },
+  { label: "Province", key: "user_address_0_province" },
+];
+
+const personalDocuments = [
+  { label: "Birth Certificate", key: "user_documents_0_documentFile" },
+  { label: "CitizenShip", key: "user_documents_1_documentFile" },
+  { label: "MarkSheet", key: "user_documents_2_documentFile" }
+]
+
 const Students = () => {
   const [selectedExport, setSelectedExport] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [activeTab, setActiveTab] = useState("all");
-  const [studentInfo, setStudentInfo] = useState({});
-  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedData, setSelectedData] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [date, setDate] = useState(null);
-  const [showAddStudentModal, setShowAddStudentModal] = useState(false);
-  const { getAllStudents, loading, error, students, totalPages, total } = useStudentStore();
+  const [cardOpen, setCardOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
 
-  const itemsPerPage = 8;
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
-
- 
-  const query = useMemo(() => {
-    const params = new URLSearchParams();
-    if (selectedGender) params.append("gender", selectedGender);
-    if (selectedDepartment) params.append("Class", selectedDepartment);
-    if (debouncedSearchTerm) params.append("firstName", debouncedSearchTerm);
-    if (date) params.append("date", date);
-    params.append("page", currentPage);
-    params.append("role", "STUDENT");
-    params.append("limit", itemsPerPage);
-    return `${params.toString()}`;
-  }, [selectedGender, selectedDepartment, debouncedSearchTerm, date, currentPage]);
+  const { getAllStudents, deleteStudent, isDeleting, error, students, totalPages, total } = useStudentStore();
 
   useEffect(() => {
-    const fetchStudents = async () => {
-      if (query) {
-        await getAllStudents(query);
-      }
-    };
-
-    fetchStudents();
-  }, [query, getAllStudents]);
+    getAllStudents("STUDENT");
+  }, []);
 
   // Export function logic
   const { exportToCSV, exportToPDF } = useExport();
@@ -138,17 +152,25 @@ const Students = () => {
     }
   }, [date]);
 
-  // Memoized flattened students data
-  const flattenedStudents = useMemo(() => flattenData(students), [students]);
+  const handleUserData = (data) => {
+    setSelectedData(data);
+    setCardOpen(true)
+  };
 
-  // Pagination logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const handleEdit = (data) => {
+    setCurrentStep(0);
+    setFormOpen(true);
+    setSelectedData(data)
+  }
+
+  const handleDelete = async (data) => {
+    await deleteStudent(data.user_id);
+  }
 
   return (
     <section>
       <div className="max-w-full mx-auto p-2">
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-5">
+        <div className="grid grid-cols-1 gap-4 lg:pr-4">
           <div className="rounded-sm bg-[#F8F8F8] lg:col-span-3 p-2">
             <div className="flex justify-end border-b-2 p-1">
               <div className="flex gap-4">
@@ -158,12 +180,14 @@ const Students = () => {
                   onChange={handleExportChange}
                   className="w-32 bg-white"
                 />
-                <Button
-                  type="create"
-                  onClick={() => setShowAddStudentModal(true)}
-                >
-                  Add Student
-                </Button>
+                <AddStudentForm
+                  formOpen={formOpen}
+                  setFormOpen={setFormOpen}
+                  currentStep={currentStep}
+                  setCurrentStep={setCurrentStep}
+                  selectedData={selectedData}
+                  setSelectedData={setSelectedData}
+                />
               </div>
             </div>
             <div className="border-b-2 p-2">
@@ -192,61 +216,37 @@ const Students = () => {
                 </div>
               </div>
             </div>
-
-            <div className="bg-[#F8F8F8] flex gap-6 justify-start items-center p-2 border-b-2">
-              {["all", "present", "alumni"].map((tab) => (
-                <div key={tab}>
-                  <a
-                    href="#"
-                    className={`font-semibold cursor-pointer ${
-                      activeTab === tab ? "border-b-2 border-blue-600" : ""
-                    }`}
-                    onClick={() => handleTabClick(tab)}
-                  >
-                    {tab.toUpperCase()}{" "}
-                    <span className="text-blue-600 bg-white rounded-lg">
-                      {students.length}
-                    </span>
-                  </a>
-                </div>
-              ))}
-            </div>
-
-            <ResultShowing
-              start={indexOfFirstItem + 1}
-              end={indexOfLastItem}
-              total={total}
+            <ActiveTab
+              activeTab={activeTab}
+              user={students}
+              handleTabClick={handleTabClick}
             />
-
             <div className="relative w-full overflow-x-auto shadow-md">
-              {error ? (
-                <div className="text-red-500">Error: {error}</div>
-              ) : (
-                <Table
-                  setStudentInfo={setStudentInfo}
-                  items={flattenedStudents}
-                  loading={loading}
-                />
-              )}
+              <AdminTable
+                title="Students"
+                tableHead={studentTableHead}
+                tableFields={studentTableFields}
+                handleUserData={handleUserData}
+                user={students}
+                loading={isDeleting}
+                handleDelete={handleDelete}
+                handleEdit={handleEdit}
+              />
             </div>
-
-            <Paginations
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
-          </div>
-
-          <div className="w-auto">
-            <ProfileCard studentInfo={studentInfo} />
           </div>
         </div>
       </div>
 
-      <AddStudentFormModal
-        cancelOption={() => setShowAddStudentModal(false)}
-        showModal={showAddStudentModal}
-      />
+      {selectedData &&
+        <DetailsCard
+          title="Student"
+          userDetails={selectedData}
+          cardOpen={cardOpen}
+          setCardOpen={setCardOpen}
+          personalInfo={personalInfo}
+          personalDocuments={personalDocuments}
+        />
+      }
     </section>
   );
 };
