@@ -73,7 +73,7 @@ const TaskDetails = () => {
                </ol>
             </div>
 
-            <div className="relative h-auto border-2 bg-white p-1 lg:col-span-2">
+            {/* <div className="relative h-auto border-2 bg-white p-1 lg:col-span-2">
                <div className="sticky top-0 flex items-center gap-4 bg-gray-100 p-2">
                   <div className="flex justify-center items-center gap-2">
                      {" "}
@@ -113,6 +113,9 @@ const TaskDetails = () => {
                      </div>
                   ))}
                </div>
+            </div> */}
+            <div className="relative h-auto border-2 bg-white p-1 lg:col-span-2">
+
             </div>
          </div>
       </section>

@@ -1,6 +1,10 @@
 
+import { Button } from '@/components/ui/button';
 import AssignmentCard from '@/pages/Assignment/AssignmentCard'
-import teacher from "../../../assets/suk.jpg";
+import useAssignmentStore from '@/store/assignmentsStore';
+import useAuthStore from '@/store/authStore';
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const data = [
    {
@@ -19,7 +23,7 @@ const data = [
       id: 2,
       dueDate: "2024-11-20",
       createDate: "2024-10-05",
-      subjectName: "PHP",
+      subjectName: "Science",
       teacherName: "Dr. Johnson",
       teacherImg: "https://images.unsplash.com/photo-1584554376766-ac0f2c65e949?q=80&w=1927&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       subjectPic:
@@ -31,7 +35,7 @@ const data = [
       id: 3,
       dueDate: "2024-11-22",
       createDate: "2024-10-10",
-      subjectName: "History",
+      subjectName: "Social",
       teacherName: "Ms. Lee",
       teacherImg: "https://images.unsplash.com/photo-1573496799652-408c2ac9fe98?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       subjectPic:
@@ -43,7 +47,7 @@ const data = [
       id: 4,
       dueDate: "2024-11-25",
       createDate: "2024-10-12",
-      subjectName: "Literature",
+      subjectName: "Nepali",
       teacherName: "Mrs. Brown",
       teacherImg: "https://images.unsplash.com/photo-1700156246325-65bbb9e1dc0d?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       subjectPic:
@@ -55,7 +59,7 @@ const data = [
       id: 5,
       dueDate: "2024-11-30",
       createDate: "2024-10-15",
-      subjectName: "Art",
+      subjectName: "English",
       teacherName: "Mr. Green",
       teacherImg: "https://images.unsplash.com/photo-1570338652597-a6a2b7bcaf1b?q=80&w=1972&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       subjectPic: "https://k2bindia.com/wp-content/uploads/2015/08/React.png",
@@ -65,8 +69,26 @@ const data = [
 ];
 
 const Tasks = () => {
+   const { assignments, getAllAssignments } = useAssignmentStore();
+   const { loggedInUser } = useAuthStore();
+   const role = loggedInUser?.role;
+
+   useEffect(() => {
+      const fetchAssignments = async () => {
+         await getAllAssignments();
+      }
+
+      fetchAssignments();
+   }, []);
+
+
    return (
       <section className="max-w-full mx-auto p-2">
+         {role === "TEACHER" && (
+            <Button className="mb-4">
+               <Link to="/add-assignment">Add Assignment</Link>
+            </Button>
+         )}
          <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
             {data.map((assignment) => (
                <AssignmentCard key={assignment.id} assignment={assignment} />
