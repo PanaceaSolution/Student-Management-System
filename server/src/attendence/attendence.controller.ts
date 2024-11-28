@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post,Query } from '@nestjs/common';
 import { AttendenceService } from './attendence.service';
 import { CreateAttendanceDto } from './dto/attendence.dto';
 
@@ -9,5 +9,11 @@ export class AttendenceController {
   @Post('/save')
   async saveAttendence(@Body() createAttendenceDto: CreateAttendanceDto) {
     return this.attendenceService.saveAttendence(createAttendenceDto);
+  }
+
+  @Get(':className/:section/generate')
+  async generateAttendence( @Param('className') className: string,
+    @Param('section') section: string,) {
+    return this.attendenceService.generateAttendence(className, section);
   }
 }

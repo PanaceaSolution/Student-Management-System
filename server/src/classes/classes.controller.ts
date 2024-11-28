@@ -16,9 +16,7 @@ export class ClassController {
     @UploadedFile() routineFile: Express.Multer.File,
   ) {
     try {
-      if (typeof createClassDto.subjects === 'string') {
-        createClassDto.subjects = JSON.parse(createClassDto.subjects);
-      }
+
 
       const classData = await this.classService.create({
         ...createClassDto,
