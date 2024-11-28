@@ -31,7 +31,7 @@ export class ClassService {
     private staffRepository: Repository<Staff>,
   ) {}
 
- async create(createClassDto: CreateClassDto): Promise<Class> {
+  async create(createClassDto: CreateClassDto): Promise<Class> {
     try {
       // Check if the class with the same name and section already exists
       const existingClassAndSection = await this.classRepository.findOne({
@@ -74,7 +74,8 @@ export class ClassService {
       throw new InternalServerErrorException('Failed to create class', error.message);
     }
   }
-  async update(classId: string, updateClassDto: UpdateClassDto): Promise<Class> {
+
+async update(classId: string, updateClassDto: UpdateClassDto): Promise<Class> {
     try {
       const existingClass = await this.classRepository.findOne({ where: { classId } });
       if (!existingClass) {
@@ -83,7 +84,7 @@ export class ClassService {
   
       let routineFileUrl = existingClass.routineFile;
   
-      
+      // Handle routineFile update
       if (updateClassDto.routineFile) {
         if (routineFileUrl) {
           const publicId = extractPublicIdFromUrl(routineFileUrl);
@@ -96,7 +97,6 @@ export class ClassService {
         routineFileUrl = uploadResult.secure_url;
       }
   
-      
       Object.assign(existingClass, {
         ...updateClassDto,
         routineFile: routineFileUrl,
@@ -111,14 +111,14 @@ export class ClassService {
     }
   }
 
-  async remove(classId: string): Promise<void> {
+async remove(classId: string): Promise<void> {
     try {
       const existingClass = await this.classRepository.findOne({ where: { classId } });
       if (!existingClass) {
         throw new NotFoundException(`Class with ID ${classId} not found`);
       }
   
-      
+      // Delete routineFile from Cloudinary if it exists
       if (existingClass.routineFile) {
         const publicId = extractPublicIdFromUrl(existingClass.routineFile);
         await deleteFileFromCloudinary(publicId);
@@ -133,7 +133,7 @@ export class ClassService {
     }
   }
 
-  async findOne(classId: string): Promise<Class> {
+async findOne(classId: string): Promise<Class> {
     try {
       const classEntity = await this.classRepository.findOne({ where: { classId } });
       if (!classEntity) {
@@ -145,15 +145,11 @@ export class ClassService {
     }
   }
   
-  async findAll(): Promise<Class[]> {
+async findAll(): Promise<Class[]> {
     try {
       return await this.classRepository.find();
     } catch (error) {
       throw new InternalServerErrorException('Failed to retrieve classes', error.message);
     }
   }
-  
-  
-
 }
-
