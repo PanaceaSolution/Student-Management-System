@@ -219,7 +219,7 @@ export class StudentService {
             }
 
             return new ResponseModel('Student and Parent created successfully', true, {
-              student: { ...newStudent, profile, className: studentClass.className }, // Add className
+              student: { ...newStudent, profile, className: studentClass.className },
               password: decryptdPassword(userReference.password),
               parent: {
                 parent: createParentResponse.parent,
@@ -348,6 +348,12 @@ export class StudentService {
           'user.contact',
           'user.address',
           'user.document',
+          'studentClass',
+          'parent',
+          'parent.user',
+          'parent.user.contact',
+          'parent.user.address',
+          'parent.user.profile',
         ],
         skip,
         take: limit,
@@ -360,8 +366,13 @@ export class StudentService {
           admissionDate: student.admissionDate,
           rollNumber: student.rollNumber,
           registrationNumber: student.registrationNumber,
-          studentClass: student.studentClass,
-          section: student.section,
+          studentClass: student.studentClass
+            ? {
+              id: student.studentClass.classId,
+              name: student.studentClass.className,
+              section: student.section,
+            }
+            : null,
           transportationMode: student.transportationMode,
           user: student.user && {
             id: student.user.userId,
@@ -373,6 +384,20 @@ export class StudentService {
             address: student.user.address,
             documents: student.user.document,
           },
+          parent: student.parent
+            ? {
+              id: student.parent.parentId,
+              user: student.parent.user && {
+                id: student.parent.user.userId,
+                email: student.parent.user.email,
+                username: student.parent.user.username,
+                role: student.parent.user.role,
+                profile: student.parent.user.profile,
+                contact: student.parent.user.contact,
+                address: student.parent.user.address,
+              },
+            }
+            : null,
         }));
 
       return new ResponseModel('Students fetched successfully', true, {
@@ -386,6 +411,8 @@ export class StudentService {
       return new ResponseModel('Error fetching students', false, error);
     }
   }
+
+
 
   async getStudentsByClassAndSection(
     className: string,
