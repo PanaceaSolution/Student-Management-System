@@ -51,8 +51,6 @@ const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, 
     setFormOpen(true);
   };
 
-  console.log("selecteddata", selectedData);
-
 
   // Initialize form values with initialData if provided
   useEffect(() => {
@@ -70,17 +68,22 @@ const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, 
       setValue("rollNumber", selectedData.user_rollNumber);
       setValue("studentClass", selectedData.user_studentClass);
       setValue("section", selectedData.user_section);
-      setValue("admissionDate", selectedData.user_profile_admissionDate);
+      setValue("admissionDate", selectedData.user_admissionDate);
       setValue("registrationNumber", selectedData.user_registrationNumber)
       setProfilePic(selectedData.user_profile_profilePicture);
       setValue("email", selectedData.user_email);
       setValue("phoneNumber", selectedData.user_contact_phoneNumber);
       setValue("alternatePhoneNumber", selectedData.user_contact_alternatePhoneNumber);
       setValue("telephoneNumber", selectedData.user_contact_telephoneNumber);
-      setValue("wardNumber", selectedData.user_address_wardNumber);
-      setValue("municipality", selectedData.user_address_municipality);
-      setValue("province", selectedData.user_address_province);
-      setValue("district", selectedData.user_address_district);
+      setValue("wardNumber", selectedData.user_address_0_wardNumber);
+      setValue("municipality", selectedData.user_address_0_municipality);
+      setValue("province", selectedData.user_address_0_province);
+      setValue("district", selectedData.user_address_0_district);
+      setDocuments({
+        birthCertificate: selectedData.user_documents_0_documentFile,
+        marksheet: selectedData.user_documents_1_documentFile,
+        citizenship: selectedData.user_document_2_citizenship
+      })
     }
   }, [selectedData, setValue]);
 
@@ -165,7 +168,7 @@ const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, 
 
     try {
       const res = selectedData
-        ? await updateStudent(selectedData.studentId, formData)
+        ? await updateStudent(selectedData.user_studentId, formData)
         : await addStudent(formData);
 
       if (res.success) {
