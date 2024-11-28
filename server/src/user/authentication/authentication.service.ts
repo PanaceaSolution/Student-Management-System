@@ -814,7 +814,7 @@ export class AuthenticationService {
         total = staffCount;
       } else if (role === ROLE.STUDENT) {
         const [students, studentCount] = await this.studentRepository.findAndCount({
-          relations: ['user', 'studentClass' , 'user.profile', 'user.contact','user.address', 'user.document' ,'parent','parent.user','parent.user.contact' ], 
+          relations: ['user', 'studentClass', 'user.profile','user.address', 'user.document' ,'parent','parent.user','parent.user.contact' ], 
           skip,
           take: limit,
           
@@ -830,7 +830,7 @@ export class AuthenticationService {
           .filter((student) => student.user) 
           .map((student) => ({
             user: this.formatUserResponse(student.user),
-            studentId: student.studentId,
+            ...student,
             className: student.studentClass?.className || null,
             contact:student.parent?.user?.contact || null
           }));
