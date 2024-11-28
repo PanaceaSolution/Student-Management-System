@@ -35,6 +35,8 @@ export class StudentService {
     private readonly userService: AuthenticationService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Parent)
+    private readonly parentRepository: Repository<Parent>,
     private readonly parentService: ParentService,
     private readonly  authenticationService: AuthenticationService,
   ) {}
@@ -102,7 +104,7 @@ export class StudentService {
   
     const studentClass = await this.classRepository.findOne({
       where: { className, section },
-      select: ['classId'],
+      select: ['classId', 'className'], // Ensure className is included
     });
     if (!studentClass) {
       throw new NotFoundException('Class not found');
@@ -163,6 +165,33 @@ export class StudentService {
           if (!parentEmail) {
             throw new BadRequestException('Parent email is required when createParent is true.');
           }
+  
+          const existingParentUser = await this.userRepository.findOne({
+            where: { email: parentEmail },
+            relations: ['profile', 'parent'],
+          });
+  
+          if (
+            existingParentUser?.profile &&
+            (existingParentUser.profile.fname === fatherName || existingParentUser.profile.fname === motherName)
+          ) {
+            const parentData = await this.parentRepository.findOne({
+              where: { user: { userId: existingParentUser.userId } },
+              relations: ['student'],
+            });
+  
+            if (parentData) {
+              parentData.student.push(newStudent);
+              await this.parentRepository.save(parentData);
+              return new ResponseModel('Student linked to existing parent successfully', true, {
+                student: { ...newStudent, className: studentClass.className }, // Add className
+                parent: {
+                  parent: parentData,
+                },
+              });
+            }
+          }
+  
           const parentDto: ParentDto = {
             childNames: [`${profile.fname} ${profile.lname}`],
             email: parentEmail,
@@ -190,7 +219,7 @@ export class StudentService {
             }
   
             return new ResponseModel('Student and Parent created successfully', true, {
-              student: newStudent,
+              student: { ...newStudent, className: studentClass.className }, // Add className
               password: decryptdPassword(userReference.password),
               parent: {
                 parent: createParentResponse.parent,
@@ -199,13 +228,13 @@ export class StudentService {
             });
           } catch (parentError) {
             console.error('Error during parent creation. Rolling back student...', parentError);
-            await this.authenticationService.deleteUsers([userReference.userId]); 
+            await this.authenticationService.deleteUsers([userReference?.userId]);
             throw new InternalServerErrorException('Failed to create parent. Student has been rolled back.');
           }
         }
   
         return new ResponseModel('Student created successfully', true, {
-          student: newStudent,
+          student: { ...newStudent, className: studentClass.className }, // Add className
           user: createUserResponse.user,
           password: decryptdPassword(userReference.password),
         });
@@ -213,9 +242,8 @@ export class StudentService {
     } catch (studentError) {
       console.error('Error during createStudent. Rolling back...', studentError);
   
-      // Ensure rollback of the student creation
-      if (newStudent && newStudent.studentId) {
-        await this.authenticationService.deleteUsers([newStudent.user?.userId]);
+      if (newStudent?.user?.userId) {
+        await this.authenticationService.deleteUsers([newStudent.user.userId]);
       }
   
       throw new InternalServerErrorException('Failed to create student due to an error.');
@@ -223,8 +251,6 @@ export class StudentService {
   }
   
   
-  
-
   async updateStudent(
     id: UUID,
     updateStudentDto: Partial<StudentDto>,
@@ -418,4 +444,5 @@ export class StudentService {
       return new ResponseModel('Error fetching students', false, error);
     }
   }
-}
+
+} 

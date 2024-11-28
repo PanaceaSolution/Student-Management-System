@@ -1,4 +1,14 @@
-import { Controller, Post, Body, Param, Get, UseInterceptors, BadRequestException, UploadedFiles, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Get,
+  UseInterceptors,
+  BadRequestException,
+  UploadedFiles,
+  Patch,
+} from '@nestjs/common';
 import { ParentService } from './parent.service';
 import { ParentDto } from './dto/parent.dto';
 import { Parent } from './entities/parent.entity';
@@ -9,10 +19,12 @@ import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 export class ParentController {
   constructor(private readonly parentService: ParentService) {}
 
+
+
   @Post('/create')
   @UseInterceptors(
     FileFieldsInterceptor([
-      { name: 'profilePicture', maxCount: 1 },
+      { name: 'profilePicture', maxCount: 1 }, 
       { name: 'documents', maxCount: 10 },
     ]),
   )
@@ -55,9 +67,4 @@ export class ParentController {
       );
     }
   }
-
-  // @Get(':id')
-  // async getParentDetails(@Param('id') id: string): Promise<Parent> {
-  //   return this.parentService.findOne(id);
-  // }
 }

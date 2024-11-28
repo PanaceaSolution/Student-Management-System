@@ -1,25 +1,15 @@
-import {
-  BadRequestException,
-  Injectable,
-  Res,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+//pacakge import
+import { v2 as Cloudinary } from 'cloudinary';
+import { JwtService } from '@nestjs/jwt';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
+import {Injectable,Res} from '@nestjs/common';
 import { Response, Request } from 'express';
 import { Equal, ILike, Like, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-// error imports form file
-import {
-  BadRequestError,
-  NotFoundError,
-  CloudinaryError,
-  InternalServerError,
-  UnauthenticatedError,
-  UnauthorizedError,
-} from '../../utils/custom-errors';
+//local import
 
-// file imports
+import {BadRequestError,NotFoundError,CloudinaryError,InternalServerError,UnauthorizedError} from '../../utils/custom-errors';
 import { LoginDto } from './dto/login.dto';
 import { RegisterUserDto } from './dto/register.dto';
 import { User } from './entities/authentication.entity';
@@ -41,15 +31,11 @@ import {
   extractPublicIdFromUrl,
   uploadFilesToCloudinary,
 } from '../../utils/file-upload.helper';
-import { UUID } from 'typeorm/driver/mongodb/bson.typings';
-import * as moment from 'moment';
-import { v2 as Cloudinary } from 'cloudinary';
 import { STAFFROLE } from '../../utils/role.helper';
 import { Student } from 'src/student/entities/student.entity';
 import { Parent } from 'src/parent/entities/parent.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
 import { FullAuthService } from 'src/middlewares/full-auth.service';
-import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthenticationService {
@@ -774,7 +760,7 @@ export class AuthenticationService {
       });
 
       if (!user) {
-        throw new NotFoundException(`Error fetching user, ${user}`);
+        throw new NotFoundError(`Error fetching user, ${user}`);
       }
 
       return {
@@ -796,11 +782,11 @@ export class AuthenticationService {
   ) {
     try {
       const skip = (page - 1) * limit;
-
+  
       if (![ROLE.ADMIN, ROLE.STUDENT, ROLE.STAFF, ROLE.PARENT].includes(role)) {
         throw new NotFoundError(`${role} not found`);
       }
-
+  
       if (role === ROLE.STAFF) {
         if (!staffRole) {
           const allStaffResponse = await this.staffService.findAllStaff();
@@ -816,13 +802,13 @@ export class AuthenticationService {
               totalPages: 0,
             };
           }
-
+  
           const total = allStaffResponse.data.length;
           const paginatedStaff = allStaffResponse.data.slice(
             skip,
             skip + limit,
           );
-
+  
           return {
             message: 'Staff members fetched successfully',
             status: 200,
@@ -834,7 +820,7 @@ export class AuthenticationService {
             totalPages: Math.ceil(total / limit),
           };
         }
-
+  
         const roleData = await this.staffRepository.find({
           where: { staffRole: staffRole },
           relations: [
@@ -845,10 +831,10 @@ export class AuthenticationService {
             'user.document',
           ],
         });
-
+  
         const total = roleData.length;
         const paginatedStaff = roleData.slice(skip, skip + limit);
-
+  
         const formattedStaff = paginatedStaff.map((staff) => ({
           user: this.formatUserResponse(staff.user),
           staffId: staff.staffId,
@@ -867,11 +853,13 @@ export class AuthenticationService {
           totalPages: Math.ceil(total / limit),
         };
       }
-
+  
       let roleData;
       switch (role) {
         case ROLE.STUDENT:
-          roleData = await this.studentRepository.find({});
+          roleData = await this.studentRepository.find({
+            relations: ['studentClass'],
+          });
           break;
         case ROLE.PARENT:
           roleData = await this.parentRepository.find({});
@@ -879,7 +867,7 @@ export class AuthenticationService {
         default:
           break;
       }
-
+  
       const whereClause = { role } as any;
       const [users, total] = await this.userRepository.findAndCount({
         where: whereClause,
@@ -888,18 +876,27 @@ export class AuthenticationService {
         skip,
         take: limit,
       });
-
+  
       const formattedUsers = users.map(this.formatUserResponse);
-
-      const finalData = formattedUsers.map((user, index) =>
-        roleData && roleData[index] ? { user, ...roleData[index] } : null,
-      );
-
+  
+      const finalData = formattedUsers.map((user, index) => {
+        if (roleData && roleData[index]) {
+          const student = roleData[index];
+          const className = student.studentClass?.className || null; 
+          return {
+            user,
+            ...student,
+            className, 
+          };
+        }
+        return null;
+      });
+  
       return {
         message: 'Users fetched successfully',
         status: 200,
         success: true,
-        data: finalData,
+        data: finalData.filter((item) => item !== null), 
         total,
         page,
         limit,
@@ -909,6 +906,7 @@ export class AuthenticationService {
       throw new InternalServerError('Error fetching users by role', error);
     }
   }
+  
 
   async searchUser(
     searchTerm: string,
@@ -966,7 +964,7 @@ export class AuthenticationService {
           break;
 
         default:
-          throw new BadRequestException('Invalid search criteria');
+          throw new BadRequestError('Invalid search criteria');
       }
 
       const [users, total] = await this.userRepository.findAndCount({
@@ -1092,7 +1090,7 @@ export class AuthenticationService {
         results,
       };
     } catch (error) {
-      throw new InternalServerErrorException(
+      throw new InternalServerError(
         'error occured during user deletation',
         error,
       );
@@ -1100,12 +1098,23 @@ export class AuthenticationService {
   }
   async deleteUsers(userIds: UUID[]) {
     const results = [];
-
+  
     try {
       for (const userId of userIds) {
+        if (!userId) {
+          // Skip undefined or null userIds
+          results.push({
+            userId,
+            message: 'Invalid userId: undefined or null',
+            status: 400,
+            success: false,
+          });
+          continue;
+        }
+  
         try {
           const user = await this.userRepository.findOne({ where: { userId } });
-
+  
           if (!user) {
             results.push({
               userId,
@@ -1115,9 +1124,9 @@ export class AuthenticationService {
             });
             continue;
           }
-
+  
           await this.userRepository.delete(userId.toString());
-
+  
           results.push({
             userId,
             message: 'User and all related data deleted successfully',
@@ -1125,10 +1134,16 @@ export class AuthenticationService {
             success: true,
           });
         } catch (error) {
-          throw new InternalServerError('Unable to delete user data', error);
+          // Catch and report individual deletion errors
+          results.push({
+            userId,
+            message: `Failed to delete user and related data: ${error.message}`,
+            status: 500,
+            success: false,
+          });
         }
       }
-
+  
       return {
         message: 'Batch deletion completed',
         status: 200,
@@ -1136,7 +1151,48 @@ export class AuthenticationService {
         results,
       };
     } catch (error) {
-      throw new InternalServerError(`Unable to delete user data ${error}`);
+      throw new InternalServerError(`Unable to delete user data: ${error.message}`);
     }
   }
+  async getUserStatistics() {
+    try {
+      const totalUsers = await this.userRepository.count();
+      const totalStudents = await this.studentRepository.count();
+      const totalParents = await this.parentRepository.count();
+      const totalStaff = await this.staffRepository.count();
+      const totalTeachers = await this.staffRepository.count({
+        where: { staffRole: STAFFROLE.TEACHER },
+      });
+      const totalAccountants = await this.staffRepository.count({
+        where: { staffRole: STAFFROLE.ACCOUNTANT },
+      });
+      const totalLibrarians = await this.staffRepository.count({
+        where: { staffRole: STAFFROLE.LIBRARIAN },
+      });
+      return {
+        message: 'User statistics fetched successfully',
+        status: 200,
+        success: true,
+        data: {
+          totalUsers,
+          totalStudents,
+          totalParents,
+          totalStaff,
+          staffRoles: {
+            totalTeachers,
+            totalAccountants,
+            totalLibrarians,
+          },
+        },
+      };
+    } catch (error) {
+      throw new InternalServerError(
+        'Error occurred while fetching user statistics',
+        error,
+      );
+    }
+  }
+  
+  
+  
 }
