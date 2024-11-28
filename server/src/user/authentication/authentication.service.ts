@@ -789,7 +789,7 @@ export class AuthenticationService {
   
       let roleData = [];
       let total = 0;
-  
+
       if (role === ROLE.STAFF) {
         const [staffMembers, staffCount] = await this.staffRepository.findAndCount({
           where: staffRole ? { staffRole } : {}, 
