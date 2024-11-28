@@ -25,18 +25,11 @@ export class Class {
   @Column('text')
   section: string;
 
-  @Column('simple-array', { nullable: true })
-  subject: string[];
+  
 
   @Column('text', { nullable: true })
   routineFile: string;
 
-  @ManyToOne(() => Staff, (staff) => staff.classes, { nullable: true })
-  @JoinColumn({ name: 'classTeacherStaffId' })
-  classTeacher: Staff;
-
-  @Column('text', { nullable: true })
-  classTeacherStaffId: string;
 
   @ManyToMany(() => Course, (course) => course.classes, { eager: true })
   @JoinTable()

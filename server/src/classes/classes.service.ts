@@ -18,6 +18,7 @@ import {
   uploadSingleFileToCloudinary,
 } from 'src/utils/file-upload.helper';
 import ResponseModel from 'src/utils/utils';
+import { UpdateCourseDto } from 'src/course/dto/update-course.dto';
 
 @Injectable()
 export class ClassService {
@@ -30,7 +31,7 @@ export class ClassService {
     private staffRepository: Repository<Staff>,
   ) {}
 
- async create(createClassDto: CreateClassDto): Promise<Class> {
+  async create(createClassDto: CreateClassDto): Promise<Class> {
     try {
       // Check if the class with the same name and section already exists
       const existingClassAndSection = await this.classRepository.findOne({
@@ -62,8 +63,6 @@ export class ClassService {
         className: createClassDto.className,
         section: createClassDto.section,
         routineFile: routineFileUrl,
-        // classTeacher,
-        // classTeacherStaffId: createClassDto.classTeacherId,
       });
 
       // Save the new class entity to the database
@@ -76,75 +75,81 @@ export class ClassService {
     }
   }
 
-  async update(id: string, updateClassDto: UpdateClassDto): Promise<Class> {
-    const existingClass = await this.findOne(id);
-    const updateData: any = { ...updateClassDto };
+async update(classId: string, updateClassDto: UpdateClassDto): Promise<Class> {
+    try {
+      const existingClass = await this.classRepository.findOne({ where: { classId } });
+      if (!existingClass) {
+        throw new NotFoundException(`Class with ID ${classId} not found`);
+      }
+  
+      let routineFileUrl = existingClass.routineFile;
+  
+      // Handle routineFile update
+      if (updateClassDto.routineFile) {
+        if (routineFileUrl) {
+          const publicId = extractPublicIdFromUrl(routineFileUrl);
+          await deleteFileFromCloudinary(publicId);
+        }
+        const uploadResult = await uploadSingleFileToCloudinary(
+          updateClassDto.routineFile,
+          'routines',
+        );
+        routineFileUrl = uploadResult.secure_url;
+      }
+  
+      Object.assign(existingClass, {
+        ...updateClassDto,
+        routineFile: routineFileUrl,
+      });
+  
+      return await this.classRepository.save(existingClass);
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to update class', error.message);
+    }
+  }
 
-    if (updateClassDto.routineFile) {
+async remove(classId: string): Promise<void> {
+    try {
+      const existingClass = await this.classRepository.findOne({ where: { classId } });
+      if (!existingClass) {
+        throw new NotFoundException(`Class with ID ${classId} not found`);
+      }
+  
+      // Delete routineFile from Cloudinary if it exists
       if (existingClass.routineFile) {
         const publicId = extractPublicIdFromUrl(existingClass.routineFile);
         await deleteFileFromCloudinary(publicId);
       }
-
-      const uploadResult = await uploadSingleFileToCloudinary(
-        updateClassDto.routineFile,
-        'routines',
-      );
-      updateData.routineFile = uploadResult.secure_url;
-    }
-    if (updateClassDto.subjects) {
-      updateData.subjects = await this.courseRepository.findByIds(
-        updateClassDto.subjects,
-      );
-    }
-
-    if (updateClassDto.classTeacherId) {
-      const classTeacher = await this.staffRepository.findOneBy({
-        staffId: updateClassDto.classTeacherId,
-      });
-
-      if (!classTeacher) {
-        throw new NotFoundException(
-          `Staff with ID ${updateClassDto.classTeacherId} not found`,
-        );
+  
+      await this.classRepository.remove(existingClass);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
       }
-
-      updateData.classTeacher = classTeacher;
-      updateData.classTeacherStaffId = updateClassDto.classTeacherId; // Add this line
-    }
-
-    await this.classRepository.save({ classId: id, ...updateData });
-    return this.findOne(id);
-  }
-
-  async remove(id: string): Promise<void> {
-    const existingClass = await this.findOne(id);
-
-    if (existingClass.routineFile) {
-      const publicId = extractPublicIdFromUrl(existingClass.routineFile);
-      await deleteFileFromCloudinary(publicId);
-    }
-
-    const result = await this.classRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Class with ID ${id} not found`);
+      throw new InternalServerErrorException('Failed to remove class', error.message);
     }
   }
 
-  async findAll(): Promise<Class[]> {
-    return this.classRepository.find({
-      relations: ['classTeacher', 'subjects'],
-    });
-  }
-
-  async findOne(id: string): Promise<Class> {
-    const classEntity = await this.classRepository.findOne({
-      where: { classId: id },
-      relations: ['classTeacher', 'subjects'],
-    });
-    if (!classEntity) {
-      throw new NotFoundException(`Class with ID ${id} not found`);
+async findOne(classId: string): Promise<Class> {
+    try {
+      const classEntity = await this.classRepository.findOne({ where: { classId } });
+      if (!classEntity) {
+        throw new NotFoundException(`Class with ID ${classId} not found`);
+      }
+      return classEntity;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to find class', error.message);
     }
-    return classEntity;
+  }
+  
+async findAll(): Promise<Class[]> {
+    try {
+      return await this.classRepository.find();
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to retrieve classes', error.message);
+    }
   }
 }

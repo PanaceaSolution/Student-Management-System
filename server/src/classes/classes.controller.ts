@@ -16,19 +16,17 @@ export class ClassController {
     @UploadedFile() routineFile: Express.Multer.File,
   ) {
     try {
-
-
       const classData = await this.classService.create({
         ...createClassDto,
-        routineFile,
+        routineFile, // Ensure routineFile is included
       });
-
+  
       return ResponseModel.success('Class created successfully', classData); 
     } catch (error) {
       return ResponseModel.error('Failed to create class', error.message); 
     }
   }
-
+  
   @Patch(':id')
   @UseInterceptors(FileInterceptor('routineFile'))
   async update(
@@ -37,15 +35,12 @@ export class ClassController {
     @UploadedFile() routineFile: Express.Multer.File,
   ) {
     try {
-      if (typeof updateClassDto.subjects === 'string') {
-        updateClassDto.subjects = JSON.parse(updateClassDto.subjects);
-      }
-
+  
       const updatedClass = await this.classService.update(id, {
         ...updateClassDto,
-        routineFile,
+        routineFile, 
       });
-
+  
       return ResponseModel.success('Class updated successfully', updatedClass);
     } catch (error) {
       return ResponseModel.error('Failed to update class', error.message); 
