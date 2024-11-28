@@ -31,7 +31,7 @@ export class Class {
   @Column('text', { nullable: true })
   routineFile: string;
 
-  @ManyToOne(() => Staff, (staff) => staff.classes, { nullable: false })
+  @ManyToOne(() => Staff, (staff) => staff.classes, { nullable: true })
   @JoinColumn({ name: 'classTeacherStaffId' })
   classTeacher: Staff;
 

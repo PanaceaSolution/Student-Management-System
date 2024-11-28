@@ -121,9 +121,8 @@ class ExpenseChart extends Component {
         content: (e) => {
           let content = `<strong>${e.entries[0].dataPoint.x.toLocaleDateString()}</strong><br/>`;
           e.entries.forEach((entry) => {
-            content += `${
-              entry.dataSeries.name
-            }: ${entry.dataPoint.y.toLocaleString()} NPR<br/>`;
+            content += `${entry.dataSeries.name
+              }: ${entry.dataPoint.y.toLocaleString()} NPR<br/>`;
           });
           return content;
         },
@@ -164,18 +163,13 @@ class ExpenseChart extends Component {
     };
 
     return (
-      <div>
+      <div className="h-full bg-white p-4 rounded-lg shadow-md">
         <div className="flex  sticky top-0 justify-between px-4 p-2 border-b-2 ">
           <select className="bg-white" onChange={this.changeFrequency}>
             <option value="daily">Daily</option>
             <option value="monthly">Monthly</option>
             <option value="annual">Annual</option>
           </select>
-          <div className="flex space-x-2 cursor-pointer">
-            <RefreshCcw size={20} className="text-green-600" />
-
-            <X size={20} className="text-red-700" />
-          </div>
         </div>
         <CanvasJSChart options={options} onRef={(ref) => (this.chart = ref)} />
       </div>

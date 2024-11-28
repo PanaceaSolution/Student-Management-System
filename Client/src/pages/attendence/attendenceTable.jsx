@@ -10,6 +10,7 @@ const AttendanceTable = () => {
   const { className, section } = useParams();
   const [attendance, setAttendance] = useState([]);
   const { saveAttendence, isSubmitting } = useAttendanceStore();
+  const { saveAttendence, isSubmitting } = useAttendanceStore();
   console.log("Class Name:", className, "Section:", section);
   const navigate = useNavigate();
   const dates = dayjs().format("YYYY-MM-DD"); // Static Dates
@@ -36,7 +37,32 @@ const AttendanceTable = () => {
         console.error("Error fetching students:", error);
       }
     };
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const response = await getStudentsByClassAndSectionService(
+          className,
+          section
+        );
+        if (response.success && Array.isArray(response.data.students)) {
+          setAttendance(
+            response.data.students.map((student) => ({
+              rollNumber: student.rollNumber,
+              fname: student.firstName,
+              lname: student.lastName,
+              isPresent: "-", // Change to isPresent to match the expected structure
+            }))
+          );
+        } else {
+          console.error("Unexpected response format:", response);
+        }
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      }
+    };
 
+    fetchStudents();
+  }, [className, section]);
     fetchStudents();
   }, [className, section]);
 
@@ -44,6 +70,7 @@ const AttendanceTable = () => {
     setAttendance((prevAttendance) =>
       prevAttendance.map((student) =>
         student.rollNumber === rollNumber
+          ? { ...student, isPresent: value }
           ? { ...student, isPresent: value }
           : student
       )
@@ -106,6 +133,7 @@ const AttendanceTable = () => {
                 >
                   <option>--</option>
                   <option value="P">P</option>
+                  <option value="A">A</option>
                   <option value="A">A</option>
                 </select>
               </td>

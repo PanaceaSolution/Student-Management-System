@@ -95,8 +95,9 @@ const Parents = () => {
       await deleteParent(id);
    };
 
-   const handleEdit = () => {
-
+   const handleEdit = (data) => {
+      setFormOpen(true);
+      setSelectedData(data);
    }
 
    return (

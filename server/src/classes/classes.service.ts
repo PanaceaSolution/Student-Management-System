@@ -1,4 +1,10 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Class } from './entities/class.entity';
@@ -6,7 +12,11 @@ import { CreateClassDto } from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { Course } from 'src/course/entities/course.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
-import { deleteFileFromCloudinary, extractPublicIdFromUrl, uploadSingleFileToCloudinary } from 'src/utils/file-upload.helper';
+import {
+  deleteFileFromCloudinary,
+  extractPublicIdFromUrl,
+  uploadSingleFileToCloudinary,
+} from 'src/utils/file-upload.helper';
 import ResponseModel from 'src/utils/utils';
 
 @Injectable()
@@ -20,51 +30,50 @@ export class ClassService {
     private staffRepository: Repository<Staff>,
   ) {}
 
-  async create(createClassDto: CreateClassDto): Promise<Class> {
-   
-    // const classTeacher = await this.staffRepository.findOneBy({
-    //   staffId: createClassDto.classTeacherId,
-    // });
+ async create(createClassDto: CreateClassDto): Promise<Class> {
+    try {
+      // Check if the class with the same name and section already exists
+      const existingClassAndSection = await this.classRepository.findOne({
+        where: {
+          className: createClassDto.className,
+          section: createClassDto.section,
+        },
+      });
 
-    // if (!classTeacher) {
-    //   throw new NotFoundException(
-    //     `Staff with ID ${createClassDto.classTeacherId} not found`,
-    //   );
-    // }
-    const existingClassAndSection = await this.classRepository.findOne({
-      where:{
-        className:createClassDto.className,
-        section:createClassDto.section,
-      },
-    })
-    if(existingClassAndSection){
-      throw new ConflictException(
-        `Class ${createClassDto.className} with section ${createClassDto.section} already exists`
-      );
+      if (existingClassAndSection) {
+        throw new ConflictException(
+          `Class ${createClassDto.className} with section ${createClassDto.section} already exists`,
+        );
+      }
+
+      let routineFileUrl = null;
+
+      // If routineFile is provided, upload it to Cloudinary
+      if (createClassDto.routineFile) {
+        const uploadResult = await uploadSingleFileToCloudinary(
+          createClassDto.routineFile,
+          'routines',
+        );
+        routineFileUrl = uploadResult.secure_url;
+      }
+
+      // Create a new class entity
+      const newClass = this.classRepository.create({
+        className: createClassDto.className,
+        section: createClassDto.section,
+        routineFile: routineFileUrl,
+        // classTeacher,
+        // classTeacherStaffId: createClassDto.classTeacherId,
+      });
+
+      // Save the new class entity to the database
+      return await this.classRepository.save(newClass);
+    } catch (error) {
+      if (error instanceof ConflictException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to create class', error.message);
     }
-     const subjects = await this.courseRepository.findByIds(
-       createClassDto.subjects,
-     );
-  
-
-    let routineFileUrl = null;
-    if (createClassDto.routineFile) {
-      const uploadResult = await uploadSingleFileToCloudinary(
-        createClassDto.routineFile,
-        'routines',
-      );
-      routineFileUrl = uploadResult.secure_url;
-    }
-
-    const newClass = this.classRepository.create({
-      className: createClassDto.className,
-      section: createClassDto.section,
-      routineFile: routineFileUrl,
-      subjects,
-      // classTeacher,
-      classTeacherStaffId: createClassDto.classTeacherId,
-    });
-    return this.classRepository.save(newClass);
   }
 
   async update(id: string, updateClassDto: UpdateClassDto): Promise<Class> {

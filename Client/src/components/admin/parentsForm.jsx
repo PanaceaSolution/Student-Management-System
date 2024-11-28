@@ -6,85 +6,37 @@ import {
    DialogDescription,
    DialogHeader,
    DialogTitle,
-   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
-import useStudentStore from "@/store/studentStore";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import {
-   MultiSelector,
-   MultiSelectorTrigger,
-   MultiSelectorInput,
-   MultiSelectorContent,
-   MultiSelectorList,
-   MultiSelectorItem,
-} from "@/components/ui/multi-select";
 import ProfilePicUpload from "../common/ImageUpload";
 import useParentStore from "@/store/parentsStore";
-import { flattenData } from "@/utilities/utilities";
 
-const ParentsForm = ({ title, selectedData, setSelectedData, formOpen, setFormOpen }) => {
-   const { students, getAllStudents } = useStudentStore();
-   const { updateParent, addParent } = useParentStore();
+const ParentsForm = ({ selectedData, setSelectedData, formOpen, setFormOpen }) => {
+   const { updateParent } = useParentStore();
    const [profilePic, setProfilePic] = useState(null);
-   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
-   const formattedStudent = flattenData(students);
-
-   const studentQuery = useMemo(() => {
-      const params = new URLSearchParams();
-      params.append("role", "STUDENT");
-      params.append("page", 1);
-      params.append("limit", 10);
-      return `${params.toString()}`;
-   }, [])
-
-   useEffect(() => {
-      const fetchData = async () => {
-         if (studentQuery) {
-            await getAllStudents(studentQuery);
-         }
-      }
-
-      fetchData();
-   }, [studentQuery]);
 
    const {
       register,
       handleSubmit,
-      setValue,
       formState: { errors },
       clearErrors,
+      setValue,
       reset
    } = useForm({});
 
    useEffect(() => {
       if (selectedData) {
-         setProfilePic(selectedData.profilePic || null);
-         setValue("firstName", selectedData.firstName);
-         setValue("lastName", selectedData.lastName);
-         setValue("email", selectedData.email);
-         setSelectedStudentIds(selectedData.studentId || []);
+         setValue("fname", selectedData.user_profile_fname);
+         setValue("lname", selectedData.user_profile_lname);
+         setValue("gender", selectedData.user_profile_gender);
+         setValue("email", selectedData.user_email);
+         setProfilePic(selectedData.user_profile_profilePicture);
       }
-   }, [selectedData, setValue]);
-
-   const resetFormState = () => {
-      reset({});
-      setProfilePic(null);
-   };
-
-   const handleAddForm = () => {
-      resetFormState();
-      setSelectedData(null);
-      setFormOpen(true);
-   };
+   }, [selectedData]);
 
    const onSubmit = async (data) => {
-      // const formattedData = {
-      //    ...formData,
-      //    profilePic: profilePic,
-      //    studentId: selectedStudentIds,
-      // };
       const formData = new FormData();
       formData.append("email", data.email);
       formData.append("role", "PARENT");
@@ -99,29 +51,19 @@ const ParentsForm = ({ title, selectedData, setSelectedData, formOpen, setFormOp
       if (profilePic) {
          formData.append("profilePicture", profilePic);
       }
-      console.log("Formatted data: ", formData);
 
-      if (selectedData) {
-         await updateParent(selectedData.id, formData);
-      } else {
-         await addParent(formData);
+      const res = await updateParent(selectedData.id, formData);
+      if (res.success) {
+         reset();
+         setIsOpen(false);
+         clearErrors();
+         setSelectedData(null);
       }
-      setIsOpen(false);
-      clearErrors();
-      setSelectedStudentIds([]);
    };
-
-   const previewImage = (profilePic, id) => {
-      if (profilePic) {
-         return (
-            <img key={id} src={profilePic} alt="Profile Pic" className="w-8 h-8 rounded-full object-cover" />
-         )
-      }
-   }
 
    return (
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
-         <DialogTrigger asChild>
+         {/* <DialogTrigger asChild>
             <Button
                variant="create"
                className="uppercase"
@@ -129,7 +71,7 @@ const ParentsForm = ({ title, selectedData, setSelectedData, formOpen, setFormOp
             >
                {title}
             </Button>
-         </DialogTrigger>
+         </DialogTrigger> */}
          <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
                <DialogTitle className="text-xl font-bold text-center uppercase">
@@ -180,7 +122,7 @@ const ParentsForm = ({ title, selectedData, setSelectedData, formOpen, setFormOp
                   error={errors.email}
                   placeholder="Enter Email"
                /> */}
-               <div>
+               {/* <div>
                   <Label htmlFor="studentId" className="block text-sm font-medium text-gray-900">
                      Student(s)
                   </Label>
@@ -212,7 +154,7 @@ const ParentsForm = ({ title, selectedData, setSelectedData, formOpen, setFormOp
                      </MultiSelectorContent>
                   </MultiSelector>
                   {errors.studentId && <p className="text-red-600 text-sm">{errors.studentId.message}</p>}
-               </div>
+               </div> */}
                <ProfilePicUpload
                   profilePic={profilePic}
                   setProfilePic={setProfilePic}
