@@ -80,8 +80,8 @@ const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, 
       setValue("province", selectedData.user_address_0_province);
       setValue("district", selectedData.user_address_0_district);
       setDocuments({
-        birthCertificate: selectedData.user_documents_0_documentFile,
-        marksheet: selectedData.user_documents_1_documentFile,
+        birthCertificate: selectedData.user_document_0_documentFile,
+        marksheet: selectedData.user_document_1_documentFile,
         citizenship: selectedData.user_document_2_citizenship
       })
     }
@@ -104,7 +104,7 @@ const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, 
     formData.append("transportationMode", data.transportationMode);
     formData.append("registrationNumber", data.registrationNumber);
     formData.append("previousSchool", data.previousSchool);
-    formData.append("isParentEmailEnabled", isParentEmailEnabled);
+    formData.append("createParent", isParentEmailEnabled);
     formData.append("parentEmail", data.parentEmail);
 
     //Profile info

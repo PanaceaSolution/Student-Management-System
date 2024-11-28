@@ -1,7 +1,7 @@
 import {
   createStudentService,
-  updateStudentService,
   getStudentsByClassAndSectionService,
+  updateStudentService,
 } from "@/services/studentService";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
@@ -119,6 +119,8 @@ const useStudentStore = create(
         // Update an existing student
         updateStudent: async (studentId, formData) => {
           set({ isSubmitting: true, error: null });
+          console.log("studentId", studentId);
+          console.log("formData", formData);
           try {
             const res = await updateStudentService(studentId, formData);
             if (res.success) {
@@ -190,6 +192,7 @@ const getStudentsData = (res) => {
   return {
     user: {
       ...res.user,
+      contact: res.contact,
       studentId: res.studentId,
       admissionDate: res.admissionDate,
       fatherName: res.fatherName,
