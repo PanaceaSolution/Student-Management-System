@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinTable, ManyToMany } from 'typeorm';
 import { Staff } from '../../staff/entities/staff.entity'; 
 import { Class } from 'src/classes/entities/class.entity';
 import { Assignment } from '../../assignment/entities/assignment.entity';
@@ -14,6 +14,10 @@ export class Course {
   @Column('text')
   courseDescription: string;
 
+
+  @ManyToMany(() => Staff, (staff) => staff.courses)
+  @JoinTable()
+  teachers: Staff[];
 
   @Column({ nullable: true })
   file: string; 
