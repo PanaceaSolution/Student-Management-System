@@ -14,24 +14,23 @@ import StepIndicator from '@/pages/admin/StudentForm/StepIndicator';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import StaffInfo from './StaffInfo';
 import AddressInfo from '@/pages/admin/StudentForm/AddressInfo';
-import ProfilePicUpload from '@/components/common/profilePicUpload';
+import ImageUpload from '@/components/common/ImageUpload';
 import StaffDocumentUpload from './StaffDocumentUpload';
 import Spinner from '@/components/Loader/Spinner';
 
 const documentFields = [
-   { name: "birthCertificate", label: "Birth Certificate (optional)" },
+   { name: "cv", label: "CV (optional)" },
    { name: "citizenship", label: "Citizenship Document (optional)" },
-]
+];
 
 const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, currentStep, setCurrentStep }) => {
    const { addStaff, updateStaff, isSubmitting } = useStaffStore();
    const steps = ["Personal Info", "Address Info", "Document Upload"];
    const [profilePic, setProfilePic] = useState('');
    const [documents, setDocuments] = useState({
-      birthCertificate: null,
+      cv: null,
       citizenship: null,
    });
-   // console.log(selectedData);
 
 
    const {
@@ -64,7 +63,7 @@ const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, cu
          setValue("alternatePhoneNumber", selectedData.user_contact_alternatePhoneNumber);
          setValue("telephoneNumber", selectedData.user_contact_telephoneNumber);
          setDocuments({
-            birthCertificate: selectedData.user_documents_0_documentFile,
+            cv: selectedData.user_documents_0_documentFile,
             citizenship: selectedData.user_documents_1_documentFile,
          })
       }
@@ -73,7 +72,7 @@ const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, cu
    const resetFormState = () => {
       reset({});
       setProfilePic(null);
-      setDocuments({ birthCertificate: null, citizenship: null });
+      setDocuments({ cv: null, citizenship: null });
    };
 
    const handleAddForm = () => {
@@ -154,36 +153,21 @@ const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, cu
       formattedData.append("document", JSON.stringify(documentData));
 
       try {
-         if (selectedData) {
-            const res = await updateStaff(selectedData.user_staffId, formattedData);
+         const res = selectedData
+            ? await updateStaff(selectedData.user_staffId, formattedData)
+            : await addStaff(formattedData);
+
+         if (res.success) {
             console.log(res);
-
-            if (res.success) {
-               setFormOpen(false);
-               reset();
-               setCurrentStep(0);
-               setProfilePic(null);
-               setDocuments({
-                  birthCertificate: null,
-                  citizenship: null,
-                  marksheet: null,
-               })
-            }
-         } else {
-            const res = await addStaff(formattedData);
-            if (res.success) {
-               setFormOpen(false);
-               reset();
-               setCurrentStep(0);
-               setProfilePic(null);
-               setDocuments({
-                  birthCertificate: null,
-                  citizenship: null,
-                  marksheet: null,
-               })
-            }
+            setFormOpen(false);
+            reset();
+            setCurrentStep(0);
+            setProfilePic(null);
+            setDocuments({
+               cv: null,
+               citizenship: null,
+            });
          }
-
       } catch (error) {
          console.error("Error adding staff:", error);
       }
@@ -233,13 +217,12 @@ const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, cu
                      <StaffInfo
                         register={register}
                         errors={errors}
-                        profilePic={profilePic}
-                        setProfilePic={setProfilePic}
                         clearErrors={clearErrors}
                      />
-                     <ProfilePicUpload
-                        profilePic={profilePic}
-                        setProfilePic={setProfilePic}
+                     <ImageUpload
+                        label="Profile Picture"
+                        image={profilePic}
+                        setImage={setProfilePic}
                         clearErrors={clearErrors}
                         errors={errors}
                      />
@@ -253,14 +236,20 @@ const AddStaffForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, cu
                   />
                )}
                {currentStep === 2 && (
-                  <StaffDocumentUpload
-                     register={register}
-                     setDocuments={setDocuments}
-                     documents={documents}
-                     errors={errors}
-                     clearErrors={clearErrors}
-                     documentFields={documentFields}
-                  />
+                  <div className='grid gap-4'>
+                     {documentFields.map((field, index) => (
+                        <ImageUpload
+                           key={index}
+                           label={field.label}
+                           image={documents[field.name]}
+                           setImage={(image) =>
+                              setDocuments((prev) => ({ ...prev, [field.name]: image }))
+                           }
+                           clearErrors={clearErrors}
+                           errors={errors}
+                        />
+                     ))}
+                  </div>
                )}
                <div className="mt-6 flex justify-between">
                   {currentStep > 0 && (

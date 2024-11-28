@@ -77,6 +77,7 @@ export function decryptdPassword(encryptedPassword: string): string {
 export default class ResponseModel<T> {
   message: string;
   success: boolean;
+  // statusCodes?: number;
   data?: T;
   error?: string;
 

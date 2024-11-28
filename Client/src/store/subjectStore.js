@@ -1,4 +1,4 @@
-import { createSubjectService, deleteSubjectService, getAllSubjectsService, getSubjectByIdService, updateSubjectService } from '@/services/subjectServices'
+import { createSubjectService, deleteSubjectService, getAllSubjectsService, updateSubjectService } from '@/services/subjectServices'
 import toast from 'react-hot-toast'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
@@ -6,68 +6,54 @@ import { devtools, persist } from 'zustand/middleware'
 const useSubjectStore = create(
    devtools(
       persist(
-         (set, get) => ({
-            loading: false,
+         (set) => ({
+            isSubmitting: false,
+            isDeleting: false,
+            isLoading: false,
             error: null,
             subjects: [],
 
             // Get all subjects
             getAllSubjects: async () => {
-               set({ loading: true, error: null })
+               set({ isLoading: true, error: null })
                try {
-                  const data = await getAllSubjectsService()
-                  if (data) {
-                     set({ subjects: data, loading: false })
-                  } else {
-                     set({ subjects: [], loading: false })
-                     toast.error('Failed to fetch data')
+                  const res = await getAllSubjectsService()
+                  if (res.success) {
+                     set({
+                        subjects: res.data,
+                        isLoading: false
+                     })
                   }
-                  return data
+                  return res;
                } catch (error) {
-                  set({ error: error.message, loading: false })
+                  set({ error: error.message, isLoading: false })
                   return error
                }
             },
 
-            // Get subject by ID
-            getSubjectById: async (subjectId) => {
-               set({ loading: true, error: null })
-               try {
-                  const data = await getSubjectByIdService(subjectId)
-                  set({ loading: false })
-                  return data
-               } catch (error) {
-                  set({ error: error.message, loading: false })
-                  return error
-               }
-            },
 
             // Add a new subject
             addSubject: async (subjectData) => {
-               set({ loading: true, error: null })
+               set({ isSubmitting: true, error: null })
                try {
-                  const data = await createSubjectService(subjectData)
-                  if (data) {
-                     toast.success(data.message)
+                  const res = await createSubjectService(subjectData)
+                  if (res.success) {
+                     toast.success(res.message)
                      set((state) => ({
-                        subjects: [...state.subjects, data],
-                        loading: false
+                        subjects: [...state.subjects, res.data],
+                        isSubmitting: false
                      }))
-                     await get().getAllSubjects()
-                  } else {
-                     toast.error('Failed to add')
-                     set({ loading: false })
                   }
-                  return data
+                  return res
                } catch (error) {
-                  set({ error: error.message, loading: false })
+                  set({ error: error.message, isSubmitting: false })
                   return error
                }
             },
 
             // Update an existing subject
             updateSubject: async (subjectId, updatedSubjectData) => {
-               set({ loading: true, error: null });
+               set({ isSubmitting: true, error: null });
 
                try {
                   const data = await updateSubjectService(subjectId, updatedSubjectData);
@@ -78,18 +64,16 @@ const useSubjectStore = create(
                         subjects: state.subjects.map((subject) =>
                            subject.id === subjectId ? { ...subject, ...updatedSubjectData } : subject
                         ),
-                        loading: false,
+                        isSubmitting: false,
                      }));
-
-                     await get().getAllSubjects();
                   } else {
                      toast.error('Failed to update');
-                     set({ loading: false });
+                     set({ isSubmitting: false });
                   }
 
                   return data;
                } catch (error) {
-                  set({ error: error.message, loading: false });
+                  set({ error: error.message, isSubmitting: false });
                   toast.error(`Error: ${error.message}`); // Show error message to user
                   return error; // Consider returning an object instead for better error handling
                }
@@ -100,26 +84,25 @@ const useSubjectStore = create(
             deleteSubject: async (subjectId) => {
                set({ loading: true, error: null })
                try {
-                  const data = await deleteSubjectService(subjectId)
-                  if (200) {
-                     toast.success(data.message)
+                  const res = await deleteSubjectService(subjectId)
+                  if (res.success) {
+                     toast.success(res.message)
                      set((state) => ({
-                        subjects: state.subjects.filter((subject) => subject.id !== subjectId),
+                        subjects: state.subjects.filter((subject) => subject.courseId !== subjectId),
                         loading: false
                      }))
-                     await get().getAllSubjects()
-                     return data
-                  } else {
-                     toast.error('Failed to delete')
-                     set({ loading: false })
                   }
+                  return res
                } catch (error) {
                   set({ error: error.message, loading: false })
                   return error
                }
             }
          }),
-         { name: 'subjects' }
+         {
+            name: 'subjects',
+            partialize: (state) => ({ subjects: state.subjects }),
+         }
       )
    )
 )

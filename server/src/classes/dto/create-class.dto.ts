@@ -12,17 +12,4 @@ export class CreateClassDto {
   @IsString()
   routineFile?: Express.Multer.File;
 
-  @IsUUID()
-  classTeacherId: string;
-
-  @IsEnum(STAFFROLE)
-  staffRole: STAFFROLE = STAFFROLE.TEACHER; 
-
-  @IsArray()
-  @IsUUID("all", { each: true })
-  subjects: string[];
-
-  @IsArray()
-  @IsOptional()
-  subject: string[];
 }

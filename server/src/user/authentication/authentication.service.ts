@@ -1,18 +1,16 @@
-import {
-  BadRequestException,
-  Injectable,
-  Req,
-  Res,
-  InternalServerErrorException,
-  HttpException,
-  NotFoundException,
-  ForbiddenException,
-  UnauthorizedException,
-} from '@nestjs/common';
+//pacakge import
+import { v2 as Cloudinary } from 'cloudinary';
+import { JwtService } from '@nestjs/jwt';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings';
+import {Injectable,Res} from '@nestjs/common';
 import { Response, Request } from 'express';
-import { LoginDto } from './dto/login.dto';
 import { Equal, ILike, Like, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+
+//local import
+
+import {BadRequestError,NotFoundError,CloudinaryError,InternalServerError,UnauthorizedError} from '../../utils/custom-errors';
+import { LoginDto } from './dto/login.dto';
 import { RegisterUserDto } from './dto/register.dto';
 import { User } from './entities/authentication.entity';
 import { ROLE } from '../../utils/role.helper';
@@ -21,7 +19,6 @@ import { UserContact } from '../userEntity/contact.entity';
 import { UserDocuments } from '../userEntity/document.entity';
 import { StaffService } from 'src/staff/staff.service';
 import { UserProfile } from '../userEntity/profile.entity';
-import { CloudinaryError, DatabaseError } from '../../utils/custom-errors';
 import {
   generateRandomPassword,
   generateUsername,
@@ -34,15 +31,11 @@ import {
   extractPublicIdFromUrl,
   uploadFilesToCloudinary,
 } from '../../utils/file-upload.helper';
-import { UUID } from 'typeorm/driver/mongodb/bson.typings';
-import * as moment from 'moment';
-import { v2 as Cloudinary } from 'cloudinary';
 import { STAFFROLE } from '../../utils/role.helper';
 import { Student } from 'src/student/entities/student.entity';
 import { Parent } from 'src/parent/entities/parent.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
 import { FullAuthService } from 'src/middlewares/full-auth.service';
-import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthenticationService {
@@ -73,7 +66,7 @@ export class AuthenticationService {
     private readonly fullAuthService: FullAuthService,
     private readonly refreshTokenUtil: RefreshTokenUtil,
     private readonly jwtService: JwtService,
-  ) { }
+  ) {}
   async register(
     RegisterDto: RegisterUserDto,
     files: {
@@ -85,19 +78,29 @@ export class AuthenticationService {
     try {
       const { email, role, profile, contact, document, address } = RegisterDto;
 
-      if (!email || !role || !profile || !contact || !document || !address) {
-        throw new BadRequestException('All fields are required');
+      const missingFields = [];
+      if (!email) missingFields.push('email');
+      if (!role) missingFields.push('role');
+      if (!profile) missingFields.push('profile');
+      if (!contact) missingFields.push('contact');
+      if (!document) missingFields.push('document');
+      if (!address) missingFields.push('address');
+
+      if (missingFields.length > 0) {
+        throw new BadRequestError(
+          `The following fields are missing: ${missingFields.join(', ')}`,
+        );
       }
 
       if (![ROLE.ADMIN, ROLE.STUDENT, ROLE.STAFF, ROLE.PARENT].includes(role)) {
-        throw new ForbiddenException('Role not allowed');
+        throw new NotFoundError(`Role ${role} not allowed`);
       }
 
       const existingUser = await this.userRepository.findOne({
         where: { email },
       });
       if (existingUser) {
-        throw new BadRequestException('User with this email already exists');
+        throw new BadRequestError(`User with email ${email} already exists`);
       }
 
       const password = generateRandomPassword();
@@ -108,7 +111,6 @@ export class AuthenticationService {
         role,
         staffRole,
       );
-
 
       const newUser = this.userRepository.create({
         email,
@@ -205,6 +207,7 @@ export class AuthenticationService {
           username: newUser.username,
           role: newUser.role,
           isActivated: newUser.isActivated,
+          password: newUser.password,
           createdAt: newUser.createdAt,
           profile: {
             fname: userProfile.fname,
@@ -233,74 +236,76 @@ export class AuthenticationService {
         plainPassword: password,
       };
     } catch (error) {
-      if (!(error instanceof HttpException)) {
-        throw new InternalServerErrorException(
-          'An unexpected error occurred during registration',
-        );
-      }
-      throw error;
+      throw new InternalServerError(
+        'Error occured in user register',
+        `${error}`,
+      );
     }
   }
 
   async login(loginDto: LoginDto, res: Response) {
     try {
       const { username, password, deviceInfo } = loginDto;
-  
+
       if (!username || !password) {
-        throw new BadRequestException('Username and password are required');
+        throw new BadRequestError('Username and Password is required');
       }
-  
+
       const user = await this.userRepository.findOne({
         where: { username },
         relations: ['profile'],
       });
-  
+
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        throw new UnauthorizedError(`${user} not found`);
       }
-  
+
       if (!user.isActivated) {
-        throw new UnauthorizedException('Account is deactivated');
+        throw new UnauthorizedError(`${user} account is deactivated`);
       }
-  
+
       const decryptedPassword = decryptdPassword(user.password);
       if (password !== decryptedPassword) {
-        throw new UnauthorizedException('Invalid credentials');
+        throw new UnauthorizedError(`Password is invalid`);
       }
-  
+
       // Check if a refresh token already exists in the database
       const existingToken = await this.fullAuthService.getRefreshTokenByUserId(
         user.userId.toString(),
       );
-  
+
       if (existingToken) {
         const now = new Date();
-  
+
         if (existingToken.expiresAt > now) {
           const payload = this.fullAuthService.createPayload({
             id: user.userId,
             username: user.username,
             role: user.role,
           });
-  
+
           const accessToken = this.jwtService.sign(payload, {
             expiresIn: '15m',
             secret: process.env.JWT_SECRET,
           });
-  
+
           // Send the same plain refresh token back in the cookie
           res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
           });
-  
-          res.cookie('refreshToken', decodeURIComponent(existingToken.refreshToken), {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-          });
-  
+
+          res.cookie(
+            'refreshToken',
+            decodeURIComponent(existingToken.refreshToken),
+            {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'strict',
+            },
+          );
+
           return res.status(200).json({
             message: 'Login successful',
             success: true,
@@ -318,14 +323,14 @@ export class AuthenticationService {
           });
         }
       }
-  
+
       // Generate new tokens if no valid refresh token exists
       const payload = this.fullAuthService.createPayload({
         id: user.userId,
         username: user.username,
         role: user.role,
       });
-  
+
       const { accessToken, refreshToken } =
         await this.fullAuthService.generateTokensAndAttachCookies(
           res,
@@ -333,7 +338,7 @@ export class AuthenticationService {
           user.userId.toString(),
           deviceInfo,
         );
-  
+
       return res.status(200).json({
         message: 'Login successful',
         success: true,
@@ -350,13 +355,9 @@ export class AuthenticationService {
         },
       });
     } catch (error) {
-      if (!(error instanceof UnauthorizedException || error instanceof BadRequestException)) {
-        throw new InternalServerErrorException('Internal server error');
-      }
-      throw error;
+      throw new InternalServerError('Error occured in user login', `${error}`);
     }
   }
-  
 
   async logout(
     @Res() res: Response,
@@ -364,23 +365,24 @@ export class AuthenticationService {
     logoutFromAll: boolean = false,
   ): Promise<any> {
     try {
+      if (!refreshToken) {
+        throw new BadRequestError('Refresh token is required');
+      }
+
       if (logoutFromAll) {
         const decodedToken = this.fullAuthService.isTokenValid(refreshToken);
         if (!decodedToken) {
-          return res.status(401).json({
-            message: 'Invalid refresh token',
-            success: false,
-          });
+          throw new UnauthorizedError('Refresh Token invalid or expired ');
         }
-  
+
         const userId = decodedToken.id;
         await this.fullAuthService.terminateAllSessions(userId);
       } else {
         await this.fullAuthService.invalidateRefreshToken(refreshToken);
       }
-  
+
       this.fullAuthService.clearCookies(res);
-  
+
       return res.status(200).json({
         message: logoutFromAll
           ? 'Logged out from all devices successfully'
@@ -388,16 +390,10 @@ export class AuthenticationService {
         success: true,
       });
     } catch (error) {
-      console.error('Error during logout:', error.message);
-      return res.status(500).json({
-        message: 'Internal server error',
-        success: false,
-      });
+      throw new InternalServerError('Error occured in user logout', `${error}`);
     }
   }
-  
-  
-  
+
   async updateUser(
     id: UUID,
     updateData: Partial<RegisterUserDto>,
@@ -408,42 +404,39 @@ export class AuthenticationService {
   ) {
     try {
       const { email, profile, contact, document, address } = updateData;
-  
+
       const user = await this.userRepository.findOne({
         where: { userId: Equal(id.toString()) },
       });
       if (!user) {
-        throw new NotFoundException('User not found');
+        throw new NotFoundError(`${user} not found`);
       }
-  
+
       const updatedFields = {};
-  
+
       if (email !== undefined) {
         const emailInUse = await this.userRepository.findOne({
           where: { email, userId: Not(Equal(id.toString())) },
         });
         if (emailInUse) {
-          throw new BadRequestException(
-            'This email is already in use by another user',
-          );
+          throw new BadRequestError(`${email} is already in use`);
         }
         user.email = email;
         updatedFields['email'] = email;
       }
 
       await this.userRepository.save(user);
-  
+
       let profilePictureUrl: string | null = null;
-  
+
       if (profile) {
         profilePictureUrl = await this.handleProfilePictureUpdate(
           files.profilePicture,
           user.userId.toString(),
-          this.profileRepository, 
+          this.profileRepository,
         );
-
       }
-  
+
       if (profile) {
         await this.updateUserProfile(
           profile,
@@ -452,7 +445,7 @@ export class AuthenticationService {
           updatedFields,
         );
       }
-  
+
       if (contact) {
         await this.updateUserContact(
           contact,
@@ -460,7 +453,7 @@ export class AuthenticationService {
           updatedFields,
         );
       }
-  
+
       if (address) {
         await this.updateUserAddress(
           address,
@@ -468,38 +461,34 @@ export class AuthenticationService {
           updatedFields,
         );
       }
-  
+
       if (document) {
         await this.updateUserDocuments(
           document,
           files.documents,
           user.userId.toString(),
           updatedFields,
-          files.documents && files.documents.length === 0 ? 'your-fallback-url' : undefined,
+          files.documents && files.documents.length === 0
+            ? 'your-fallback-url'
+            : undefined,
         );
       }
-  
+
       const updatedUser = await this.userRepository.findOne({
         where: { userId: Equal(id.toString()) },
         relations: ['profile', 'address', 'contact', 'document'],
       });
-  
+
       return {
         message: 'User updated successfully',
         status: 200,
         user: this.formatUserResponse(updatedUser),
       };
     } catch (error) {
-      console.error('Error updating user:', error);
-      if (!(error instanceof HttpException)) {
-        throw new InternalServerErrorException(
-          'An unexpected error occurred during user update',
-        );
-      }
-      throw error;
+      throw new InternalServerError('Error updating user', `${error}`);
     }
   }
-  
+
   async handleProfilePictureUpdate(
     profilePictureFiles: Express.Multer.File[] | undefined,
     userId: string,
@@ -508,27 +497,27 @@ export class AuthenticationService {
     if (!profilePictureFiles || profilePictureFiles.length === 0) {
       return null;
     }
-  
+
     const profile = await this.profileRepository
       .createQueryBuilder('profile')
       .innerJoin('profile.user', 'user')
       .where('user.userId = :userId', { userId })
       .getOne();
-  
+
     if (!profile) {
-      throw new NotFoundException('Profile not found for the user');
+      throw new NotFoundError(`${profile} not found`);
     }
-  
+
     const currentProfilePictureUrl = profile.profilePicture;
     if (currentProfilePictureUrl) {
       const publicId = extractPublicIdFromUrl(currentProfilePictureUrl);
       try {
         await deleteFileFromCloudinary(publicId);
       } catch (error) {
-        throw new InternalServerErrorException('Failed to delete old profile picture');
+        throw new CloudinaryError('Failed to delete old profile picture');
       }
     }
-  
+
     const newProfilePicture = profilePictureFiles[0];
     const uploadResult = await new Promise((resolve, reject) => {
       const stream = Cloudinary.uploader.upload_stream(
@@ -542,17 +531,16 @@ export class AuthenticationService {
       );
       stream.end(newProfilePicture.buffer);
     });
-  
+
     const newProfilePictureUrl = (uploadResult as any).secure_url;
     updatedFields['profilePicture'] = newProfilePictureUrl;
-  
+
     profile.profilePicture = newProfilePictureUrl;
     await this.profileRepository.save(profile);
-  
+
     return newProfilePictureUrl;
   }
-  
-  
+
   private async updateUserProfile(
     profileData,
     userId: string,
@@ -640,22 +628,23 @@ export class AuthenticationService {
     fallbackDocumentFile?: string,
   ) {
     const documents =
-      typeof documentData === 'string' ? JSON.parse(documentData) : documentData;
+      typeof documentData === 'string'
+        ? JSON.parse(documentData)
+        : documentData;
 
     if (Array.isArray(documents) && documents.length > 0) {
       const existingDocuments = await this.documentRepository.find({
         where: { user: Equal(userId) },
       });
-  
+
       if (existingDocuments.length > 0) {
         for (const existingDoc of existingDocuments) {
           if (existingDoc.documentFile) {
             const publicId = extractPublicIdFromUrl(existingDoc.documentFile);
             try {
               await deleteFileFromCloudinary(publicId);
-
             } catch (error) {
-              console.error(
+              throw new CloudinaryError(
                 `Failed to delete old document from Cloudinary: ${existingDoc.documentFile}`,
                 error,
               );
@@ -663,8 +652,12 @@ export class AuthenticationService {
           }
         }
       }
-  
-      await this.documentRepository.delete({ user: Equal(userId) });
+
+      try {
+        await this.documentRepository.delete({ user: Equal(userId) });
+      } catch (error) {
+        throw new CloudinaryError('Error occured in user document delete');
+      }
 
       const newDocuments = await Promise.all(
         documents.map(async (doc, index) => {
@@ -677,12 +670,12 @@ export class AuthenticationService {
             );
             documentFileUrl = uploadedDocumentUrl;
           }
-  
+
           if (!documentFileUrl && fallbackDocumentFile) {
             documentFileUrl = fallbackDocumentFile;
           }
           if (!documentFileUrl) {
-            throw new BadRequestException(
+            throw new BadRequestError(
               `Document file or URL is required for "${doc.documentName}"`,
             );
           }
@@ -755,12 +748,7 @@ export class AuthenticationService {
         success: true,
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: 'Error fetching users',
-        status: 500,
-        success: false,
-        error: error.message,
-      });
+      throw new InternalServerError('Error fetching users', error);
     }
   }
 
@@ -772,11 +760,7 @@ export class AuthenticationService {
       });
 
       if (!user) {
-        throw new NotFoundException({
-          message: 'User not found',
-          status: 404,
-          success: false,
-        });
+        throw new NotFoundError(`Error fetching user, ${user}`);
       }
 
       return {
@@ -786,15 +770,7 @@ export class AuthenticationService {
         user: this.formatUserResponse(user),
       };
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      } else {
-        throw new InternalServerErrorException({
-          message: 'Failed to fetch user data',
-          status: 500,
-          success: false,
-        });
-      }
+      throw new InternalServerError('Error fetching user', error);
     }
   }
 
@@ -806,15 +782,11 @@ export class AuthenticationService {
   ) {
     try {
       const skip = (page - 1) * limit;
-
+  
       if (![ROLE.ADMIN, ROLE.STUDENT, ROLE.STAFF, ROLE.PARENT].includes(role)) {
-        throw new BadRequestException({
-          message: 'Invalid role provided',
-          status: 400,
-          success: false,
-        });
+        throw new NotFoundError(`${role} not found`);
       }
-
+  
       if (role === ROLE.STAFF) {
         if (!staffRole) {
           const allStaffResponse = await this.staffService.findAllStaff();
@@ -830,13 +802,13 @@ export class AuthenticationService {
               totalPages: 0,
             };
           }
-
+  
           const total = allStaffResponse.data.length;
           const paginatedStaff = allStaffResponse.data.slice(
             skip,
             skip + limit,
           );
-
+  
           return {
             message: 'Staff members fetched successfully',
             status: 200,
@@ -848,7 +820,7 @@ export class AuthenticationService {
             totalPages: Math.ceil(total / limit),
           };
         }
-
+  
         const roleData = await this.staffRepository.find({
           where: { staffRole: staffRole },
           relations: [
@@ -859,10 +831,10 @@ export class AuthenticationService {
             'user.document',
           ],
         });
-
+  
         const total = roleData.length;
         const paginatedStaff = roleData.slice(skip, skip + limit);
-
+  
         const formattedStaff = paginatedStaff.map((staff) => ({
           user: this.formatUserResponse(staff.user),
           staffId: staff.staffId,
@@ -881,11 +853,13 @@ export class AuthenticationService {
           totalPages: Math.ceil(total / limit),
         };
       }
-
+  
       let roleData;
       switch (role) {
         case ROLE.STUDENT:
-          roleData = await this.studentRepository.find({});
+          roleData = await this.studentRepository.find({
+            relations: ['studentClass'],
+          });
           break;
         case ROLE.PARENT:
           roleData = await this.parentRepository.find({});
@@ -893,7 +867,7 @@ export class AuthenticationService {
         default:
           break;
       }
-
+  
       const whereClause = { role } as any;
       const [users, total] = await this.userRepository.findAndCount({
         where: whereClause,
@@ -902,84 +876,97 @@ export class AuthenticationService {
         skip,
         take: limit,
       });
-
+  
       const formattedUsers = users.map(this.formatUserResponse);
-
-      const finalData = formattedUsers.map((user, index) =>
-        roleData && roleData[index] ? { user, ...roleData[index] } : null,
-      );
-
+  
+      const finalData = formattedUsers.map((user, index) => {
+        if (roleData && roleData[index]) {
+          const student = roleData[index];
+          const className = student.studentClass?.className || null; 
+          return {
+            user,
+            ...student,
+            className, 
+          };
+        }
+        return null;
+      });
+  
       return {
         message: 'Users fetched successfully',
         status: 200,
         success: true,
-        data: finalData,
+        data: finalData.filter((item) => item !== null), 
         total,
         page,
         limit,
         totalPages: Math.ceil(total / limit),
       };
     } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
-      } else {
-        console.error(error);
-        throw new InternalServerErrorException({
-          message: 'Failed to fetch users by role',
-          status: 500,
-          success: false,
-        });
-      }
+      throw new InternalServerError('Error fetching users by role', error);
     }
   }
+  
 
   async searchUser(
     searchTerm: string,
     searchBy: 'name' | 'role' | 'email' | 'username' | 'gender',
     page: number = 1,
     limit: number = 10,
-    role?: ROLE, 
+    role?: ROLE,
   ) {
     try {
       const skip = (page - 1) * limit;
       let whereClause;
-  
+
       switch (searchBy) {
         case 'name':
           const [fname, lname] = searchTerm.split(' ');
           if (lname) {
             whereClause = {
-              profile: { fname: ILike(`%${fname}%`), lname: ILike(`%${lname}%`) },
-              ...(role && { role }), 
+              profile: {
+                fname: ILike(`%${fname}%`),
+                lname: ILike(`%${lname}%`),
+              },
+              ...(role && { role }),
             };
           } else {
             whereClause = [
-              { profile: { fname: ILike(`%${searchTerm}%`) }, ...(role && { role }) },
-              { profile: { lname: ILike(`%${searchTerm}%`) }, ...(role && { role }) },
+              {
+                profile: { fname: ILike(`%${searchTerm}%`) },
+                ...(role && { role }),
+              },
+              {
+                profile: { lname: ILike(`%${searchTerm}%`) },
+                ...(role && { role }),
+              },
             ];
           }
           break;
-  
+
         case 'gender':
-          whereClause = { profile: { gender: searchTerm.toUpperCase() }, ...(role && { role }) };
+          whereClause = {
+            profile: { gender: searchTerm.toUpperCase() },
+            ...(role && { role }),
+          };
           break;
-  
+
         case 'role':
           whereClause = { role: searchTerm as ROLE };
           break;
-  
+
         case 'email':
           whereClause = { email: ILike(`%${searchTerm}%`) };
           break;
-  
+
         case 'username':
           whereClause = { username: ILike(`%${searchTerm}%`) };
           break;
-  
+
         default:
-          throw new BadRequestException('Invalid search criteria');
+          throw new BadRequestError('Invalid search criteria');
       }
-  
+
       const [users, total] = await this.userRepository.findAndCount({
         where: whereClause,
         relations: ['profile', 'contact', 'address', 'document'],
@@ -987,32 +974,38 @@ export class AuthenticationService {
         skip,
         take: limit,
       });
-  
+
       const enrichedUsers = await Promise.all(
         users.map(async (user) => {
           let roleData = null;
-  
+
           switch (user.role) {
             case ROLE.STUDENT:
-              roleData = await this.studentRepository.findOne({ where: { user: { userId: user.userId } } });
+              roleData = await this.studentRepository.findOne({
+                where: { user: { userId: user.userId } },
+              });
               break;
             case ROLE.STAFF:
-              roleData = await this.staffRepository.findOne({ where: { user: { userId: user.userId } } });
+              roleData = await this.staffRepository.findOne({
+                where: { user: { userId: user.userId } },
+              });
               break;
             case ROLE.PARENT:
-              roleData = await this.parentRepository.findOne({ where: { user: { userId: user.userId } } });
+              roleData = await this.parentRepository.findOne({
+                where: { user: { userId: user.userId } },
+              });
               break;
             default:
               break;
           }
-  
+
           return {
             ...this.formatUserResponse(user),
             roleData,
           };
         }),
       );
-  
+
       return {
         message: 'Users fetched successfully',
         status: 200,
@@ -1024,19 +1017,10 @@ export class AuthenticationService {
         totalPages: Math.ceil(total / limit),
       };
     } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
-      } else {
-        console.error(error);
-        throw new InternalServerErrorException({
-          message: 'An unexpected error occurred during search',
-          status: 500,
-          success: false,
-        });
-      }
+      throw new InternalServerError('Error searching user', error);
     }
   }
-  
+
   async deactivateUsers(userIds: UUID[]) {
     const results = [];
 
@@ -1095,12 +1079,7 @@ export class AuthenticationService {
             success: true,
           });
         } catch (error) {
-          results.push({
-            userId,
-            message: 'Failed to deactivate user and related data',
-            status: 500,
-            success: false,
-          });
+          throw new InternalServerError('Failed to deactivate user', error);
         }
       }
 
@@ -1111,21 +1090,31 @@ export class AuthenticationService {
         results,
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: 'An unexpected error occurred during batch deactivation',
-        status: 500,
-        success: false,
-      });
+      throw new InternalServerError(
+        'error occured during user deletation',
+        error,
+      );
     }
   }
   async deleteUsers(userIds: UUID[]) {
     const results = [];
-
+  
     try {
       for (const userId of userIds) {
+        if (!userId) {
+          // Skip undefined or null userIds
+          results.push({
+            userId,
+            message: 'Invalid userId: undefined or null',
+            status: 400,
+            success: false,
+          });
+          continue;
+        }
+  
         try {
           const user = await this.userRepository.findOne({ where: { userId } });
-
+  
           if (!user) {
             results.push({
               userId,
@@ -1135,9 +1124,9 @@ export class AuthenticationService {
             });
             continue;
           }
-
+  
           await this.userRepository.delete(userId.toString());
-
+  
           results.push({
             userId,
             message: 'User and all related data deleted successfully',
@@ -1145,25 +1134,16 @@ export class AuthenticationService {
             success: true,
           });
         } catch (error) {
-          if (error.code === '23503') {
-            results.push({
-              userId,
-              message:
-                'Cannot delete user because it is referenced by other records',
-              status: 400,
-              success: false,
-            });
-          } else {
-            results.push({
-              userId,
-              message: 'Failed to delete user and related data',
-              status: 500,
-              success: false,
-            });
-          }
+          // Catch and report individual deletion errors
+          results.push({
+            userId,
+            message: `Failed to delete user and related data: ${error.message}`,
+            status: 500,
+            success: false,
+          });
         }
       }
-
+  
       return {
         message: 'Batch deletion completed',
         status: 200,
@@ -1171,12 +1151,48 @@ export class AuthenticationService {
         results,
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: 'An unexpected error occurred during batch deletion',
-        status: 500,
-        success: false,
-      });
+      throw new InternalServerError(`Unable to delete user data: ${error.message}`);
     }
   }
+  async getUserStatistics() {
+    try {
+      const totalUsers = await this.userRepository.count();
+      const totalStudents = await this.studentRepository.count();
+      const totalParents = await this.parentRepository.count();
+      const totalStaff = await this.staffRepository.count();
+      const totalTeachers = await this.staffRepository.count({
+        where: { staffRole: STAFFROLE.TEACHER },
+      });
+      const totalAccountants = await this.staffRepository.count({
+        where: { staffRole: STAFFROLE.ACCOUNTANT },
+      });
+      const totalLibrarians = await this.staffRepository.count({
+        where: { staffRole: STAFFROLE.LIBRARIAN },
+      });
+      return {
+        message: 'User statistics fetched successfully',
+        status: 200,
+        success: true,
+        data: {
+          totalUsers,
+          totalStudents,
+          totalParents,
+          totalStaff,
+          staffRoles: {
+            totalTeachers,
+            totalAccountants,
+            totalLibrarians,
+          },
+        },
+      };
+    } catch (error) {
+      throw new InternalServerError(
+        'Error occurred while fetching user statistics',
+        error,
+      );
+    }
+  }
+  
+  
+  
 }
-

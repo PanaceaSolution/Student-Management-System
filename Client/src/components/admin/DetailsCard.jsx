@@ -40,7 +40,7 @@ const DetailsCard = ({
 
    return (
       <Dialog open={cardOpen} onOpenChange={setCardOpen}>
-         <DialogContent className="sm:max-w-2xl">
+         <DialogContent className="sm:max-w-2xl max-h-[90vh]">
             <DialogHeader>
                <DialogTitle className="text-2xl font-bold text-primary">
                   {title} Details

@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Equal, Repository } from 'typeorm';
-import { Course } from './entities/course.entity';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { Student } from '../student/entities/student.entity'; 
+import { Student } from '../student/entities/student.entity';
 import { CourseEnrollment } from './courseEnrollment/entities/course-enrollment.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
 import { uploadSingleFileToCloudinary } from 'src/utils/file-upload.helper';
 import { User } from 'src/user/authentication/entities/authentication.entity';
+import { Course } from './entities/course.entity';
 
 @Injectable()
 export class CourseService {
@@ -29,11 +29,12 @@ export class CourseService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-
-
-  async create(createCourseDto: CreateCourseDto, file?: Express.Multer.File): Promise<Course> {
+  async create(
+    createCourseDto: CreateCourseDto,
+    file?: Express.Multer.File,
+  ): Promise<Course> {
     if (file) {
-      createCourseDto.file = file.path; 
+      createCourseDto.file = file.path;
     }
 
     
@@ -109,10 +110,13 @@ async update(courseId: string, updateCourseDto: UpdateCourseDto, file?: Express.
    
   
   // Enroll a student in a course
-  async enrollStudent(courseId: string, studentId: string): Promise<CourseEnrollment> {
+  async enrollStudent(
+    courseId: string,
+    studentId: string,
+  ): Promise<CourseEnrollment> {
     const course = await this.findOne(courseId);
-    const student = await this.studentRepository.findOne({ 
-        where: { studentId: Equal(studentId) } 
+    const student = await this.studentRepository.findOne({
+      where: { studentId: Equal(studentId) },
     });
 
     if (!student) {
@@ -130,14 +134,16 @@ async update(courseId: string, updateCourseDto: UpdateCourseDto, file?: Express.
   // Unenroll a student from a course
   async unenrollStudent(courseId: string, studentId: string): Promise<void> {
     const enrollment = await this.courseEnrollmentRepository.findOne({
-      where: { 
-        course: { courseId: Equal(courseId) }, 
-        student: { studentId: Equal(studentId) } 
+      where: {
+        course: { courseId: Equal(courseId) },
+        student: { studentId: Equal(studentId) },
       },
     });
 
     if (!enrollment) {
-      throw new NotFoundException(`Enrollment not found for course ID ${courseId} and student ID ${studentId}`);
+      throw new NotFoundException(
+        `Enrollment not found for course ID ${courseId} and student ID ${studentId}`,
+      );
     }
 
     await this.courseEnrollmentRepository.remove(enrollment);

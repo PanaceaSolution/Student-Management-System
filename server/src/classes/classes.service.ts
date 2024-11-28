@@ -1,4 +1,10 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Class } from './entities/class.entity';
@@ -6,8 +12,13 @@ import { CreateClassDto } from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { Course } from 'src/course/entities/course.entity';
 import { Staff } from 'src/staff/entities/staff.entity';
-import { deleteFileFromCloudinary, extractPublicIdFromUrl, uploadSingleFileToCloudinary } from 'src/utils/file-upload.helper';
+import {
+  deleteFileFromCloudinary,
+  extractPublicIdFromUrl,
+  uploadSingleFileToCloudinary,
+} from 'src/utils/file-upload.helper';
 import ResponseModel from 'src/utils/utils';
+import { UpdateCourseDto } from 'src/course/dto/update-course.dto';
 
 @Injectable()
 export class ClassService {
@@ -20,122 +31,129 @@ export class ClassService {
     private staffRepository: Repository<Staff>,
   ) {}
 
-  async create(createClassDto: CreateClassDto): Promise<Class> {
-   
-    // const classTeacher = await this.staffRepository.findOneBy({
-    //   staffId: createClassDto.classTeacherId,
-    // });
+ async create(createClassDto: CreateClassDto): Promise<Class> {
+    try {
+      // Check if the class with the same name and section already exists
+      const existingClassAndSection = await this.classRepository.findOne({
+        where: {
+          className: createClassDto.className,
+          section: createClassDto.section,
+        },
+      });
 
-    // if (!classTeacher) {
-    //   throw new NotFoundException(
-    //     `Staff with ID ${createClassDto.classTeacherId} not found`,
-    //   );
-    // }
-    const existingClassAndSection = await this.classRepository.findOne({
-      where:{
-        className:createClassDto.className,
-        section:createClassDto.section,
-      },
-    })
-    if(existingClassAndSection){
-      throw new ConflictException(
-        `Class ${createClassDto.className} with section ${createClassDto.section} already exists`
-      );
+      if (existingClassAndSection) {
+        throw new ConflictException(
+          `Class ${createClassDto.className} with section ${createClassDto.section} already exists`,
+        );
+      }
+
+      let routineFileUrl = null;
+
+      // If routineFile is provided, upload it to Cloudinary
+      if (createClassDto.routineFile) {
+        const uploadResult = await uploadSingleFileToCloudinary(
+          createClassDto.routineFile,
+          'routines',
+        );
+        routineFileUrl = uploadResult.secure_url;
+      }
+
+      // Create a new class entity
+      const newClass = this.classRepository.create({
+        className: createClassDto.className,
+        section: createClassDto.section,
+        routineFile: routineFileUrl,
+      });
+
+      // Save the new class entity to the database
+      return await this.classRepository.save(newClass);
+    } catch (error) {
+      if (error instanceof ConflictException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to create class', error.message);
     }
-     const subjects = await this.courseRepository.findByIds(
-       createClassDto.subjects,
-     );
+  }
+  async update(classId: string, updateClassDto: UpdateClassDto): Promise<Class> {
+    try {
+      const existingClass = await this.classRepository.findOne({ where: { classId } });
+      if (!existingClass) {
+        throw new NotFoundException(`Class with ID ${classId} not found`);
+      }
   
-
-    let routineFileUrl = null;
-    if (createClassDto.routineFile) {
-      const uploadResult = await uploadSingleFileToCloudinary(
-        createClassDto.routineFile,
-        'routines',
-      );
-      routineFileUrl = uploadResult.secure_url;
+      let routineFileUrl = existingClass.routineFile;
+  
+      
+      if (updateClassDto.routineFile) {
+        if (routineFileUrl) {
+          const publicId = extractPublicIdFromUrl(routineFileUrl);
+          await deleteFileFromCloudinary(publicId);
+        }
+        const uploadResult = await uploadSingleFileToCloudinary(
+          updateClassDto.routineFile,
+          'routines',
+        );
+        routineFileUrl = uploadResult.secure_url;
+      }
+  
+      
+      Object.assign(existingClass, {
+        ...updateClassDto,
+        routineFile: routineFileUrl,
+      });
+  
+      return await this.classRepository.save(existingClass);
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to update class', error.message);
     }
-
-    const newClass = this.classRepository.create({
-      className: createClassDto.className,
-      section: createClassDto.section,
-      routineFile: routineFileUrl,
-      subjects,
-      // classTeacher,
-      classTeacherStaffId: createClassDto.classTeacherId,
-    });
-    return this.classRepository.save(newClass);
   }
 
-  async update(id: string, updateClassDto: UpdateClassDto): Promise<Class> {
-    const existingClass = await this.findOne(id);
-    const updateData: any = { ...updateClassDto };
-
-    if (updateClassDto.routineFile) {
+  async remove(classId: string): Promise<void> {
+    try {
+      const existingClass = await this.classRepository.findOne({ where: { classId } });
+      if (!existingClass) {
+        throw new NotFoundException(`Class with ID ${classId} not found`);
+      }
+  
+      
       if (existingClass.routineFile) {
         const publicId = extractPublicIdFromUrl(existingClass.routineFile);
         await deleteFileFromCloudinary(publicId);
       }
-
-      const uploadResult = await uploadSingleFileToCloudinary(
-        updateClassDto.routineFile,
-        'routines',
-      );
-      updateData.routineFile = uploadResult.secure_url;
-    }
-    if (updateClassDto.subjects) {
-      updateData.subjects = await this.courseRepository.findByIds(
-        updateClassDto.subjects,
-      );
-    }
-
-    if (updateClassDto.classTeacherId) {
-      const classTeacher = await this.staffRepository.findOneBy({
-        staffId: updateClassDto.classTeacherId,
-      });
-
-      if (!classTeacher) {
-        throw new NotFoundException(
-          `Staff with ID ${updateClassDto.classTeacherId} not found`,
-        );
+  
+      await this.classRepository.remove(existingClass);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
       }
-
-      updateData.classTeacher = classTeacher;
-      updateData.classTeacherStaffId = updateClassDto.classTeacherId; // Add this line
-    }
-
-    await this.classRepository.save({ classId: id, ...updateData });
-    return this.findOne(id);
-  }
-
-  async remove(id: string): Promise<void> {
-    const existingClass = await this.findOne(id);
-
-    if (existingClass.routineFile) {
-      const publicId = extractPublicIdFromUrl(existingClass.routineFile);
-      await deleteFileFromCloudinary(publicId);
-    }
-
-    const result = await this.classRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Class with ID ${id} not found`);
+      throw new InternalServerErrorException('Failed to remove class', error.message);
     }
   }
 
+  async findOne(classId: string): Promise<Class> {
+    try {
+      const classEntity = await this.classRepository.findOne({ where: { classId } });
+      if (!classEntity) {
+        throw new NotFoundException(`Class with ID ${classId} not found`);
+      }
+      return classEntity;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to find class', error.message);
+    }
+  }
+  
   async findAll(): Promise<Class[]> {
-    return this.classRepository.find({
-      relations: ['classTeacher', 'subjects'],
-    });
-  }
-
-  async findOne(id: string): Promise<Class> {
-    const classEntity = await this.classRepository.findOne({
-      where: { classId: id },
-      relations: ['classTeacher', 'subjects'],
-    });
-    if (!classEntity) {
-      throw new NotFoundException(`Class with ID ${id} not found`);
+    try {
+      return await this.classRepository.find();
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to retrieve classes', error.message);
     }
-    return classEntity;
   }
+  
+  
+
 }
+

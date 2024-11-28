@@ -16,21 +16,31 @@ const useAuthStore = create(
    devtools(
       persist(
          (set) => ({
-            loading: false,
+            isLoggingIn: false,
+            isLoggingOut: false,
             isAuthenticated: false,
             loggedInUser: null,
+            // isAuthenticated: true,
+            // loggedInUser: {
+            //    profile: {
+            //       profilePicture: '',
+            //       fname: 'Aayush',
+            //       lname: 'Ghimire',
+            //    },
+            //    role: 'STUDENT',
+            //    id: 0,
+            //    username: ''
+            // },
 
             // Login action
             login: async (userData) => {
-               set({ loading: true });
+               set({ isLoggingIn: true });
                try {
                   const res = await loginService(userData);
-
                   if (res.success) {
                      // Set role based on username if role is 'STAFF'
                      const data = res.user;
                      const decodedData = jwtDecode(data.accessToken);
-                     console.log(data, decodedData);
 
                      const finalRole = decodedData.role === 'STAFF'
                         ? getRoleFromUsername(decodedData.username || userData.username)
@@ -43,46 +53,61 @@ const useAuthStore = create(
                            role: finalRole,
                            id: decodedData.id,
                            username: decodedData.username
-                        }
+                        },
                      });
                      toast.success("Login successful");
+                  } else {
+                     toast.error(res.message);
                   }
                   return res;
                } catch (error) {
                   set({ isAuthenticated: false, loggedInUser: null });
                   toast.error(error.message);
                } finally {
-                  set({ loading: false });
+                  set({ isLoggingIn: false });
                }
             },
 
             logout: async () => {
-               set({ loading: true });
+               set({ isLoggingOut: true });
                try {
                   const res = await logoutService();
                   if (res.success) {
                      set({
                         isAuthenticated: false,
-                        loggedInUser: null
+                        loggedInUser: null,
                      });
+                     localStorage.removeItem("auth");
                      toast.success("Logout successful");
                   }
                   return res;
                } catch (error) {
+                  console.error("Error during logout:", error);
                   toast.error(error.message);
-                  set({ loading: false });
                } finally {
-                  set({ loading: false })
+                  set({ isLoggingOut: false });
                }
             },
+
+            // Refresh token action
             refresh: async () => {
                try {
                   const res = await refreshService();
+                  if (res.success) {
+                     set({
+                        isAuthenticated: true,
+                     });
+                  }
                   return res;
                } catch (error) {
-                  console.error(error);
+                  console.error("Error during token refresh:", error);
+                  set({
+                     isAuthenticated: false,
+                     loggedInUser: null,
+                  });
                }
-            }
+            },
+
          }),
          {
             name: 'auth',

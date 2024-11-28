@@ -1,6 +1,24 @@
 
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaChalkboardTeacher, FaChartBar, FaNetworkWired, FaTasks, FaUserGraduate, FaUserTie, SiGoogleclassroom, SiGooglemessages, SiStorybook, IoLibrary, IoMdCalendar, GrResources, TbReportAnalytics, RiMoneyRupeeCircleLine, LuLogOut, MdDashboard, FaHouseUser } from '../components/Icons'
+import {
+   FaChalkboardTeacher,
+   FaChartBar,
+   FaNetworkWired,
+   FaTasks,
+   FaUserGraduate,
+   FaUserTie,
+   SiGoogleclassroom,
+   SiGooglemessages,
+   SiStorybook,
+   IoLibrary,
+   IoMdCalendar,
+   GrResources,
+   TbReportAnalytics,
+   RiMoneyRupeeCircleLine,
+   MdDashboard,
+   FaHouseUser,
+   IoPeople
+} from "../components/Icons";
 import {
    Tooltip,
    TooltipTrigger,
@@ -14,104 +32,110 @@ import useAuthStore from '@/store/authStore';
 // Sidebar Links Configuration
 const links = [
    {
-      name: 'Dashboard',
-      href: '/dashboard',
+      name: "Dashboard",
+      href: "/dashboard",
       icon: <MdDashboard className="h-6 w-6" />,
       roles: ["ADMIN", "TEACHER", "STUDENT", "PARENT", "ACCOUNTANT", "LIBRARIAN"],
    },
    {
-      name: 'Students',
-      href: '/students',
+      name: "Students",
+      href: "/students",
       icon: <FaUserGraduate className="h-6 w-6" />,
       roles: ["ADMIN"],
    },
    {
-      name: 'Parents',
-      href: '/parents',
+      name: "Parents",
+      href: "/parents",
       icon: <FaHouseUser className="h-6 w-6" />,
       roles: ["ADMIN"],
    },
+   // {
+   //    name: "Teachers",
+   //    href: "/teachers",
+   //    icon: <FaChalkboardTeacher className="h-6 w-6" />,
+   //    roles: ["ADMIN"],
+   // },
    {
-      name: 'Teachers',
-      href: '/teachers',
-      icon: <FaChalkboardTeacher className="h-6 w-6" />,
-      roles: ["ADMIN"],
-   },
-   {
-      name: 'Staff',
-      href: '/staffs',
+      name: "Staff",
+      href: "/staffs",
       icon: <FaUserTie className="h-6 w-6" />,
       roles: ["ADMIN"],
    },
    {
-      name: 'Subjects',
-      href: '/subjects',
+      name: "Subjects",
+      href: "/subjects",
       icon: <SiStorybook className="h-6 w-6" />,
       roles: ["ADMIN"],
    },
    {
-      name: 'Classes',
-      href: '/classes',
+      name: "Classes",
+      href: "/classes",
       icon: <SiGoogleclassroom className="h-6 w-6" />,
       roles: ["ADMIN"],
    },
    {
-      name: 'Logistics',
-      href: '/logistics',
+      name: "Attendence",
+      href: "/attendence",
+      icon: <IoPeople className="h-6 w-6" />,
+      roles: ["TEACHER", "ADMIN"],
+   },
+   {
+      name: "Logistics",
+      href: "/logistics",
       icon: <FaNetworkWired className="h-6 w-6" />,
       roles: ["ADMIN"],
    },
    {
-      name: 'Portfolio',
-      href: '/portfolio',
+      name: "Portfolio",
+      href: "/portfolio",
       icon: <FaUserGraduate className="h-6 w-6" />,
       roles: ["TEACHER", "STUDENT", "PARENT", "ACCOUNTANT", "LIBRARIAN"],
    },
    {
-      name: 'Finance',
-      href: '/finance',
+      name: "Finance",
+      href: "/finance",
       icon: <FaChartBar className="h-6 w-6" />,
       roles: ["ADMIN", "ACCOUNTANT"],
    },
    {
-      name: 'Routine',
-      href: '/routine',
+      name: "Routine",
+      href: "/routine",
       icon: <IoMdCalendar className="h-6 w-6" />,
       roles: ["TEACHER", "STUDENT"],
    },
    {
-      name: 'Resources',
-      href: '/resources',
+      name: "Resources",
+      href: "/resources",
       icon: <GrResources className="h-6 w-6" />,
       roles: ["TEACHER", "STUDENT"],
    },
    {
-      name: 'Tasks',
-      href: '/tasks',
+      name: "Tasks",
+      href: "/tasks",
       icon: <FaTasks className="h-6 w-6" />,
       roles: ["TEACHER", "STUDENT"],
    },
    {
-      name: 'Report',
-      href: '/report',
+      name: "Report",
+      href: "/report",
       icon: <TbReportAnalytics className="h-6 w-6" />,
       roles: ["PARENT"],
    },
    {
-      name: 'Fees',
-      href: '/fees',
+      name: "Fees",
+      href: "/fees",
       icon: <RiMoneyRupeeCircleLine className="h-6 w-6" />,
       roles: ["PARENT"],
    },
    {
-      name: 'Message',
-      href: '/message',
+      name: "Message",
+      href: "/message",
       icon: <SiGooglemessages className="h-6 w-6" />,
       roles: ["TEACHER", "PARENT"],
    },
    {
-      name: 'Library',
-      href: '/library',
+      name: "Library",
+      href: "/library",
       icon: <IoLibrary className="h-6 w-6" />,
       roles: ["ADMIN", "TEACHER", "STUDENT", "LIBRARIAN"],
    },
@@ -119,7 +143,6 @@ const links = [
 
 const Sidebar = () => {
    const location = useLocation();
-   const navigate = useNavigate();
    const { loggedInUser } = useAuthStore();
    const userRole = loggedInUser?.role;
 

@@ -6,19 +6,21 @@ import { Parent } from './entities/parent.entity';
 import { User } from '../user/authentication/entities/authentication.entity';
 import { Student } from '../student/entities/student.entity'; // If needed for student-parent relation
 import { AuthenticationModule } from 'src/user/authentication/authentication.module';
+import ResponseModel from 'src/utils/utils';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Parent,
       User,
-      Student, // Include Student if Parent has a relation with Student
+      Student, 
     ]),
-    AuthenticationModule
+    AuthenticationModule,
+    ResponseModel
 
   ],
   controllers: [ParentController],
   providers: [ParentService],
-  exports: [ParentService], 
+  exports: [ParentService ,  TypeOrmModule], 
 })
 export class ParentModule {}

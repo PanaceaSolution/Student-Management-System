@@ -1,17 +1,13 @@
 import { DateSelect } from '@/components/DateSelect';
 import SearchBox from '@/components/SearchBox';
 import Select from '@/components/Select';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import StaffTable from '@/components/admin/staffTable';
+import React, { useCallback, useEffect, useState } from 'react';
+import StaffTable from '@/components/admin/AdminTable';
 import DetailsCard from '@/components/admin/DetailsCard';
 import AddStaffForm from '@/components/admin/StaffForm/AddStaffForm';
 import useExport from '@/hooks/useExport';
 import ActiveTab from '@/components/common/activeTab';
-import useUserStore from '@/store/userStore';
 import useStaffStore from '@/store/staffStore';
-import Loadding from '@/components/Loader/Spinner';
-import Spinner from '@/components/Loader/Spinner';
-import { Button } from '@/components/ui/button';
 
 const Exports = [
   { value: "", label: "EXPORT" },
@@ -80,8 +76,10 @@ const Staffs = () => {
   const { staff, getStaff, deleteStaff, isSubmitting, isDeleting } = useStaffStore()
 
   useEffect(() => {
-    getStaff("STAFF");
+    getStaff("STAFF")
   }, []);
+
+
 
   // Handle format selection and trigger export
   const { exportToCSV, exportToPDF } = useExport()
@@ -120,8 +118,8 @@ const Staffs = () => {
     setSelectedData(data)
   }
 
-  const handleDelete = async (id) => {
-    await deleteStaff(id);
+  const handleDelete = async (data) => {
+    await deleteStaff(data.user_id);
   };
 
   return (
@@ -144,7 +142,6 @@ const Staffs = () => {
                   setSelectedData={setSelectedData}
                   currentStep={currentStep}
                   setCurrentStep={setCurrentStep}
-                  loading={isSubmitting}
                 />
               </div>
             </div>

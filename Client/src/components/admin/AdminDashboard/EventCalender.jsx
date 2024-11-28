@@ -35,20 +35,20 @@ const EventCalendar = () => {
 
   // Function to style the day cells
   const dayPropGetter = (date) => {
-    const today = moment().startOf("day"); 
-    const isToday = moment(date).isSame(today, "day"); 
+    const today = moment().startOf("day");
+    const isToday = moment(date).isSame(today, "day");
     const isSaturday = moment(date).day() === 6;
 
     const backgroundColor = isToday
       ? "bg-green-200"
       : isSaturday
-      ? "bg-red-200"
-      : "";
+        ? "bg-red-200"
+        : "";
     const textColor = isToday
       ? "text-green-800"
       : isSaturday
-      ? "text-red-800"
-      : "text-gray-800";
+        ? "text-red-800"
+        : "text-gray-800";
 
     return {
       className: `${backgroundColor} ${textColor}`,
@@ -64,18 +64,23 @@ const EventCalendar = () => {
   };
 
   return (
-    <div className="bg-gray-100 p-1 rounded-sm shadow-md z-10">
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: 400 }}
-        dayPropGetter={dayPropGetter}
-        eventPropGetter={eventPropGetter}
-        className="bg-white rounded-lg inset-0"
-        popup
-      />
+    <div className="relative h-full lg:col-span-2 bg-white p-4 rounded-lg shadow-md">
+      <div className="sticky top-0 flex justify-between items-center px-4 py-2 border-b mb-2">
+        <p className="text-lg font-semibold text-black">Event Calendar</p>
+      </div>
+      <div className="max-h-80 overflow-y-auto scrollbar-thumb-gray-300 scrollbar-thin">
+        <Calendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          style={{ height: 400 }}
+          dayPropGetter={dayPropGetter}
+          eventPropGetter={eventPropGetter}
+          className="bg-white rounded-lg inset-0"
+          popup
+        />
+      </div>
     </div>
   );
 };

@@ -16,8 +16,8 @@ const useStaffStore = create(
             error: null,
             staff: [],
             teacher: [],
-            totalUsers: 0,
-            pages: 0,
+            total: 0,
+            totalPages: 0,
 
             // Get all staff
             getStaff: async (role) => {
@@ -27,19 +27,34 @@ const useStaffStore = create(
                   if (res.success) {
                      set({
                         staff: flattenData(res.data),
-                        totalUsers: res.total,
-                        pages: res.totalPages,
+                        total: res.total,
+                        totalPages: res.totalPages,
                         isloading: false,
                      });
-                  } else {
-                     set({ staff: [], isloading: false });
-                     toast.error(res.message || "Failed to fetch data");
                   }
                } catch (error) {
                   set({ error: error.message, isloading: false });
                   toast.error(error.message || "Failed to fetch staff data");
                }
             },
+
+            // getTeacher: async (query) => {
+            //    set({ isloading: true, error: null });
+            //    try {
+            //       const res = await getAllUserService(query);
+            //       if (res.success) {
+            //          set({
+            //             teacher: flattenData(res.data),
+            //             totalUsers: res.total,
+            //             pages: res.totalPages,
+            //             isloading: false,
+            //          });
+            //       }
+            //    } catch (error) {
+            //       set({ error: error.message, isloading: false });
+            //       toast.error(error.message || "Failed to fetch staff data");
+            //    }
+            // },
 
             // Add a new staff member
             addStaff: async (staffData) => {
@@ -51,7 +66,7 @@ const useStaffStore = create(
                   if (res.success) {
                      const formattedStaff = flattenNestedData(addedStaff(res));
                      set((state) => ({
-                        staff: [formattedStaff, ...state.staff],
+                        staff: [...state.staff, formattedStaff],
                         isSubmitting: false,
                      }));
                      toast.success(res.message);
@@ -78,7 +93,7 @@ const useStaffStore = create(
 
                      set((state) => ({
                         staff: state.staff.map((staff) =>
-                           staff.staffId === staffId ? { ...staff, ...formattedStaff } : staff
+                           staff.user_staffId === staffId ? { ...staff, formattedStaff } : staff
                         ),
                         isSubmitting: false,
                      }));
@@ -115,7 +130,14 @@ const useStaffStore = create(
                }
             },
          }),
-         { name: "staffs" }
+         {
+            name: "staffs",
+            partialize: (state) => ({
+               staff: state.staff,
+               totalPages: state.totalPages,
+               total: state.total
+            }),
+         }
       )
    )
 );

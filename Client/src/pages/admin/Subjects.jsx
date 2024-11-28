@@ -4,9 +4,10 @@ import Select from '@/components/Select';
 import { Button } from '@/components/ui/button';
 import useSubjectStore from '@/store/subjectStore';
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import TableWithActions from '@/components/admin/tableWithActions';
 import useExport from '@/hooks/useExport';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Pencil, Trash2 } from 'lucide-react';
+import AdminTable from '@/components/admin/AdminTable';
 
 
 const Exports = [
@@ -15,49 +16,10 @@ const Exports = [
    { value: "PDF", label: "PDF" },
 ];
 
-const Classes = [
-   { value: "", label: "Class" },
-   { value: "1", label: "1" },
-   { value: "2", label: "2" },
-   { value: "3", label: "3" },
-   { value: "4", label: "4" },
-   { value: "5", label: "5" },
-   { value: "6", label: "6" },
-   { value: "7", label: "7" },
-   { value: "8", label: "8" },
-   { value: "9", label: "9" },
-   { value: "10", label: "10" },
-];
-
-const formFields = [
-   {
-      name: "subjectName",
-      label: "Subject Name",
-      required: "Subject Name is required",
-      placeholder: "Enter Subject Name",
-      type: "text",
-   },
-   {
-      name: "class",
-      label: "Class Name",
-      required: "Class Name is required",
-      placeholder: "Enter Class Name",
-      type: "text",
-   },
-   {
-      name: "section",
-      label: "Section",
-      required: "Section is required",
-      placeholder: "Enter Section",
-      type: "text",
-   }
-];
-
-const subjectsTableHead = ["Id", "Subject Name", "Class", "Section", "Actions"];
-const subjectTableField = ["id", "subjectName", "class", "section"];
+const subjectsTableHead = ["", "Subject Name", "Description", "Actions"];
+const subjectTableField = ["courseName", "courseDescription"];
 
 const Subjects = () => {
-   const navigate = useNavigate();
    const [selectedExport, setSelectedExport] = useState("");
    const [selectedClass, setSelectedClass] = useState("");
    const [searchTerm, setSearchTerm] = useState("");
@@ -69,12 +31,15 @@ const Subjects = () => {
    const { exportToCSV, exportToPDF } = useExport();
 
    useEffect(() => {
-      getAllSubjects();
-   }, [getAllSubjects]);
-
-   const sortedSubjects = subjects.sort((a, b) => {
-      return parseInt(a.class) - parseInt(b.class);
-   });
+      const fetchSubjects = async () => {
+         try {
+            await getAllSubjects();
+         } catch (error) {
+            console.error("Error fetching subjects:", error);
+         }
+      };
+      fetchSubjects();
+   }, []);
 
    const handleEdit = (data) => {
       setIsModalOpen(true);
@@ -86,19 +51,24 @@ const Subjects = () => {
       await deleteSubject(id);
    };
 
+   const handleExport = () => {
+      const exportHandlers = {
+         CSV: () => exportToCSV(subjects, "subjects.csv"),
+         PDF: () => {
+            const headers = [
+               { header: "Id", dataKey: "id" },
+               { header: "Subject Name", dataKey: "subjectName" },
+               { header: "Class", dataKey: "class" },
+            ];
+            exportToPDF(subjects, headers, "Subjects List", "subjects.pdf");
+         }
+      };
+      if (selectedExport) exportHandlers[selectedExport]();
+   };
+
    const handleExportChange = (event) => {
-      const value = event.target.value;
-      setSelectedExport(value);
-      if (value === 'CSV') {
-         exportToCSV(sortedSubjects, "subjects.csv");
-      } else if (value === 'PDF') {
-         const headers = [
-            { header: "Id", dataKey: "id" },
-            { header: "Subject Name", dataKey: "subjectName" },
-            { header: "Class", dataKey: "class" },
-         ];
-         exportToPDF(sortedSubjects, headers, "Subjects List", "subjects.pdf");
-      }
+      setSelectedExport(event.target.value);
+      handleExport();
    };
 
    const handleSearchChange = (event) => {
@@ -109,11 +79,6 @@ const Subjects = () => {
       setSelectedClass(event.target.value);
    };
 
-   const filteredSubjects = sortedSubjects.filter(subject => {
-      const matchesSearchTerm = subject.subjectName.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesClass = selectedClass ? subject.class === selectedClass : true;
-      return matchesSearchTerm && matchesClass;
-   });
 
    return (
       <section>
@@ -127,15 +92,17 @@ const Subjects = () => {
                         onChange={handleExportChange}
                         className="w-32 bg-white"
                      />
-                     <SubjectForm
-                        formFields={formFields}
-                        isModalOpen={isModalOpen}
-                        setIsModalOpen={setIsModalOpen}
-                        id={selectedId}
-                        setId={setSelectedId}
-                        isUpdating={isUpdating}
-                        setIsUpdating={setIsUpdating}
-                     />
+                     <Button
+                        variant="create"
+                        className="uppercase"
+                        onClick={() => {
+                           setIsUpdating(false);
+                           setIsModalOpen(true);
+                           setSelectedId(null);
+                        }}
+                     >
+                        Add Subjects
+                     </Button>
                   </div>
                </div>
                <div className="border-b-2 p-2">
@@ -147,28 +114,57 @@ const Subjects = () => {
                            className="mb-4"
                         />
                      </div>
-                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                        <Select
-                           options={Classes}
-                           selectedValue={selectedClass}
-                           onChange={handleClassChange}
-                           className="w-32 bg-white"
-                        />
-                     </div>
                   </div>
                </div>
                <div className="relative w-full overflow-x-auto shadow-md">
-                  <TableWithActions
+                  <AdminTable
+                     title="Subjects"
                      tableHead={subjectsTableHead}
-                     tableBody={filteredSubjects}
                      tableFields={subjectTableField}
-                     noDataMessage="No subjects found"
+                     user={subjects}
+                     handleUserData={handleEdit}
                      handleEdit={handleEdit}
                      handleDelete={handleDelete}
                   />
                </div>
+               {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                  {subjects.map((subject) =>
+                     <Card key={subject.courseId} className="shadow-lg">
+                        <CardHeader>
+                           <CardTitle>{subject.courseName}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                           <p>{subject.courseDescription}</p>
+                        </CardContent>
+                        <CardFooter className="flex justify-end gap-2">
+                           <Button
+                              variant="edit"
+                              size="icon"
+                              onClick={() => handleEdit(subject)}
+                           >
+                              <Pencil />
+                           </Button>
+                           <Button
+                              variant="destructive"
+                              size="icon"
+                              onClick={() => handleDelete(subject.courseId)}
+                           >
+                              <Trash2 />
+                           </Button>
+                        </CardFooter>
+                     </Card>
+                  )}
+               </div> */}
             </div>
          </div>
+         <SubjectForm
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+            id={selectedId}
+            setId={setSelectedId}
+            isUpdating={isUpdating}
+            setIsUpdating={setIsUpdating}
+         />
       </section>
    );
 };
