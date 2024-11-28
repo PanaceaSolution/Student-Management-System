@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import { useRefresh } from "@/context/RefreshProvider";
+import default_user from "../assets/default_user.jpg"
 
 const Navbar = () => {
    const navigate = useNavigate();
@@ -87,13 +88,10 @@ const Navbar = () => {
                <DropdownMenuTrigger asChild>
                   <Avatar className="w-10 h-10 border border-black shadow-md cursor-pointer">
                      <AvatarImage
-                        src={loggedInUser?.profile.profilePicture}
-                        alt={`${loggedInUser?.profile.fname}'s Avatar`}
+                        src={loggedInUser?.profile?.profilePicture || default_user}
+                        alt={`${loggedInUser?.profile?.fname || 'User'}'s Avatar`}
                         className="object-cover"
                      />
-                     <AvatarFallback className="text-3xl font-bold">
-                        {loggedInUser?.profile.fname?.[0]}
-                     </AvatarFallback>
                   </Avatar>
                </DropdownMenuTrigger>
                <DropdownMenuContent>
