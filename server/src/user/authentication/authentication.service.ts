@@ -834,7 +834,7 @@ export class AuthenticationService {
             className: student.studentClass?.className || null,
             contact:student.parent?.user?.contact || null
           }));
-  
+
         total = studentCount;
       } else if (role === ROLE.PARENT) {
         const [parents, parentCount] = await this.parentRepository.findAndCount({
