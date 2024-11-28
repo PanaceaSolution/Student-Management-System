@@ -9,6 +9,7 @@ import { User } from 'src/user/authentication/entities/authentication.entity';
 import { generateAndUploadExcelSheet } from 'src/utils/file-upload.helper';
 
 import ResponseModel from 'src/utils/utils';
+import { NotAcceptableError } from 'src/utils/custom-errors';
 
 @Injectable()
 export class AttendenceService {
@@ -24,7 +25,6 @@ export class AttendenceService {
   ) {}
 
   async saveAttendence(createAttendenceDto: CreateAttendanceDto) {
-    // console.log('Received createAttendenceDto:', createAttendenceDto);
     try {
       const todayDate = new Date().toLocaleDateString();
       const { className, section, students } = createAttendenceDto;
@@ -64,8 +64,7 @@ export class AttendenceService {
           relations: ['user', 'user.profile', 'studentClass'], // Ensure user relation is loaded
         });
         studentLists.push(...studentsData);
-        console.log("student data", studentsData);
-        
+        console.log('student data', studentsData);
 
         if (studentsData.length === 0) {
           console.warn('No students found for class:', classData.classId);
@@ -122,12 +121,20 @@ export class AttendenceService {
           });
         }
 
-        console.log("attendence", attendance);
-        
-        
+        // console.log('attendence', attendance);
+        // console.log('student data', studentsData);
+
+        if (isPresent?.toString() !== 'P' && isPresent?.toString() !== 'A') {
+         return ResponseModel.error("Attendence value is not valid","Invalid attendence")
+        }
         // Update isPresent field for the student
         for (const student of studentsData) {
+          if (!Array.isArray(student.isPresent)) {
+            student.isPresent = [];
+          }
+
           student.isPresent.push(isPresent.toString());
+
           await this.studentRepository.save(student);
         }
 
