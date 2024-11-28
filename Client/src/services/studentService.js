@@ -103,8 +103,6 @@ export const createStudentService = async (studentData) => {
 };
 
 export const updateStudentService = async (studentId, formData) => {
-  console.log("studentId", studentId);
-  console.log("formData", formData);
 
   try {
     const response = await fetch(`${URL}/student/update/${studentId}`, {

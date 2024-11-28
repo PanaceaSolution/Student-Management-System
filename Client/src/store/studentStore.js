@@ -119,8 +119,6 @@ const useStudentStore = create(
         // Update an existing student
         updateStudent: async (studentId, formData) => {
           set({ isSubmitting: true, error: null });
-          console.log("studentId", studentId);
-          console.log("formData", formData);
           try {
             const res = await updateStudentService(studentId, formData);
             if (res.success) {
@@ -150,13 +148,15 @@ const useStudentStore = create(
         // Delete an existing student
         deleteStudent: async (studentId) => {
           set({ isDeleting: true, error: null });
+          console.log(studentId);
+
           try {
             const res = await deleteUserService(studentId);
             if (res.success) {
               toast.success("Student deleted successfully");
               set((state) => ({
                 students: state.students.filter(
-                  (student) => student?.user_id !== studentId
+                  (student) => student?.user_userId !== studentId
                 ),
                 isDeleting: false,
               }));

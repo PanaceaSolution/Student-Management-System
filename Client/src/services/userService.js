@@ -12,6 +12,8 @@ export const getAllUserService = async (role) => {
 }
 
 export const deleteUserService = async (id) => {
+   console.log(id);
+
    const response = await fetch(`${URL}/auth/delete`, {
       method: "DELETE",
       headers: {
