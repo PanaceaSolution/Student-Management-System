@@ -19,15 +19,12 @@ import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 export class ParentController {
   constructor(private readonly parentService: ParentService) {}
 
-  @Get('number')
-  async getStudents() {
-    return this.parentService.getParentsNumber();
-  }
+
 
   @Post('/create')
   @UseInterceptors(
     FileFieldsInterceptor([
-      { name: 'profilePicture', maxCount: 1 },
+      { name: 'profilePicture', maxCount: 1 }, 
       { name: 'documents', maxCount: 10 },
     ]),
   )

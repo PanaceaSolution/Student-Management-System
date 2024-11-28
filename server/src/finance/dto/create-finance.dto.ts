@@ -13,7 +13,7 @@ export class CreateFinanceDto {
   @IsString()
   admissionFee: string;
 
-  @IsNotEmpty({ message: 'Security Deposit is required' })
+  @IsNotEmpty({ message: 'Security Deposit is required' }) 
   @IsString()
   securityDeposite: string;
 

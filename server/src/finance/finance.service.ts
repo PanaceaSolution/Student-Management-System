@@ -15,7 +15,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
-// import { isUUID } from 'class-validator';
+
 
 @Injectable()
 export class FinanceService {
@@ -64,7 +64,6 @@ export class FinanceService {
   async findAll(): Promise<Finance[]> {
     return await this.financeRepository.find();
   }
-
   async findOne(id: string): Promise<Finance> {
     const finance = await this.financeRepository.findOne({ where: { id } });
     if (!finance)

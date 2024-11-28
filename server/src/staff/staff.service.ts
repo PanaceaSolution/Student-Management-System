@@ -318,21 +318,5 @@ export class StaffService {
     return `This action removes a #${id} staff`;
   }
 
-  async getStaffsNumber() {
-    const staffNumber = await this.staffRepository.count();
-    return new ResponseModel('Staffs fetched successfully', true, staffNumber);
-  }
 
-  async getTeachersNumber() {
-    const teacherNumber = await this.staffRepository.count({
-      where: {
-        staffRole: STAFFROLE.TEACHER,
-      },
-    });
-    return new ResponseModel(
-      'Teachers fetched successfully',
-      true,
-      teacherNumber,
-    );
-  }
 }
