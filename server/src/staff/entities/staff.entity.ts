@@ -37,7 +37,7 @@ export class Staff {
   @OneToMany(() => Course, (course) => course)
   courses: Course[];
 
-  @OneToMany(() => Class, (class_) => class_.classTeacher)
+  @OneToMany(() => Class, (class_) => class_)
   classes: Class[];
 
   @OneToMany(() => Assignment, (assignment) => assignment.staffId)
