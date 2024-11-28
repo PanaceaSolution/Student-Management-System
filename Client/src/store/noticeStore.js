@@ -1,5 +1,5 @@
 import { createNoticeService } from "@/services/noticeService";
-import { flattenData, flattenNestedData } from "@/utilities/utilities";
+import { flattenNestedData } from "@/utilities/utilities";
 import toast from "react-hot-toast";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
@@ -23,7 +23,7 @@ const useNoticeStore = create(
             set((state) => ({
               notices: [flattenNestedData(res.data), ...state.notices],
               isSubmitting: false,
-            }));
+            })); 
           } else {
             toast.error(res.message);
             set({ isSubmitting: false });
