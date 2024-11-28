@@ -12,7 +12,7 @@ import { flattenData } from "@/utilities/utilities";
 const useStudentStore = create(
   devtools(
     persist(
-      (set, get) => ({
+      (set) => ({
         loading: false,
         isSubmitting: false,
         isDeleting: false,
@@ -20,7 +20,6 @@ const useStudentStore = create(
         students: [],
         studentById: {},
         studentByClassAndSection: [],
-        deleteLoading: false,
         total: 0,
         totalPages: 0,
 
@@ -28,19 +27,15 @@ const useStudentStore = create(
         getAllStudents: async (role) => {
           set({ loading: true, error: null });
           try {
-            const data = await getAllUserService(role);
-            if (data && data.data) {
+            const res = await getAllUserService(role);
+            if (res.success) {
               set({
-                students: flattenData(data.data),
-                total: data.total,
-                totalPages: data.totalPages,
+                students: flattenData(res.data),
+                total: res.total,
+                totalPages: res.totalPages,
                 loading: false,
               });
-            } else {
-              set({ students: [], loading: false });
-              toast.error("Failed to fetch data");
             }
-            return data;
           } catch (error) {
             set({
               error: error?.message || "An error occurred",
@@ -171,13 +166,22 @@ const useStudentStore = create(
           } catch (error) {
             set({
               error: error?.message || "An error occurred",
-              deleteLoading: false,
+              isDeleting: false,
             });
             return error;
           }
         },
       }),
-      { name: "students" }
+      {
+        name: "students",
+        partialize: (state) => ({
+          students: state.students,
+          studentByClassAndSection: state.studentByClassAndSection,
+          total: state.total,
+          totalPages: state.totalPages
+        })
+
+      }
     )
   )
 );

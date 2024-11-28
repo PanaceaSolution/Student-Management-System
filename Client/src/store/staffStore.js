@@ -16,8 +16,8 @@ const useStaffStore = create(
             error: null,
             staff: [],
             teacher: [],
-            totalUsers: 0,
-            pages: 0,
+            total: 0,
+            totalPages: 0,
 
             // Get all staff
             getStaff: async (role) => {
@@ -27,8 +27,8 @@ const useStaffStore = create(
                   if (res.success) {
                      set({
                         staff: flattenData(res.data),
-                        totalUsers: res.total,
-                        pages: res.totalPages,
+                        total: res.total,
+                        totalPages: res.totalPages,
                         isloading: false,
                      });
                   }
@@ -134,8 +134,8 @@ const useStaffStore = create(
             name: "staffs",
             partialize: (state) => ({
                staff: state.staff,
-               pages: state.pages,
-               totalUsers: state.totalUsers
+               totalPages: state.totalPages,
+               total: state.total
             }),
          }
       )
