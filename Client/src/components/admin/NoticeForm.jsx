@@ -9,6 +9,8 @@ import { Controller, useForm } from "react-hook-form";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
+import ImageUpload from "../common/ImageUpload";
+import { useState } from "react";
 
 const formFields = [
    {
@@ -30,11 +32,13 @@ const formFields = [
 ];
 
 const NoticeForm = ({ formOpen, setFormOpen }) => {
+   const [image, setImage] = useState(null);
    const {
       control,
       handleSubmit,
       formState: { errors },
       reset,
+      clearErrors
    } = useForm();
 
    const onSubmit = async (data) => {
@@ -89,6 +93,13 @@ const NoticeForm = ({ formOpen, setFormOpen }) => {
                      </div>
                   ))}
                </div>
+               <ImageUpload
+                  label="Upload Notice Image"
+                  image={image}
+                  setImage={setImage}
+                  errors={errors}
+                  clearErrors={clearErrors}
+               />
                <div className="flex justify-end gap-4 mt-4">
                   <button
                      type="button"
