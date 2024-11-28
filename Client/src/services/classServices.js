@@ -21,7 +21,7 @@ export const createClassService = async (classData) => {
 };
 
 export const updateClassService = async (id, updatedClassData) => {
-  const response = await fetch(`${URL}/class/update/${id}`, {
+  const response = await fetch(`${URL}/class/${id}`, {
     method: "PATCH",
     credentials: "include",
     body: updatedClassData,

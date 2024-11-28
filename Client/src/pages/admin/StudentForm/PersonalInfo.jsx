@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { AtSign, CircleDollarSign, Phone, Smartphone, SquareUser, SquareUserRound, User } from 'lucide-react';
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
-const PersonalInfo = ({ register, errors, clearErrors }) => {
+const PersonalInfo = ({ register, errors, clearErrors, isParentEmailEnabled, setIsParentEmailEnabled }) => {
+
   const formFields = [
     {
       name: "fname",
@@ -213,6 +215,36 @@ const PersonalInfo = ({ register, errors, clearErrors }) => {
             )}
           </div>
         ))}
+        <div className="col-span-2">
+          <div className="flex items-center gap-2">
+            {/* <Input
+              type="checkbox"
+              id="enableParentEmail"
+              checked={isParentEmailEnabled}
+              onChange={(e) => setIsParentEmailEnabled(e.target.checked)}
+              className="h-4 w-4 border-gray-300 rounded focus:ring-primary-500"
+            /> */}
+            <Checkbox
+              id="enableParentEmail"
+              checked={isParentEmailEnabled}
+              onCheckedChange={(e) => setIsParentEmailEnabled(e)}
+            />
+            <Label htmlFor="enableParentEmail" className="text-sm font-medium text-gray-900">
+              Create Parent Account
+            </Label>
+          </div>
+          <Input
+            id="parentEmail"
+            type="email"
+            className={`w-full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${errors.parentEmail ? "border-red-500" : ""}`}
+            placeholder="Enter Parent Email"
+            {...register("parentEmail")}
+            disabled={!isParentEmailEnabled}
+          />
+          {errors.parentEmail && (
+            <p className="text-red-600 text-sm">{errors.parentEmail.message}</p>
+          )}
+        </div>
       </div>
     </div>
   );

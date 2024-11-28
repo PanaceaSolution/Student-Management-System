@@ -4,6 +4,7 @@ import {
    DialogDescription,
    DialogHeader,
    DialogTitle,
+   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Controller, useForm } from "react-hook-form"
 import { Label } from "../ui/label";
@@ -11,8 +12,9 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import useClassStore from "@/store/classStore";
 import Spinner from "../Loader/Spinner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ImageUpload from "../common/ImageUpload";
+import { set } from "date-fns";
 
 const formFields = [
    {
@@ -29,40 +31,72 @@ const formFields = [
       placeholder: "Enter Section",
       type: "text",
    },
-
 ]
-const ClassForm = ({ isOpen, setIsOpen, selectedData }) => {
+const ClassForm = ({ isOpen, setIsOpen, selectedData, setSelectedData }) => {
 
-   const [routine, setRoutine] = useState('');
-   const { addClass, isSubmitting } = useClassStore();
+   const [routineFile, setRoutineFile] = useState('');
+   const { addClass, updateClass, isSubmitting } = useClassStore();
 
-   const {
-      control,
-      handleSubmit,
-      formState: { errors },
-      reset,
-      clearErrors
-   } = useForm();
+   const { control, handleSubmit, formState: { errors }, reset, setValue, clearErrors } = useForm({
+      defaultValues: {
+         className: "",
+         section: "",
+      }
+   });
+
+
+   useEffect(() => {
+      if (selectedData) {
+         setValue("className", selectedData.className);
+         setValue("section", selectedData.section);
+         setRoutineFile(selectedData.routineFile);
+      }
+   }, [selectedData, setValue]);
+   console.log("selectedData", selectedData);
+
 
    const onSubmit = async (data) => {
       const formData = new FormData();
       formData.append("className", data.className);
       formData.append("section", data.section);
+      formData.append("routineFile", routineFile);
       console.log("Form Data:", formData);
 
-      const res = await addClass(formData);
-      if (res.success) {
-         reset();
-         setIsOpen(false);
+      try {
+         const res = selectedData
+            ? await updateClass(selectedData.classId, formData)
+            : await addClass(formData);
+         if (res.success) {
+            reset({});
+            setIsOpen(false);
+            clearErrors();
+            setRoutineFile('')
+         }
+      } catch (error) {
+         console.error("Error submitting form:", error);
       }
    }
 
    return (
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
+         <DialogTrigger>
+            <Button
+               variant="create"
+               className="uppercase"
+               onClick={() => {
+                  setSelectedData(null)
+                  setRoutineFile('')
+                  reset({});
+                  setIsOpen(true)
+               }}
+            >
+               Add Class
+            </Button>
+         </DialogTrigger>
          <DialogContent className="bg-white overflow-y-auto sm:w-full sm:max-w-3xl">
             <DialogHeader>
                <DialogTitle className="text-xl font-bold text-center uppercase">
-                  Add Class
+                  {selectedData ? "Update Class" : "Add Class"}
                </DialogTitle>
                <DialogDescription />
             </DialogHeader>
@@ -97,8 +131,8 @@ const ClassForm = ({ isOpen, setIsOpen, selectedData }) => {
                </div>
                <ImageUpload
                   label="Routine(Optional)"
-                  image={routine}
-                  setImage={setRoutine}
+                  image={routineFile}
+                  setImage={setRoutineFile}
                   errors={errors}
                   clearErrors={clearErrors}
                />

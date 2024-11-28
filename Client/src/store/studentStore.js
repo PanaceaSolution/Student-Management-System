@@ -1,7 +1,7 @@
 import {
   createStudentService,
-  updateStudentService,
   getStudentsByClassAndSectionService,
+  updateStudentService,
 } from "@/services/studentService";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
@@ -30,7 +30,7 @@ const useStudentStore = create(
             const res = await getAllUserService(role);
             if (res.success) {
               set({
-                students: flattenData(res.data),
+                students: flattenData(res.data.map(getStudentsData)),
                 total: res.total,
                 totalPages: res.totalPages,
                 loading: false,
@@ -110,7 +110,7 @@ const useStudentStore = create(
           } catch (error) {
             const errorMessage =
               error?.message || "An error occurred while adding the student";
-            set({ error: errorMessage, loading: false });
+            set({ error: errorMessage, isSubmitting: false });
             toast.error(errorMessage);
             return error;
           }
@@ -119,6 +119,8 @@ const useStudentStore = create(
         // Update an existing student
         updateStudent: async (studentId, formData) => {
           set({ isSubmitting: true, error: null });
+          console.log("studentId", studentId);
+          console.log("formData", formData);
           try {
             const res = await updateStudentService(studentId, formData);
             if (res.success) {
@@ -185,5 +187,27 @@ const useStudentStore = create(
     )
   )
 );
+
+const getStudentsData = (res) => {
+  return {
+    user: {
+      ...res.user,
+      contact: res.contact,
+      studentId: res.studentId,
+      admissionDate: res.admissionDate,
+      fatherName: res.fatherName,
+      motherName: res.motherName,
+      guardianName: res.guardianName,
+      religion: res.religion,
+      bloodType: res.bloodType,
+      previousSchool: res.previousSchool,
+      rollNumber: res.rollNumber,
+      registrationNumber: res.registrationNumber,
+      studentClass: res.studentClass.className,
+      section: res.studentClass.section,
+      transportationMode: res.transportationMode,
+    },
+  };
+};
 
 export default useStudentStore;

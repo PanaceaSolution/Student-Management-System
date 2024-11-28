@@ -22,7 +22,7 @@ export class AttendenceService {
     private readonly studentRepository: Repository<Student>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async saveAttendence(createAttendenceDto: CreateAttendanceDto) {
     try {
@@ -125,7 +125,7 @@ export class AttendenceService {
         // console.log('student data', studentsData);
 
         if (isPresent?.toString() !== 'P' && isPresent?.toString() !== 'A') {
-         return ResponseModel.error("Attendence value is not valid","Invalid attendence")
+          return ResponseModel.error("Attendence value is not valid", "Invalid attendence")
         }
         // Update isPresent field for the student
         for (const student of studentsData) {
@@ -205,9 +205,8 @@ export class AttendenceService {
 
         //  console.log("studdent", studentData);
 
-        const sheetName = `Class_${classData.className}_${
-          new Date().toISOString().split('T')[0]
-        }.xlsx`
+        const sheetName = `Class_${classData.className}_${new Date().toISOString().split('T')[0]
+          }.xlsx`
           .replace(/[^a-zA-Z0-9_]/g, '') // Remove special characters
           .slice(0, 31); // Ensure the name is within 31 characters
 
@@ -228,9 +227,8 @@ export class AttendenceService {
         );
       }
 
-      const fileName = `Attendance_${
-        classData.className
-      }_${new Date().toISOString()}`;
+      const fileName = `Attendance_${classData.className
+        }_${new Date().toISOString()}`;
       const uploadedUrl = await generateAndUploadExcelSheet(
         sheetData,
         fileName,

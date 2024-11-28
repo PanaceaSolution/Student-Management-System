@@ -11,8 +11,10 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Controller, useForm } from "react-hook-form";
 import useSubjectStore from "@/store/subjectStore";
-import { useEffect } from "react";
-import toast from "react-hot-toast";
+import ImageUpload from "../common/ImageUpload";
+import { useEffect, useState } from "react";
+import { Textarea } from "../ui/textarea";
+import Spinner from "../Loader/Spinner";
 
 const formFields = [
    {
@@ -21,6 +23,7 @@ const formFields = [
       required: "Course Name is required",
       placeholder: "Enter Course Name",
       type: "text",
+      tag: "input",
    },
    {
       name: "courseDescription",
@@ -28,61 +31,101 @@ const formFields = [
       required: "Course Description is required",
       placeholder: "Enter Course Description",
       type: "text",
+      tag: "textarea",
+   },
+   {
+      name: "fname",
+      label: " Teacher's First Name*",
+      required: " Teacher's First Name is required",
+      placeholder: "Enter Teacher's First Name",
+      type: "text",
+      tag: "input",
+   },
+   {
+      name: "lname",
+      label: " Teacher's Last Name*",
+      required: " Teacher's Last Name is required",
+      placeholder: "Enter Teacher's Last Name",
+      type: "text",
+      tag: "input",
    }
 ];
 
-const SubjectForm = ({
-   setIsModalOpen,
-   isModalOpen,
-   id,
-   setId,
-   isUpdating,
-   setIsUpdating
-}) => {
+const SubjectForm = ({ setIsFormOpen, isFormOpen, selectedData, setSelectedData }) => {
 
-   const { addSubject, updateSubject, isSubmitting } = useSubjectStore()
+   const [file, setFile] = useState('');
 
-   // useEffect(() => {
-   //    if (id) {
-   //       getSubjectById(id).
-   //          then(data => reset(data));
-   //    }
-   // }, [id]);
+   const { addSubject, isSubmitting } = useSubjectStore()
 
-   const { control, handleSubmit, formState: { errors }, reset } = useForm({});
+   const {
+      control,
+      handleSubmit,
+      formState: { errors },
+      setValue,
+      reset,
+      clearErrors
+   } = useForm({});
+
+   useEffect(() => {
+      if (selectedData) {
+         setValue("courseName", selectedData.courseName);
+         setValue("courseDescription", selectedData.courseDescription);
+         setValue("fname", selectedData.fname);
+         setValue("lname", selectedData.lname);
+         setFile(selectedData.file);
+      }
+   })
 
 
    const onSubmit = async (data) => {
       const formData = new FormData();
       formData.append("courseName", data.courseName);
       formData.append("courseDescription", data.courseDescription);
+      formData.append("fname", data.fname);
+      formData.append("lname", data.lname);
 
-      const res = isUpdating
-         ? await updateSubject(id, formData)
-         : await addSubject(formData);
+      if (image) {
+         formData.append("file", file);
+      }
+      console.log("Form Data:", formData);
+
+
+      const res = await addSubject(formData);
 
       if (res.success) {
-         reset()
-         setIsModalOpen(false);
-         setId(null);
+         setSelectedData(null);
+         setIsFormOpen(false);
+         clearErrors();
+         setImage('');
       }
    };
 
    return (
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-         <DialogContent className="sm:max-w-[425px] bg-white">
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+         <DialogTrigger>
+            <Button
+               variant="create"
+               className="uppercase"
+               onClick={() => {
+                  reset({});
+                  setIsFormOpen(true);
+                  setSelectedData(null);
+               }}
+            >
+               Add Subjects
+            </Button>
+         </DialogTrigger>
+         <DialogContent className="bg-white overflow-y-auto sm:w-full sm:max-w-3xl">
             <DialogHeader>
                <DialogTitle className="text-xl font-bold text-center uppercase">
-                  {isUpdating ? "Edit Subject" : "Add New Subject"}
+                  Add Subject
                </DialogTitle>
-               <DialogDescription>
-                  Fill in the details below to {isUpdating ? "update" : "add"} subject.
-               </DialogDescription>
+               <DialogDescription />
             </DialogHeader>
             <hr />
             <form onSubmit={handleSubmit(onSubmit)} >
                <div className="grid gap-4 mb-4">
-                  {formFields.map(({ name, label, required, placeholder }) => (
+                  {formFields.map(({ name, label, required, placeholder, tag }) => (
                      <div key={name} className="grid items-center gap-2">
                         <Label htmlFor={name}>{label}</Label>
                         <Controller
@@ -91,13 +134,24 @@ const SubjectForm = ({
                            defaultValue=""
                            rules={required ? { required: required } : {}}
                            render={({ field }) => (
-                              <Input
-                                 {...field}
-                                 id={name}
-                                 type="text"
-                                 placeholder={placeholder}
-                                 className={`w-full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${errors[field.name] ? "border-red-500" : ""}`}
-                              />
+                              tag === "textarea" ? (
+                                 <Textarea
+                                    {...field}
+                                    id={name}
+                                    placeholder={placeholder}
+                                    className={`w-full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${errors[name] ? "border-red-500" : ""
+                                       }`}
+                                 />
+                              ) : (
+                                 <Input
+                                    {...field}
+                                    id={name}
+                                    type="text"
+                                    placeholder={placeholder}
+                                    className={`w-full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${errors[name] ? "border-red-500" : ""
+                                       }`}
+                                 />
+                              )
                            )}
                         />
                         {errors[name] && (
@@ -108,6 +162,13 @@ const SubjectForm = ({
                      </div>
                   ))}
                </div>
+               <ImageUpload
+                  label="Upload Course Image"
+                  image={file}
+                  setImage={setFile}
+                  errors={errors}
+                  clearErrors={clearErrors}
+               />
                <div className="flex justify-end mt-4">
                   <Button
                      type="submit"

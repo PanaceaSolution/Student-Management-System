@@ -23,33 +23,18 @@ const Subjects = () => {
    const [selectedExport, setSelectedExport] = useState("");
    const [selectedClass, setSelectedClass] = useState("");
    const [searchTerm, setSearchTerm] = useState("");
-   const [isModalOpen, setIsModalOpen] = useState(false);
-   const [selectedId, setSelectedId] = useState(null);
-   const [isUpdating, setIsUpdating] = useState(false);
+   const [isFormOpen, setIsFormOpen] = useState(false);
+   const [selectedData, setSelectedData] = useState(null);
 
    const { subjects, getAllSubjects, deleteSubject } = useSubjectStore();
    const { exportToCSV, exportToPDF } = useExport();
 
    useEffect(() => {
       const fetchSubjects = async () => {
-         try {
-            await getAllSubjects();
-         } catch (error) {
-            console.error("Error fetching subjects:", error);
-         }
+         await getAllSubjects();
       };
       fetchSubjects();
    }, []);
-
-   const handleEdit = (data) => {
-      setIsModalOpen(true);
-      setIsUpdating(true);
-      setSelectedId(data.id);
-   };
-
-   const handleDelete = async (id) => {
-      await deleteSubject(id);
-   };
 
    const handleExport = () => {
       const exportHandlers = {
@@ -75,8 +60,13 @@ const Subjects = () => {
       setSearchTerm(event.target.value);
    };
 
-   const handleClassChange = (event) => {
-      setSelectedClass(event.target.value);
+   const handleEdit = (data) => {
+      setIsFormOpen(true);
+      setSelectedData(data);
+   };
+
+   const handleDelete = async (data) => {
+      await deleteSubject(data.courseId);
    };
 
 
@@ -92,17 +82,12 @@ const Subjects = () => {
                         onChange={handleExportChange}
                         className="w-32 bg-white"
                      />
-                     <Button
-                        variant="create"
-                        className="uppercase"
-                        onClick={() => {
-                           setIsUpdating(false);
-                           setIsModalOpen(true);
-                           setSelectedId(null);
-                        }}
-                     >
-                        Add Subjects
-                     </Button>
+                     <SubjectForm
+                        isFormOpen={isFormOpen}
+                        setIsFormOpen={setIsFormOpen}
+                        selectedData={selectedData}
+                        setSelectedData={setSelectedData}
+                     />
                   </div>
                </div>
                <div className="border-b-2 p-2">
@@ -127,44 +112,8 @@ const Subjects = () => {
                      handleDelete={handleDelete}
                   />
                </div>
-               {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                  {subjects.map((subject) =>
-                     <Card key={subject.courseId} className="shadow-lg">
-                        <CardHeader>
-                           <CardTitle>{subject.courseName}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                           <p>{subject.courseDescription}</p>
-                        </CardContent>
-                        <CardFooter className="flex justify-end gap-2">
-                           <Button
-                              variant="edit"
-                              size="icon"
-                              onClick={() => handleEdit(subject)}
-                           >
-                              <Pencil />
-                           </Button>
-                           <Button
-                              variant="destructive"
-                              size="icon"
-                              onClick={() => handleDelete(subject.courseId)}
-                           >
-                              <Trash2 />
-                           </Button>
-                        </CardFooter>
-                     </Card>
-                  )}
-               </div> */}
             </div>
          </div>
-         <SubjectForm
-            isModalOpen={isModalOpen}
-            setIsModalOpen={setIsModalOpen}
-            id={selectedId}
-            setId={setSelectedId}
-            isUpdating={isUpdating}
-            setIsUpdating={setIsUpdating}
-         />
       </section>
    );
 };
