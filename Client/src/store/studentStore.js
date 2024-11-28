@@ -30,7 +30,7 @@ const useStudentStore = create(
             const res = await getAllUserService(role);
             if (res.success) {
               set({
-                students: flattenData(res.data),
+                students: flattenData(res.data.map(getStudentsData)),
                 total: res.total,
                 totalPages: res.totalPages,
                 loading: false,
@@ -110,7 +110,7 @@ const useStudentStore = create(
           } catch (error) {
             const errorMessage =
               error?.message || "An error occurred while adding the student";
-            set({ error: errorMessage, loading: false });
+            set({ error: errorMessage, isSubmitting: false });
             toast.error(errorMessage);
             return error;
           }
@@ -185,5 +185,26 @@ const useStudentStore = create(
     )
   )
 );
+
+const getStudentsData = (res) => {
+  return {
+    user: {
+      ...res.user,
+      studentId: res.studentId,
+      admissionDate: res.admissionDate,
+      fatherName: res.fatherName,
+      motherName: res.motherName,
+      guardianName: res.guardianName,
+      religion: res.religion,
+      bloodType: res.bloodType,
+      previousSchool: res.previousSchool,
+      rollNumber: res.rollNumber,
+      registrationNumber: res.registrationNumber,
+      studentClass: res.studentClass.className,
+      section: res.studentClass.section,
+      transportationMode: res.transportationMode,
+    },
+  };
+};
 
 export default useStudentStore;

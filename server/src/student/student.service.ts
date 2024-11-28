@@ -38,8 +38,8 @@ export class StudentService {
     @InjectRepository(Parent)
     private readonly parentRepository: Repository<Parent>,
     private readonly parentService: ParentService,
-    private readonly  authenticationService: AuthenticationService,
-  ) {}
+    private readonly authenticationService: AuthenticationService,
+  ) { }
   async createStudent(
     createStudentDto: StudentDto,
     files: {
@@ -69,26 +69,26 @@ export class StudentService {
       className,
       parentEmail,
     } = createStudentDto;
-  
+
     console.log('createParent:', createParent);
-  
+
     if (!profile || !profile.fname || !profile.lname) {
       throw new BadRequestException('Profile information (fname and lname) is required.');
     }
-  
+
     const AD = moment(admissionDate, 'YYYY-MM-DD');
     if (!AD.isValid()) {
       throw new BadRequestException('Invalid date format for Admission Date');
     }
     const AdmissionIsoString = AD.toISOString();
-  
+
     const studentExist = await this.studentRepository.findOne({
       where: [{ registrationNumber }],
     });
     if (studentExist) {
       throw new BadRequestException('Student already exists in the database');
     }
-  
+
     const documentMetadata = document || [];
     const documentUrls = [];
     if (files.documents && files.documents.length > 0) {
@@ -101,7 +101,7 @@ export class StudentService {
         })),
       );
     }
-  
+
     const studentClass = await this.classRepository.findOne({
       where: { className, section },
       select: ['classId', 'className'], // Ensure className is included
@@ -109,7 +109,7 @@ export class StudentService {
     if (!studentClass) {
       throw new NotFoundException('Class not found');
     }
-  
+
     const newStudent = this.studentRepository.create({
       fatherName,
       motherName,
@@ -124,10 +124,10 @@ export class StudentService {
       studentClassId: studentClass.classId,
       transportationMode,
     });
-  
+
     try {
       const studentCreated = await this.studentRepository.save(newStudent);
-  
+
       if (studentCreated) {
         const registerDto = {
           email,
@@ -141,36 +141,36 @@ export class StudentService {
           createdAt: new Date().toISOString(),
           refreshToken: null,
         };
-  
+
         const createUserResponse = await this.userService.register(registerDto, files);
-  
+
         if (!createUserResponse || !createUserResponse.user) {
           throw new InternalServerErrorException('Error occurs while creating user');
         }
-  
+
         const userReference = await this.userRepository.findOne({
           where: { userId: createUserResponse.user.id },
         });
-  
+
         if (!userReference) {
           throw new InternalServerErrorException('Error finding user after creation');
         }
-  
+
         await this.studentRepository.save({
           ...newStudent,
           user: userReference,
         });
-  
+
         if (createParent) {
           if (!parentEmail) {
             throw new BadRequestException('Parent email is required when createParent is true.');
           }
-  
+
           const existingParentUser = await this.userRepository.findOne({
             where: { email: parentEmail },
             relations: ['profile', 'parent'],
           });
-  
+
           if (
             existingParentUser?.profile &&
             (existingParentUser.profile.fname === fatherName || existingParentUser.profile.fname === motherName)
@@ -179,7 +179,7 @@ export class StudentService {
               where: { user: { userId: existingParentUser.userId } },
               relations: ['student'],
             });
-  
+
             if (parentData) {
               parentData.student.push(newStudent);
               await this.parentRepository.save(parentData);
@@ -191,7 +191,7 @@ export class StudentService {
               });
             }
           }
-  
+
           const parentDto: ParentDto = {
             childNames: [`${profile.fname} ${profile.lname}`],
             email: parentEmail,
@@ -210,16 +210,16 @@ export class StudentService {
             createdAt: new Date().toISOString(),
             password: generateRandomPassword(),
           };
-  
+
           try {
             const createParentResponse = await this.parentService.createParent(parentDto, files);
-  
+
             if (!createParentResponse.plainPassword) {
               throw new InternalServerErrorException('Error occurs while creating parent');
             }
-  
+
             return new ResponseModel('Student and Parent created successfully', true, {
-              student: { ...newStudent, className: studentClass.className }, // Add className
+              student: { ...newStudent, profile, className: studentClass.className }, // Add className
               password: decryptdPassword(userReference.password),
               parent: {
                 parent: createParentResponse.parent,
@@ -232,7 +232,7 @@ export class StudentService {
             throw new InternalServerErrorException('Failed to create parent. Student has been rolled back.');
           }
         }
-  
+
         return new ResponseModel('Student created successfully', true, {
           student: { ...newStudent, className: studentClass.className }, // Add className
           user: createUserResponse.user,
@@ -241,16 +241,16 @@ export class StudentService {
       }
     } catch (studentError) {
       console.error('Error during createStudent. Rolling back...', studentError);
-  
+
       if (newStudent?.user?.userId) {
         await this.authenticationService.deleteUsers([newStudent.user.userId]);
       }
-  
+
       throw new InternalServerErrorException('Failed to create student due to an error.');
     }
   }
-  
-  
+
+
   async updateStudent(
     id: UUID,
     updateStudentDto: Partial<StudentDto>,
@@ -390,10 +390,10 @@ export class StudentService {
   async getStudentsByClassAndSection(
     className: string,
     section: string,
-    
+
   ) {
     try {
-     
+
 
       const [students, total] = await this.studentRepository.findAndCount({
         relations: [

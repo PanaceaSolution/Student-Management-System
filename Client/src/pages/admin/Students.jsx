@@ -48,25 +48,25 @@ const Department = [
 ];
 
 const studentTableHead = ["", "First Name", "Last Name", "Gender", "Class", "Section", "Actions"];
-const studentTableFields = ["user_profile_fname", "user_profile_lname", "user_profile_gender", "studentClass", "section"];
+const studentTableFields = ["user_profile_fname", "user_profile_lname", "user_profile_gender", "user_studentClass", "user_section"];
 
 
 const personalInfo = [
   { label: "First Name", key: "user_profile_fname" },
   { label: "Last Name", key: "user_profile_lname" },
-  { label: "Father Name", key: "fatherName" },
-  { label: "Mother Name", key: "motherName" },
-  { label: "Guardian Name", key: "guardianName" },
+  { label: "Father Name", key: "user_fatherName" },
+  { label: "Mother Name", key: "user_motherName" },
+  { label: "Guardian Name", key: "user_guardianName" },
   { label: "Date of Birth", key: "user_profile_dob" },
   { label: "Gender", key: "user_profile_gender" },
-  { label: "Blood Group", key: "bloodType" },
-  { label: "Religion", key: "religion" },
-  { label: "Class", key: "studentClass" },
-  { label: "Section", key: "section" },
-  { label: "Roll Number", key: "rollNumber" },
-  { label: "Registration Number", key: "registrationNumber" },
-  { label: "Previous School", key: "previousSchool" },
-  { label: "Date of Admission", key: "admissionDate" },
+  { label: "Blood Group", key: "user_bloodType" },
+  { label: "Religion", key: "user_religion" },
+  { label: "Class", key: "user_studentClass" },
+  { label: "Section", key: "user_section" },
+  { label: "Roll Number", key: "user_rollNumber" },
+  { label: "Registration Number", key: "user_registrationNumber" },
+  { label: "Previous School", key: "user_previousSchool" },
+  { label: "Date of Admission", key: "user_admissionDate" },
   { label: "Email", key: "user_email" },
   { label: "Phone Number", key: "user_contact_phoneNumber" },
   { label: "Telephone Number", key: "user_contact_telephoneNumber" },
