@@ -50,7 +50,7 @@ export const getStudentByIdService = async (id) => {
 
 export const getStudentsByClassAndSectionService = async (
   className,
-  section,
+  section
 ) => {
   try {
     const response = await fetch(
@@ -67,9 +67,7 @@ export const getStudentsByClassAndSectionService = async (
     const data = await response.json();
     console.log("data", data);
     return data;
-
   } catch (error) {
-
     console.error("Error while getting students by class and section:", error);
     throw error;
   }
@@ -127,7 +125,6 @@ export const updateStudentService = async ({ studentId, formData }) => {
     const data = await response.json();
     return data;
   } catch (error) {
-
     console.error("Error while updating student:", error);
     toast.error("An error occurred while updating the student.");
     throw error;

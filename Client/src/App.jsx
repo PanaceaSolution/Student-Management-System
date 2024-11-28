@@ -9,7 +9,7 @@ import useAuthStore from "@/store/authStore.js";
 
 
 // Lazy load components
-const Dashboard = lazy(() => import("./pages/AdminDashboard/Dashboard"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Library = lazy(() => import("./pages/LibraryDashboard/Library"));
 const Finance = lazy(() => import("./pages/admin/Finance"));
 const Classes = lazy(() => import("./pages/admin/Classes"));
