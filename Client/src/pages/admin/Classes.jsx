@@ -86,13 +86,12 @@ const Class = () => {
                 onChange={handleExportChange}
                 className="w-32 bg-white"
               />
-              <Button
-                variant="create"
-                className="uppercase"
-                onClick={() => setIsFormOpen(true)}
-              >
-                Add Class
-              </Button>
+              <ClassForm
+                isOpen={isFormOpen}
+                setIsOpen={setIsFormOpen}
+                selectedData={selectedData}
+                setSelectedData={setSelectedData}
+              />
             </div>
           </div>
           <div className="border-b-2 p-2">
@@ -120,11 +119,7 @@ const Class = () => {
           </div>
         </div>
       </div>
-      <ClassForm
-        isOpen={isFormOpen}
-        setIsOpen={setIsFormOpen}
-        selectedData={selectedData}
-      />
+
     </section>
   );
 };
