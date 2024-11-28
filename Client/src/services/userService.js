@@ -11,9 +11,18 @@ export const getAllUserService = async (role) => {
    return await response.json();
 }
 
-export const deleteUserService = async (id) => {
-   console.log(id);
+export const getStatsService = async () => {
+   const response = await fetch(`${URL}/auth/user-statistics`, {
+      method: "GET",
+      headers: {
+         "Content-Type": "application/json",
+      },
+      credentials: "include",
+   });
+   return await response.json();
+}
 
+export const deleteUserService = async (id) => {
    const response = await fetch(`${URL}/auth/delete`, {
       method: "DELETE",
       headers: {

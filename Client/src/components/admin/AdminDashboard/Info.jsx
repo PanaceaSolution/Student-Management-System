@@ -2,38 +2,39 @@ import { Separator } from "@/components/ui/separator";
 import { UsersRound } from "lucide-react";
 import React from "react";
 
-const info = [
-  {
-    id: 1,
-    name: "Students",
-    icon: UsersRound,
-    color: "text-green-600",
-    count: 50,
-  },
-  {
-    id: 2,
-    name: "Teachers",
-    icon: UsersRound,
-    color: "text-blue-600",
-    count: 50,
-  },
-  {
-    id: 3,
-    name: "Parents",
-    icon: UsersRound,
-    color: "text-yellow-600",
-    count: 50,
-  },
-  {
-    id: 4,
-    name: "Staffs",
-    icon: UsersRound,
-    color: "text-red-600",
-    count: 50,
-  }
-]
 
-const Info = () => {
+
+const Info = ({ stats }) => {
+  const info = [
+    {
+      id: 1,
+      name: "Students",
+      icon: UsersRound,
+      color: "text-green-600",
+      count: stats.totalStudents,
+    },
+    {
+      id: 2,
+      name: "Teachers",
+      icon: UsersRound,
+      color: "text-blue-600",
+      count: stats.staffRoles.totalTeachers,
+    },
+    {
+      id: 3,
+      name: "Parents",
+      icon: UsersRound,
+      color: "text-yellow-600",
+      count: stats.totalParents,
+    },
+    {
+      id: 4,
+      name: "Staffs",
+      icon: UsersRound,
+      color: "text-red-600",
+      count: stats.totalStaff,
+    }
+  ]
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
       {info.map((item) => {

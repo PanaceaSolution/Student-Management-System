@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import { deleteUserService, getAllUserService } from "@/services/userService";
+import { deleteUserService, getAllUserService, getStatsService } from "@/services/userService";
 
 
 const useUserStore = create(
@@ -11,18 +11,36 @@ const useUserStore = create(
             isDeleting: false,
             error: null,
             allUsers: [],
+            stats: [],
             totalUsers: 0,
             pages: 0,
 
             getAllUser: async (role) => {
                set({ isLoading: true, error: null });
                try {
-                  const data = await getAllUserService(role);
-                  if (data.status === 200) {
+                  const res = await getAllUserService(role);
+                  if (res.success) {
                      set({
-                        allUsers: data.data,
-                        totalUsers: data.total,
-                        pages: data.totalPages,
+                        allUsers: res.data,
+                        totalUsers: res.total,
+                        pages: res.totalPages,
+                        isLoading: false
+                     })
+                  } else {
+                     set({ isLoading: false })
+                  }
+               } catch (error) {
+                  set({ error: error.message, isLoading: false })
+               }
+            },
+
+            getStats: async () => {
+               set({ isLoading: true, error: null });
+               try {
+                  const res = await getStatsService();
+                  if (res.success) {
+                     set({
+                        stats: res.data,
                         isLoading: false
                      })
                   } else {
@@ -36,10 +54,10 @@ const useUserStore = create(
             deleteUser: async (id) => {
                set({ isDeleting: true, error: null });
                try {
-                  const data = await deleteUserService(id);
-                  if (data.status === 200) {
+                  const res = await deleteUserService(id);
+                  if (res.success) {
                      set((state) => ({
-                        allUsers: state.allUsers.filter((user) => user.id !== id),
+                        allUsers: state.allUsers.filter((user) => user.user_Id !== id),
                         isDeleting: false
                      }));
                      toast.success('User deleted successfully')
@@ -58,7 +76,8 @@ const useUserStore = create(
             partialize: (state) => ({
                allUsers: state.allUsers,
                pages: state.pages,
-               totalUsers: state.totalUsers
+               totalUsers: state.totalUsers,
+               stats: state.stats
             })
          }
       )

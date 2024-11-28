@@ -1,13 +1,13 @@
 import React from "react";
 import { Chart } from "react-google-charts";
 
-const InfoChart = () => {
+const InfoChart = ({ stats }) => {
   const data = [
     ["Users", "Total"],
-    ["Students", 11],
-    ["Parents", 2],
-    ["Teachers", 2],
-    ["Staffs", 2],
+    ["Students", stats.totalStudents],
+    ["Parents", stats.totalParents],
+    ["Teachers", stats.staffRoles.totalTeachers],
+    ["Staffs", stats.totalStaff],
   ];
 
   const options = {
