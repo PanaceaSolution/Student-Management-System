@@ -53,7 +53,7 @@ const NoticeForm = ({ formOpen, setFormOpen }) => {
          <DialogContent className="bg-white overflow-y-auto sm:w-full sm:max-w-2xl">
             <DialogHeader>
                <DialogTitle>Add Notice</DialogTitle>
-               <DialogDescription>Fill out the form below to add a new notice.</DialogDescription>
+               <DialogDescription />
             </DialogHeader>
             <hr />
             <form onSubmit={handleSubmit(onSubmit)}>

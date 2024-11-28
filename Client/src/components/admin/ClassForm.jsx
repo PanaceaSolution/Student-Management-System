@@ -37,14 +37,13 @@ const ClassForm = ({ isOpen, setIsOpen, selectedData, setSelectedData }) => {
    const [routineFile, setRoutineFile] = useState('');
    const { addClass, updateClass, isSubmitting } = useClassStore();
 
-   const {
-      control,
-      handleSubmit,
-      formState: { errors },
-      reset,
-      setValue,
-      clearErrors
-   } = useForm();
+   const { control, handleSubmit, formState: { errors }, reset, setValue, clearErrors } = useForm({
+      defaultValues: {
+         className: "",
+         section: "",
+      }
+   });
+
 
    useEffect(() => {
       if (selectedData) {
@@ -52,7 +51,7 @@ const ClassForm = ({ isOpen, setIsOpen, selectedData, setSelectedData }) => {
          setValue("section", selectedData.section);
          setRoutineFile(selectedData.routineFile);
       }
-   })
+   }, [selectedData, setValue]);
    console.log("selectedData", selectedData);
 
 
@@ -97,7 +96,7 @@ const ClassForm = ({ isOpen, setIsOpen, selectedData, setSelectedData }) => {
          <DialogContent className="bg-white overflow-y-auto sm:w-full sm:max-w-3xl">
             <DialogHeader>
                <DialogTitle className="text-xl font-bold text-center uppercase">
-                  Add Class
+                  {selectedData ? "Update Class" : "Add Class"}
                </DialogTitle>
                <DialogDescription />
             </DialogHeader>
