@@ -219,7 +219,7 @@ export class StudentService {
             }
   
             return new ResponseModel('Student and Parent created successfully', true, {
-              student: { ...newStudent, className: studentClass.className }, // Add className
+              student: { ...newStudent,profile, className: studentClass.className }, // Add className
               password: decryptdPassword(userReference.password),
               parent: {
                 parent: createParentResponse.parent,

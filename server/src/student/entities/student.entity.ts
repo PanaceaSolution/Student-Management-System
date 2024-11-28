@@ -62,7 +62,7 @@ export class Student {
   transportationMode: TRANSPORTATION_MODE;
 
   @Column({ type: 'simple-array', nullable: true })
-  isPresent: string[]
+  isPresent: string[];
 
   @OneToOne(() => User, (user) => user.student, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
