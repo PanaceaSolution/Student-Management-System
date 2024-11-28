@@ -119,11 +119,14 @@ export async function generateAndUploadExcelSheet(
   const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
   const stream = bufferToStream(buffer);
 
+  const fileNameWithExtension = fileName.endsWith('.xlsx') ? fileName:`${fileName}.xlsx`;
+
   const uploadResult = await new Promise((resolve, reject) => {
     const uploadStream = Cloudinary.uploader.upload_stream(
       {
         resource_type: 'raw',
-        public_id: fileName,
+        public_id: fileNameWithExtension,
+       
       },
       (error, result) => {
         if (error) return reject(error);
@@ -132,5 +135,8 @@ export async function generateAndUploadExcelSheet(
     );
     stream.pipe(uploadStream);
   });
+  console.log("Result", uploadResult);
   return (uploadResult as any).secure_url;
+
+  
 }

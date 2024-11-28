@@ -1,15 +1,8 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Attendence } from './entities/attendence.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  CreateAttendanceDto,
-  StudentAttendanceDto,
-} from './dto/attendence.dto';
-import { DeepPartial, Equal, In, Repository } from 'typeorm';
+import { CreateAttendanceDto } from './dto/attendence.dto';
+import { Equal, In, Repository } from 'typeorm';
 import { Class } from 'src/classes/entities/class.entity';
 import { Student } from 'src/student/entities/student.entity';
 import { User } from 'src/user/authentication/entities/authentication.entity';
@@ -31,7 +24,7 @@ export class AttendenceService {
   ) {}
 
   async saveAttendence(createAttendenceDto: CreateAttendanceDto) {
-    console.log('Received createAttendenceDto:', createAttendenceDto);
+    // console.log('Received createAttendenceDto:', createAttendenceDto);
     try {
       const todayDate = new Date().toLocaleDateString();
       const { className, section, students } = createAttendenceDto;
@@ -43,7 +36,7 @@ export class AttendenceService {
         where: { className, section },
         relations: ['students'],
       });
-      console.log('classData', classData);
+      // console.log('classData', classData);
 
       if (!classData) {
         return ResponseModel.error(
@@ -59,7 +52,7 @@ export class AttendenceService {
       for (const studentDto of students) {
         const { rollNumber, fname, lname, isPresent } = studentDto;
 
-        console.log('student dto', studentDto);
+        // console.log('student dto', studentDto);
 
         const studentsData = await this.studentRepository.find({
           where: {
@@ -71,10 +64,8 @@ export class AttendenceService {
           relations: ['user', 'user.profile', 'studentClass'], // Ensure user relation is loaded
         });
         studentLists.push(...studentsData);
-        console.log(
-          'Querying students with studentClassId:',
-          classData.classId,
-        );
+        console.log("student data", studentsData);
+        
 
         if (studentsData.length === 0) {
           console.warn('No students found for class:', classData.classId);
@@ -90,7 +81,7 @@ export class AttendenceService {
               student.user.profile.lname === lname,
           ) // Ensure student has a user and matches fname and lname
           .map((student) => student.user.userId);
-        console.log('users with userIds', userIds);
+        // console.log('users with userIds', userIds);
 
         if (userIds.length === 0) {
           console.warn('No matching users found for student:', studentDto);
@@ -103,7 +94,7 @@ export class AttendenceService {
           },
           relations: ['profile'],
         });
-        console.log('users data:', usersData);
+        // console.log('users data:', usersData);
 
         let attendance = await this.attendenceRepository.findOne({
           where: {
@@ -111,17 +102,19 @@ export class AttendenceService {
           },
         });
 
+        // console.log('attendecnce', attendance);
+
         if (attendance) {
-          if (attendance.classId.includes(classIds.join()))
-            //    {
-            //   return ResponseModel.error(
-            //     'Attendance already recorded for this class today',
-            //     'You can only record attendance for a class once per day',
-            //   );
-            // }
+          if (
+            attendance.classId &&
+            attendance.classId.includes(classIds.join())
+          ) {
             attendance.classId = [
               ...new Set([...attendance.classId, ...classIds]),
             ];
+          } else if (!attendance.classId) {
+            attendance.classId = classIds;
+          }
         } else {
           attendance = this.attendenceRepository.create({
             classId: classIds,
@@ -129,10 +122,12 @@ export class AttendenceService {
           });
         }
 
+        console.log("attendence", attendance);
+        
+        
         // Update isPresent field for the student
         for (const student of studentsData) {
           student.isPresent.push(isPresent.toString());
-
           await this.studentRepository.save(student);
         }
 
@@ -156,6 +151,97 @@ export class AttendenceService {
     } catch (error) {
       console.error('Error while saving attendance:', error);
       throw ResponseModel.error('Error while saving attendance', error);
+    }
+  }
+
+  async generateAttendence(className: string, section: string) {
+    try {
+      // Fetch the attendance records for the specific class
+      const classData = await this.classRepository.findOne({
+        where: { className, section },
+        relations: ['students', 'students.user', 'students.user.profile'],
+      });
+
+      console.log(classData.attendences);
+
+      if (!classData) {
+        return ResponseModel.error(
+          'Class not found',
+          `No class found with name: ${className} and section: ${section}.`,
+        );
+      }
+      console.log('Fetching attendance for classId:', classData.classId);
+      const attendanceRecords = await this.attendenceRepository.find({
+        where: { classId: Equal(classData.classId) }, // Now using the found classId
+      });
+
+      console.log('attendece record', attendanceRecords);
+
+      if (attendanceRecords.length === 0) {
+        return ResponseModel.error(
+          'No attendance records found for the selected class',
+          `No attendance data exists for the class: ${classData.className} and section :${classData.section}.`,
+        );
+      }
+
+      const classDetails = `Class: ${classData.className}, Section: ${classData.section}`;
+      const sheetData = [];
+
+      for (const record of attendanceRecords) {
+        // Prepare student attendance data for the specific date
+        const studentData = classData.students.map((student) => [
+          student.rollNumber,
+          student.user.profile.fname,
+          student.user.profile.lname,
+          student.isPresent?.[record.date.toISOString()] ? 'P' : 'A', // Assuming `isPresent` is a map or array indexed by date
+        ]);
+
+        //  console.log("studdent", studentData);
+
+        const sheetName = `Class_${classData.className}_${
+          new Date().toISOString().split('T')[0]
+        }.xlsx`
+          .replace(/[^a-zA-Z0-9_]/g, '') // Remove special characters
+          .slice(0, 31); // Ensure the name is within 31 characters
+
+        // Add a new sheet for the specific attendance record
+        sheetData.push({
+          sheetName,
+          topHeaderValues: [`Date: ${record.date}`, classDetails],
+          headers: ['Roll Number', 'First Name', 'Last Name', 'Is Present'],
+          data: studentData,
+        });
+      }
+      console.log('sheetData', sheetData);
+
+      if (sheetData.length === 0) {
+        return ResponseModel.error(
+          'No attendance data for the selected class',
+          `No attendance data exists for the class:${className} and section:${section}`,
+        );
+      }
+
+      const fileName = `Attendance_${
+        classData.className
+      }_${new Date().toISOString()}`;
+      const uploadedUrl = await generateAndUploadExcelSheet(
+        sheetData,
+        fileName,
+      );
+
+      return ResponseModel.success(
+        'Attendance Excel sheet generated successfully',
+        { url: uploadedUrl },
+      );
+    } catch (error) {
+      console.error(
+        'Error generating attendance Excel sheet for class:',
+        error,
+      );
+      throw ResponseModel.error(
+        'Error generating attendance Excel sheet',
+        error,
+      );
     }
   }
 }

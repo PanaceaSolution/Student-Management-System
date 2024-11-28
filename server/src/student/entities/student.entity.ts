@@ -20,7 +20,7 @@ import { Attendence } from 'src/attendence/entities/attendence.entity';
 import { Class } from 'src/classes/entities/class.entity';
 
 @Entity({ name: 'Student' })
-@Unique(['studentClassId', 'rollNumber'])
+@Unique(['studentClass', 'rollNumber'])
 export class Student {
   @PrimaryGeneratedColumn('uuid')
   studentId: UUID;
@@ -62,7 +62,7 @@ export class Student {
   transportationMode: TRANSPORTATION_MODE;
 
   @Column({ type: 'simple-array', nullable: true })
-  isPresent: string[]
+  isPresent: string[];
 
   @OneToOne(() => User, (user) => user.student, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
