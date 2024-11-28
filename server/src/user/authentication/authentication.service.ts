@@ -896,7 +896,7 @@ export class AuthenticationService {
       throw new InternalServerError('Error fetching users by role', error);
     }
   }
-  
+
   async searchUser(
     searchTerm: string,
     searchBy: 'name' | 'role' | 'email' | 'username' | 'gender',
