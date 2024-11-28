@@ -782,47 +782,17 @@ export class AuthenticationService {
   ) {
     try {
       const skip = (page - 1) * limit;
-  
+
       if (![ROLE.ADMIN, ROLE.STUDENT, ROLE.STAFF, ROLE.PARENT].includes(role)) {
         throw new NotFoundError(`${role} not found`);
       }
   
+      let roleData = [];
+      let total = 0;
+  
       if (role === ROLE.STAFF) {
-        if (!staffRole) {
-          const allStaffResponse = await this.staffService.findAllStaff();
-          if (allStaffResponse.status === 404) {
-            return {
-              message: 'No staff members found',
-              status: 404,
-              success: false,
-              data: [],
-              total: 0,
-              page,
-              limit,
-              totalPages: 0,
-            };
-          }
-  
-          const total = allStaffResponse.data.length;
-          const paginatedStaff = allStaffResponse.data.slice(
-            skip,
-            skip + limit,
-          );
-  
-          return {
-            message: 'Staff members fetched successfully',
-            status: 200,
-            success: true,
-            data: paginatedStaff,
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit),
-          };
-        }
-  
-        const roleData = await this.staffRepository.find({
-          where: { staffRole: staffRole },
+        const [staffMembers, staffCount] = await this.staffRepository.findAndCount({
+          where: staffRole ? { staffRole } : {}, 
           relations: [
             'user',
             'user.profile',
@@ -830,79 +800,99 @@ export class AuthenticationService {
             'user.contact',
             'user.document',
           ],
+          skip,
+          take: limit,
         });
   
-        const total = roleData.length;
-        const paginatedStaff = roleData.slice(skip, skip + limit);
-  
-        const formattedStaff = paginatedStaff.map((staff) => ({
+        roleData = staffMembers.map((staff) => ({
           user: this.formatUserResponse(staff.user),
           staffId: staff.staffId,
           hireDate: staff.hireDate,
           salary: staff.salary,
           staffRole: staff.staffRole,
         }));
+  
+        total = staffCount;
+      } else if (role === ROLE.STUDENT) {
+        const [students, studentCount] = await this.studentRepository.findAndCount({
+          relations: ['user', 'studentClass' , 'user.profile', 'user.contact','user.address', 'user.document' ,'parent','parent.user','parent.user.contact' ], 
+          skip,
+          take: limit,
+          
+        });
+
+        students.forEach((student) => {
+          if (!student.user) {
+            console.warn('Student without user:', student);
+          }
+        });
+  
+        roleData = students
+          .filter((student) => student.user) 
+          .map((student) => ({
+            user: this.formatUserResponse(student.user),
+            studentId: student.studentId,
+            className: student.studentClass?.className || null,
+            contact:student.parent?.user?.contact || null
+          }));
+  
+        total = studentCount;
+      } else if (role === ROLE.PARENT) {
+        const [parents, parentCount] = await this.parentRepository.findAndCount({
+          relations: ['user', 'user.profile', 'user.contact','user.address', 'user.document'],
+          skip,
+          take: limit,
+        });
+        roleData = parents.map((parent) => ({
+          user: this.formatUserResponse(parent.user),
+          parentId: parent.parentId,
+          child:parent.childNames,
+        }));
+  
+        total = parentCount;
+      } else {
+        const whereClause = { role };
+        const [users, userCount] = await this.userRepository.findAndCount({
+          where: whereClause,
+          relations: ['profile', 'address', 'contact', 'document'],
+          order: { createdAt: 'DESC' },
+          skip,
+          take: limit,
+        });
+
+        console.log('Users fetched:', users);
+        roleData = users.map((user) => {
+          console.log('Formatting user:', user);
+          return this.formatUserResponse(user);
+        });
+  
+        total = userCount;
+      }
+
+      if (!roleData.length) {
         return {
-          message: 'Staff members fetched successfully',
-          status: 200,
-          success: true,
-          data: formattedStaff,
-          total,
+          message: 'No users found for the specified role',
+          status: 404,
+          success: false,
+          data: [],
+          total: 0,
           page,
           limit,
-          totalPages: Math.ceil(total / limit),
+          totalPages: 0,
         };
       }
-  
-      let roleData;
-      switch (role) {
-        case ROLE.STUDENT:
-          roleData = await this.studentRepository.find({
-            relations: ['studentClass'],
-          });
-          break;
-        case ROLE.PARENT:
-          roleData = await this.parentRepository.find({});
-          break;
-        default:
-          break;
-      }
-  
-      const whereClause = { role } as any;
-      const [users, total] = await this.userRepository.findAndCount({
-        where: whereClause,
-        relations: ['profile', 'address', 'contact', 'document'],
-        order: { createdAt: 'DESC' },
-        skip,
-        take: limit,
-      });
-  
-      const formattedUsers = users.map(this.formatUserResponse);
-  
-      const finalData = formattedUsers.map((user, index) => {
-        if (roleData && roleData[index]) {
-          const student = roleData[index];
-          const className = student.studentClass?.className || null; 
-          return {
-            user,
-            ...student,
-            className, 
-          };
-        }
-        return null;
-      });
-  
       return {
         message: 'Users fetched successfully',
         status: 200,
         success: true,
-        data: finalData.filter((item) => item !== null), 
+        data: roleData,
         total,
         page,
         limit,
         totalPages: Math.ceil(total / limit),
       };
     } catch (error) {
+      console.error('Error fetching users by role:', error);
       throw new InternalServerError('Error fetching users by role', error);
     }
   }

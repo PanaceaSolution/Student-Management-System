@@ -340,7 +340,7 @@ export class StudentService {
   async getAllStudents(page: number, limit: number) {
     try {
       const skip = (page - 1) * limit;
-
+  
       const [students, total] = await this.studentRepository.findAndCount({
         relations: [
           'user',
@@ -348,11 +348,17 @@ export class StudentService {
           'user.contact',
           'user.address',
           'user.document',
+          'studentClass',
+          'parent',
+          'parent.user',
+          'parent.user.contact',
+          'parent.user.address',
+          'parent.user.profile',
         ],
         skip,
         take: limit,
       });
-
+  
       const formattedStudents = students
         .filter((student) => student.user !== null)
         .map((student) => ({
@@ -360,8 +366,13 @@ export class StudentService {
           admissionDate: student.admissionDate,
           rollNumber: student.rollNumber,
           registrationNumber: student.registrationNumber,
-          studentClass: student.studentClass,
-          section: student.section,
+          studentClass: student.studentClass
+            ? {
+                id: student.studentClass.classId,
+                name: student.studentClass.className,
+                section: student.section,
+              }
+            : null,
           transportationMode: student.transportationMode,
           user: student.user && {
             id: student.user.userId,
@@ -373,8 +384,22 @@ export class StudentService {
             address: student.user.address,
             documents: student.user.document,
           },
+          parent: student.parent
+            ? {
+                id: student.parent.parentId,
+                user: student.parent.user && {
+                  id: student.parent.user.userId,
+                  email: student.parent.user.email,
+                  username: student.parent.user.username,
+                  role: student.parent.user.role,
+                  profile: student.parent.user.profile,
+                  contact: student.parent.user.contact,
+                  address: student.parent.user.address,
+                },
+              }
+            : null,
         }));
-
+  
       return new ResponseModel('Students fetched successfully', true, {
         data: formattedStudents,
         total,
@@ -386,6 +411,8 @@ export class StudentService {
       return new ResponseModel('Error fetching students', false, error);
     }
   }
+  
+  
 
   async getStudentsByClassAndSection(
     className: string,
