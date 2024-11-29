@@ -8,17 +8,17 @@ const Info = ({ stats }) => {
   const info = [
     {
       id: 1,
+      name: "Users",
+      icon: UsersRound,
+      color: "text-blue-600",
+      count: stats.totalUsers,
+    },
+    {
+      id: 2,
       name: "Students",
       icon: UsersRound,
       color: "text-green-600",
       count: stats.totalStudents,
-    },
-    {
-      id: 2,
-      name: "Teachers",
-      icon: UsersRound,
-      color: "text-blue-600",
-      count: stats.staffRoles.totalTeachers,
     },
     {
       id: 3,
