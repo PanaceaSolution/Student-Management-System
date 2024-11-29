@@ -1214,6 +1214,7 @@ export class AuthenticationService {
         where: {
           userId: userId,
         },
+        relations: ['profile', 'address', 'contact', 'document'],
       });
       const userRole = userDetail.role;
       let roleDetail;
