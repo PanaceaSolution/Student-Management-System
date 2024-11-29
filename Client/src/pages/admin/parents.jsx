@@ -1,6 +1,5 @@
 import SearchBox from '@/components/SearchBox';
 import Select from '@/components/Select';
-import { Button } from '@/components/ui/button';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
    Dialog,
@@ -12,10 +11,9 @@ import {
 } from "@/components/ui/dialog"
 import ParentsForm from '@/components/admin/ParentsForm';
 import useParentStore from '@/store/parentsStore';
-import StaffTable from '@/components/admin/AdminTable';
 import useExport from '@/hooks/useExport';
 import ActiveTab from '@/components/common/activeTab';
-import useStudentStore from '@/store/studentStore';
+import AdminTable from '@/components/admin/AdminTable';
 
 const Exports = [
    { value: "", label: "EXPORT" },
@@ -30,8 +28,8 @@ const Gender = [
    { value: "Others", label: "Others" },
 ];
 
-const parentsTableHead = ["", "First Name", "Last Name", "Gender", "Phone Number"];
-const parentsTableFields = ["user_profile_fname", "user_profile_lname", "user_profile_gender", "user_contact_phoneNumber"];
+const parentsTableHead = ["", "Father's Name", "Mother's Name", "No. of Children", "Phone Number"];
+const parentsTableFields = ["user_profile_fname", "user_profile_lname", "child_0", "user_contact_phoneNumber"];
 
 const parentsContent = [
    { label: "First Name", key: "user_profile_fname" },
@@ -44,17 +42,24 @@ const parentsContent = [
 
 const Parents = () => {
    const [formOpen, setFormOpen] = useState(false);
+   const [cardOpen, setCardOpen] = useState(false);
    const [selectedExport, setSelectedExport] = useState("");
    const [selectedGender, setSelectedGender] = useState("");
    const [activeTab, setActiveTab] = useState("all");
    const [selectedData, setSelectedData] = useState(null);
    const [searchTerm, setSearchTerm] = useState("");
 
-   const { parents, getAllParents, deleteParent, isSubmitting, isDeleting } = useParentStore()
+   const { parents, getAllParents, deleteParent, isDeleting } = useParentStore()
 
    useEffect(() => {
-      getAllParents("PARENT")
+      const fetchParents = async () => {
+         await getAllParents('PARENT');
+      };
+      fetchParents();
    }, []);
+
+   console.log("Parents:", parents);
+
 
 
    const { exportToCSV, exportToPDF } = useExport()
@@ -89,10 +94,12 @@ const Parents = () => {
 
    const handleUserData = (data) => {
       setSelectedData(data);
+      setCardOpen(true);
    };
 
-   const handleDelete = async (id) => {
-      await deleteParent(id);
+
+   const handleDelete = async (data) => {
+      await deleteParent(data.user_id);
    };
 
    const handleEdit = (data) => {
@@ -147,7 +154,7 @@ const Parents = () => {
                      handleTabClick={handleTabClick}
                   />
                   <div className="relative w-full overflow-x-auto shadow-md">
-                     <StaffTable
+                     <AdminTable
                         title="Parent"
                         tableHead={parentsTableHead}
                         tableFields={parentsTableFields}
@@ -160,8 +167,7 @@ const Parents = () => {
                   </div>
                </div>
                {selectedData && (
-                  <Dialog>
-                     <DialogTrigger>Open</DialogTrigger>
+                  <Dialog open={cardOpen} onOpenChange={setCardOpen}>
                      <DialogContent>
                         <DialogHeader>
                            <DialogTitle>Are you absolutely sure?</DialogTitle>

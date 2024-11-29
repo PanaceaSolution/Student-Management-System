@@ -1,6 +1,6 @@
 import { createParentService, updateParentService } from "@/services/parentsServices";
 import { deleteUserService, getAllUserService } from "@/services/userService";
-import { flattenData } from "@/utilities/utilities";
+import { flattenData, flattenNestedData } from "@/utilities/utilities";
 import toast from "react-hot-toast";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
