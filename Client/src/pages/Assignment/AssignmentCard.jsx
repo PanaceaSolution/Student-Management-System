@@ -38,7 +38,7 @@ const AssignmentCard = ({ assignment }) => {
         <CardTitle>{assignment.subjectName}</CardTitle>
         <CardDescription>{assignment.teacherName}</CardDescription>
       </CardHeader>
-      {isWithinDateRange && (
+      {/* {isWithinDateRange && (
         <CardContent className="relative border m-3 shadow-md rounded-lg p-2">
           <h1 className="text-sm md:text-base lg:text-md font-medium">
             {assignment.description}
@@ -54,7 +54,7 @@ const AssignmentCard = ({ assignment }) => {
             className="absolute -top-1 -right-1 rounded-full h-2 w-2 animate-pulse transition-all duration-600 bg-blue-900"
           />
         </CardContent>
-      )}
+      )} */}
     </Card>
   );
 };

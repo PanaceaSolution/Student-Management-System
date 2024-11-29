@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button';
 import AssignmentCard from '@/pages/Assignment/AssignmentCard'
 import useAssignmentStore from '@/store/assignmentsStore';
 import useAuthStore from '@/store/authStore';
-import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import AddTasks from './AddTasks';
 
 const data = [
    {
@@ -69,6 +69,7 @@ const data = [
 ];
 
 const Tasks = () => {
+   const [isFormOpen, setIsFormOpen] = useState(false);
    const { assignments, getAllAssignments } = useAssignmentStore();
    const { loggedInUser } = useAuthStore();
    const role = loggedInUser?.role;
@@ -85,15 +86,20 @@ const Tasks = () => {
    return (
       <section className="max-w-full mx-auto p-2">
          {role === "TEACHER" && (
-            <Button className="mb-4">
-               <Link to="/add-assignment">Add Assignment</Link>
+            <Button
+               onClick={() => setIsFormOpen(true)}
+               className="mb-4"
+            >
+               Add Tasks
             </Button>
          )}
-         <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+         <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 lg:gap-4">
             {data.map((assignment) => (
                <AssignmentCard key={assignment.id} assignment={assignment} />
             ))}
          </div>
+
+         {isFormOpen && <AddTasks isFormOpen={isFormOpen} setIsFormOpen={setIsFormOpen} />}
       </section>
    )
 }
