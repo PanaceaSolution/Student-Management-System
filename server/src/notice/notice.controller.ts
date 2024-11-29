@@ -59,7 +59,7 @@ export class NoticeController {
         }
     }
 
-    @Delete(':id')
+    @Delete('/delete/:id')
     async remove(@Param('id') noticeID: string) {
         try {
             await this.noticeService.remove(noticeID);

@@ -64,7 +64,7 @@ export class AttendenceService {
           relations: ['user', 'user.profile', 'studentClass'], // Ensure user relation is loaded
         });
         studentLists.push(...studentsData);
-        console.log('student data', studentsData);
+        // console.log('student data', studentsData);
 
         if (studentsData.length === 0) {
           console.warn('No students found for class:', classData.classId);
@@ -169,7 +169,7 @@ export class AttendenceService {
         relations: ['students', 'students.user', 'students.user.profile'],
       });
 
-      console.log(classData.attendences);
+      // console.log(classData.attendences);
 
       if (!classData) {
         return ResponseModel.error(
@@ -177,12 +177,12 @@ export class AttendenceService {
           `No class found with name: ${className} and section: ${section}.`,
         );
       }
-      console.log('Fetching attendance for classId:', classData.classId);
+      // console.log('Fetching attendance for classId:', classData.classId);
       const attendanceRecords = await this.attendenceRepository.find({
         where: { classId: Equal(classData.classId) }, // Now using the found classId
       });
 
-      console.log('attendece record', attendanceRecords);
+      // console.log('attendece record', attendanceRecords);
 
       if (attendanceRecords.length === 0) {
         return ResponseModel.error(
@@ -218,7 +218,7 @@ export class AttendenceService {
           data: studentData,
         });
       }
-      console.log('sheetData', sheetData);
+      // console.log('sheetData', sheetData);
 
       if (sheetData.length === 0) {
         return ResponseModel.error(

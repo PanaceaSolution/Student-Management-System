@@ -38,7 +38,7 @@ export class ClassService {
         where: {
           className: createClassDto.className,
           section: createClassDto.section,
-        },
+        }, 
       });
 
       if (existingClassAndSection) {

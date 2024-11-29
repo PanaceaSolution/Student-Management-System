@@ -18,6 +18,8 @@ export class NoticeService {
 
     if (file) {
       const uploadResult = await uploadSingleFileToCloudinary(file,'notices');
+      console.log("Image", uploadResult);
+      
       notice.filePath = uploadResult.secure_url;
     }
     return this.noticeRepository.save(notice);

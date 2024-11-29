@@ -1,7 +1,9 @@
-import { Plus, } from "lucide-react";
-import React, { useState } from "react";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 import NoticeForm from "../NoticeForm";
-
+import dayjs from 'dayjs';
+import { FaTrash } from "react-icons/fa";
+import useNoticeStore from "@/store/noticeStore";
 
 const tailwindColors = [
   "text-red-700",
@@ -19,24 +21,16 @@ const getRandomColorClass = () => {
   return tailwindColors[randomIndex];
 };
 
-const notices = [
-  {
-    id: 1,
-    title: "Notice 1",
-    description: "Description of Notice 1",
-    createdAt: "2023-08-01",
-  },
-  {
-    id: 2,
-    title: "Notice 2",
-    description: "Description of Notice 2",
-    createdAt: "2023-08-02",
-  },
-]
-
-
 const Notice = () => {
   const [formOpen, setFormOpen] = useState(false);
+  const notices = useNoticeStore((state) => state.notices);
+  const {deleteNotice} = useNoticeStore()
+
+  const handleDelete = async (noticeID)=>{
+    console.log("id is this", noticeID);
+    await deleteNotice(noticeID);
+
+  }
 
   return (
     <>
@@ -45,17 +39,27 @@ const Notice = () => {
         <div className="flex justify-between px-4 p-2 border-b-2">
           <p className="text-lg text-black font-semibold">Notice Board</p>
           <div className="flex space-x-2 cursor-pointer">
-            <Plus size={20} className="cursor-pointer" onClick={() => setFormOpen(true)} />
+            <Plus
+              size={20}
+              className="cursor-pointer"
+              onClick={() => setFormOpen(true)}
+            />
           </div>
         </div>
         <div className="max-h-80 overflow-y-auto scrollbar-thumb-gray-300 scrollbar-thin">
           {notices.map((notice) => (
-            <div
-              key={notice.id}
-              className="px-2 border-b-2 p-3 cursor-pointer"
-              onClick={() => handleEditNotice(notice)}
-            >
-              <span className="text-xs font-semibold">{notice.createdAt}</span>
+            <div key={notice.id} className="px-2 border-b-2 p-3 cursor-pointer">
+              <div className="flex justify-end">
+                <button
+                onClick={()=>handleDelete(notice.noticeID)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <FaTrash size={18} />
+                </button>
+              </div>
+              <span className="text-xs font-semibold">
+                {dayjs(notice.createdAt).format("YY-MM-DD")}
+              </span>
               <p className="text-sm flex gap-2">
                 <span className={getRandomColorClass()}>{notice.title}</span>
               </p>
