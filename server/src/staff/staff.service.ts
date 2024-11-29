@@ -125,7 +125,7 @@ export class StaffService {
       user: userReference,
     });
     const plainPassword = decryptdPassword(userReference.password);
-    console.log('Plainpassword is', plainPassword);
+    // console.log('Plainpassword is', plainPassword);
 
     await this.staffRepository.save(newStaff);
 
@@ -135,6 +135,7 @@ export class StaffService {
       message: 'Staff created successfully',
       staff: { ...newStaff, user: createUserResponse.user },
       // user: createUserResponse,
+      plainPassword:plainPassword
     };
   }
 
@@ -149,7 +150,7 @@ export class StaffService {
       if (!staff) {
         throw new NotFoundException('Staff not found');
       }
-      console.log(staff);
+      // console.log(staff);
 
       const updateUser = await this.userService.updateUser(
         staff.user.userId, // userid unable to send
@@ -164,7 +165,7 @@ export class StaffService {
       if (staffRole) staff.staffRole = staffRole.trim() as STAFFROLE;
 
       const updatedStaff = await this.staffRepository.save(staff);
-      console.log('Updateed staff is:', updatedStaff);
+      // console.log('Updateed staff is:', updatedStaff);
 
       return {
         status: 201,
@@ -174,7 +175,7 @@ export class StaffService {
         success: true,
       };
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return {
         message: 'Internal server error',
         error,

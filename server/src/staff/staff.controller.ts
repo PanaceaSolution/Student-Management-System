@@ -33,8 +33,8 @@ export class StaffController {
     @UploadedFiles()
     files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] }
   ) {
-    console.log('Received files:', files);
-    console.log('Received DTO:', createStaffDto);
+    // console.log('Received files:', files);
+    // console.log('Received DTO:', createStaffDto);
 
     return this.staffService.createStaff(createStaffDto, files);
   }
