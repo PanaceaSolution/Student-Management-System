@@ -28,7 +28,7 @@ export const deleteUserService = async (id) => {
       headers: {
          "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userIds: [`${id}`] }),
+      body: JSON.stringify({ userIds: id }),
    });
    if (!response.ok) throw new Error("Failed to delete user");
    return await response.json();

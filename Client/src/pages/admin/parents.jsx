@@ -49,7 +49,7 @@ const Parents = () => {
    const [selectedData, setSelectedData] = useState(null);
    const [searchTerm, setSearchTerm] = useState("");
 
-   const { parents, getAllParents, deleteParent, isDeleting } = useParentStore()
+   const { parents, getAllParents } = useParentStore()
 
    useEffect(() => {
       const fetchParents = async () => {
@@ -58,7 +58,6 @@ const Parents = () => {
       fetchParents();
    }, []);
 
-   console.log("Parents:", parents);
 
 
 
@@ -97,16 +96,6 @@ const Parents = () => {
       setCardOpen(true);
    };
 
-
-   const handleDelete = async (data) => {
-      await deleteParent(data.user_id);
-   };
-
-   const handleEdit = (data) => {
-      setFormOpen(true);
-      setSelectedData(data);
-   }
-
    return (
       <section>
          <div className='max-w-full mx-auto'>
@@ -120,13 +109,13 @@ const Parents = () => {
                            onChange={handleExportChange}
                            className="w-32 bg-white"
                         />
-                        <ParentsForm
+                        {/* <ParentsForm
                            title="Add Parent"
                            selectedData={selectedData}
                            setSelectedData={setSelectedData}
                            formOpen={formOpen}
                            setFormOpen={setFormOpen}
-                        />
+                        /> */}
                      </div>
                   </div>
                   <div className="border-b-2 p-2">
@@ -160,9 +149,9 @@ const Parents = () => {
                         tableFields={parentsTableFields}
                         user={parents}
                         handleUserData={handleUserData}
-                        handleDelete={handleDelete}
-                        handleEdit={handleEdit}
-                        loading={isDeleting}
+                        handleDelete={() => { }}
+                        handleEdit={() => { }}
+                        loading={false}
                      />
                   </div>
                </div>

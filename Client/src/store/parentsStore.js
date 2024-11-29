@@ -82,26 +82,6 @@ const useParentStore = create(
                   return error;
                }
             },
-
-            deleteParent: async (parentId) => {
-               set({ isDeleting: true, error: null });
-               try {
-                  const res = await deleteUserService(parentId);
-                  if (res.success) {
-                     set((state) => ({
-                        parents: state.parents.filter((parent) => parent.user_id !== parentId),
-                        isDeleting: false,
-                     }));
-                     toast.success('User deleted successfully');
-                  } else {
-                     toast.error("Failed to delete");
-                     set({ isDeleting: false });
-                  }
-               } catch (error) {
-                  set({ error: error.message, isDeleting: false });
-                  return error;
-               }
-            },
          }),
          {
             name: "parents",

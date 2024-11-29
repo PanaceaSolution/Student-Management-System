@@ -146,19 +146,20 @@ const useStudentStore = create(
         },
 
         // Delete an existing student
-        deleteStudent: async (studentId) => {
+        deleteStudent: async (ids) => {
           set({ isDeleting: true, error: null });
-          console.log(studentId);
+          console.log(ids);
 
           try {
-            const res = await deleteUserService(studentId);
-            if (res.success) {
+            const res = await deleteUserService(ids);
+            if (res.success && res.results[0].success) {
               toast.success("Student deleted successfully");
               set((state) => ({
                 students: state.students.filter(
                   (student) => student?.user_userId !== studentId
                 ),
                 isDeleting: false,
+                error: null, // Clear the error state
               }));
             } else {
               toast.error("Failed to delete student");
@@ -206,6 +207,7 @@ const getStudentsData = (res) => {
       studentClass: res.studentClass.className,
       section: res.studentClass.section,
       transportationMode: res.transportationMode,
+      parentId: res.parent.user.userId
     },
   };
 };

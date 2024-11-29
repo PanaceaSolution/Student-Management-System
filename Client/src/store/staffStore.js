@@ -113,7 +113,7 @@ const useStaffStore = create(
             deleteStaff: async (id) => {
                set({ isDeleting: true, error: null });
                try {
-                  const res = await deleteUserService(id);
+                  const res = await deleteUserService([id]);
                   if (res.success) {
                      set((state) => ({
                         staff: state.staff.filter((user) => user.user_id !== id),

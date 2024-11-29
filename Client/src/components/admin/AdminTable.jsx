@@ -74,7 +74,7 @@ const AdminTable = ({ title, user, handleUserData, tableHead, tableFields, handl
                               {user[field]}
                            </TableCell>
                         ))}
-                        <TableCell className="flex justify-center gap-2">
+                        {title !== "Parent" && <TableCell className="flex justify-center gap-2">
                            <Button
                               variant="edit"
                               size="icon"
@@ -91,7 +91,7 @@ const AdminTable = ({ title, user, handleUserData, tableHead, tableFields, handl
                            >
                               {loading ? <Spinner /> : <Trash2 />}
                            </Button>
-                        </TableCell>
+                        </TableCell>}
                      </TableRow>
                   ))
                )}

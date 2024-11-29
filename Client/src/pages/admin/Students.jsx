@@ -164,9 +164,11 @@ const Students = () => {
   }
 
   const handleDelete = async (data) => {
-    console.log(data);
+    const studentId = data.user_userId
+    const parentId = data.user_parentId
+    const ids = [studentId, parentId]
 
-    await deleteStudent(data.user_userId);
+    await deleteStudent(ids);
   }
 
   return (
