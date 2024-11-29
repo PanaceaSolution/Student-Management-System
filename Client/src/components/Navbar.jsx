@@ -6,7 +6,7 @@ import { FaHamburger, FaSync } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import useAuthStore from "@/store/authStore";
-import { LucideLogOut } from "lucide-react";
+import { LucideLogOut, RefreshCw } from "lucide-react";
 import {
    DropdownMenu,
    DropdownMenuContent,
@@ -22,32 +22,33 @@ import default_user from "../assets/default_user.jpg"
 const Navbar = () => {
    const navigate = useNavigate();
    const { loggedInUser, logout } = useAuthStore();
-   const { refreshWithRetry } = useRefresh()
+   const { refreshWithRetry, isRefreshing } = useRefresh()
    const [currentTime, setCurrentTime] = useState(dayjs());
    const [hasShadow, setHasShadow] = useState(false);
 
+   // Update current time
    useEffect(() => {
-      // Update the current time every second
       const timer = setInterval(() => setCurrentTime(dayjs()), 1000);
+      return () => clearInterval(timer);
+   }, []);
 
-      // Detect scroll position for shadow effect
+   // Detect scroll position
+   useEffect(() => {
       const handleScroll = () => setHasShadow(window.scrollY > 0);
       window.addEventListener("scroll", handleScroll);
-
-      return () => {
-         clearInterval(timer);
-         window.removeEventListener("scroll", handleScroll);
-      };
+      return () => window.removeEventListener("scroll", handleScroll);
    }, []);
+
 
    const logoutHandle = async () => {
       try {
          const res = await logout();
          if (res.success) navigate("/");
       } catch (error) {
-         console.error("Logout failed:", error);
+         toast.error("Logout failed. Please try again.");
       }
    };
+
 
    return (
       <div
@@ -79,37 +80,44 @@ const Navbar = () => {
                {currentTime.format("HH:mm:ss A")} - {currentTime.format("D MMM, YYYY")}
             </p>
             {/* Refresh Button */}
-            <Button onClick={refreshWithRetry} className="hidden md:block">
+            {/* <Button onClick={refreshWithRetry} className="hidden md:block">
                <FaSync className="w-6 h-6 text-primary" />
-            </Button>
+            </Button> */}
 
             {/* User Avatar and Dropdown */}
-            <DropdownMenu>
-               <DropdownMenuTrigger asChild>
-                  <Avatar className="w-10 h-10 border border-black shadow-md cursor-pointer">
-                     <AvatarImage
-                        src={loggedInUser?.profile?.profilePicture || default_user}
-                        alt={`${loggedInUser?.profile?.fname || 'User'}'s Avatar`}
-                        className="object-cover"
-                     />
-                  </Avatar>
-               </DropdownMenuTrigger>
-               <DropdownMenuContent>
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-primary" />
-                  <DropdownMenuItem onClick={() => navigate("/profile")}>Profile</DropdownMenuItem>
-                  <DropdownMenuItem>
-                     <Button
-                        variant="destructive"
-                        onClick={logoutHandle}
-                        className="flex items-center justify-center gap-3 w-full"
-                     >
-                        <LucideLogOut />
-                        <span>Logout</span>
-                     </Button>
-                  </DropdownMenuItem>
-               </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex items-center gap-4">
+               <RefreshCw
+                  onClick={refreshWithRetry}
+                  aria-label="Refresh content"
+                  className={`w-6 h-6 text-primary cursor-pointer ${isRefreshing ? "animate-spin" : ""}`}
+               />
+               <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                     <Avatar className="w-10 h-10 border border-black shadow-md cursor-pointer">
+                        <AvatarImage
+                           src={loggedInUser?.profile?.profilePicture || default_user}
+                           alt={`${loggedInUser?.profile?.fname || 'User'}'s Avatar`}
+                           className="object-cover"
+                        />
+                     </Avatar>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                     <DropdownMenuSeparator className="bg-primary" />
+                     <DropdownMenuItem onClick={() => navigate("/profile")}>Profile</DropdownMenuItem>
+                     <DropdownMenuItem asChild>
+                        <Button
+                           variant="destructive"
+                           onClick={logoutHandle}
+                           className="flex items-center justify-center gap-3 w-full"
+                        >
+                           <LucideLogOut />
+                           <span>Logout</span>
+                        </Button>
+                     </DropdownMenuItem>
+                  </DropdownMenuContent>
+               </DropdownMenu>
+            </div>
          </header>
       </div>
    );

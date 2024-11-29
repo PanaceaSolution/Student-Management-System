@@ -18,6 +18,7 @@ const useAuthStore = create(
          (set) => ({
             isLoggingIn: false,
             isLoggingOut: false,
+            isRefreshing: false,
             isAuthenticated: false,
             loggedInUser: null,
             // isAuthenticated: true,
@@ -91,11 +92,13 @@ const useAuthStore = create(
 
             // Refresh token action
             refresh: async () => {
+               set({ isRefreshing: true });
                try {
                   const res = await refreshService();
                   if (res.success) {
                      set({
                         isAuthenticated: true,
+                        isRefreshing: false
                      });
                   }
                   return res;
@@ -104,6 +107,7 @@ const useAuthStore = create(
                   set({
                      isAuthenticated: false,
                      loggedInUser: null,
+                     isRefreshing: false
                   });
                }
             },
