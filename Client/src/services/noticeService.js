@@ -7,6 +7,14 @@ export const createNoticeService = async (noticeData) => {
     body:noticeData,
   });
 
-  console.log("Response", response);
   return response.json();
 };
+
+export const deleteNoticeService = async(noticeId)=>{
+    const response = await fetch(`${URL}/notices/delete/${noticeId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+  const data =  await response.json();
+  return data;
+}
