@@ -1,4 +1,4 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { useParams, useNavigate } from "react-router-dom";
 import { getStudentsByClassAndSectionService } from "@/services/studentService";
@@ -8,10 +8,12 @@ import Spinner from "@/components/Loader/Spinner";
 const AttendanceTable = () => {
   const { className, section } = useParams();
   const [attendance, setAttendance] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
   const { saveAttendence, isSubmitting } = useAttendanceStore();
   console.log("Class Name:", className, "Section:", section);
   const navigate = useNavigate();
   const dates = dayjs().format("YYYY-MM-DD"); // Static Dates
+
   useEffect(() => {
     const fetchStudents = async () => {
       try {
@@ -33,6 +35,8 @@ const AttendanceTable = () => {
         }
       } catch (error) {
         console.error("Error fetching students:", error);
+      } finally {
+        setLoading(false); // Set loading to false after fetching
       }
     };
 
@@ -80,38 +84,46 @@ const AttendanceTable = () => {
       <h1 className="text-xl font-bold mb-4">
         Attendance for Class {className}, Section {section}
       </h1>
-      <table className="min-w-full border-collapse border border-gray-200 bg-white rounded-md">
-        <thead>
-          <tr>
-            <th className="border border-gray-300 px-4 py-2">Roll Number</th>
-            <th className="border border-gray-300 px-4 py-2">First Name</th>
-            <th className="border border-gray-300 px-4 py-2">Last Name</th>
-            <th className="border border-gray-300 px-4 py-2">{dates}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {attendance.map(({ rollNumber, fname, lname, attendance }) => (
-            <tr key={rollNumber}>
-              <td className="border border-gray-300 px-4 py-2">{rollNumber}</td>
-              <td className="border border-gray-300 px-4 py-2">{fname}</td>
-              <td className="border border-gray-300 px-4 py-2">{lname}</td>
-              <td className="border border-gray-300 px-4 py-2">
-                <select
-                  value={attendance}
-                  onChange={(e) =>
-                    handleAttendanceChange(rollNumber, e.target.value)
-                  }
-                  className="border border-gray-300 px-2 py-1 rounded"
-                >
-                  <option>--</option>
-                  <option value="P">P</option>
-                  <option value="A">A</option>
-                </select>
-              </td>
+      {loading ? (
+        <div className="flex justify-center items-center">
+          <Spinner />
+        </div>
+      ) : (
+        <table className="min-w-full border-collapse border border-gray-200 bg-white rounded-md">
+          <thead>
+            <tr>
+              <th className="border border-gray-300 px-4 py-2">Roll Number</th>
+              <th className="border border-gray-300 px-4 py-2">First Name</th>
+              <th className="border border-gray-300 px-4 py-2">Last Name</th>
+              <th className="border border-gray-300 px-4 py-2">{dates}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {attendance.map(({ rollNumber, fname, lname, isPresent }) => (
+              <tr key={rollNumber}>
+                <td className="border border-gray-300 px-4 py-2">
+                  {rollNumber}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">{fname}</td>
+                <td className="border border-gray-300 px-4 py-2">{lname}</td>
+                <td className="border border-gray-300 px-4 py-2">
+                  <select
+                    value={isPresent}
+                    onChange={(e) =>
+                      handleAttendanceChange(rollNumber, e.target.value)
+                    }
+                    className="border border-gray-300 px-2 py-1 rounded"
+                  >
+                    <option>--</option>
+                    <option value="P">P</option>
+                    <option value="A">A</option>
+                  </select>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
       <div className="mt-4 flex gap-4">
         <button
           className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
