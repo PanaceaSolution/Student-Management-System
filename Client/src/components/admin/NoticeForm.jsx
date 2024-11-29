@@ -11,7 +11,7 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import ImageUpload from "../common/ImageUpload";
 import { useState } from "react";
-import useNoticeStore from "@/store/noticeStore";import Spinner from "@/components/Loader/Spinner";
+import useNoticeStore from "@/store/noticeStore"; import Spinner from "@/components/Loader/Spinner";
 
 const formFields = [
   {
@@ -49,7 +49,6 @@ const NoticeForm = ({ formOpen, setFormOpen }) => {
     formData.append("description", data.description.toString());
     formData.append("filePath", image);
 
-    console.log("clicked");
     const res = await addNotice(formData);
     if (res.success) {
       reset();
@@ -89,9 +88,8 @@ const NoticeForm = ({ formOpen, setFormOpen }) => {
                         {...field}
                         id={name}
                         placeholder={placeholder}
-                        className={`w-full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${
-                          errors[name] ? "border-red-500" : ""
-                        }`}
+                        className={`w-full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${errors[name] ? "border-red-500" : ""
+                          }`}
                       />
                     ) : (
                       <Input
@@ -99,9 +97,8 @@ const NoticeForm = ({ formOpen, setFormOpen }) => {
                         id={name}
                         type="text"
                         placeholder={placeholder}
-                        className={`w-full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${
-                          errors[name] ? "border-red-500" : ""
-                        }`}
+                        className={`w-full rounded-sm border border-gray-300 bg-transparent mt-1 shadow-sm py-2 px-3 text-gray-900 ${errors[name] ? "border-red-500" : ""
+                          }`}
                       />
                     )
                   }
