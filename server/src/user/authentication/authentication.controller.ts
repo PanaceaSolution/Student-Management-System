@@ -22,9 +22,7 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterUserDto } from './dto/register.dto';
 import { Response, Request } from 'express';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
-import {
-  FileFieldsInterceptor,
-} from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ROLE, STAFFROLE } from 'src/utils/role.helper';
 import { AuthGuard } from '../../middlewares/auth.guard';
 import { FullAuthService } from 'src/middlewares/full-auth.service';
@@ -32,7 +30,10 @@ import { RefreshTokenUtil } from 'src/middlewares/refresh-token.util';
 
 @Controller('auth')
 export class AuthenticationController {
-  constructor(private authenticationService: AuthenticationService,private RefreshTokenUtil : RefreshTokenUtil ) {}
+  constructor(
+    private authenticationService: AuthenticationService,
+    private RefreshTokenUtil: RefreshTokenUtil,
+  ) {}
 
   @Post('register')
   @UseInterceptors(
@@ -42,12 +43,14 @@ export class AuthenticationController {
     ]),
   )
   async register(
-    @Body() body: RegisterUserDto,  
+    @Body() body: RegisterUserDto,
     @UploadedFiles()
-    files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] },
+    files: {
+      profilePicture?: Express.Multer.File[];
+      documents?: Express.Multer.File[];
+    },
   ) {
     try {
- 
       return this.authenticationService.register(body, files);
     } catch (error) {
       console.error('Error parsing JSON strings in form-data:', error);
@@ -59,7 +62,6 @@ export class AuthenticationController {
     return this.authenticationService.login(loginDto, res);
   }
 
- 
   @Post('logout')
   @UseGuards(AuthGuard)
   async logout(@Req() req: Request, @Res() res: Response) {
@@ -77,7 +79,6 @@ export class AuthenticationController {
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     return this.RefreshTokenUtil.refreshToken(req, res);
   }
-  
 
   @Patch('update/:id')
   @UseGuards(AuthGuard)
@@ -91,7 +92,10 @@ export class AuthenticationController {
     @Param('id') id: UUID,
     @Body() updateUserDto: Partial<RegisterUserDto>,
     @UploadedFiles()
-    files: { profilePicture?: Express.Multer.File[]; documents?: Express.Multer.File[] } = {},
+    files: {
+      profilePicture?: Express.Multer.File[];
+      documents?: Express.Multer.File[];
+    } = {},
   ) {
     try {
       return this.authenticationService.updateUser(id, updateUserDto, files);
@@ -135,7 +139,10 @@ export class AuthenticationController {
     try {
       return await this.authenticationService.getSingleUser(id);
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof InternalServerErrorException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof InternalServerErrorException
+      ) {
         throw error;
       } else {
         throw new InternalServerErrorException({
@@ -143,22 +150,29 @@ export class AuthenticationController {
           status: 500,
           success: false,
         });
-      
       }
     }
   }
-    @Get('users/role')
-    @UseGuards(AuthGuard)
+  @Get('users/role')
+  @UseGuards(AuthGuard)
   async getUsersByRole(
     @Query('role') role: ROLE,
     @Query('staffRole') staffRole?: STAFFROLE,
     @Query('page') page: number = 1,
-    @Query('limit') limit: number = 8
+    @Query('limit') limit: number = 8,
   ) {
     try {
-      return await this.authenticationService.getUsersByRole(role, staffRole, page, limit);
+      return await this.authenticationService.getUsersByRole(
+        role,
+        staffRole,
+        page,
+        limit,
+      );
     } catch (error) {
-      if (error instanceof BadRequestException || error instanceof InternalServerErrorException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof InternalServerErrorException
+      ) {
         throw error;
       } else {
         throw new InternalServerErrorException({
@@ -179,9 +193,13 @@ export class AuthenticationController {
   }
 
   @Get('/user-statistics')
-async getUserStatistics(@Res() res: Response) {
-  const statistics = await this.authenticationService.getUserStatistics();
-  return res.status(200).json(statistics);
-}
+  async getUserStatistics(@Res() res: Response) {
+    const statistics = await this.authenticationService.getUserStatistics();
+    return res.status(200).json(statistics);
+  }
 
+  @Get('/get-user/:userId')
+  async getUserDetails(@Param('userId') userId: UUID) {
+    return await this.authenticationService.getUserDetails(userId);
+  }
 }

@@ -2,13 +2,20 @@
 import { v2 as Cloudinary } from 'cloudinary';
 import { JwtService } from '@nestjs/jwt';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
-import {Injectable,Res} from '@nestjs/common';
+import { Injectable, Res } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { Equal, ILike, Like, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 //local import
-import {BadRequestError,NotFoundError,CloudinaryError,InternalServerError,UnauthorizedError} from '../../utils/custom-errors';
+import {
+  BadRequestError,
+  NotFoundError,
+  CloudinaryError,
+  InternalServerError,
+  UnauthorizedError,
+  DatabaseError,
+} from '../../utils/custom-errors';
 import { LoginDto } from './dto/login.dto';
 import { RegisterUserDto } from './dto/register.dto';
 import { User } from './entities/authentication.entity';
@@ -18,7 +25,7 @@ import { UserContact } from '../userEntity/contact.entity';
 import { UserDocuments } from '../userEntity/document.entity';
 import { StaffService } from 'src/staff/staff.service';
 import { UserProfile } from '../userEntity/profile.entity';
-import {
+import ResponseModel, {
   generateRandomPassword,
   generateUsername,
   encryptdPassword,
@@ -785,24 +792,25 @@ export class AuthenticationService {
       if (![ROLE.ADMIN, ROLE.STUDENT, ROLE.STAFF, ROLE.PARENT].includes(role)) {
         throw new NotFoundError(`${role} not found`);
       }
-  
+
       let roleData = [];
       let total = 0;
 
       if (role === ROLE.STAFF) {
-        const [staffMembers, staffCount] = await this.staffRepository.findAndCount({
-          where: staffRole ? { staffRole } : {}, 
-          relations: [
-            'user',
-            'user.profile',
-            'user.address',
-            'user.contact',
-            'user.document',
-          ],
-          skip,
-          take: limit,
-        });
-  
+        const [staffMembers, staffCount] =
+          await this.staffRepository.findAndCount({
+            where: staffRole ? { staffRole } : {},
+            relations: [
+              'user',
+              'user.profile',
+              'user.address',
+              'user.contact',
+              'user.document',
+            ],
+            skip,
+            take: limit,
+          });
+
         roleData = staffMembers.map((staff) => ({
           user: this.formatUserResponse(staff.user),
           staffId: staff.staffId,
@@ -810,44 +818,61 @@ export class AuthenticationService {
           salary: staff.salary,
           staffRole: staff.staffRole,
         }));
-  
+
         total = staffCount;
       } else if (role === ROLE.STUDENT) {
-        const [students, studentCount] = await this.studentRepository.findAndCount({
-          relations: ['user', 'studentClass', 'user.profile','user.address', 'user.document' ,'parent','parent.user','parent.user.contact' ], 
-          skip,
-          take: limit,
-          
-        });
+        const [students, studentCount] =
+          await this.studentRepository.findAndCount({
+            relations: [
+              'user',
+              'studentClass',
+              'user.profile',
+              'user.address',
+              'user.document',
+              'parent',
+              'parent.user',
+              'parent.user.contact',
+            ],
+            skip,
+            take: limit,
+          });
 
         students.forEach((student) => {
           if (!student.user) {
             console.warn('Student without user:', student);
           }
         });
-  
+
         roleData = students
-          .filter((student) => student.user) 
+          .filter((student) => student.user)
           .map((student) => ({
             user: this.formatUserResponse(student.user),
             ...student,
             className: student.studentClass?.className || null,
-            contact:student.parent?.user?.contact || null
+            contact: student.parent?.user?.contact || null,
           }));
 
         total = studentCount;
       } else if (role === ROLE.PARENT) {
-        const [parents, parentCount] = await this.parentRepository.findAndCount({
-          relations: ['user', 'user.profile', 'user.contact','user.address', 'user.document'],
-          skip,
-          take: limit,
-        });
+        const [parents, parentCount] = await this.parentRepository.findAndCount(
+          {
+            relations: [
+              'user',
+              'user.profile',
+              'user.contact',
+              'user.address',
+              'user.document',
+            ],
+            skip,
+            take: limit,
+          },
+        );
         roleData = parents.map((parent) => ({
           user: this.formatUserResponse(parent.user),
           parentId: parent.parentId,
-          child:parent.childNames,
+          child: parent.childNames,
         }));
-  
+
         total = parentCount;
       } else {
         const whereClause = { role };
@@ -864,7 +889,7 @@ export class AuthenticationService {
           console.log('Formatting user:', user);
           return this.formatUserResponse(user);
         });
-  
+
         total = userCount;
       }
 
@@ -1086,7 +1111,7 @@ export class AuthenticationService {
   }
   async deleteUsers(userIds: UUID[]) {
     const results = [];
-  
+
     try {
       for (const userId of userIds) {
         if (!userId) {
@@ -1099,10 +1124,10 @@ export class AuthenticationService {
           });
           continue;
         }
-  
+
         try {
           const user = await this.userRepository.findOne({ where: { userId } });
-  
+
           if (!user) {
             results.push({
               userId,
@@ -1112,9 +1137,9 @@ export class AuthenticationService {
             });
             continue;
           }
-  
+
           await this.userRepository.delete(userId.toString());
-  
+
           results.push({
             userId,
             message: 'User and all related data deleted successfully',
@@ -1131,7 +1156,7 @@ export class AuthenticationService {
           });
         }
       }
-  
+
       return {
         message: 'Batch deletion completed',
         status: 200,
@@ -1139,7 +1164,9 @@ export class AuthenticationService {
         results,
       };
     } catch (error) {
-      throw new InternalServerError(`Unable to delete user data: ${error.message}`);
+      throw new InternalServerError(
+        `Unable to delete user data: ${error.message}`,
+      );
     }
   }
   async getUserStatistics() {
@@ -1180,7 +1207,87 @@ export class AuthenticationService {
       );
     }
   }
-  
-  
-  
+
+  async getUserDetails(userId: UUID) {
+    try {
+      const userDetail = await this.userRepository.findOne({
+        where: {
+          userId: userId,
+        },
+      });
+      const userRole = userDetail.role;
+      let roleDetail;
+      switch (userRole) {
+        case ROLE.STUDENT: {
+          try {
+            roleDetail = await this.studentRepository.findOne({
+              where: {
+                user: userDetail,
+              },
+            });
+            return new ResponseModel(
+              'User details fetched successfully',
+              true,
+              {
+                userDetail,
+                roleDetail,
+              },
+            );
+          } catch (error) {
+            throw new DatabaseError('Failed to fetch data', error);
+          }
+        }
+        case ROLE.PARENT: {
+          try {
+            roleDetail = await this.parentRepository.findOne({
+              where: {
+                user: userDetail,
+              },
+            });
+
+            const studentDetail = await this.studentRepository.find({
+              where: {
+                parent: { parentId: roleDetail.parentId },
+              },
+            });
+            return new ResponseModel(
+              'User details fetched successfully',
+              true,
+              {
+                userDetail,
+                studentDetail,
+                roleDetail,
+              },
+            );
+          } catch (error) {
+            throw new DatabaseError('Failed to fetch data', error);
+          }
+        }
+        case ROLE.STAFF: {
+          try {
+            roleDetail = await this.staffRepository.findOne({
+              where: {
+                user: userDetail,
+              },
+            });
+            return new ResponseModel(
+              'User details fetched successfully',
+              true,
+              {
+                userDetail,
+                roleDetail,
+              },
+            );
+          } catch (error) {
+            throw new DatabaseError('Failed to fetch data', error);
+          }
+        }
+      }
+      return new ResponseModel('User fetched successfully', true, {
+        userDetail,
+      });
+    } catch (error) {
+      throw new InternalServerError('Error fetching user detail', error);
+    }
+  }
 }
