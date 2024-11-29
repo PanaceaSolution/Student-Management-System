@@ -19,6 +19,7 @@ import { FullAuthService } from '../../middlewares/full-auth.service';
 import { RefreshTokenUtil } from '../../middlewares/refresh-token.util';
 import { BadRequestError, InternalServerError, UnauthenticatedError, UnauthorizedError } from 'src/utils/custom-errors';
 import { NotFoundError } from 'rxjs';
+import { StudentModule } from 'src/student/student.module';
 
 @Module({
   imports: [
@@ -31,33 +32,29 @@ import { NotFoundError } from 'rxjs';
       Student,
       Staff,
       Parent,
-      RefreshToken, // Register the RefreshToken entity in TypeORM
-      BadRequestError,
-      NotFoundError,
-      InternalServerError,
-      UnauthenticatedError,
-      UnauthorizedError
+      RefreshToken,
     ]),
     JwtModule.register({
-      secret: process.env.JWT_SECRET, // JWT secret from environment variables
-      signOptions: { expiresIn: process.env.JWT_LIFETIME }, // Token expiration from environment variables
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: process.env.JWT_LIFETIME },
     }),
     MulterModule.register({
-      storage: multer.memoryStorage(), // Configure in-memory storage for Multer
+      storage: multer.memoryStorage(),
     }),
-    forwardRef(() => StaffModule), // Forward reference to StaffModule for dependency resolution
+    forwardRef(() => StaffModule),
+    forwardRef(() => StudentModule), // Add forward reference
   ],
   controllers: [AuthenticationController],
   providers: [
-    AuthenticationService, // Core service for authentication logic
-    FullAuthService, // Service for handling tokens and cookies
-    RefreshTokenUtil, // Utility for handling token refresh logic
+    AuthenticationService,
+    FullAuthService,
+    RefreshTokenUtil,
   ],
   exports: [
-    AuthenticationService, // Allow other modules to use the authentication service
-    FullAuthService, // Allow other modules to use the full auth service
-    RefreshTokenUtil, // Export the RefreshTokenUtil for use elsewhere
-    JwtModule, // Export the JWT module for token-related functionalities
+    AuthenticationService,
+    FullAuthService,
+    RefreshTokenUtil,
+    JwtModule,
   ],
 })
 export class AuthenticationModule {}

@@ -2,6 +2,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import NoticeForm from "../NoticeForm";
 import useNoticeStore from "@/store/noticeStore";
+import dayjs from 'dayjs';
 
 const tailwindColors = [
   "text-red-700",
@@ -40,7 +41,9 @@ const Notice = () => {
         <div className="max-h-80 overflow-y-auto scrollbar-thumb-gray-300 scrollbar-thin">
           {notices.map((notice) => (
             <div key={notice.id} className="px-2 border-b-2 p-3 cursor-pointer">
-              <span className="text-xs font-semibold">{notice.createdAt}</span>
+              <span className="text-xs font-semibold">
+                {dayjs(notice.createdAt).format("YY-MM-DD")}
+              </span>
               <p className="text-sm flex gap-2">
                 <span className={getRandomColorClass()}>{notice.title}</span>
               </p>

@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import useStudentStore from "@/store/studentStore";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import ProfilePicUpload from "@/components/common/ImageUpload";
+import ImageUpload from "@/components/common/ImageUpload";
 import StaffDocumentUpload from "@/components/admin/StaffForm/StaffDocumentUpload";
 import Spinner from "@/components/Loader/Spinner";
 
@@ -26,6 +26,7 @@ const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, 
     marksheet: null,
     citizenship: null,
   });
+  const [isParentEmailEnabled, setIsParentEmailEnabled] = useState(false);
   const {
     register,
     handleSubmit,
@@ -50,6 +51,7 @@ const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, 
     setFormOpen(true);
   };
 
+
   // Initialize form values with initialData if provided
   useEffect(() => {
     if (selectedData) {
@@ -58,22 +60,30 @@ const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, 
       setValue("fatherName", selectedData.user_fatherName);
       setValue("motherName", selectedData.user_motherName);
       setValue("guardianName", selectedData.user_guardianName);
+      setValue("religion", selectedData.user_religion);
       setValue("gender", selectedData.user_profile_gender);
+      setValue("bloodType", selectedData.user_bloodType);
+      setValue("previousSchool", selectedData.user_previousSchool);
       setValue("dob", selectedData.user_profile_dob);
       setValue("rollNumber", selectedData.user_rollNumber);
-      setValue("class", selectedData.user_class);
+      setValue("studentClass", selectedData.user_studentClass);
       setValue("section", selectedData.user_section);
-      setValue("admissionDate", selectedData.user_profile_admissionDate);
+      setValue("admissionDate", selectedData.user_admissionDate);
       setValue("registrationNumber", selectedData.user_registrationNumber)
       setProfilePic(selectedData.user_profile_profilePicture);
       setValue("email", selectedData.user_email);
       setValue("phoneNumber", selectedData.user_contact_phoneNumber);
       setValue("alternatePhoneNumber", selectedData.user_contact_alternatePhoneNumber);
       setValue("telephoneNumber", selectedData.user_contact_telephoneNumber);
-      setValue("wardNumber", selectedData.user_address_wardNumber);
-      setValue("municipality", selectedData.user_address_municipality);
-      setValue("province", selectedData.user_address_province);
-      setValue("district", selectedData.user_address_district);
+      setValue("wardNumber", selectedData.user_address_0_wardNumber);
+      setValue("municipality", selectedData.user_address_0_municipality);
+      setValue("province", selectedData.user_address_0_province);
+      setValue("district", selectedData.user_address_0_district);
+      setDocuments({
+        birthCertificate: selectedData.user_document_0_documentFile,
+        marksheet: selectedData.user_document_1_documentFile,
+        citizenship: selectedData.user_document_2_citizenship
+      })
     }
   }, [selectedData, setValue]);
 
@@ -86,7 +96,7 @@ const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, 
     formData.append("motherName", data.motherName);
     formData.append("guardianName", data.guardianName);
     formData.append("rollNumber", data.rollNumber);
-    formData.append("class", data.class);
+    formData.append("studentClass", data.studentClass);
     formData.append("section", data.section);
     formData.append("admissionDate", data.admissionDate);
     formData.append("religion", data.religion);
@@ -94,6 +104,8 @@ const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, 
     formData.append("transportationMode", data.transportationMode);
     formData.append("registrationNumber", data.registrationNumber);
     formData.append("previousSchool", data.previousSchool);
+    formData.append("createParent", isParentEmailEnabled);
+    formData.append("parentEmail", data.parentEmail);
 
     //Profile info
     formData.append("profile", JSON.stringify({
@@ -156,7 +168,7 @@ const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, 
 
     try {
       const res = selectedData
-        ? await updateStudent(selectedData.studentId, formData)
+        ? await updateStudent(selectedData.user_studentId, formData)
         : await addStudent(formData);
 
       if (res.success) {
@@ -216,10 +228,13 @@ const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, 
                 register={register}
                 errors={errors}
                 clearErrors={clearErrors}
+                isParentEmailEnabled={isParentEmailEnabled}
+                setIsParentEmailEnabled={setIsParentEmailEnabled}
               />
-              <ProfilePicUpload
-                profilePic={profilePic}
-                setProfilePic={setProfilePic}
+              <ImageUpload
+                label="Profile Picture"
+                image={profilePic}
+                setImage={setProfilePic}
                 clearErrors={clearErrors}
                 errors={errors}
               />
@@ -237,14 +252,20 @@ const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, 
 
           {/* Step 3 - Document Upload */}
           {currentStep === 2 && (
-            <StaffDocumentUpload
-              register={register}
-              setDocuments={setDocuments}
-              documents={documents}
-              errors={errors}
-              clearErrors={clearErrors}
-              documentFields={documentFields}
-            />
+            <div className='grid gap-4'>
+              {documentFields.map((field, index) => (
+                <ImageUpload
+                  key={index}
+                  label={field.label}
+                  image={documents[field.name]}
+                  setImage={(image) =>
+                    setDocuments((prev) => ({ ...prev, [field.name]: image }))
+                  }
+                  clearErrors={clearErrors}
+                  errors={errors}
+                />
+              ))}
+            </div>
           )}
 
           <div className="mt-6 flex justify-between">
@@ -267,7 +288,7 @@ const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, 
                 Next <ChevronRight />
               </div>
             ) : (
-              <button
+              <Button
                 type="submit"
                 className="bg-blue-600 text-white py-2 px-4 rounded"
                 disabled={isSubmitting}
@@ -281,7 +302,7 @@ const AddStudentForm = ({ formOpen, setFormOpen, selectedData, setSelectedData, 
                   )
                   : "Submit"
                 }
-              </button>
+              </Button>
             )}
           </div>
         </form>

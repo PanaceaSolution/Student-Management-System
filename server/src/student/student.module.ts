@@ -1,4 +1,4 @@
-import { Module, RequestMethod, MiddlewareConsumer } from '@nestjs/common';
+import { Module, RequestMethod, MiddlewareConsumer, forwardRef } from '@nestjs/common';
 import { StudentController } from './student.controller';
 import { StudentService } from './student.service';
 // import { AuthMiddleware } from '../auth.middleware';
@@ -17,12 +17,11 @@ import { ParentModule } from 'src/parent/parent.module';
       Class,
       UserProfile,
     ]),
-    AuthenticationModule,
+    forwardRef(() => AuthenticationModule), // Add forward reference
     ParentModule,
   ],
   controllers: [StudentController],
   providers: [StudentService],
-  exports: [TypeOrmModule.forFeature([Student])] 
+  exports: [StudentService, TypeOrmModule], // Export StudentService
 })
-export class StudentModule {
-}
+export class StudentModule {}

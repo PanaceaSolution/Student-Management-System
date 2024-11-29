@@ -43,6 +43,9 @@ const useSubjectStore = create(
                         subjects: [...state.subjects, res.data],
                         isSubmitting: false
                      }))
+                  } else {
+                     toast.error(res.message)
+                     set({ isSubmitting: false })
                   }
                   return res
                } catch (error) {

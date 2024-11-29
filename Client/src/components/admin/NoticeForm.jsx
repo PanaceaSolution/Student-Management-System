@@ -11,7 +11,7 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import ImageUpload from "../common/ImageUpload";
 import { useState } from "react";
-import useNoticeStore from "@/store/noticeStore";
+import useNoticeStore from "@/store/noticeStore";import Spinner from "@/components/Loader/Spinner";
 
 const formFields = [
   {
@@ -41,7 +41,7 @@ const NoticeForm = ({ formOpen, setFormOpen }) => {
     reset,
     clearErrors,
   } = useForm();
-  const { addNotice } = useNoticeStore();
+  const { addNotice, isSubmitting } = useNoticeStore();
 
   const onSubmit = async (data) => {
     const formData = new FormData();
@@ -131,9 +131,17 @@ const NoticeForm = ({ formOpen, setFormOpen }) => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-sm"
+              className=" px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-sm"
+              disabled={isSubmitting}
             >
-              Submit
+              {isSubmitting ? (
+                <div className="flex justify-center items-center gap-2 cursor-not-allowed">
+                  <Spinner />
+                  <p>Submitting Notice</p>
+                </div>
+              ) : (
+                <p>Submit Notice</p>
+              )}
             </button>
           </div>
         </form>
