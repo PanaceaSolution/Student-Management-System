@@ -1,21 +1,8 @@
 import PortfolioCard from '@/components/portfolioCard'
 import StudentResult from '@/components/studentResult'
 import useAuthStore from '@/store/authStore'
-
-const info = [
-   { name: "First Name", value: "John", },
-   { name: "Last Name", value: "Doe", },
-   { name: "Father's Name", value: "Jammy Doe", },
-   { name: "Mother's Name", value: "Jessy Doe", },
-   { name: "Gender", value: "Male", },
-   { name: "Date of Birth", value: "2020/05/10", },
-   { name: "Blood Type", value: "A+", },
-   { name: "Email", value: "LmV0z@example.com", },
-   { name: "Admission Date", value: "2023/01/20", },
-   { name: "Class", value: "4", },
-   { name: "Section", value: "A", },
-   { name: "Address", value: "Lalitpur", }
-]
+import useUserStore from '@/store/userStore';
+import { useEffect } from 'react';
 
 const assignment = [
    { class: "4", subject: "English", onTime: "Yes", date: "2023/02/20" },
@@ -36,6 +23,32 @@ const examResult = [
 const Portfolio = () => {
    const { loggedInUser } = useAuthStore()
    const role = loggedInUser?.role
+   const { userById, getUserById } = useUserStore()
+
+   useEffect(() => {
+      const fetchUser = async () => {
+         await getUserById(loggedInUser.id)
+      }
+
+      fetchUser()
+   }, [])
+   console.log(userById);
+
+   const info = [
+      { name: "First Name", value: userById?.profile_fname, },
+      { name: "Last Name", value: userById?.profile_lname, },
+      { name: "Father's Name", value: userById?.fatherName, },
+      { name: "Mother's Name", value: "Jessy Doe", },
+      { name: "Gender", value: "Male", },
+      { name: "Date of Birth", value: "2020/05/10", },
+      { name: "Blood Type", value: "A+", },
+      { name: "Email", value: "LmV0z@example.com", },
+      { name: "Admission Date", value: "2023/01/20", },
+      { name: "Class", value: "4", },
+      { name: "Section", value: "A", },
+      { name: "Address", value: "Lalitpur", }
+   ]
+
    return (
       <section className="w-full mx-auto">
          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:p-4 h-full">

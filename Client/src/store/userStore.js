@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import { deleteUserService, getAllUserService, getStatsService } from "@/services/userService";
+import { deleteUserService, getAllUserService, getStatsService, getUserByIdService } from "@/services/userService";
+import { flattenNestedData } from "@/utilities/utilities";
 
 
 const useUserStore = create(
@@ -11,6 +12,7 @@ const useUserStore = create(
             isDeleting: false,
             error: null,
             allUsers: [],
+            userById: {},
             stats: [],
             totalUsers: 0,
             pages: 0,
@@ -24,6 +26,23 @@ const useUserStore = create(
                         allUsers: res.data,
                         totalUsers: res.total,
                         pages: res.totalPages,
+                        isLoading: false
+                     })
+                  } else {
+                     set({ isLoading: false })
+                  }
+               } catch (error) {
+                  set({ error: error.message, isLoading: false })
+               }
+            },
+
+            getUserById: async (id) => {
+               set({ isLoading: true, error: null });
+               try {
+                  const res = await getUserByIdService(id);
+                  if (res.success) {
+                     set({
+                        userById: flattenNestedData(res.user),
                         isLoading: false
                      })
                   } else {
@@ -75,6 +94,7 @@ const useUserStore = create(
             name: "users",
             partialize: (state) => ({
                allUsers: state.allUsers,
+               userById: state.userById,
                pages: state.pages,
                totalUsers: state.totalUsers,
                stats: state.stats
