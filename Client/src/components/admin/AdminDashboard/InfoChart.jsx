@@ -6,7 +6,7 @@ const InfoChart = ({ stats }) => {
     ["Users", "Total"],
     ["Students", stats.totalStudents],
     ["Parents", stats.totalParents],
-    ["Teachers", stats.staffRoles.totalTeachers],
+    ["Teachers", stats.staffRoles?.totalTeachers],
     ["Staffs", stats.totalStaff],
   ];
 
